@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .o{stroke:#008A59}
+    @media (prefers-color-scheme:dark){.o{stroke:#00B87A}}
+  </style>
+  <path class="o" transform="translate(4 2)" d="M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z" fill="#00FFDA" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke"/>
+</svg>
