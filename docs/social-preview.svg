@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <rect width="1280" height="640" fill="#17181c"/>
+  <g transform="translate(250 120) scale(12)"><path transform="translate(4 2)" d="M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z" fill="#00FFDA" stroke="#008A59" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke"/></g>
+  <text x="640" y="300" font-family="-apple-system,Helvetica,Arial,sans-serif" font-size="72" font-weight="800" fill="#eceef2">Pointer colors</text>
+  <text x="640" y="370" font-family="-apple-system,Helvetica,Arial,sans-serif" font-size="40" fill="#9aa0ac">for macOS</text>
+</svg>

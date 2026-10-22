@@ -1,4 +1,6 @@
-# Pointer colors for macOS
+<p align="center"><img src="favicon.svg" width="72" alt="Pointer colors icon"></p>
+
+<h1 align="center">Pointer colors for macOS</h1>
 
 A small gallery of pointer outline and fill color pairs for macOS, with a live preview. Pick a pair, move your mouse over the fake desktop to try it, then copy the two hex codes into System Settings.
 
