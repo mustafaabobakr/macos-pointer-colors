@@ -55,6 +55,17 @@ struct MenuContentView: View {
     }
 
     private var sizeRow: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            sizeControls.disabled(model.needsFullDiskAccess)
+            if model.needsFullDiskAccess {
+                Text("Pointer size needs Full Disk Access.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var sizeControls: some View {
         HStack(spacing: 10) {
             Text("Pointer size").font(.caption).frame(width: 74, alignment: .leading)
             Slider(value: Binding(get: { model.scale }, set: { model.setScale($0) }),
