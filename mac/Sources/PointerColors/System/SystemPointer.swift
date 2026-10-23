@@ -1,7 +1,7 @@
 import Foundation
 
 enum SystemPointerError: LocalizedError, Equatable {
-    /// macOS refused the write to `com.apple.universalaccess`; the app needs Full Disk Access.
+    /// macOS refused the write to `com.apple.universalaccess`, directly and through `defaults`.
     case permissionDenied
     /// The private UniversalAccess function for live pointer size is missing on this macOS.
     case sizeAPIUnavailable
@@ -11,7 +11,7 @@ enum SystemPointerError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return String(localized: "macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app.")
+            return String(localized: "macOS didn't accept the change. Try again, or set it in System Settings › Accessibility › Display.")
         case .sizeAPIUnavailable:
             return String(localized: "This version of macOS doesn't offer live pointer size changes.")
         case .featureUnavailable:
@@ -61,14 +61,6 @@ struct SystemPointer {
             guard written else { throw SystemPointerError.permissionDenied }
         }
         universalAccess.postMouseSettingsChanged()
-    }
-
-    /// True when pointer settings can be changed, directly or through `defaults`.
-    func canWriteSettings() -> Bool {
-        let current = copy(Self.scaleKey)
-        set(Self.scaleKey, current)
-        if synchronize() { return true }
-        return DefaultsTool.write(Self.scaleKey as String, number: currentScale())
     }
 
     // MARK: Size

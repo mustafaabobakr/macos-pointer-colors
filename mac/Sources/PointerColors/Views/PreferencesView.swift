@@ -54,15 +54,6 @@ private struct GeneralPreferences: View {
                     Text("Size of the menu and this window. Automatic uses Large on big screens.")
                 }
             }
-            Section("Permission") {
-                LabeledContent("Pointer colors and size") {
-                    if model.needsFullDiskAccess {
-                        Button("Grant Full Disk Access…") { model.openFullDiskAccessSettings() }
-                    } else {
-                        Label("Allowed", systemImage: "checkmark.circle").foregroundStyle(.green)
-                    }
-                }
-            }
         }
         .formStyle(.grouped)
         .onAppear {

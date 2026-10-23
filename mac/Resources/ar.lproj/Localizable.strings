@@ -2,7 +2,6 @@
 
 /* Menu */
 "Pointer size" = "حجم المؤشر";
-"Pointer size needs Full Disk Access." = "يحتاج حجم المؤشر إلى صلاحية الوصول الكامل إلى القرص.";
 "Reset pointer size to default" = "إعادة حجم المؤشر إلى الوضع الافتراضي";
 "PAIRS" = "الأزواج";
 "PREVIEW" = "معاينة";
@@ -20,9 +19,6 @@
 "%@ copied" = "تم نسخ %@";
 "Currently applied" = "مطبّق حاليًا";
 "Not applied yet" = "لم يُطبَّق بعد";
-"Full Disk Access needed" = "يلزم الوصول الكامل إلى القرص";
-"macOS protects the pointer color and size settings. Turn on Pointer Colors in Full Disk Access, then quit and reopen the app. Copying hex codes works without it." = "يحمي macOS إعدادات لون المؤشر وحجمه. فعّل Pointer Colors في «الوصول الكامل إلى القرص»، ثم أنهِ التطبيق وأعد فتحه. يعمل نسخ رموز الألوان بدونها.";
-"Open Full Disk Access settings" = "فتح إعدادات الوصول الكامل إلى القرص";
 "%@ on %@" = "%1$@ على %2$@";
 
 /* Preview backgrounds */
@@ -83,10 +79,6 @@
 "Large" = "كبير";
 "Extra large" = "كبير جدًا";
 "Huge" = "ضخم";
-"Permission" = "الصلاحية";
-"Pointer colors and size" = "ألوان المؤشر وحجمه";
-"Grant Full Disk Access…" = "منح الوصول الكامل إلى القرص…";
-"Allowed" = "مسموح";
 
 /* Pairs */
 "Hidden pairs stay out of the menu-bar grid. Custom pairs can be edited or deleted." = "لا تظهر الأزواج المخفية في شبكة شريط القوائم. يمكن تعديل الأزواج المخصصة أو حذفها.";
@@ -100,7 +92,6 @@
 "Couldn't export: %@" = "تعذّر التصدير: %@";
 
 /* Automation */
-"Automation needs Full Disk Access. Grant it in General › Permission." = "تحتاج الأتمتة إلى الوصول الكامل إلى القرص. امنحه من عام › الصلاحية.";
 "Switch pairs with light and dark appearance" = "تبديل الأزواج مع المظهر الفاتح والداكن";
 "Applies a pair whenever macOS changes appearance, including on a schedule." = "يطبّق زوجًا كلما غيّر macOS المظهر، بما في ذلك حسب جدول.";
 "Light appearance" = "المظهر الفاتح";
@@ -129,7 +120,6 @@
 "GitHub answered %lld." = "ردّ GitHub بالرمز %lld.";
 
 /* Errors */
-"macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app." = "منع macOS التغيير. امنح Pointer Colors الوصول الكامل إلى القرص، ثم أعد فتح التطبيق.";
 "This version of macOS doesn't offer live pointer size changes." = "لا يتيح هذا الإصدار من macOS تغيير حجم المؤشر مباشرةً.";
 "This version of macOS doesn't offer that setting." = "لا يتيح هذا الإصدار من macOS هذا الإعداد.";
 "Couldn't change Launch at login: %@" = "تعذّر تغيير التشغيل عند تسجيل الدخول: %@";
@@ -153,3 +143,4 @@
 "Checking for Updates…" = "جارٍ التحقق من التحديثات…";
 "%@ Click above to download." = "%@ انقر أعلاه للتنزيل.";
 "Quit" = "إنهاء";
+"macOS didn't accept the change. Try again, or set it in System Settings › Accessibility › Display." = "لم يقبل macOS التغيير. حاول مرة أخرى، أو اضبطه من إعدادات النظام › تسهيلات الاستخدام › الشاشة.";

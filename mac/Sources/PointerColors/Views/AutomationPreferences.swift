@@ -17,13 +17,6 @@ struct AutomationPreferences: View {
             }
         }
         .formStyle(.grouped)
-        .disabled(model.needsFullDiskAccess)
-        .overlay(alignment: .top) {
-            if model.needsFullDiskAccess {
-                Text("Automation needs Full Disk Access. Grant it in General › Permission.")
-                    .appFont(.caption).foregroundStyle(.orange).padding(.top, 4)
-            }
-        }
         .onAppear { shakeToFind = model.shakeToFind ?? false }
     }
 }

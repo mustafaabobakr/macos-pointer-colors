@@ -24,7 +24,6 @@ final class AppModel {
     private(set) var library = PairLibrary()
     private(set) var appliedPair: PointerPair?
     private(set) var status: ApplyStatus = .notApplied
-    private(set) var needsFullDiskAccess = false
     private(set) var launchAtLogin = false
     var selectedID: String
     var scale: Double
@@ -86,7 +85,6 @@ final class AppModel {
         let colors = pointer.currentColors()
         appliedPair = library.pair(matching: colors.outline, fill: colors.fill)
         scale = pointer.currentScale()
-        needsFullDiskAccess = !pointer.canWriteSettings()
         launchAtLogin = settings.launchAtLogin
         syncSelection()
         updateStatus()
@@ -194,10 +192,6 @@ final class AppModel {
         status = .copied("\(outline ? String(localized: "Outline") : String(localized: "Fill")) \(hex)")
     }
 
-    func openFullDiskAccessSettings() {
-        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!
-        NSWorkspace.shared.open(url)
-    }
 
     // MARK: Library
 
@@ -272,7 +266,6 @@ final class AppModel {
     }
 
     private func fail(_ error: Error) {
-        if error as? SystemPointerError == .permissionDenied { needsFullDiskAccess = true }
         status = .failed(error.localizedDescription)
     }
 

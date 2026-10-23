@@ -10,13 +10,11 @@ struct MenuContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if model.needsFullDiskAccess { PermissionBanner(model: model) }
             header
             sizeRow
             VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
             pairGrid
             DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
-                .disabled(model.needsFullDiskAccess)
             if isAddingCustom {
                 CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
                     model.addCustom(name: name, outline: outline, fill: fill)
@@ -70,12 +68,6 @@ struct MenuContentView: View {
                     sizeControls
                 }
                 PerDisplayToggle(automation: model.automation)
-            }
-            .disabled(model.needsFullDiskAccess)
-            if model.needsFullDiskAccess {
-                Text("Pointer size needs Full Disk Access.")
-                    .appFont(.caption2)
-                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -148,26 +140,6 @@ struct MenuContentView: View {
             MenuRow(title: String(localized: "Quit"), shortcut: "⌘Q") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
         }
-    }
-}
-
-private struct PermissionBanner: View {
-    let model: AppModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Full Disk Access needed", systemImage: "lock")
-                .appFont(.callout, weight: .semibold)
-            Text("macOS protects the pointer color and size settings. Turn on Pointer Colors in Full Disk Access, then quit and reopen the app. Copying hex codes works without it.")
-                .appFont(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Button("Open Full Disk Access settings") { model.openFullDiskAccessSettings() }
-                .controlSize(.small)
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.orange.opacity(0.15)))
     }
 }
 
