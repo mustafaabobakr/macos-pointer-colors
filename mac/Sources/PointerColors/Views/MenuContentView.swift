@@ -5,7 +5,6 @@ struct MenuContentView: View {
     @Bindable var model: AppModel
     @State private var isAddingCustom = false
     @State private var editingPair: PointerPair?
-    @State private var pairToDelete: PointerPair?
     @Environment(\.openSettings) private var openSettings
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
@@ -50,22 +49,10 @@ struct MenuContentView: View {
         .frame(width: 380 * scale)
         .appTextScale(scale)
         .onAppear { model.refreshFromSystem() }
-        .confirmationDialog(deleteTitle, isPresented: Binding(get: { pairToDelete != nil },
-                                                              set: { if !$0 { pairToDelete = nil } })) {
-            Button("Delete", role: .destructive) {
-                if let pair = pairToDelete { model.removeCustom(pair) }
-                pairToDelete = nil
-            }
-        } message: {
-            Text("This can't be undone.")
-        }
     }
 
     private var scale: CGFloat { model.textScale }
 
-    private var deleteTitle: String {
-        String(localized: "Delete “\(pairToDelete?.name ?? "")”?")
-    }
 
     private var header: some View {
         HStack(spacing: 14) {
@@ -183,7 +170,7 @@ struct MenuContentView: View {
             .help("Edit \(pair.name)")
             .accessibilityLabel("Edit \(pair.name)")
             Spacer()
-            Button { pairToDelete = pair } label: {
+            Button { model.removeCustom(pair) } label: {
                 Image(systemName: "trash.circle.fill").foregroundStyle(.white, .red)
             }
             .help("Delete \(pair.name)")
@@ -196,7 +183,7 @@ struct MenuContentView: View {
 
     @ViewBuilder private func customPairMenu(_ pair: PointerPair) -> some View {
         Button("Edit…") { isAddingCustom = false; editingPair = pair }
-        Button("Delete…", role: .destructive) { pairToDelete = pair }
+        Button("Delete", role: .destructive) { model.removeCustom(pair) }
     }
 
     private var footer: some View {
