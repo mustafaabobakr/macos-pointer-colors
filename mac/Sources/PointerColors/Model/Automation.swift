@@ -102,7 +102,8 @@ final class Automation {
         displayTimer = nil
         lastDisplayID = nil
         guard perDisplaySizes else { return }
-        checkPointerDisplay()
+        // Deferred: running it during init would call back into the model before it holds this object.
+        DispatchQueue.main.async { [weak self] in self?.checkPointerDisplay() }
         displayTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.checkPointerDisplay() }
         }
