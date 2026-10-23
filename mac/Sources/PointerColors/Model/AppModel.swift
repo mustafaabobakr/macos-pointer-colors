@@ -168,6 +168,16 @@ final class AppModel {
         select(pair)
     }
 
+    /// Adds a pair from a website link, reusing an existing pair with the same colors.
+    func add(_ link: PairLink, apply shouldApply: Bool) {
+        if let existing = library.pair(matching: link.outline, fill: link.fill) {
+            select(existing)
+        } else {
+            addCustom(name: link.name, outline: link.outline, fill: link.fill)
+        }
+        if shouldApply { applySelected() }
+    }
+
     func updateCustom(_ pair: PointerPair) {
         library.update(pair)
         updateStatus()

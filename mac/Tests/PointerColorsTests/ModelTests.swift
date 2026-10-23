@@ -25,6 +25,27 @@ final class RGBATests: XCTestCase {
     }
 }
 
+final class PairLinkTests: XCTestCase {
+    func testParsesWebsiteLink() {
+        let link = PairLink(url: URL(string: "pointercolors://add?name=Aqua%20mint&outline=00FFDA&fill=008A59")!)
+        XCTAssertEqual(link?.name, "Aqua mint")
+        XCTAssertEqual(link?.outline.hex, "00FFDA")
+        XCTAssertEqual(link?.fill.hex, "008A59")
+    }
+
+    func testRejectsBadColorsAndOtherSchemes() {
+        XCTAssertNil(PairLink(url: URL(string: "pointercolors://add?outline=ZZZ&fill=008A59")!))
+        XCTAssertNil(PairLink(url: URL(string: "https://add?outline=00FFDA&fill=008A59")!))
+        XCTAssertNil(PairLink(url: URL(string: "pointercolors://delete?outline=00FFDA&fill=008A59")!))
+    }
+
+    func testCapsLongNamesAndFillsMissingOnes() {
+        let long = String(repeating: "a", count: 100)
+        XCTAssertEqual(PairLink(url: URL(string: "pointercolors://add?name=\(long)&outline=FFFFFF&fill=000000")!)?.name.count, 40)
+        XCTAssertEqual(PairLink(url: URL(string: "pointercolors://add?outline=FFFFFF&fill=000000")!)?.name, "From the website")
+    }
+}
+
 final class ContrastTests: XCTestCase {
     func testWhiteOnBlackIsMaximum() {
         XCTAssertEqual(RGBA(hex: "FFFFFF")!.contrast(with: RGBA(hex: "000000")!), 21, accuracy: 0.01)

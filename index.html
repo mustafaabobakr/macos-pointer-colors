@@ -77,6 +77,7 @@ input[type=range]{accent-color:var(--ink)}
 .panel .lbl{font-size:.85rem;color:var(--muted)}
 .panel .hex{font-size:1.25rem;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .panel input[type=color]{margin-left:auto;width:38px;height:32px;border:0;background:none;padding:0;cursor:pointer}
+.addmac{margin:12px 0 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.addmac small{color:var(--muted)}.addmac .copy{text-decoration:none;display:inline-block}
 .copy{border:1px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;font-size:.82rem;border-radius:8px;padding:5px 10px;cursor:pointer}
 
 .contexts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
@@ -144,6 +145,8 @@ input[type=range]{accent-color:var(--ink)}
           <button class="copy" data-copy="F">Copy</button>
         </div>
       </div>
+
+      <p class="addmac"><a class="copy" id="addMac" href="pointercolors://add">Add to Pointer Colors for Mac</a> <small>Opens the Mac app, if it's installed.</small></p>
 
       <div class="contexts" id="contexts"></div>
     </div>
@@ -219,7 +222,12 @@ document.querySelectorAll("#wp button").forEach(b=>b.onclick=()=>{
   stage.className="stage wp-"+b.dataset.wp;
 });
 
-document.querySelectorAll(".copy").forEach(b=>b.onclick=async()=>{
+document.getElementById("addMac").onclick=e=>{
+  const match=PAIRS.find(p=>p.o.toUpperCase()===cur.o.toUpperCase()&&p.f.toUpperCase()===cur.f.toUpperCase());
+  const q=new URLSearchParams({name:match?match.name:"Custom pair",outline:cur.o.replace("#",""),fill:cur.f.replace("#","")});
+  e.currentTarget.href="pointercolors://add?"+q.toString();
+};
+document.querySelectorAll("button.copy").forEach(b=>b.onclick=async()=>{
   const v=(b.dataset.copy==="O"?cur.o:cur.f).replace("#","");
   try{ await navigator.clipboard.writeText(v); toast(`Copied ${v}`);}catch(e){ toast(`Hex: ${v}`); }
 });
