@@ -8,8 +8,12 @@ MAC_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$MAC_DIR/build/Pointer Colors.app"
 
 cd "$MAC_DIR"
-swift build -c "$CONFIG"
-BIN_DIR="$(swift build -c "$CONFIG" --show-bin-path)"
+# Record the real SDK in the binary. SwiftPM otherwise stamps the deployment target (14.0) as
+# the SDK, and AppKit then draws pre-Liquid Glass controls for compatibility.
+SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
+LINK_FLAGS="-Xlinker -platform_version -Xlinker macos -Xlinker 14.0 -Xlinker $SDK_VERSION"
+swift build -c "$CONFIG" $LINK_FLAGS
+BIN_DIR="$(swift build -c "$CONFIG" $LINK_FLAGS --show-bin-path)"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
