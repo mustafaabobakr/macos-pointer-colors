@@ -1,0 +1,191 @@
+/* Arabic. Keys are the English UI strings; %@ / %lld are filled in at runtime. */
+
+/* Menu */
+"Pointer size" = "حجم المؤشر";
+"Pointer size needs Full Disk Access." = "يحتاج حجم المؤشر إلى صلاحية الوصول الكامل إلى القرص.";
+"Reset pointer size to default" = "إعادة حجم المؤشر إلى الوضع الافتراضي";
+"PAIRS" = "الأزواج";
+"PREVIEW" = "معاينة";
+"Custom" = "مخصص";
+"Add a custom pair" = "إضافة زوج مخصص";
+"Apply to pointer" = "تطبيق على المؤشر";
+"Reset" = "إعادة تعيين";
+"Preferences…" = "الإعدادات…";
+"Browse pairs on the website" = "تصفّح الأزواج على الموقع";
+"Quit Pointer Colors" = "إنهاء Pointer Colors";
+"Outline" = "الحدود";
+"Fill" = "التعبئة";
+"Copy %@" = "نسخ %@";
+"Copy %@ hex %@" = "نسخ رمز %1$@ %2$@";
+"%@ copied" = "تم نسخ %@";
+"Currently applied" = "مطبّق حاليًا";
+"Not applied yet" = "لم يُطبَّق بعد";
+"Full Disk Access needed" = "يلزم الوصول الكامل إلى القرص";
+"macOS protects the pointer color and size settings. Turn on Pointer Colors in Full Disk Access, then quit and reopen the app. Copying hex codes works without it." = "يحمي macOS إعدادات لون المؤشر وحجمه. فعّل Pointer Colors في «الوصول الكامل إلى القرص»، ثم أنهِ التطبيق وأعد فتحه. يعمل نسخ رموز الألوان بدونها.";
+"Open Full Disk Access settings" = "فتح إعدادات الوصول الكامل إلى القرص";
+"%@ on %@" = "%1$@ على %2$@";
+
+/* Preview backgrounds */
+"Light page" = "صفحة فاتحة";
+"Dark app" = "تطبيق داكن";
+"Photo" = "صورة";
+"Spreadsheet" = "جدول بيانات";
+
+/* Contrast */
+"Hard to see on light and dark screens" = "يصعب رؤيته على الشاشات الفاتحة والداكنة";
+"Hard to see on light screens" = "يصعب رؤيته على الشاشات الفاتحة";
+"Hard to see on dark screens" = "يصعب رؤيته على الشاشات الداكنة";
+"Neither the outline nor the fill reaches 3:1 contrast against that background." = "لا تصل الحدود ولا التعبئة إلى تباين 3:1 مع تلك الخلفية.";
+
+/* Custom pair editor */
+"New custom pair" = "زوج مخصص جديد";
+"Edit pair" = "تعديل الزوج";
+"Name" = "الاسم";
+"My pair" = "زوجي";
+"Outline %@" = "الحدود %@";
+"Fill %@" = "التعبئة %@";
+"Cancel" = "إلغاء";
+"Save pair" = "حفظ الزوج";
+
+/* Preferences tabs */
+"General" = "عام";
+"Pairs" = "الأزواج";
+"Automation" = "الأتمتة";
+"Shortcuts" = "الاختصارات";
+"About" = "حول";
+
+/* General */
+"Launch at login" = "التشغيل عند تسجيل الدخول";
+"Start Pointer Colors when you log in." = "شغّل Pointer Colors عند تسجيل الدخول.";
+"Re-apply my pair when the app starts" = "إعادة تطبيق زوجي عند بدء التطبيق";
+"Puts your colors and size back if something reset them." = "يعيد ألوانك وحجمك إذا أعادها شيء إلى الوضع الافتراضي.";
+"Draw the menu-bar icon in my colors" = "رسم أيقونة شريط القوائم بألواني";
+"Off shows a plain icon that follows the menu bar." = "عند الإيقاف تظهر أيقونة بسيطة تتبع شريط القوائم.";
+"Play a sound when a pair is applied" = "تشغيل صوت عند تطبيق زوج";
+"Keyboard shortcuts" = "اختصارات لوحة المفاتيح";
+"They work from any app. None are set until you record one." = "تعمل من أي تطبيق. لا يوجد أي اختصار حتى تسجّل واحدًا.";
+"Another app already uses this shortcut." = "يستخدم تطبيق آخر هذا الاختصار بالفعل.";
+"Apply the next pair" = "تطبيق الزوج التالي";
+"Apply the previous pair" = "تطبيق الزوج السابق";
+"Make the pointer bigger" = "تكبير المؤشر";
+"Make the pointer smaller" = "تصغير المؤشر";
+"Record shortcut" = "تسجيل اختصار";
+"Type shortcut…" = "اكتب الاختصار…";
+"Click to record a shortcut" = "انقر لتسجيل اختصار";
+"Press a shortcut. Esc cancels, Delete clears." = "اضغط اختصارًا. Esc للإلغاء، وDelete للمسح.";
+"Include ⌘, ⌥ or ⌃" = "أضف ⌘ أو ⌥ أو ⌃";
+"Clear shortcut" = "مسح الاختصار";
+"Appearance" = "المظهر";
+"Text size" = "حجم النص";
+"Size of the menu and this window. Automatic uses Large on big screens." = "حجم القائمة وهذه النافذة. يستخدم «تلقائي» الحجم الكبير على الشاشات الكبيرة.";
+"Automatic" = "تلقائي";
+"Default" = "افتراضي";
+"Large" = "كبير";
+"Extra large" = "كبير جدًا";
+"Huge" = "ضخم";
+"Permission" = "الصلاحية";
+"Pointer colors and size" = "ألوان المؤشر وحجمه";
+"Grant Full Disk Access…" = "منح الوصول الكامل إلى القرص…";
+"Allowed" = "مسموح";
+
+/* Pairs */
+"Hidden pairs stay out of the menu-bar grid. Custom pairs can be edited or deleted." = "لا تظهر الأزواج المخفية في شبكة شريط القوائم. يمكن تعديل الأزواج المخصصة أو حذفها.";
+"Edit" = "تعديل";
+"Delete" = "حذف";
+"Show" = "إظهار";
+"Add custom pair" = "إضافة زوج مخصص";
+"Import…" = "استيراد…";
+"Export…" = "تصدير…";
+"Couldn't import that file: %@" = "تعذّر استيراد هذا الملف: %@";
+"Couldn't export: %@" = "تعذّر التصدير: %@";
+
+/* Automation */
+"Automation needs Full Disk Access. Grant it in General › Permission." = "تحتاج الأتمتة إلى الوصول الكامل إلى القرص. امنحه من عام › الصلاحية.";
+"Switch pairs with light and dark appearance" = "تبديل الأزواج مع المظهر الفاتح والداكن";
+"Applies a pair whenever macOS changes appearance, including on a schedule." = "يطبّق زوجًا كلما غيّر macOS المظهر، بما في ذلك حسب جدول.";
+"Light appearance" = "المظهر الفاتح";
+"Dark appearance" = "المظهر الداكن";
+"Displays" = "الشاشات";
+"Different pointer size on each display" = "حجم مؤشر مختلف لكل شاشة";
+"The size changes when the pointer moves onto another display." = "يتغيّر الحجم عند انتقال المؤشر إلى شاشة أخرى.";
+"Pointer size on %@" = "حجم المؤشر على %@";
+"Finding the pointer" = "العثور على المؤشر";
+"Shake mouse pointer to locate" = "هزّ مؤشر الماوس لتحديد موقعه";
+"Move the pointer back and forth quickly to make it bigger for a moment." = "حرّك المؤشر ذهابًا وإيابًا بسرعة ليكبر للحظة.";
+
+/* About and updates */
+"Pointer Colors" = "Pointer Colors";
+"Version %@" = "الإصدار %@";
+"Website" = "الموقع";
+"GitHub" = "GitHub";
+"Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display." = "يغيّر إعدادات حدود المؤشر وتعبئته وحجمه نفسها الموجودة في إعدادات النظام › تسهيلات الاستخدام › الشاشة.";
+"Check for Updates…" = "التحقق من التحديثات…";
+"Check automatically once a day" = "التحقق تلقائيًا مرة يوميًا";
+"Download the new version" = "تنزيل الإصدار الجديد";
+"You're up to date." = "لديك أحدث إصدار.";
+"Version %@ is available." = "الإصدار %@ متاح.";
+"No releases are published yet." = "لم يُنشر أي إصدار بعد.";
+"Couldn't check: %@" = "تعذّر التحقق: %@";
+"GitHub answered %lld." = "ردّ GitHub بالرمز %lld.";
+
+/* Errors */
+"macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app." = "منع macOS التغيير. امنح Pointer Colors الوصول الكامل إلى القرص، ثم أعد فتح التطبيق.";
+"This version of macOS doesn't offer live pointer size changes." = "لا يتيح هذا الإصدار من macOS تغيير حجم المؤشر مباشرةً.";
+"This version of macOS doesn't offer that setting." = "لا يتيح هذا الإصدار من macOS هذا الإعداد.";
+"Couldn't change Launch at login: %@" = "تعذّر تغيير التشغيل عند تسجيل الدخول: %@";
+
+/* Website links */
+"Add “%@” to Pointer Colors?" = "هل تريد إضافة «%@» إلى Pointer Colors؟";
+"Outline %@, fill %@." = "الحدود %1$@، التعبئة %2$@.";
+"Add and Apply" = "إضافة وتطبيق";
+"Add" = "إضافة";
+"From the website" = "من الموقع";
+"Separate size for each display" = "حجم منفصل لكل شاشة";
+"Now: %@" = "الآن: %@";
+"(current)" = "(الحالية)";
+"Reset to the macOS default, normal size" = "العودة إلى الإعداد الافتراضي في macOS بالحجم العادي";
+"Separate colors for each display" = "ألوان منفصلة لكل شاشة";
+"The pair above is the default for all displays." = "الزوج أعلاه هو الافتراضي لكل الشاشات.";
+"Same as all displays" = "مثل كل الشاشات";
+"Colors on %@" = "الألوان على %@";
+"Created by" = "من إعداد";
+"Mostafa Abobakr" = "مصطفى أبوبكر";
+"Checking for Updates…" = "جارٍ التحقق من التحديثات…";
+"%@ Click above to download." = "%@ انقر أعلاه للتنزيل.";
+"Quit" = "إنهاء";
+"Add custom" = "إضافة مخصص";
+"Neon" = "نيون";
+"Colors" = "ألوان";
+"Edit…" = "تعديل…";
+"Delete…" = "حذف…";
+"Delete “%@”?" = "هل تريد حذف «%@»؟";
+"This can't be undone." = "لا يمكن التراجع عن ذلك.";
+"Edit %@" = "تعديل %@";
+"Delete %@" = "حذف %@";
+"Apps" = "التطبيقات";
+"Different pair for each app" = "زوج مختلف لكل تطبيق";
+"Applies while the app is in front. App pairs win over display pairs." = "يُطبَّق ما دام التطبيق في المقدمة. أزواج التطبيقات تتقدم على أزواج الشاشات.";
+"Add App…" = "إضافة تطبيق…";
+"Pair for %@" = "الزوج لـ %@";
+"Remove %@" = "إزالة %@";
+"Edit app pairs in Preferences › Automation" = "عدّل أزواج التطبيقات من الإعدادات › الأتمتة";
+"Apps with their own pair: %lld" = "تطبيقات لها زوج خاص: %lld";
+"Theme" = "السمة";
+"System" = "النظام";
+"Light" = "فاتح";
+"Dark" = "داكن";
+"Menu tint" = "تلوين القائمة";
+"None" = "بلا";
+"Pointer color" = "لون المؤشر";
+"Blue" = "أزرق";
+"Purple" = "بنفسجي";
+"Pink" = "وردي";
+"Orange" = "برتقالي";
+"Green" = "أخضر";
+"Graphite" = "جرافيت";
+"Menu glass" = "زجاج القائمة";
+"Standard" = "قياسي";
+"Frosted" = "مُصنفَر";
+"Clear" = "شفاف";
+"Tint strength" = "قوة التلوين";
+"Off" = "إيقاف";

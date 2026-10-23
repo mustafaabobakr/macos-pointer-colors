@@ -1,0 +1,336 @@
+{
+  "about": "The one list of pointer pairs, shared by the website (index.html) and the Mac app (bundled at build time). Colors are RRGGBB without '#'. \"system\" marks the two macOS defaults. \"group\" is default, neon or colors; both the site and the app show pairs in that order under those headings.",
+  "pairs": [
+    {
+      "id": "macos-light",
+      "name": "macOS light",
+      "outline": "FFFFFF",
+      "fill": "000000",
+      "system": "light",
+      "group": "default"
+    },
+    {
+      "id": "macos-dark",
+      "name": "macOS dark",
+      "outline": "000000",
+      "fill": "FFFFFF",
+      "system": "dark",
+      "group": "default"
+    },
+    {
+      "id": "aqua-mint",
+      "name": "Aqua mint",
+      "outline": "00FFDA",
+      "fill": "008A59",
+      "group": "neon"
+    },
+    {
+      "id": "neon",
+      "name": "Neon",
+      "outline": "39FF14",
+      "fill": "7C3AED",
+      "group": "neon"
+    },
+    {
+      "id": "neon-pink",
+      "name": "Neon pink",
+      "outline": "FF2BD6",
+      "fill": "8A005F",
+      "group": "neon"
+    },
+    {
+      "id": "neon-lime",
+      "name": "Neon lime",
+      "outline": "39FF14",
+      "fill": "1E7A00",
+      "group": "neon"
+    },
+    {
+      "id": "electric-blue",
+      "name": "Electric blue",
+      "outline": "00E5FF",
+      "fill": "005A8A",
+      "group": "neon"
+    },
+    {
+      "id": "neon-orange",
+      "name": "Neon orange",
+      "outline": "FF9E2C",
+      "fill": "8A2E00",
+      "group": "neon"
+    },
+    {
+      "id": "neon-violet",
+      "name": "Neon violet",
+      "outline": "C77DFF",
+      "fill": "4B0082",
+      "group": "neon"
+    },
+    {
+      "id": "neon-yellow",
+      "name": "Neon yellow",
+      "outline": "F5FF2E",
+      "fill": "6B5E00",
+      "group": "neon"
+    },
+    {
+      "id": "neon-red",
+      "name": "Neon red",
+      "outline": "FF5A5A",
+      "fill": "8A0010",
+      "group": "neon"
+    },
+    {
+      "id": "neon-cyan",
+      "name": "Neon cyan",
+      "outline": "00FFFF",
+      "fill": "006B7A",
+      "group": "neon"
+    },
+    {
+      "id": "neon-magenta",
+      "name": "Neon magenta",
+      "outline": "FF00FF",
+      "fill": "6A006A",
+      "group": "neon"
+    },
+    {
+      "id": "toxic-green",
+      "name": "Toxic green",
+      "outline": "AAFF00",
+      "fill": "3D5C00",
+      "group": "neon"
+    },
+    {
+      "id": "hot-coral",
+      "name": "Hot coral",
+      "outline": "FF6E8A",
+      "fill": "8A0F2E",
+      "group": "neon"
+    },
+    {
+      "id": "laser-purple",
+      "name": "Laser purple",
+      "outline": "9D4DFF",
+      "fill": "2E0066",
+      "group": "neon"
+    },
+    {
+      "id": "ultra-blue",
+      "name": "Ultra blue",
+      "outline": "4D7CFF",
+      "fill": "001A80",
+      "group": "neon"
+    },
+    {
+      "id": "neon-teal",
+      "name": "Neon teal",
+      "outline": "1DFFB0",
+      "fill": "00664A",
+      "group": "neon"
+    },
+    {
+      "id": "plasma-gold",
+      "name": "Plasma gold",
+      "outline": "FFD000",
+      "fill": "7A4A00",
+      "group": "neon"
+    },
+    {
+      "id": "synthwave",
+      "name": "Synthwave",
+      "outline": "FF3CAC",
+      "fill": "2B1A6B",
+      "group": "neon"
+    },
+    {
+      "id": "arctic-neon",
+      "name": "Arctic neon",
+      "outline": "8CFFFF",
+      "fill": "00527A",
+      "group": "neon"
+    },
+    {
+      "id": "glow-vermilion",
+      "name": "Glow vermilion",
+      "outline": "FF4000",
+      "fill": "421100",
+      "group": "neon"
+    },
+    {
+      "id": "glow-emerald",
+      "name": "Glow emerald",
+      "outline": "00FF40",
+      "fill": "00701C",
+      "group": "neon"
+    },
+    {
+      "id": "glow-azure",
+      "name": "Glow azure",
+      "outline": "0582FF",
+      "fill": "001C38",
+      "group": "neon"
+    },
+    {
+      "id": "glow-blue",
+      "name": "Glow blue",
+      "outline": "7575FF",
+      "fill": "000075",
+      "group": "neon"
+    },
+    {
+      "id": "glow-indigo",
+      "name": "Glow indigo",
+      "outline": "906BFF",
+      "fill": "1B006B",
+      "group": "neon"
+    },
+    {
+      "id": "glow-purple",
+      "name": "Glow purple",
+      "outline": "CD38FF",
+      "fill": "320042",
+      "group": "neon"
+    },
+    {
+      "id": "glacier",
+      "name": "Glacier",
+      "outline": "FFFFFF",
+      "fill": "0A84FF",
+      "group": "colors"
+    },
+    {
+      "id": "ultraviolet",
+      "name": "Ultraviolet",
+      "outline": "FF4FD8",
+      "fill": "5B21B6",
+      "group": "colors"
+    },
+    {
+      "id": "solar-flare",
+      "name": "Solar flare",
+      "outline": "FFD60A",
+      "fill": "E85D04",
+      "group": "colors"
+    },
+    {
+      "id": "coral-reef",
+      "name": "Coral reef",
+      "outline": "FFE3D8",
+      "fill": "FF453A",
+      "group": "colors"
+    },
+    {
+      "id": "sakura",
+      "name": "Sakura",
+      "outline": "FFFFFF",
+      "fill": "FF6FA8",
+      "group": "colors"
+    },
+    {
+      "id": "lavender",
+      "name": "Lavender",
+      "outline": "E9D5FF",
+      "fill": "7C3AED",
+      "group": "colors"
+    },
+    {
+      "id": "lime-ink",
+      "name": "Lime ink",
+      "outline": "D9FF3F",
+      "fill": "1C1C1E",
+      "group": "colors"
+    },
+    {
+      "id": "ember",
+      "name": "Ember",
+      "outline": "FF9F0A",
+      "fill": "000000",
+      "group": "colors"
+    },
+    {
+      "id": "deep-sea",
+      "name": "Deep sea",
+      "outline": "64D2FF",
+      "fill": "004E64",
+      "group": "colors"
+    },
+    {
+      "id": "highlighter",
+      "name": "Highlighter",
+      "outline": "000000",
+      "fill": "FFFF00",
+      "group": "colors"
+    },
+    {
+      "id": "tangerine",
+      "name": "Tangerine",
+      "outline": "FFFFFF",
+      "fill": "D35400",
+      "group": "colors"
+    },
+    {
+      "id": "cobalt",
+      "name": "Cobalt",
+      "outline": "FFD60A",
+      "fill": "0047AB",
+      "group": "colors"
+    },
+    {
+      "id": "ruby",
+      "name": "Ruby",
+      "outline": "FFFFFF",
+      "fill": "C8102E",
+      "group": "colors"
+    },
+    {
+      "id": "forest",
+      "name": "Forest",
+      "outline": "FFFFFF",
+      "fill": "1B7F3A",
+      "group": "colors"
+    },
+    {
+      "id": "lagoon",
+      "name": "Lagoon",
+      "outline": "000000",
+      "fill": "2EE6D6",
+      "group": "colors"
+    },
+    {
+      "id": "magenta",
+      "name": "Magenta",
+      "outline": "FFFFFF",
+      "fill": "E5007E",
+      "group": "colors"
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "outline": "000000",
+      "fill": "FFC300",
+      "group": "colors"
+    },
+    {
+      "id": "ice",
+      "name": "Ice",
+      "outline": "0A84FF",
+      "fill": "FFFFFF",
+      "group": "colors"
+    },
+    {
+      "id": "midnight",
+      "name": "Midnight",
+      "outline": "64D2FF",
+      "fill": "0B1A33",
+      "group": "colors"
+    },
+    {
+      "id": "rose-gold",
+      "name": "Rose gold",
+      "outline": "4A2C2A",
+      "fill": "F4B8A9",
+      "group": "colors"
+    }
+  ]
+}
