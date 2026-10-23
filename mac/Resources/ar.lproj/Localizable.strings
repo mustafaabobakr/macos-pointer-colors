@@ -140,7 +140,6 @@
 "Add and Apply" = "إضافة وتطبيق";
 "Add" = "إضافة";
 "From the website" = "من الموقع";
-"Restart Pointer Colors" = "إعادة تشغيل Pointer Colors";
 "Separate size for each display" = "حجم منفصل لكل شاشة";
 "Now: %@" = "الآن: %@";
 "(current)" = "(الحالية)";
@@ -151,3 +150,5 @@
 "Colors on %@" = "الألوان على %@";
 "Created by" = "من إعداد";
 "Mostafa Abobakr" = "مصطفى أبوبكر";
+"Checking for Updates…" = "جارٍ التحقق من التحديثات…";
+"%@ Click above to download." = "%@ انقر أعلاه للتنزيل.";
