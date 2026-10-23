@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Preferences › Automation: appearance pairs, per-display sizes and shake to find.
+/// Preferences › Automation: appearance pairs and shake to find. Per-display sizes live in the menu.
 struct AutomationPreferences: View {
     let model: AppModel
     @State private var shakeToFind = false
@@ -8,7 +8,6 @@ struct AutomationPreferences: View {
     var body: some View {
         Form {
             AppearanceSection(automation: model.automation, pairs: model.library.all)
-            DisplaySection(automation: model.automation)
             Section("Finding the pointer") {
                 Toggle(isOn: Binding(get: { shakeToFind }, set: { shakeToFind = $0; model.setShakeToFind($0) })) {
                     Text("Shake mouse pointer to locate")
@@ -51,44 +50,5 @@ private struct AppearanceSection: View {
             ForEach(pairs) { Text($0.name).tag($0.id) }
         }
         .disabled(!automation.followsAppearance)
-    }
-}
-
-private struct DisplaySection: View {
-    @Bindable var automation: Automation
-
-    var body: some View {
-        Section {
-            Toggle(isOn: $automation.perDisplaySizes) {
-                Text("Different pointer size on each display")
-                Text("The size changes when the pointer moves onto another display.")
-            }
-            ForEach(automation.displays) { display in
-                DisplaySizeRow(automation: automation, display: display)
-            }
-        } header: {
-            Text("Displays")
-        }
-    }
-}
-
-private struct DisplaySizeRow: View {
-    let automation: Automation
-    let display: DisplayInfo
-
-    var body: some View {
-        LabeledContent(display.name) {
-            HStack {
-                Slider(value: Binding(get: { automation.size(for: display) },
-                                      set: { automation.setSize($0, for: display) }),
-                       in: SystemPointer.minimumScale...SystemPointer.maximumScale, step: 0.25)
-                    .frame(width: 180)
-                    .accessibilityLabel("Pointer size on \(display.name)")
-                Text(String(format: "%.2f×", automation.size(for: display)))
-                    .appFont(.caption, monospacedDigits: true)
-                    .frame(width: 44, alignment: .trailing)
-            }
-        }
-        .disabled(!automation.perDisplaySizes)
     }
 }

@@ -62,6 +62,7 @@ struct MenuContentView: View {
     private var sizeRow: some View {
         VStack(alignment: .leading, spacing: 4) {
             sizeControls.disabled(model.needsFullDiskAccess)
+            PerDisplayToggle(automation: model.automation).disabled(model.needsFullDiskAccess)
             if model.needsFullDiskAccess {
                 Text("Pointer size needs Full Disk Access.")
                     .appFont(.caption2)
@@ -229,5 +230,21 @@ private struct MenuRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Per-display sizes live in the menu so it's clear which display the slider is changing.
+private struct PerDisplayToggle: View {
+    @Bindable var automation: Automation
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Toggle("Separate size for each display", isOn: $automation.perDisplaySizes)
+                .toggleStyle(.checkbox)
+                .appFont(.caption)
+            if automation.perDisplaySizes, let display = automation.currentDisplay {
+                Text("Now: \(display.name)").appFont(.caption).foregroundStyle(.secondary).lineLimit(1)
+            }
+        }
     }
 }

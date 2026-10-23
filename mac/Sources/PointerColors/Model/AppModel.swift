@@ -115,6 +115,7 @@ final class AppModel {
             selectedID = PointerPair.classic.id
             settings.lastAppliedPairID = nil
             settings.lastAppliedScale = nil
+            automation.resetAllDisplaySizes()
             refreshFromSystem()
         } catch {
             fail(error)
@@ -127,6 +128,7 @@ final class AppModel {
         do {
             try pointer.setScale(value)
             settings.lastAppliedScale = value
+            automation.rememberSizeForCurrentDisplay(value)
         } catch {
             scale = pointer.currentScale()
             fail(error)

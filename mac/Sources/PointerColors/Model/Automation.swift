@@ -38,12 +38,13 @@ final class Automation {
     }
     private(set) var displaySizes: [String: Double]
     private(set) var displays: [DisplayInfo] = DisplayInfo.current()
+    /// The display the pointer is on, while per-display sizes are on.
+    private(set) var lastDisplayID: String?
 
     @ObservationIgnored private let settings: AppSettings
     @ObservationIgnored private let applyPair: (String) -> Void
     @ObservationIgnored private let applyScale: (Double) -> Void
     @ObservationIgnored private var displayTimer: Timer?
-    @ObservationIgnored private var lastDisplayID: String?
 
     init(settings: AppSettings, applyPair: @escaping (String) -> Void, applyScale: @escaping (Double) -> Void) {
         self.settings = settings
@@ -81,11 +82,27 @@ final class Automation {
         if display.id == lastDisplayID, perDisplaySizes { applyScale(size) }
     }
 
+    var currentDisplay: DisplayInfo? { displays.first { $0.id == lastDisplayID } }
+
+    /// Records the size for the display the pointer is on, without applying it again.
+    func rememberSizeForCurrentDisplay(_ size: Double) {
+        guard perDisplaySizes, let id = lastDisplayID else { return }
+        displaySizes[id] = size
+        settings.displaySizes = displaySizes
+    }
+
+    /// Back to the default size on every display.
+    func resetAllDisplaySizes() {
+        displaySizes = [:]
+        settings.displaySizes = [:]
+    }
+
     private func updateDisplayTracking() {
         displayTimer?.invalidate()
         displayTimer = nil
         lastDisplayID = nil
         guard perDisplaySizes else { return }
+        checkPointerDisplay()
         displayTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.checkPointerDisplay() }
         }
