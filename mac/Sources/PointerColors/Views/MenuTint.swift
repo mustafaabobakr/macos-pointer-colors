@@ -37,7 +37,7 @@ enum MenuTint: String, CaseIterable, Identifiable {
 
 /// How the menu's glass background looks.
 enum MenuGlass: String, CaseIterable, Identifiable {
-    case system, regular, clear
+    case system, regular, clear, off
 
     var id: String { rawValue }
 
@@ -46,6 +46,7 @@ enum MenuGlass: String, CaseIterable, Identifiable {
         case .system: return String(localized: "Standard")
         case .regular: return String(localized: "Frosted")
         case .clear: return String(localized: "Clear")
+        case .off: return String(localized: "Off")
         }
     }
 
@@ -67,7 +68,10 @@ struct MenuBackgroundStyle {
 extension View {
     /// Liquid Glass behind the menu on macOS 26 and later; a soft color wash before that.
     @ViewBuilder func menuBackground(_ style: MenuBackgroundStyle) -> some View {
-        if #available(macOS 26.0, *), let glass = style.glassEffect {
+        if style.glass == .off {
+            // No glass: a solid window background, with the tint as a flat wash.
+            background(Color(nsColor: .windowBackgroundColor).overlay(style.tint?.opacity(style.tintStrength * 0.35)).padding(-6))
+        } else if #available(macOS 26.0, *), let glass = style.glassEffect {
             background(Color.clear.glassEffect(glass, in: .rect(cornerRadius: 16)).padding(-6))
         } else if let tint = style.tint {
             background(tint.opacity(style.tintStrength * 0.35))
@@ -88,6 +92,7 @@ extension MenuBackgroundStyle {
             base = .regular
         case .regular: base = .regular
         case .clear: base = .clear
+        case .off: return nil
         }
         guard let tint else { return base }
         return base.tint(tint.opacity(tintStrength))
