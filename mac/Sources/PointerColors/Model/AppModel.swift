@@ -41,6 +41,16 @@ final class AppModel {
     var menuTint: MenuTint = .saved {
         didSet { menuTint.save() }
     }
+    var menuGlass: MenuGlass = .saved {
+        didSet { menuGlass.save() }
+    }
+    var menuTintStrength: Double = UserDefaults.standard.object(forKey: "menuTintStrength") as? Double ?? 0.35 {
+        didSet { UserDefaults.standard.set(menuTintStrength, forKey: "menuTintStrength") }
+    }
+
+    var menuBackgroundStyle: MenuBackgroundStyle {
+        MenuBackgroundStyle(glass: menuGlass, tint: menuTint.color(pointer: selectedPair), tintStrength: menuTintStrength)
+    }
     /// Whether macOS itself is in dark mode, kept current for the System theme.
     var systemIsDark = AppTheme.systemIsDark
 

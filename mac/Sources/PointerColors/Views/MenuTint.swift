@@ -35,17 +35,61 @@ enum MenuTint: String, CaseIterable, Identifiable {
     func save() { UserDefaults.standard.set(rawValue, forKey: "menuTint") }
 }
 
+/// How the menu's glass background looks.
+enum MenuGlass: String, CaseIterable, Identifiable {
+    case system, regular, clear
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: return String(localized: "Standard")
+        case .regular: return String(localized: "Frosted")
+        case .clear: return String(localized: "Clear")
+        }
+    }
+
+    static var saved: MenuGlass {
+        UserDefaults.standard.string(forKey: "menuGlass").flatMap(MenuGlass.init(rawValue:)) ?? .system
+    }
+
+    func save() { UserDefaults.standard.set(rawValue, forKey: "menuGlass") }
+}
+
+/// Everything that styles the menu background.
+struct MenuBackgroundStyle {
+    var glass: MenuGlass
+    var tint: Color?
+    /// 0...1; how much of the tint shows through.
+    var tintStrength: Double
+}
+
 extension View {
-    /// Tinted Liquid Glass behind the menu on macOS 26 and later; a soft color wash before that.
-    @ViewBuilder func menuTint(_ color: Color?) -> some View {
-        if let color {
-            if #available(macOS 26.0, *) {
-                background(Color.clear.glassEffect(.regular.tint(color.opacity(0.35)), in: .rect(cornerRadius: 16)).padding(-6))
-            } else {
-                background(color.opacity(0.12))
-            }
+    /// Liquid Glass behind the menu on macOS 26 and later; a soft color wash before that.
+    @ViewBuilder func menuBackground(_ style: MenuBackgroundStyle) -> some View {
+        if #available(macOS 26.0, *), let glass = style.glassEffect {
+            background(Color.clear.glassEffect(glass, in: .rect(cornerRadius: 16)).padding(-6))
+        } else if let tint = style.tint {
+            background(tint.opacity(style.tintStrength * 0.35))
         } else {
             self
         }
+    }
+}
+
+extension MenuBackgroundStyle {
+    /// Nil keeps the menu's standard background.
+    @available(macOS 26.0, *)
+    var glassEffect: Glass? {
+        let base: Glass
+        switch glass {
+        case .system:
+            guard tint != nil else { return nil }
+            base = .regular
+        case .regular: base = .regular
+        case .clear: base = .clear
+        }
+        guard let tint else { return base }
+        return base.tint(tint.opacity(tintStrength))
     }
 }

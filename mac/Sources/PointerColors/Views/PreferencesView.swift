@@ -52,9 +52,18 @@ private struct GeneralPreferences: View {
                     ForEach(AppTheme.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                Picker("Menu glass", selection: $model.menuGlass) {
+                    ForEach(MenuGlass.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
                 Picker("Menu tint", selection: $model.menuTint) {
                     ForEach(MenuTint.allCases) { Text($0.title).tag($0) }
                 }
+                LabeledContent("Tint strength") {
+                    Slider(value: $model.menuTintStrength, in: 0.1...0.8)
+                        .frame(width: 180)
+                }
+                .disabled(model.menuTint == .none)
                 Picker(selection: $model.textSize) {
                     ForEach(TextSize.allCases) { Text($0.title).tag($0) }
                 } label: {

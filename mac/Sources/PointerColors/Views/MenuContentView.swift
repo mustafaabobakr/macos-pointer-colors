@@ -48,7 +48,7 @@ struct MenuContentView: View {
             footer
         }
         .padding(14)
-        .menuTint(model.menuTint.color(pointer: model.selectedPair))
+        .menuBackground(model.menuBackgroundStyle)
         .frame(width: 380 * scale)
         .appTextScale(scale)
         .preferredColorScheme(model.colorScheme)
