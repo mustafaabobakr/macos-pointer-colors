@@ -42,7 +42,7 @@ private struct GeneralPreferences: View {
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
             }
             Section("Permission") {
-                LabeledContent("Pointer colors") {
+                LabeledContent("Pointer colors and size") {
                     if model.needsFullDiskAccess {
                         Button("Grant Full Disk Access…") { model.openFullDiskAccessSettings() }
                     } else {

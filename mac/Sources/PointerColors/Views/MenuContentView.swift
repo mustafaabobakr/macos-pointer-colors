@@ -127,9 +127,9 @@ private struct PermissionBanner: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Full Disk Access needed for colors", systemImage: "lock")
+            Label("Full Disk Access needed", systemImage: "lock")
                 .font(.callout.weight(.semibold))
-            Text("macOS protects the pointer color settings. Turn on Pointer Colors in Full Disk Access, then reopen this menu. Pointer size and copying hex codes work without it.")
+            Text("macOS protects the pointer color and size settings. Turn on Pointer Colors in Full Disk Access, then quit and reopen the app. Copying hex codes works without it.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

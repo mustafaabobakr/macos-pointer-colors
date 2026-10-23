@@ -30,8 +30,8 @@ mac/scripts/build-app.sh
 open "mac/build/Pointer Colors.app"
 ```
 
-- **Pointer size** changes live through `UACursorSetScale`, the private UniversalAccess call System Settings uses. No permission needed.
-- **Pointer colors** are written to `com.apple.universalaccess`, which macOS only lets third-party apps write with **Full Disk Access**. The app explains this and links to the setting.
+- **Needs Full Disk Access.** Pointer colors and size live in `com.apple.universalaccess`, which macOS only lets third-party apps write with Full Disk Access. The app explains this and links to the setting.
+- **Pointer size** changes live through `UACursorSetScale`, the private UniversalAccess call System Settings uses, and is saved to `mouseDriverCursorSize` so it sticks.
 - It uses private API and isn't sandboxed, so it can't ship on the Mac App Store.
 
 ## Run locally

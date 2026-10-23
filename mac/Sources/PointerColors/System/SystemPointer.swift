@@ -9,7 +9,7 @@ enum SystemPointerError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return "macOS blocked the change. Give Pointer Colors Full Disk Access, then try again."
+            return "macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app."
         case .sizeAPIUnavailable:
             return "This version of macOS doesn't offer live pointer size changes."
         }
@@ -19,7 +19,8 @@ enum SystemPointerError: LocalizedError, Equatable {
 /// Reads and changes the system pointer: the same settings as
 /// System Settings › Accessibility › Display › Pointer.
 ///
-/// Colors live in the `com.apple.universalaccess` preferences domain (`cursorOutline`, `cursorFill`).
+/// Colors and size live in the `com.apple.universalaccess` preferences domain
+/// (`cursorOutline`, `cursorFill`, `mouseDriverCursorSize`).
 /// That domain is privacy-protected: third-party apps can only write it with Full Disk Access.
 /// After writing, the Universal Access "mouse settings changed" notification is posted so the
 /// system can pick the new colors up.
@@ -60,8 +61,8 @@ struct SystemPointer {
         universalAccess.postMouseSettingsChanged()
     }
 
-    /// True when this process may write pointer colors (Full Disk Access is granted).
-    func canWriteColors() -> Bool {
+    /// True when this process may change pointer settings (Full Disk Access is granted).
+    func canWriteSettings() -> Bool {
         let current = copy(Self.outlineKey)
         set(Self.outlineKey, current)
         return synchronize()
@@ -74,9 +75,19 @@ struct SystemPointer {
         return (copy(Self.scaleKey) as? NSNumber)?.doubleValue ?? Self.minimumScale
     }
 
+    /// Changes the size live and saves it. `UACursorSetScale` alone only updates this process:
+    /// without Full Disk Access the save never reaches the system and the size snaps back.
     func setScale(_ scale: Double) throws {
         let value = scale.clamped(to: Self.minimumScale...Self.maximumScale)
+        let previous = currentScale()
         guard universalAccess.setCursorScale(value) else { throw SystemPointerError.sizeAPIUnavailable }
+        set(Self.scaleKey, value as CFNumber)
+        guard synchronize() else {
+            // Undo the in-process change so the app doesn't report a size the system never took.
+            _ = universalAccess.setCursorScale(previous)
+            set(Self.scaleKey, previous as CFNumber)
+            throw SystemPointerError.permissionDenied
+        }
     }
 
     // MARK: Preferences

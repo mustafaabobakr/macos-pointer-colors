@@ -54,7 +54,7 @@ final class AppModel {
         let colors = pointer.currentColors()
         appliedPair = library.pair(matching: colors.outline, fill: colors.fill)
         scale = pointer.currentScale()
-        needsFullDiskAccess = !pointer.canWriteColors()
+        needsFullDiskAccess = !pointer.canWriteSettings()
         launchAtLogin = settings.launchAtLogin
         if let appliedPair { selectedID = appliedPair.id }
         updateStatus()
@@ -91,6 +91,7 @@ final class AppModel {
             try pointer.setScale(value)
             settings.lastAppliedScale = value
         } catch {
+            scale = pointer.currentScale()
             fail(error)
         }
     }
