@@ -40,7 +40,11 @@ final class AppModel {
         textSize.factor(screenWidth: NSScreen.main?.frame.width ?? 0)
     }
 
+    var shortcuts: [ShortcutAction: KeyCombo] = [:]
+    var shortcutConflicts: Set<ShortcutAction> = []
+
     let settings = AppSettings()
+    let hotKeys = HotKeyCenter()
     private let pointer = SystemPointer()
 
     init() {
@@ -48,8 +52,10 @@ final class AppModel {
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
+        shortcuts = settings.shortcuts
         refreshFromSystem()
         reapplyIfNeeded()
+        registerShortcuts()
     }
 
     var selectedPair: PointerPair { library.pair(id: selectedID) ?? PointerPair.builtIns[0] }

@@ -32,6 +32,21 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue.rawValue, forKey: Key.textSize) }
     }
 
+    /// Recorded global shortcuts. Empty by default: nothing is assigned until the user records one.
+    var shortcuts: [ShortcutAction: KeyCombo] {
+        get {
+            guard let data = defaults.data(forKey: Key.shortcuts),
+                  let raw = try? JSONDecoder().decode([String: KeyCombo].self, from: data) else { return [:] }
+            return Dictionary(uniqueKeysWithValues: raw.compactMap { key, combo in
+                ShortcutAction(rawValue: key).map { ($0, combo) }
+            })
+        }
+        nonmutating set {
+            let raw = Dictionary(uniqueKeysWithValues: newValue.map { ($0.key.rawValue, $0.value) })
+            defaults.set(try? JSONEncoder().encode(raw), forKey: Key.shortcuts)
+        }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }
@@ -60,6 +75,7 @@ struct AppSettings {
         static let iconInPairColors = "iconInPairColors"
         static let playSoundOnApply = "playSoundOnApply"
         static let textSize = "textSize"
+        static let shortcuts = "shortcuts"
         static let lastAppliedPairID = "lastAppliedPairID"
         static let lastAppliedScale = "lastAppliedScale"
     }

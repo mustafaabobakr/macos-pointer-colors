@@ -42,6 +42,27 @@ private struct GeneralPreferences: View {
                 Toggle("Play a sound when a pair is applied", isOn: $sound)
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
             }
+            Section {
+                ForEach(ShortcutAction.allCases) { action in
+                    LabeledContent {
+                        ShortcutRecorder(combo: model.shortcuts[action]) { combo in
+                            model.setShortcut(combo, for: action)
+                        } onRecordingChange: { recording in
+                            recording ? model.hotKeys.unregisterAll() : model.registerShortcuts()
+                        }
+                    } label: {
+                        Text(action.title)
+                        if model.shortcutConflicts.contains(action) {
+                            Text("Another app already uses this shortcut.").foregroundStyle(.orange)
+                        }
+                    }
+                }
+            } header: {
+                Text("Keyboard shortcuts")
+            } footer: {
+                Text("They work from any app. None are set until you record one.")
+                    .appFont(.caption).foregroundStyle(.secondary)
+            }
             Section("Appearance") {
                 Picker(selection: $model.textSize) {
                     ForEach(TextSize.allCases) { Text($0.title).tag($0) }
