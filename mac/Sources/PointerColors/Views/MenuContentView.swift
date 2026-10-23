@@ -12,7 +12,6 @@ struct MenuContentView: View {
         VStack(alignment: .leading, spacing: 14) {
             if model.needsFullDiskAccess { PermissionBanner(model: model) }
             header
-            sizeRow
             VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
             pairGrid
             if isAddingCustom {
@@ -23,6 +22,7 @@ struct MenuContentView: View {
                     isAddingCustom = false
                 }
             }
+            sizeRow
             actions
             Divider()
             footer
