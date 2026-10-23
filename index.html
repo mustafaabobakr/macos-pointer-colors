@@ -1,44 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pointer colors for macOS</title>
+<meta name="description" content="Pointer outline and fill color pairs for macOS, with a live preview and a free menu-bar app that applies them.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#eef0f3; --surface:#ffffff; --ink:#15171c; --muted:#5d6370; --line:#d9dce3; --chip:#f4f5f8; --focus:#0a84ff;
+  --bg:#eef0f3; --surface:#ffffff; --ink:#15171c; --muted:#5d6370; --line:#d9dce3; --chip:#f4f5f8; --focus:#0a84ff; --accent:#0a6fd8; --on-accent:#ffffff;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){ --bg:#17181c; --surface:#212328; --ink:#eceef2; --muted:#9aa0ac; --line:#33363d; --chip:#2a2c32; color-scheme:dark; }
+  :root:not([data-theme="light"]){ --bg:#17181c; --surface:#212328; --ink:#eceef2; --muted:#9aa0ac; --line:#33363d; --chip:#2a2c32; --accent:#3d9bff; --on-accent:#0b1220; color-scheme:dark; }
 }
-:root[data-theme="dark"]{ --bg:#17181c; --surface:#212328; --ink:#eceef2; --muted:#9aa0ac; --line:#33363d; --chip:#2a2c32; color-scheme:dark; }
+:root[data-theme="dark"]{ --bg:#17181c; --surface:#212328; --ink:#eceef2; --muted:#9aa0ac; --line:#33363d; --chip:#2a2c32; --accent:#3d9bff; --on-accent:#0b1220; color-scheme:dark; }
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;line-height:1.5}
+html[lang="ar"] body{font-family:"IBM Plex Sans Arabic","Bricolage Grotesque",-apple-system,system-ui,sans-serif}
 .wrap{max-width:1180px;margin:0 auto;padding:32px 20px 56px}
-h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1.02;letter-spacing:-.03em;margin:0 0 10px}
+.top{display:flex;justify-content:flex-end;margin:-12px 0 8px}
+.lang{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px;gap:2px}
+.lang button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:.85rem;padding:4px 10px;border-radius:7px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1.08;letter-spacing:-.03em;margin:0 0 10px}
+html[lang="ar"] h1{letter-spacing:0}
 .lede{color:var(--muted);max-width:60ch;margin:0 0 28px}
 .layout{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
 @media (max-width:860px){.layout{grid-template-columns:1fr}}
 
 /* palette list */
 .list{display:flex;flex-direction:column;gap:6px}
-.swatch{display:flex;align-items:center;gap:14px;width:100%;padding:10px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.swatch{display:flex;align-items:center;gap:14px;width:100%;padding:10px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer}
 .swatch:hover{background:var(--chip)}
 .swatch[aria-pressed="true"]{background:var(--surface);border-color:var(--line);box-shadow:0 1px 0 var(--line)}
-.swatch:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.swatch:focus-visible,button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .swatch svg{flex:none;width:30px;height:38px}
 .swatch b{display:block;font-weight:600}
-.swatch small{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
-.mine{font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:auto;flex:none}
+.swatch small{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
 
-/* stage */
+/* stage: a macOS desktop, so it stays left-to-right in every language */
 .stage{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:16/10;min-height:340px;cursor:none;user-select:none;touch-action:none;transition:background .4s}
 .stage.wp-sonoma{background:radial-gradient(120% 90% at 15% 10%,#ffb36b 0%,transparent 55%),radial-gradient(90% 90% at 90% 20%,#ff5f8f 0%,transparent 60%),radial-gradient(120% 100% at 50% 110%,#3b2fb8 0%,#5a3fd9 40%,transparent 75%),#7a4bd8}
 .stage.wp-light{background:linear-gradient(160deg,#fbfbfd,#e3e7ee)}
@@ -75,26 +81,38 @@ input[type=range]{accent-color:var(--ink)}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px}
 .panel .chipc{width:44px;height:26px;border-radius:999px;border:3px solid #444;flex:none}
 .panel .lbl{font-size:.85rem;color:var(--muted)}
-.panel .hex{font-size:1.25rem;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.panel input[type=color]{margin-left:auto;width:38px;height:32px;border:0;background:none;padding:0;cursor:pointer}
-.addmac{margin:12px 0 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.addmac small{color:var(--muted)}.addmac .copy{text-decoration:none;display:inline-block}
-.copy{border:1px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;font-size:.82rem;border-radius:8px;padding:5px 10px;cursor:pointer}
+.panel .hex{font-size:1.25rem;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+.panel input[type=color]{margin-inline-start:auto;width:38px;height:32px;border:0;background:none;padding:0;cursor:pointer}
+.actions{margin:12px 0 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.actions small{color:var(--muted)}
+.copy{border:1px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;font-size:.82rem;border-radius:8px;padding:5px 10px;cursor:pointer;text-decoration:none;display:inline-block}
 
 .contexts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
 @media (max-width:620px){.contexts{grid-template-columns:repeat(2,1fr)}}
 .ctx{border-radius:12px;height:110px;position:relative;overflow:hidden;border:1px solid var(--line)}
 .ctx svg{position:absolute;left:50%;top:50%;width:34px;height:44px;transform:translate(-30%,-40%);filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35))}
-.ctx span{position:absolute;left:10px;bottom:7px;font-size:.75rem;padding:1px 7px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}
+.ctx span{position:absolute;inset-inline-start:10px;bottom:7px;font-size:.75rem;padding:1px 7px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}
 
 .how{margin-top:36px;max-width:68ch}
 .group{grid-column:1/-1;margin:10px 0 2px;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .group:first-child{margin-top:0}
-.credit{margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
-.credit a{color:var(--ink)}
-.how h2{font-size:1.35rem;margin:0 0 8px;letter-spacing:-.01em}
-.how ol{padding-left:1.2em;margin:0;color:var(--muted)}
+.how h2,.mac h2{font-size:1.35rem;margin:0 0 8px;letter-spacing:-.01em}
+.how ol{padding-inline-start:1.2em;margin:0;color:var(--muted)}
 .how li{margin:4px 0}
 .how strong{color:var(--ink);font-weight:600}
+
+/* Mac app */
+.mac{margin-top:44px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px}
+@media (max-width:860px){.mac{grid-template-columns:1fr;padding:20px}}
+.mac p{color:var(--muted);margin:0 0 14px;max-width:60ch}
+.mac ul{margin:0 0 18px;padding-inline-start:1.2em;color:var(--muted)}
+.mac li{margin:3px 0}
+.mac img{width:100%;height:auto;max-height:620px;object-fit:cover;object-position:top;border-radius:14px;border:1px solid var(--line);display:block}
+.download{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:var(--on-accent);text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px;min-height:44px}
+.download svg{width:18px;height:18px}
+.fine{font-size:.82rem;color:var(--muted);margin:10px 0 0}
+
+.credit{margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.credit a{color:var(--ink)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:.9rem;transition:.25s;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -102,14 +120,20 @@ input[type=range]{accent-color:var(--ink)}
 </head>
 <body>
 <div class="wrap">
-  <h1>Pointer colors for macOS</h1>
-  <p class="lede">Pick a pair, move your mouse over the desktop to try it, then copy the two hex codes into System Settings.</p>
+  <div class="top">
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true" lang="en">English</button>
+      <button data-lang="ar" aria-pressed="false" lang="ar">العربية</button>
+    </div>
+  </div>
+  <h1 data-i18n="title">Pointer colors for macOS</h1>
+  <p class="lede" data-i18n="lede">Pick a pair, move your mouse over the desktop to try it, then copy the two hex codes into System Settings.</p>
 
   <div class="layout">
-    <div class="list" id="list" role="group" aria-label="Color pairs"></div>
+    <div class="list" id="list" role="group" aria-label="Color pairs" data-i18n-label="pairsLabel"></div>
 
     <div>
-      <div class="stage wp-sonoma" id="stage" aria-label="Pointer preview desktop">
+      <div class="stage wp-sonoma" id="stage" dir="ltr" aria-label="Pointer preview desktop" data-i18n-label="stageLabel">
         <div class="menubar"><span class="apple"></span><b>Finder</b><span>File</span><span>Edit</span><span>View</span><span>Go</span><span class="clock" id="clock">Thu 9:41</span></div>
         <div class="win">
           <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span></div>
@@ -121,78 +145,177 @@ input[type=range]{accent-color:var(--ink)}
         <div class="dock" aria-hidden="true">
           <i style="background:linear-gradient(#5ac8fa,#0a84ff)"></i><i style="background:linear-gradient(#ffd60a,#ff9f0a)"></i><i style="background:linear-gradient(#30d158,#248a3d)"></i><i style="background:linear-gradient(#ff6482,#ff2d55)"></i><i style="background:linear-gradient(#bf5af2,#5e5ce6)"></i>
         </div>
-        <div class="hint" id="hint">Move your mouse here</div>
+        <div class="hint" id="hint" data-i18n="hint">Move your mouse here</div>
         <svg class="pointer" id="pointer" viewBox="0 0 24 32" width="24" height="32" aria-hidden="true"></svg>
       </div>
 
       <div class="controls">
-        <div class="seg" id="wp" role="group" aria-label="Wallpaper">
-          <button data-wp="sonoma" aria-pressed="true">Colorful</button>
-          <button data-wp="light" aria-pressed="false">Light</button>
-          <button data-wp="dark" aria-pressed="false">Dark</button>
-          <button data-wp="busy" aria-pressed="false">Busy</button>
+        <div class="seg" id="wp" role="group" aria-label="Wallpaper" data-i18n-label="wallpaper">
+          <button data-wp="sonoma" aria-pressed="true" data-i18n="wpColorful">Colorful</button>
+          <button data-wp="light" aria-pressed="false" data-i18n="wpLight">Light</button>
+          <button data-wp="dark" aria-pressed="false" data-i18n="wpDark">Dark</button>
+          <button data-wp="busy" aria-pressed="false" data-i18n="wpBusy">Busy</button>
         </div>
-        <label class="size">Pointer size <input type="range" id="size" min="1" max="4" step="0.25" value="1.5"></label>
+        <label class="size"><span data-i18n="size">Pointer size</span> <input type="range" id="size" min="1" max="4" step="0.25" value="1.5"></label>
       </div>
 
       <div class="readout">
         <div class="panel">
           <span class="chipc" id="chipO"></span>
-          <div><div class="lbl">Pointer outline color</div><div class="hex" id="hexO"></div></div>
-          <input type="color" id="pickO" aria-label="Custom outline color">
-          <button class="copy" data-copy="O">Copy</button>
+          <div><div class="lbl" data-i18n="outline">Pointer outline color</div><div class="hex" id="hexO"></div></div>
+          <input type="color" id="pickO" aria-label="Custom outline color" data-i18n-label="pickO">
+          <button class="copy" data-copy="O" data-i18n="copy">Copy</button>
         </div>
         <div class="panel">
           <span class="chipc" id="chipF"></span>
-          <div><div class="lbl">Pointer fill color</div><div class="hex" id="hexF"></div></div>
-          <input type="color" id="pickF" aria-label="Custom fill color">
-          <button class="copy" data-copy="F">Copy</button>
+          <div><div class="lbl" data-i18n="fill">Pointer fill color</div><div class="hex" id="hexF"></div></div>
+          <input type="color" id="pickF" aria-label="Custom fill color" data-i18n-label="pickF">
+          <button class="copy" data-copy="F" data-i18n="copy">Copy</button>
         </div>
       </div>
 
-      <p class="addmac"><a class="copy" id="addMac" href="pointercolors://add">Add to Pointer Colors for Mac</a> <small>Opens the Mac app, if it's installed.</small></p>
+      <p class="actions">
+        <button class="copy" id="share" data-i18n="share">Share this pair</button>
+        <a class="copy" id="addMac" href="pointercolors://add" data-i18n="addMac">Add to Pointer Colors for Mac</a>
+        <small data-i18n="addMacNote">Opens the Mac app, if it's installed.</small>
+      </p>
 
       <div class="contexts" id="contexts"></div>
     </div>
   </div>
 
   <section class="how">
-    <h2>Apply it on your Mac</h2>
+    <h2 data-i18n="howTitle">Apply it on your Mac</h2>
     <ol>
-      <li>Open <strong>System Settings › Accessibility › Display</strong> and scroll to <strong>Pointer</strong>.</li>
-      <li>Click <strong>Pointer outline color</strong>, choose the sliders tab, set it to Hex Color, and paste the outline code.</li>
-      <li>Do the same for <strong>Pointer fill color</strong>.</li>
-      <li>Want it bigger? Drag <strong>Pointer size</strong> on the same screen. <strong>Reset</strong> brings back black and white.</li>
+      <li data-i18n="how1">Open <strong>System Settings › Accessibility › Display</strong> and scroll to <strong>Pointer</strong>.</li>
+      <li data-i18n="how2">Click <strong>Pointer outline color</strong>, choose the sliders tab, set it to Hex Color, and paste the outline code.</li>
+      <li data-i18n="how3">Do the same for <strong>Pointer fill color</strong>.</li>
+      <li data-i18n="how4">Want it bigger? Drag <strong>Pointer size</strong> on the same screen. <strong>Reset</strong> brings back black and white.</li>
     </ol>
   </section>
 
-  <footer class="credit">Created by <a href="https://github.com/mustafaabobakr">Mostafa Abobakr</a> · <a href="https://github.com/mustafaabobakr/macos-pointer-colors">Source on GitHub</a></footer>
+  <section class="mac" id="mac" aria-labelledby="macTitle">
+    <div>
+      <h2 id="macTitle" data-i18n="macTitle">Pointer Colors for Mac</h2>
+      <p data-i18n="macLede">A free menu-bar app that applies a pair in one click, so you never type hex codes.</p>
+      <ul>
+        <li data-i18n="mac1">Every pair on this page, plus your own</li>
+        <li data-i18n="mac2">Pointer size slider, a separate color and size for each display, and a pair for each app</li>
+        <li data-i18n="mac3">Switches pairs with light and dark appearance</li>
+        <li data-i18n="mac4">Keyboard shortcuts, contrast warnings, English and Arabic</li>
+      </ul>
+      <a class="download" id="download" href="https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest/download/Pointer-Colors.dmg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+        <span data-i18n="download">Download for macOS</span>
+      </a>
+      <p class="fine" data-i18n="macFine">macOS 14 or later. The app isn't notarized yet: the first time, right-click it and choose Open, or allow it in System Settings › Privacy &amp; Security.</p>
+    </div>
+    <img src="docs/mac-app.png" width="1140" height="2526" alt="The Pointer Colors menu-bar app showing pairs, a size slider and previews" data-i18n-alt="macShot" loading="lazy">
+  </section>
+
+  <footer class="credit"><span data-i18n="createdBy">Created by</span> <a href="https://github.com/mustafaabobakr" data-i18n="author">Mostafa Abobakr</a> · <a href="https://github.com/mustafaabobakr/macos-pointer-colors" data-i18n="source">Source on GitHub</a></footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
 <script type="module">
+// ---------- Language ----------
+const AR = {
+  title: "ألوان مؤشر macOS",
+  lede: "اختر زوجًا، وحرّك الماوس فوق سطح المكتب لتجربته، ثم انسخ رمزي اللونين إلى إعدادات النظام.",
+  pairsLabel: "أزواج الألوان", stageLabel: "سطح مكتب لمعاينة المؤشر", wallpaper: "الخلفية",
+  hint: "حرّك الماوس هنا",
+  wpColorful: "ملوّنة", wpLight: "فاتحة", wpDark: "داكنة", wpBusy: "مزدحمة",
+  size: "حجم المؤشر",
+  outline: "لون حدود المؤشر", fill: "لون تعبئة المؤشر", pickO: "لون حدود مخصص", pickF: "لون تعبئة مخصص",
+  copy: "نسخ", share: "مشاركة هذا الزوج",
+  addMac: "إضافة إلى Pointer Colors للماك", addMacNote: "يفتح تطبيق الماك إن كان مثبّتًا.",
+  howTitle: "طبّقه على جهاز الماك",
+  how1: "افتح <strong>إعدادات النظام › تسهيلات الاستخدام › الشاشة</strong> ومرّر إلى <strong>المؤشر</strong>.",
+  how2: "انقر <strong>لون حدود المؤشر</strong>، واختر تبويب أشرطة التمرير، واضبطه على Hex Color، ثم الصق رمز الحدود.",
+  how3: "كرّر الأمر مع <strong>لون تعبئة المؤشر</strong>.",
+  how4: "تريده أكبر؟ اسحب <strong>حجم المؤشر</strong> في الشاشة نفسها. يعيد زر <strong>إعادة تعيين</strong> الأسود والأبيض.",
+  macTitle: "Pointer Colors للماك",
+  macLede: "تطبيق مجاني في شريط القوائم يطبّق الزوج بنقرة واحدة، دون كتابة رموز الألوان.",
+  mac1: "كل الأزواج في هذه الصفحة، إضافة إلى أزواجك",
+  mac2: "شريط لحجم المؤشر، ولون وحجم منفصلان لكل شاشة، وزوج لكل تطبيق",
+  mac3: "يبدّل الأزواج مع المظهر الفاتح والداكن",
+  mac4: "اختصارات لوحة المفاتيح، وتنبيهات التباين، والعربية والإنجليزية",
+  download: "تنزيل لنظام macOS",
+  macFine: "يتطلب macOS 14 أو أحدث. التطبيق غير موثّق من Apple بعد: في المرة الأولى انقر عليه بالزر الأيمن واختر فتح، أو اسمح به من إعدادات النظام › الخصوصية والأمن.",
+  macShot: "تطبيق Pointer Colors في شريط القوائم يعرض الأزواج وشريط الحجم والمعاينات",
+  createdBy: "من إعداد", author: "مصطفى أبوبكر", source: "الشيفرة على GitHub",
+  // used from script
+  groupDefault: "الافتراضي", groupNeon: "نيون", groupColors: "ألوان",
+  ctxLight: "صفحة فاتحة", ctxDark: "تطبيق داكن", ctxPhoto: "صورة", ctxSheet: "جدول بيانات",
+  copied: "تم نسخ", linkCopied: "تم نسخ رابط المشاركة", customPair: "زوج مخصص", docTitle: "ألوان مؤشر macOS",
+};
+const EN_SCRIPT = {
+  groupDefault: "Default", groupNeon: "Neon", groupColors: "Colors",
+  ctxLight: "Light page", ctxDark: "Dark app", ctxPhoto: "Photo", ctxSheet: "Spreadsheet",
+  copied: "Copied", linkCopied: "Share link copied", customPair: "Custom pair", docTitle: "Pointer colors for macOS",
+};
+// English text lives in the markup; remember it so switching back restores it.
+const EN = {};
+document.querySelectorAll("[data-i18n]").forEach(el=>{ EN[el.dataset.i18n]=el.innerHTML; });
+document.querySelectorAll("[data-i18n-label]").forEach(el=>{ EN[el.dataset.i18nLabel]=el.getAttribute("aria-label"); });
+document.querySelectorAll("[data-i18n-alt]").forEach(el=>{ EN[el.dataset.i18nAlt]=el.getAttribute("alt"); });
+
+const store = { get(k){ try{return localStorage.getItem(k)}catch(e){return null} }, set(k,v){ try{localStorage.setItem(k,v)}catch(e){} } };
+const params = new URLSearchParams(location.search);
+let lang = params.get("lang") || store.get("lang") || (navigator.language||"").slice(0,2);
+lang = lang==="ar" ? "ar" : "en";
+const t = key => (lang==="ar" ? AR[key] : (EN_SCRIPT[key] ?? EN[key])) ?? EN[key] ?? key;
+
+function setLang(next){
+  lang = next;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang==="ar" ? "rtl" : "ltr";
+  document.title = t("docTitle");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML = lang==="ar" ? AR[el.dataset.i18n] : EN[el.dataset.i18n]; });
+  document.querySelectorAll("[data-i18n-label]").forEach(el=>el.setAttribute("aria-label", lang==="ar" ? AR[el.dataset.i18nLabel] : EN[el.dataset.i18nLabel]));
+  document.querySelectorAll("[data-i18n-alt]").forEach(el=>el.setAttribute("alt", lang==="ar" ? AR[el.dataset.i18nAlt] : EN[el.dataset.i18nAlt]));
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.lang===lang));
+  if (typeof renderList==="function") { renderList(); apply(cur.o,cur.f); }
+}
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{ store.set("lang",b.dataset.lang); setLang(b.dataset.lang); });
+
+// ---------- Pairs ----------
 // pairs.json is the one list shared with the Mac app.
 const PAIRS = (await (await fetch("pairs.json")).json()).pairs
   .map(p=>({name:p.name, o:"#"+p.outline, f:"#"+p.fill, system:p.system, group:p.group}));
-const GROUP_TITLES={default:"Default",neon:"Neon",colors:"Colors"};
-const START = PAIRS.find(p=>!p.system) || PAIRS[0];
+const GROUP_KEYS={default:"groupDefault",neon:"groupNeon",colors:"groupColors"};
+const HEX=/^[0-9a-f]{6}$/i;
+const same=(p,o,f)=>p.o.toUpperCase()===o.toUpperCase()&&p.f.toUpperCase()===f.toUpperCase();
+
+// A shared link (?outline=…&fill=…) wins over the default first pair.
+function sharedPair(){
+  const o=params.get("outline"), f=params.get("fill");
+  if(!HEX.test(o||"")||!HEX.test(f||"")) return null;
+  const oo="#"+o.toUpperCase(), ff="#"+f.toUpperCase();
+  return PAIRS.find(p=>same(p,oo,ff)) || {name:(params.get("name")||"").slice(0,40), o:oo, f:ff, custom:true};
+}
+const START = sharedPair() || PAIRS.find(p=>!p.system) || PAIRS[0];
 const ARROW = "M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z";
 const arrowSVG = (o,f,w=1.7)=>`<path d="${ARROW}" fill="${f}" stroke="${o}" stroke-width="${w}" stroke-linejoin="round"/>`;
 
 let cur = {o:START.o, f:START.f};
+let selectedName = START.custom ? null : START.name;
 const $ = id=>document.getElementById(id);
 const list=$("list"), pointer=$("pointer"), stage=$("stage");
 
-PAIRS.forEach((p,i)=>{
-  if(i===0||PAIRS[i-1].group!==p.group){const h=document.createElement("h3");h.className="group";h.textContent=GROUP_TITLES[p.group]||"Colors";list.appendChild(h);}
-  const b=document.createElement("button");
-  b.className="swatch"; b.setAttribute("aria-pressed", p===START);
-  b.innerHTML=`<svg viewBox="0 0 24 32" aria-hidden="true">${arrowSVG(p.o,p.f,2)}</svg><span><b>${p.name}</b><small>${p.o} / ${p.f}</small></span>`;
-  b.onclick=()=>{ document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); apply(p.o,p.f); };
-  list.appendChild(b);
-});
+function renderList(){
+  list.innerHTML="";
+  PAIRS.forEach((p,i)=>{
+    if(i===0||PAIRS[i-1].group!==p.group){const h=document.createElement("h3");h.className="group";h.textContent=t(GROUP_KEYS[p.group]||"groupColors");list.appendChild(h);}
+    const b=document.createElement("button");
+    b.className="swatch"; b.setAttribute("aria-pressed", p.name===selectedName);
+    b.innerHTML=`<svg viewBox="0 0 24 32" aria-hidden="true">${arrowSVG(p.o,p.f,2)}</svg><span><b lang="en">${p.name}</b><small>${p.o} / ${p.f}</small></span>`;
+    b.onclick=()=>{ selectedName=p.name; document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); apply(p.o,p.f); };
+    list.appendChild(b);
+  });
+}
 
-const CTX=[["Light page","#ffffff"],["Dark app","#1c1c1e"],["Photo","linear-gradient(135deg,#2f6b4f,#c9a86a 60%,#86b9d8)"],["Spreadsheet","repeating-linear-gradient(0deg,#fff 0 17px,#dadde3 17px 18px),#fff"]];
+const CTX=[["ctxLight","#ffffff"],["ctxDark","#1c1c1e"],["ctxPhoto","linear-gradient(135deg,#2f6b4f,#c9a86a 60%,#86b9d8)"],["ctxSheet","repeating-linear-gradient(0deg,#fff 0 17px,#dadde3 17px 18px),#fff"]];
 function apply(o,f){
   cur={o,f};
   pointer.innerHTML=arrowSVG(o,f);
@@ -200,11 +323,11 @@ function apply(o,f){
   $("chipO").style.background=o; $("chipO").style.borderColor="#444";
   $("chipF").style.background=f;
   $("pickO").value=o.toLowerCase(); $("pickF").value=f.toLowerCase();
-  $("contexts").innerHTML=CTX.map(([n,bg])=>`<div class="ctx" style="background:${bg}"><svg viewBox="0 0 24 32">${arrowSVG(o,f)}</svg><span>${n}</span></div>`).join("");
+  $("contexts").innerHTML=CTX.map(([k,bg])=>`<div class="ctx" style="background:${bg}"><svg viewBox="0 0 24 32">${arrowSVG(o,f)}</svg><span>${t(k)}</span></div>`).join("");
 }
+function clearSel(){ selectedName=null; document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false")); }
 $("pickO").oninput=e=>{clearSel();apply(e.target.value.toUpperCase(),cur.f)};
 $("pickF").oninput=e=>{clearSel();apply(cur.o,e.target.value.toUpperCase())};
-function clearSel(){document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false"))}
 
 let scale=1.5, pos={x:0,y:0};
 function place(){ pointer.style.transform=`translate(${pos.x-3*scale}px,${pos.y-2*scale}px) scale(${scale})`; }
@@ -220,19 +343,24 @@ document.querySelectorAll("#wp button").forEach(b=>b.onclick=()=>{
   stage.className="stage wp-"+b.dataset.wp;
 });
 
-document.getElementById("addMac").onclick=e=>{
-  const match=PAIRS.find(p=>p.o.toUpperCase()===cur.o.toUpperCase()&&p.f.toUpperCase()===cur.f.toUpperCase());
-  const q=new URLSearchParams({name:match?match.name:"Custom pair",outline:cur.o.replace("#",""),fill:cur.f.replace("#","")});
-  e.currentTarget.href="pointercolors://add?"+q.toString();
-};
-document.querySelectorAll("button.copy").forEach(b=>b.onclick=async()=>{
-  const v=(b.dataset.copy==="O"?cur.o:cur.f).replace("#","");
-  try{ await navigator.clipboard.writeText(v); toast(`Copied ${v}`);}catch(e){ toast(`Hex: ${v}`); }
-});
-function toast(t){const el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1600);}
+const currentName=()=>{ const m=PAIRS.find(p=>same(p,cur.o,cur.f)); return m?m.name:t("customPair"); };
+const pairQuery=()=>new URLSearchParams({name:currentName(),outline:cur.o.replace("#",""),fill:cur.f.replace("#","")});
 
-const d=new Date(); $("clock").textContent=d.toLocaleDateString(undefined,{weekday:"short"})+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
-apply(cur.o,cur.f); center();
+$("addMac").onclick=e=>{ e.currentTarget.href="pointercolors://add?"+pairQuery().toString(); };
+$("share").onclick=async()=>{
+  const q=pairQuery(); if(lang==="ar") q.set("lang","ar");
+  const url=`${location.origin}${location.pathname}?${q.toString()}`;
+  try{ await navigator.clipboard.writeText(url); toast(t("linkCopied")); }catch(e){ toast(url); }
+};
+document.querySelectorAll("button.copy[data-copy]").forEach(b=>b.onclick=async()=>{
+  const v=(b.dataset.copy==="O"?cur.o:cur.f).replace("#","");
+  try{ await navigator.clipboard.writeText(v); toast(`${t("copied")} ${v}`);}catch(e){ toast(`Hex: ${v}`); }
+});
+function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1800);}
+
+const d=new Date(); $("clock").textContent=d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+setLang(lang);
+renderList(); apply(cur.o,cur.f); center();
 </script>
 </body>
 </html>
