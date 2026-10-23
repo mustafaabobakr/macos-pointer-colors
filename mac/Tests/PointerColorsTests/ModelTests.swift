@@ -113,3 +113,24 @@ final class PairLibraryTests: XCTestCase {
         XCTAssertEqual(target.custom.map(\.fill.hex), ["445566"])
     }
 }
+
+final class UpdateCheckerTests: XCTestCase {
+    func testVersionComparisonIsNumeric() {
+        XCTAssertTrue(UpdateChecker.isNewer("0.10.0", than: "0.9.3"))
+        XCTAssertTrue(UpdateChecker.isNewer("1.0", than: "0.9.9"))
+        XCTAssertFalse(UpdateChecker.isNewer("0.1.0", than: "0.1"))
+        XCTAssertFalse(UpdateChecker.isNewer("0.1.0", than: "0.2.0"))
+    }
+
+    func testReadsGitHubRelease() {
+        let json = #"{"tag_name":"v0.2.0","html_url":"https://github.com/x/y/releases/tag/v0.2.0"}"#.data(using: .utf8)!
+        let result = UpdateChecker.result(data: json, status: 200, current: "0.1.0")
+        XCTAssertEqual(result, .available(version: "0.2.0", url: URL(string: "https://github.com/x/y/releases/tag/v0.2.0")!))
+        XCTAssertEqual(UpdateChecker.result(data: json, status: 200, current: "0.2.0"), .upToDate)
+    }
+
+    func testMissingReleasesAndErrors() {
+        XCTAssertEqual(UpdateChecker.result(data: Data(), status: 404, current: "0.1.0"), .noReleases)
+        XCTAssertEqual(UpdateChecker.result(data: Data(), status: 500, current: "0.1.0"), .failed("GitHub answered 500."))
+    }
+}

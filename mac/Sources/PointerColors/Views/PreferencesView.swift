@@ -12,7 +12,7 @@ struct PreferencesView: View {
                 .tabItem { Label("Pairs", systemImage: "cursorarrow") }
             AutomationPreferences(model: model)
                 .tabItem { Label("Automation", systemImage: "wand.and.stars") }
-            AboutPreferences()
+            AboutPreferences(model: model)
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
         .frame(width: 560 * model.textScale, height: 520 * model.textScale)
@@ -193,6 +193,7 @@ private struct PairRow: View {
 }
 
 private struct AboutPreferences: View {
+    let model: AppModel
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
     }
@@ -211,7 +212,34 @@ private struct AboutPreferences: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 380)
+            Divider().frame(maxWidth: 300).padding(.vertical, 6)
+            UpdateSection(model: model)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct UpdateSection: View {
+    @Bindable var model: AppModel
+    @State private var autoCheck = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Button("Check for Updates…") { Task { await model.checkForUpdates() } }
+                    .disabled(model.isCheckingForUpdates)
+                if model.isCheckingForUpdates { ProgressView().controlSize(.small) }
+            }
+            if let message = model.updateMessage {
+                Text(message).appFont(.caption).foregroundStyle(.secondary)
+            }
+            if let url = model.availableUpdateURL {
+                Link("Download the new version", destination: url)
+            }
+            Toggle("Check automatically once a day", isOn: $autoCheck)
+                .toggleStyle(.checkbox)
+                .onChange(of: autoCheck) { model.checksForUpdatesAutomatically = autoCheck }
+        }
+        .onAppear { autoCheck = model.checksForUpdatesAutomatically }
     }
 }

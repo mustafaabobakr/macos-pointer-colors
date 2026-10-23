@@ -40,6 +40,8 @@ final class AppModel {
         textSize.factor(screenWidth: NSScreen.main?.frame.width ?? 0)
     }
 
+    var updateResult: UpdateChecker.Result?
+    var isCheckingForUpdates = false
     var shortcuts: [ShortcutAction: KeyCombo] = [:]
     var shortcutConflicts: Set<ShortcutAction> = []
 
@@ -68,6 +70,7 @@ final class AppModel {
         reapplyIfNeeded()
         registerShortcuts()
         automation.applyAppearancePair()
+        Task { await checkForUpdatesIfDue() }
     }
 
     var selectedPair: PointerPair { library.pair(id: selectedID) ?? PointerPair.builtIns[0] }
