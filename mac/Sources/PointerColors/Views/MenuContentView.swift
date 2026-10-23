@@ -61,8 +61,15 @@ struct MenuContentView: View {
 
     private var sizeRow: some View {
         VStack(alignment: .leading, spacing: 4) {
-            sizeControls.disabled(model.needsFullDiskAccess)
-            PerDisplayToggle(automation: model.automation).disabled(model.needsFullDiskAccess)
+            Group {
+                if model.automation.perDisplaySizes {
+                    DisplaySizeList(automation: model.automation, scale: scale)
+                } else {
+                    sizeControls
+                }
+                PerDisplayToggle(automation: model.automation)
+            }
+            .disabled(model.needsFullDiskAccess)
             if model.needsFullDiskAccess {
                 Text("Pointer size needs Full Disk Access.")
                     .appFont(.caption2)
@@ -233,17 +240,62 @@ private struct MenuRow: View {
     }
 }
 
-/// Per-display sizes live in the menu so it's clear which display the slider is changing.
+/// Per-display sizes live in the menu so it's clear which display each slider changes.
 private struct PerDisplayToggle: View {
     @Bindable var automation: Automation
 
     var body: some View {
-        HStack(spacing: 6) {
-            Toggle("Separate size for each display", isOn: $automation.perDisplaySizes)
-                .toggleStyle(.checkbox)
-                .appFont(.caption)
-            if automation.perDisplaySizes, let display = automation.currentDisplay {
-                Text("Now: \(display.name)").appFont(.caption).foregroundStyle(.secondary).lineLimit(1)
+        Toggle("Separate size for each display", isOn: $automation.perDisplaySizes)
+            .toggleStyle(.checkbox)
+            .appFont(.caption)
+    }
+}
+
+/// One slider per connected display; the one under the pointer is marked "current".
+private struct DisplaySizeList: View {
+    let automation: Automation
+    let scale: CGFloat
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(automation.displays) { display in
+                DisplaySizeRow(automation: automation, display: display,
+                               isCurrent: display.id == automation.lastDisplayID, scale: scale)
+            }
+        }
+    }
+}
+
+private struct DisplaySizeRow: View {
+    let automation: Automation
+    let display: DisplayInfo
+    let isCurrent: Bool
+    let scale: CGFloat
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                Image(systemName: "display").accessibilityHidden(true)
+                Text(display.name).appFont(.caption).lineLimit(1)
+                if isCurrent {
+                    Text("(current)").appFont(.caption, weight: .semibold).foregroundStyle(Color.accentColor)
+                }
+            }
+            HStack(spacing: 8) {
+                Slider(value: Binding(get: { automation.size(for: display) },
+                                      set: { automation.setSize($0, for: display) }),
+                       in: SystemPointer.minimumScale...SystemPointer.maximumScale)
+                    .accessibilityLabel("Pointer size on \(display.name)")
+                Text(String(format: "%.2f×", automation.size(for: display)))
+                    .appFont(.caption, monospacedDigits: true)
+                    .frame(width: 40 * scale, alignment: .trailing)
+                Button { automation.setSize(SystemPointer.minimumScale, for: display) } label: {
+                    Image(systemName: "arrow.counterclockwise")
+                }
+                .buttonStyle(.borderless)
+                .disabled(automation.size(for: display) == SystemPointer.minimumScale)
+                .help("Reset pointer size to default")
+                .accessibilityLabel("Reset pointer size to default")
             }
         }
     }
