@@ -87,6 +87,12 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: "displayPairs") }
     }
 
+    /// Match the text-selection highlight to the pointer. Off by default.
+    var highlightFollowsPointer: Bool {
+        get { defaults.bool(forKey: "highlightFollowsPointer") }
+        nonmutating set { defaults.set(newValue, forKey: "highlightFollowsPointer") }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }
