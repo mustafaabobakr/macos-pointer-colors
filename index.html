@@ -3,8 +3,59 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pointer colors for macOS</title>
-<meta name="description" content="Pointer outline and fill color pairs for macOS, with a live preview and a free menu-bar app that applies them.">
+<title>Mac Pointer Colors: change your mouse cursor color and size on macOS</title>
+<meta name="description" content="Change the mouse pointer (cursor) color and size on your Mac. 47 outline and fill color pairs with a live preview, hex codes for System Settings, and a free macOS menu-bar app that applies them in one click.">
+<meta name="keywords" content="mac cursor color, change mouse pointer color mac, macOS pointer color, cursor size mac, custom cursor macOS, pointer outline color, pointer fill color, macOS accessibility, big cursor mac, menu bar app">
+<meta name="author" content="Mostafa Abobakr">
+<meta name="theme-color" content="#08090c">
+<link rel="canonical" href="https://macos-pointer-colors.pages.dev/">
+<link rel="alternate" hreflang="en" href="https://macos-pointer-colors.pages.dev/?lang=en">
+<link rel="alternate" hreflang="ar" href="https://macos-pointer-colors.pages.dev/?lang=ar">
+<link rel="alternate" hreflang="x-default" href="https://macos-pointer-colors.pages.dev/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pointer Colors">
+<meta property="og:title" content="Mac Pointer Colors: change your mouse cursor color and size">
+<meta property="og:description" content="47 pointer color pairs with a live preview, plus a free menu-bar app that applies them in one click.">
+<meta property="og:url" content="https://macos-pointer-colors.pages.dev/">
+<meta property="og:image" content="https://macos-pointer-colors.pages.dev/docs/readme-hero.png">
+<meta property="og:image:width" content="3200">
+<meta property="og:image:height" content="1640">
+<meta property="og:image:alt" content="Pointer Colors: your pointer, one click away">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mac Pointer Colors: change your mouse cursor color and size">
+<meta name="twitter:description" content="47 pointer color pairs with a live preview, plus a free menu-bar app that applies them in one click.">
+<meta name="twitter:image" content="https://macos-pointer-colors.pages.dev/docs/readme-hero.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Pointer Colors",
+      "description": "A free macOS menu-bar app that changes the mouse pointer outline color, fill color and size, with per-display and per-app pairs.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "macOS 14 or later",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "downloadUrl": "https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest/download/Pointer-Colors.dmg",
+      "url": "https://macos-pointer-colors.pages.dev/",
+      "image": "https://macos-pointer-colors.pages.dev/docs/mac-app.png",
+      "inLanguage": ["en", "ar"],
+      "author": { "@type": "Person", "name": "Mostafa Abobakr", "url": "https://github.com/mustafaabobakr" },
+      "codeRepository": "https://github.com/mustafaabobakr/macos-pointer-colors"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "How do I change the mouse pointer color on a Mac?", "acceptedAnswer": { "@type": "Answer", "text": "Open System Settings › Accessibility › Display, scroll to Pointer, and set Pointer outline color and Pointer fill color with the hex codes from this page. Or use the free Pointer Colors app to apply a pair in one click." } },
+        { "@type": "Question", "name": "How do I make the cursor bigger on macOS?", "acceptedAnswer": { "@type": "Answer", "text": "Drag Pointer size in System Settings › Accessibility › Display, or use the size slider in Pointer Colors, which can also set a different size on each display." } },
+        { "@type": "Question", "name": "How do I reset the pointer to black and white?", "acceptedAnswer": { "@type": "Answer", "text": "Click Reset Colors under Pointer in System Settings › Accessibility › Display, or pick the macOS light or macOS dark pair on this page or in the app." } },
+        { "@type": "Question", "name": "Which pointer colors are easiest to see?", "acceptedAnswer": { "@type": "Answer", "text": "Pick a pair where the outline or the fill stands out on both white pages and dark apps. Check it on the four preview tiles; the app also warns when a pair is hard to see." } },
+        { "@type": "Question", "name": "Is Pointer Colors free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The website and the Mac app are free and open source on GitHub. The app only changes the pointer settings macOS already has." } }
+      ]
+    }
+  ]
+}
+</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -108,6 +159,16 @@ input[type=range]{accent-color:var(--ink)}
 .how ol{padding-inline-start:1.2em;margin:0;color:var(--muted)}
 .how li{margin:4px 0}
 .how strong{color:var(--ink);font-weight:600}
+.faq{margin-top:56px;max-width:760px}
+.faq h2{font-size:1.35rem;margin:0 0 12px;letter-spacing:-.01em}
+.faq details{border-top:1px solid var(--line)}
+.faq details:last-of-type{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 2px;font-weight:600;min-height:44px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:1.3rem;font-weight:400;color:var(--muted);transition:transform .25s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{margin:0 0 16px;color:var(--muted);max-width:68ch}
+.faq strong{color:var(--ink);font-weight:600}
 
 /* Mac app */
 /* Always dark, lit by the selected pair: --glow-a / --glow-b are set from script. */
@@ -133,7 +194,13 @@ html[lang="ar"] .mac h2{letter-spacing:0;line-height:1.18}
 .ghost{display:inline-flex;align-items:center;gap:8px;min-height:54px;padding:0 22px;border-radius:999px;border:1px solid rgba(255,255,255,.2);color:#fff;text-decoration:none;font-weight:600;transition:background .25s,border-color .25s}
 .ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.35)}
 .ghost svg{width:16px;height:16px}
-.mac .fine{font-size:.82rem;color:rgba(255,255,255,.52);margin:18px 0 0;max-width:52ch}
+.mac .fine{font-size:.82rem;color:rgba(255,255,255,.6);margin:18px 0 0;max-width:52ch}
+.mac .fine u{color:#fff;font-weight:600;text-decoration-color:var(--glow-a);text-decoration-thickness:2px;text-underline-offset:3px}
+.cmd{display:flex;align-items:center;gap:8px;margin:10px 0 0;max-width:52ch;padding:6px 6px 6px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+html[dir="rtl"] .cmd{padding:6px 14px 6px 6px}
+.cmd code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font:500 .84rem ui-monospace,SFMono-Regular,Menlo,monospace;color:#fff;scrollbar-width:none}
+.cmd button{flex:none;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:.8rem;font-weight:600;border-radius:8px;padding:6px 12px;min-height:32px;cursor:pointer}
+.cmd button:hover{background:rgba(255,255,255,.12)}
 .mac a:focus-visible{outline-color:#fff}
 /* Marketing copy, not text to edit: keep the arrow cursor (links still get the hand). */
 .mac{cursor:default}
@@ -258,12 +325,25 @@ html[dir="rtl"] .shot:hover img{transform:none}
           <span data-i18n="viewSource">View source</span>
         </a>
       </div>
-      <p class="fine" data-i18n="macFine">macOS 14 or later. The app isn't notarized yet: the first time, right-click it and choose Open, or allow it in System Settings › Privacy &amp; Security.</p>
+      <p class="fine" data-i18n="macFine">macOS 14 or later. The app is <u>not notarized yet</u>, so the first time, right-click it and choose Open, allow it in System Settings › Privacy &amp; Security, or run this in Terminal:</p>
+      <div class="cmd">
+        <code id="xattrCmd" dir="ltr">xattr -cr "/Applications/Pointer Colors.app"</code>
+        <button type="button" id="copyCmd" data-i18n="copy">Copy</button>
+      </div>
     </div>
     <div class="shot">
       <img src="docs/mac-app.png" width="1140" height="2526" alt="The Pointer Colors menu-bar app showing pairs, a size slider and previews" data-i18n-alt="macShot" loading="lazy">
       <svg class="float" id="floatPointer" viewBox="0 0 24 32" aria-hidden="true"></svg>
     </div>
+  </section>
+
+  <section class="faq" aria-labelledby="faqTitle">
+    <h2 id="faqTitle" data-i18n="faqTitle">Questions</h2>
+    <details><summary data-i18n="q1">How do I change the mouse pointer color on a Mac?</summary><p data-i18n="a1">Open <strong>System Settings › Accessibility › Display</strong>, scroll to <strong>Pointer</strong>, and set <strong>Pointer outline color</strong> and <strong>Pointer fill color</strong> with the hex codes from this page. Or use the free Pointer Colors app to apply a pair in one click.</p></details>
+    <details><summary data-i18n="q2">How do I make the cursor bigger on macOS?</summary><p data-i18n="a2">Drag <strong>Pointer size</strong> in System Settings › Accessibility › Display, or use the size slider in Pointer Colors, which can also set a different size on each display.</p></details>
+    <details><summary data-i18n="q3">How do I reset the pointer to black and white?</summary><p data-i18n="a3">Click <strong>Reset Colors</strong> under Pointer in System Settings › Accessibility › Display, or pick the <strong>macOS light</strong> or <strong>macOS dark</strong> pair on this page or in the app.</p></details>
+    <details><summary data-i18n="q4">Which pointer colors are easiest to see?</summary><p data-i18n="a4">Pick a pair where the outline or the fill stands out on both white pages and dark apps. Check it on the four preview tiles; the app also warns when a pair is hard to see.</p></details>
+    <details><summary data-i18n="q5">Is Pointer Colors free?</summary><p data-i18n="a5">Yes. The website and the Mac app are free and open source on GitHub. The app only changes the pointer settings macOS already has.</p></details>
   </section>
 
   <footer class="credit"><span data-i18n="createdBy">Created by</span> <a href="https://github.com/mustafaabobakr" data-i18n="author">Mostafa Abobakr</a> · <a href="https://github.com/mustafaabobakr/macos-pointer-colors" data-i18n="source">Source on GitHub</a></footer>
@@ -297,18 +377,31 @@ const AR = {
   mac3: "يبدّل الأزواج مع المظهر الفاتح والداكن",
   mac4: "اختصارات لوحة المفاتيح، وتنبيهات التباين، والعربية والإنجليزية",
   download: "تنزيل لنظام macOS",
-  macFine: "يتطلب macOS 14 أو أحدث. التطبيق غير موثّق من Apple بعد: في المرة الأولى انقر عليه بالزر الأيمن واختر فتح، أو اسمح به من إعدادات النظام › الخصوصية والأمن.",
+  macFine: "يتطلب macOS 14 أو أحدث. التطبيق <u>غير موثّق من Apple بعد</u>، لذا في المرة الأولى انقر عليه بالزر الأيمن واختر فتح، أو اسمح به من إعدادات النظام › الخصوصية والأمن، أو شغّل هذا الأمر في Terminal:",
+  cmdCopied: "تم نسخ الأمر",
+  faqTitle: "أسئلة شائعة",
+  q1: "كيف أغيّر لون مؤشر الماوس على الماك؟",
+  a1: "افتح <strong>إعدادات النظام › تسهيلات الاستخدام › الشاشة</strong>، ومرّر إلى <strong>المؤشر</strong>، واضبط <strong>لون حدود المؤشر</strong> و<strong>لون تعبئة المؤشر</strong> برموز الألوان من هذه الصفحة. أو استخدم تطبيق Pointer Colors المجاني لتطبيق الزوج بنقرة واحدة.",
+  q2: "كيف أكبّر المؤشر على macOS؟",
+  a2: "اسحب <strong>حجم المؤشر</strong> في إعدادات النظام › تسهيلات الاستخدام › الشاشة، أو استخدم شريط الحجم في Pointer Colors، الذي يتيح أيضًا حجمًا مختلفًا لكل شاشة.",
+  q3: "كيف أعيد المؤشر إلى الأسود والأبيض؟",
+  a3: "انقر <strong>إعادة تعيين الألوان</strong> تحت المؤشر في إعدادات النظام › تسهيلات الاستخدام › الشاشة، أو اختر زوج <strong>macOS light</strong> أو <strong>macOS dark</strong> في هذه الصفحة أو في التطبيق.",
+  q4: "ما ألوان المؤشر الأسهل رؤية؟",
+  a4: "اختر زوجًا تبرز فيه الحدود أو التعبئة على الصفحات البيضاء والتطبيقات الداكنة معًا. جرّبه على بطاقات المعاينة الأربع؛ ويحذّرك التطبيق أيضًا عندما يصعب رؤية الزوج.",
+  q5: "هل Pointer Colors مجاني؟",
+  a5: "نعم. الموقع وتطبيق الماك مجانيان ومفتوحا المصدر على GitHub. لا يغيّر التطبيق إلا إعدادات المؤشر الموجودة في macOS أصلًا.",
   macShot: "تطبيق Pointer Colors في شريط القوائم يعرض الأزواج وشريط الحجم والمعاينات",
   createdBy: "من إعداد", author: "مصطفى أبوبكر", source: "الشيفرة على GitHub",
   // used from script
   groupDefault: "الافتراضي", groupNeon: "نيون", groupColors: "ألوان",
   ctxLight: "صفحة فاتحة", ctxDark: "تطبيق داكن", ctxPhoto: "صورة", ctxSheet: "جدول بيانات",
-  copied: "تم نسخ", linkCopied: "تم نسخ رابط المشاركة", customPair: "زوج مخصص", docTitle: "ألوان مؤشر macOS",
+  copied: "تم نسخ", linkCopied: "تم نسخ رابط المشاركة", customPair: "زوج مخصص", docTitle: "ألوان مؤشر الماك: غيّر لون مؤشر الماوس وحجمه على macOS",
 };
 const EN_SCRIPT = {
   groupDefault: "Default", groupNeon: "Neon", groupColors: "Colors",
   ctxLight: "Light page", ctxDark: "Dark app", ctxPhoto: "Photo", ctxSheet: "Spreadsheet",
-  copied: "Copied", linkCopied: "Share link copied", customPair: "Custom pair", docTitle: "Pointer colors for macOS",
+  cmdCopied: "Command copied",
+  copied: "Copied", linkCopied: "Share link copied", customPair: "Custom pair", docTitle: "Mac Pointer Colors: change your mouse cursor color and size on macOS",
 };
 // English text lives in the markup; remember it so switching back restores it.
 const EN = {};
@@ -441,6 +534,10 @@ document.querySelectorAll("button.copy[data-copy]").forEach(b=>b.onclick=async()
   const v=(b.dataset.copy==="O"?cur.o:cur.f).replace("#","");
   try{ await navigator.clipboard.writeText(v); toast(`${t("copied")} ${v}`);}catch(e){ toast(`Hex: ${v}`); }
 });
+$("copyCmd").onclick=async()=>{
+  const cmd=$("xattrCmd").textContent;
+  try{ await navigator.clipboard.writeText(cmd); toast(t("cmdCopied")); }catch(e){ toast(cmd); }
+};
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1800);}
 
 const d=new Date(); $("clock").textContent=d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});

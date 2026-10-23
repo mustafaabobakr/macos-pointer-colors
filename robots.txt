@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://macos-pointer-colors.pages.dev/sitemap.xml
