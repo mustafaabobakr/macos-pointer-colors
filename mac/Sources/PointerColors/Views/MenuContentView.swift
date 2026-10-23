@@ -118,6 +118,7 @@ struct MenuContentView: View {
                         Text("Custom").appFont(.tile)
                     }
                     .frame(maxWidth: .infinity, minHeight: 58 * scale)
+                    .contentShape(Rectangle())
                     .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(style: .init(lineWidth: 1, dash: [3])).foregroundStyle(.tertiary))
                 }
                 .buttonStyle(.plain)
