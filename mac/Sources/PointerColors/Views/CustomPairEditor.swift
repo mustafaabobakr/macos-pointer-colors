@@ -7,8 +7,8 @@ struct CustomPairEditor: View {
     let onCancel: () -> Void
 
     @State private var name: String
-    @State private var outline: Color
-    @State private var fill: Color
+    @State private var outline: RGBA
+    @State private var fill: RGBA
 
     init(title: String, initial: PointerPair?,
          onSave: @escaping (String, RGBA, RGBA) -> Void, onCancel: @escaping () -> Void) {
@@ -16,8 +16,8 @@ struct CustomPairEditor: View {
         self.onSave = onSave
         self.onCancel = onCancel
         _name = State(initialValue: initial?.name ?? String(localized: "My pair"))
-        _outline = State(initialValue: initial?.outline.color ?? .white)
-        _fill = State(initialValue: initial?.fill.color ?? Color(red: 1, green: 0.435, blue: 0.659))
+        _outline = State(initialValue: initial?.outline ?? RGBA(hex: "FFFFFF")!)
+        _fill = State(initialValue: initial?.fill ?? RGBA(hex: "FF6FA8")!)
     }
 
     var body: some View {
@@ -28,19 +28,13 @@ struct CustomPairEditor: View {
                 PointerGlyph(pair: preview).frame(height: 22)
             }
             TextField("Name", text: $name)
-            HStack(spacing: 16) {
-                ColorPicker(selection: $outline, supportsOpacity: false) {
-                    Text("Outline \(RGBA(outline).hex)").appFont(.caption, monospacedDigits: true)
-                }
-                ColorPicker(selection: $fill, supportsOpacity: false) {
-                    Text("Fill \(RGBA(fill).hex)").appFont(.caption, monospacedDigits: true)
-                }
-            }
+            InlineColorField(label: "Outline", color: $outline)
+            InlineColorField(label: "Fill", color: $fill)
             ContrastWarning(pair: preview)
             HStack {
                 Spacer()
                 Button("Cancel", action: onCancel)
-                Button("Save pair") { onSave(name, RGBA(outline), RGBA(fill)) }
+                Button("Save pair") { onSave(name, outline, fill) }
                     .buttonStyle(.borderedProminent)
             }
             .controlSize(.small)
@@ -50,6 +44,6 @@ struct CustomPairEditor: View {
     }
 
     private var preview: PointerPair {
-        PointerPair(id: "preview", name: name, outline: RGBA(outline), fill: RGBA(fill))
+        PointerPair(id: "preview", name: name, outline: outline, fill: fill)
     }
 }
