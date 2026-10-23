@@ -135,6 +135,9 @@ html[lang="ar"] .mac h2{letter-spacing:0;line-height:1.18}
 .ghost svg{width:16px;height:16px}
 .mac .fine{font-size:.82rem;color:rgba(255,255,255,.52);margin:18px 0 0;max-width:52ch}
 .mac a:focus-visible{outline-color:#fff}
+/* Marketing copy, not text to edit: keep the arrow cursor (links still get the hand). */
+.mac{cursor:default}
+.mac a{cursor:pointer}
 /* Screenshot on a tilt; straightens on hover. The big pointer floats over its corner. */
 .shot{position:relative;perspective:1600px}
 .shot img{width:100%;height:auto;max-height:660px;object-fit:cover;object-position:top;display:block;border-radius:24px;border:1px solid rgba(255,255,255,.12);transform:rotateY(-14deg) rotateX(7deg) rotateZ(1.5deg);box-shadow:0 60px 120px -40px rgba(0,0,0,.85),-40px 40px 90px -50px var(--glow-a);-webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent);transition:transform 1s cubic-bezier(.2,.8,.2,1)}
