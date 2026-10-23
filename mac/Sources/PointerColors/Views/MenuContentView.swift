@@ -5,7 +5,7 @@ struct MenuContentView: View {
     @Bindable var model: AppModel
     @State private var isAddingCustom = false
     @State private var editingPair: PointerPair?
-    @Environment(\.openPreferences) private var openPreferences
+    @Environment(\.openSettings) private var openSettings
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
@@ -193,7 +193,8 @@ struct MenuContentView: View {
     private var footer: some View {
         VStack(alignment: .leading, spacing: 2) {
             MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
-                openPreferences()
+                NSApp.activate()
+                openSettings()
             }
             .keyboardShortcut(",")
             MenuRow(title: model.isCheckingForUpdates ? String(localized: "Checking for Updates…") : String(localized: "Check for Updates…"),
