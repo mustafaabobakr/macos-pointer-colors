@@ -10,7 +10,6 @@
 "Add a custom pair" = "إضافة زوج مخصص";
 "Apply to pointer" = "تطبيق على المؤشر";
 "Reset" = "إعادة تعيين";
-"Back to black and white at normal size" = "العودة إلى الأسود والأبيض بالحجم العادي";
 "Preferences…" = "الإعدادات…";
 "Browse pairs on the website" = "تصفّح الأزواج على الموقع";
 "Quit Pointer Colors" = "إنهاء Pointer Colors";
@@ -70,7 +69,6 @@
 "Apply the previous pair" = "تطبيق الزوج السابق";
 "Make the pointer bigger" = "تكبير المؤشر";
 "Make the pointer smaller" = "تصغير المؤشر";
-"Reset to black and white, normal size" = "إعادة الأسود والأبيض والحجم العادي";
 "Record shortcut" = "تسجيل اختصار";
 "Type shortcut…" = "اكتب الاختصار…";
 "Click to record a shortcut" = "انقر لتسجيل اختصار";
@@ -146,4 +144,4 @@
 "Separate size for each display" = "حجم منفصل لكل شاشة";
 "Now: %@" = "الآن: %@";
 "(current)" = "(الحالية)";
-"Reset to black and white" = "إعادة الأسود والأبيض";
+"Reset to the macOS default, normal size" = "العودة إلى الإعداد الافتراضي في macOS بالحجم العادي";

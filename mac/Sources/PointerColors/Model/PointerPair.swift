@@ -2,11 +2,17 @@ import Foundation
 
 /// An outline/fill color pair for the macOS pointer.
 struct PointerPair: Codable, Hashable, Identifiable {
+    /// Marks the two pairs that match macOS's own defaults.
+    enum SystemDefault: String, Codable {
+        case light, dark
+    }
+
     var id: String
     var name: String
     var outline: RGBA
     var fill: RGBA
     var isCustom: Bool = false
+    var system: SystemDefault?
 
     static func custom(name: String, outline: RGBA, fill: RGBA) -> PointerPair {
         PointerPair(id: "custom-\(UUID().uuidString)", name: name, outline: outline, fill: fill, isCustom: true)
@@ -19,25 +25,20 @@ struct PointerPair: Codable, Hashable, Identifiable {
 }
 
 extension PointerPair {
-    static let classic = builtIn("classic", "Classic", "FFFFFF", "000000")
+    /// Built-in pairs from pairs.json (shared with the website), macOS defaults first.
+    static let builtIns: [PointerPair] = PairCatalog.load()
 
-    /// The same pairs as the website, in the same order.
-    static let builtIns: [PointerPair] = [
-        builtIn("aqua-mint", "Aqua mint", "00FFDA", "008A59"),
-        builtIn("aqua-green", "Aqua green", "00FFDA", "008A00"),
-        builtIn("glacier", "Glacier", "FFFFFF", "0A84FF"),
-        builtIn("ultraviolet", "Ultraviolet", "FF4FD8", "5B21B6"),
-        builtIn("solar-flare", "Solar flare", "FFD60A", "E85D04"),
-        builtIn("coral-reef", "Coral reef", "FFE3D8", "FF453A"),
-        builtIn("sakura", "Sakura", "FFFFFF", "FF6FA8"),
-        builtIn("lavender", "Lavender", "E9D5FF", "7C3AED"),
-        builtIn("lime-ink", "Lime ink", "D9FF3F", "1C1C1E"),
-        builtIn("ember", "Ember", "FF9F0A", "000000"),
-        builtIn("deep-sea", "Deep sea", "64D2FF", "004E64"),
-        classic,
-    ]
+    static var macOSLight: PointerPair { systemDefault(.light) }
+    static var macOSDark: PointerPair { systemDefault(.dark) }
 
-    private static func builtIn(_ id: String, _ name: String, _ outline: String, _ fill: String) -> PointerPair {
-        PointerPair(id: id, name: name, outline: RGBA(hex: outline)!, fill: RGBA(hex: fill)!)
+    /// The first non-default pair: what the app shows before anything is chosen.
+    static var featured: PointerPair { builtIns.first { $0.system == nil } ?? builtIns[0] }
+
+    static func systemDefault(dark: Bool) -> PointerPair {
+        dark ? macOSDark : macOSLight
+    }
+
+    private static func systemDefault(_ kind: SystemDefault) -> PointerPair {
+        builtIns.first { $0.system == kind } ?? builtIns[0]
     }
 }

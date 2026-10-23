@@ -54,12 +54,12 @@ struct AppSettings {
     }
 
     var lightPairID: String {
-        get { defaults.string(forKey: Key.lightPairID) ?? PointerPair.classic.id }
+        get { defaults.string(forKey: Key.lightPairID) ?? PointerPair.macOSLight.id }
         nonmutating set { defaults.set(newValue, forKey: Key.lightPairID) }
     }
 
     var darkPairID: String {
-        get { defaults.string(forKey: Key.darkPairID) ?? PointerPair.builtIns[0].id }
+        get { defaults.string(forKey: Key.darkPairID) ?? PointerPair.macOSDark.id }
         nonmutating set { defaults.set(newValue, forKey: Key.darkPairID) }
     }
 

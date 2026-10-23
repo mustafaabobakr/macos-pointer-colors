@@ -164,31 +164,21 @@ input[type=range]{accent-color:var(--ink)}
 </div>
 <div class="toast" id="toast" role="status"></div>
 
-<script>
-const PAIRS = [
-  {name:"Aqua mint", o:"#00FFDA", f:"#008A59"},
-  {name:"Aqua green", o:"#00FFDA", f:"#008A00"},
-  {name:"Glacier", o:"#FFFFFF", f:"#0A84FF"},
-  {name:"Ultraviolet", o:"#FF4FD8", f:"#5B21B6"},
-  {name:"Solar flare", o:"#FFD60A", f:"#E85D04"},
-  {name:"Coral reef", o:"#FFE3D8", f:"#FF453A"},
-  {name:"Sakura", o:"#FFFFFF", f:"#FF6FA8"},
-  {name:"Lavender", o:"#E9D5FF", f:"#7C3AED"},
-  {name:"Lime ink", o:"#D9FF3F", f:"#1C1C1E"},
-  {name:"Ember", o:"#FF9F0A", f:"#000000"},
-  {name:"Deep sea", o:"#64D2FF", f:"#004E64"},
-  {name:"Classic macOS", o:"#FFFFFF", f:"#000000"}
-];
+<script type="module">
+// pairs.json is the one list shared with the Mac app.
+const PAIRS = (await (await fetch("pairs.json")).json()).pairs
+  .map(p=>({name:p.name, o:"#"+p.outline, f:"#"+p.fill, system:p.system}));
+const START = PAIRS.find(p=>!p.system) || PAIRS[0];
 const ARROW = "M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z";
 const arrowSVG = (o,f,w=1.7)=>`<path d="${ARROW}" fill="${f}" stroke="${o}" stroke-width="${w}" stroke-linejoin="round"/>`;
 
-let cur = {o:PAIRS[0].o, f:PAIRS[0].f};
+let cur = {o:START.o, f:START.f};
 const $ = id=>document.getElementById(id);
 const list=$("list"), pointer=$("pointer"), stage=$("stage");
 
 PAIRS.forEach((p,i)=>{
   const b=document.createElement("button");
-  b.className="swatch"; b.setAttribute("aria-pressed", i===0);
+  b.className="swatch"; b.setAttribute("aria-pressed", p===START);
   b.innerHTML=`<svg viewBox="0 0 24 32" aria-hidden="true">${arrowSVG(p.o,p.f,2)}</svg><span><b>${p.name}</b><small>${p.o} / ${p.f}</small></span>`;
   b.onclick=()=>{ document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); apply(p.o,p.f); };
   list.appendChild(b);

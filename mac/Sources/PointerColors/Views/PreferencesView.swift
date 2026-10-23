@@ -212,7 +212,7 @@ private struct AboutPreferences: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            PointerGlyph(pair: PointerPair.builtIns[0], lineWidth: 2).frame(height: 48)
+            PointerGlyph(pair: PointerPair.featured, lineWidth: 2).frame(height: 48)
             Text("Pointer Colors").appFont(.title2, weight: .bold)
             Text("Version \(version)").foregroundStyle(.secondary)
             HStack(spacing: 16) {

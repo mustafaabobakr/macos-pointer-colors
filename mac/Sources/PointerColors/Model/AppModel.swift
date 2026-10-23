@@ -61,7 +61,7 @@ final class AppModel {
     }
 
     init() {
-        selectedID = PointerPair.builtIns[0].id
+        selectedID = PointerPair.featured.id
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
@@ -73,7 +73,7 @@ final class AppModel {
         Task { await checkForUpdatesIfDue() }
     }
 
-    var selectedPair: PointerPair { library.pair(id: selectedID) ?? PointerPair.builtIns[0] }
+    var selectedPair: PointerPair { library.pair(id: selectedID) ?? PointerPair.featured }
 
     /// The icon follows what's on screen, falling back to the selection for unknown colors.
     var menuBarPair: PointerPair { appliedPair ?? selectedPair }
@@ -114,11 +114,13 @@ final class AppModel {
         apply(pair)
     }
 
+    /// Back to the macOS default pair for the current appearance, at normal size.
     func reset() {
+        let systemDefault = PointerPair.systemDefault(dark: automation.isDarkMode)
         do {
-            try pointer.resetColors()
+            try pointer.apply(systemDefault)
             try pointer.setScale(SystemPointer.minimumScale)
-            selectedID = PointerPair.classic.id
+            selectedID = systemDefault.id
             settings.lastAppliedPairID = nil
             settings.lastAppliedScale = nil
             automation.resetAllDisplaySizes()
@@ -196,7 +198,7 @@ final class AppModel {
 
     func removeCustom(_ pair: PointerPair) {
         library.remove(id: pair.id)
-        if selectedID == pair.id { selectedID = PointerPair.builtIns[0].id }
+        if selectedID == pair.id { selectedID = PointerPair.featured.id }
         updateStatus()
     }
 

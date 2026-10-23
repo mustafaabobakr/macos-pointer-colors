@@ -24,7 +24,6 @@ struct MenuContentView: View {
                     isAddingCustom = false
                 }
             }
-            actions
             Divider()
             footer
         }
@@ -123,14 +122,6 @@ struct MenuContentView: View {
                 .accessibilityLabel("Add a custom pair")
             }
         }
-    }
-
-    private var actions: some View {
-        Button { model.reset() } label: {
-            Text("Reset to black and white").frame(maxWidth: .infinity)
-        }
-        .controlSize(.large)
-        .help("Back to black and white at normal size")
     }
 
     private var footer: some View {

@@ -58,7 +58,7 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable {
         case .previousPair: return String(localized: "Apply the previous pair")
         case .biggerPointer: return String(localized: "Make the pointer bigger")
         case .smallerPointer: return String(localized: "Make the pointer smaller")
-        case .resetPointer: return String(localized: "Reset to black and white, normal size")
+        case .resetPointer: return String(localized: "Reset to the macOS default, normal size")
         }
     }
 }

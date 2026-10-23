@@ -8,7 +8,7 @@ A small gallery of pointer outline and fill color pairs for macOS, with a live p
 
 ## Features
 
-- 12 hand-picked outline/fill pairs, plus color pickers to mix your own
+- The macOS light and dark defaults plus 22 hand-picked outline/fill pairs, and color pickers to mix your own
 - Live pointer preview on a macOS-style desktop with Colorful, Light, Dark and Busy wallpapers
 - Pointer size slider
 - Visibility tiles: light page, dark app, photo and spreadsheet
@@ -49,11 +49,17 @@ open "mac/build/Pointer Colors.app"
 
 ## Run locally
 
-It's a single static file with no build step:
+It's static with no build step. The page loads `pairs.json`, so serve the folder rather than opening the file directly:
 
 ```sh
-open index.html
+python3 -m http.server 8000
 ```
+
+Then open http://localhost:8000.
+
+## Pointer pairs
+
+`pairs.json` is the one list of pairs for both the website and the Mac app (the app bundles it at build time). Add or change a pair there and both pick it up. The first two entries are the macOS defaults for light and dark appearance.
 
 ## Deploy
 

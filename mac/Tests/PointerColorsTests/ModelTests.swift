@@ -21,7 +21,7 @@ final class RGBATests: XCTestCase {
     func testMatchesRoundedPreferenceValues() {
         let stored = RGBA(red: 0, green: 1, blue: 0.854902)
         let fill = RGBA(red: 0, green: 0.5411764705882353, blue: 0.349019)
-        XCTAssertTrue(PointerPair.builtIns[0].matches(outline: stored, fill: fill))
+        XCTAssertTrue(PointerPair.builtIns.first { $0.id == "aqua-mint" }!.matches(outline: stored, fill: fill))
     }
 }
 
@@ -52,7 +52,7 @@ final class ContrastTests: XCTestCase {
     }
 
     func testClassicIsVisibleEverywhere() {
-        XCTAssertNil(PairVisibility(.classic).warning)
+        XCTAssertNil(PairVisibility(.macOSLight).warning)
     }
 
     func testPastelPairIsHardOnLight() {

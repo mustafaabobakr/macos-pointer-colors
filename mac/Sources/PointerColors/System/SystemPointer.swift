@@ -45,8 +45,8 @@ struct SystemPointer {
     // MARK: Colors
 
     func currentColors() -> (outline: RGBA, fill: RGBA) {
-        let outline = RGBA(preferenceValue: copy(Self.outlineKey)) ?? PointerPair.classic.outline
-        let fill = RGBA(preferenceValue: copy(Self.fillKey)) ?? PointerPair.classic.fill
+        let outline = RGBA(preferenceValue: copy(Self.outlineKey)) ?? PointerPair.macOSLight.outline
+        let fill = RGBA(preferenceValue: copy(Self.fillKey)) ?? PointerPair.macOSLight.fill
         return (outline, fill)
     }
 
