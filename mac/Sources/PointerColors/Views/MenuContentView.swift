@@ -13,6 +13,7 @@ struct MenuContentView: View {
             if model.needsFullDiskAccess { PermissionBanner(model: model) }
             header
             sizeRow
+            VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
             pairGrid
             if isAddingCustom {
                 CustomPairEditor(title: "New custom pair", initial: nil) { name, outline, fill in
