@@ -26,8 +26,13 @@ xcrun actool "$MAC_DIR/Resources/AppIcon.icon" \
   --output-partial-info-plist "$MAC_DIR/build/icon-partial.plist" \
   --output-format human-readable-text >/dev/null
 
-# Ad-hoc signature so macOS can track the app for Full Disk Access and login items.
-# For distribution, re-sign with a Developer ID and notarize.
-codesign --force --sign - --options runtime "$APP"
+# Sign with a stable local identity so macOS keeps Full Disk Access across rebuilds.
+# Override with SIGN_IDENTITY=... ; falls back to ad-hoc ("-") if it isn't in the keychain.
+IDENTITY="${SIGN_IDENTITY:-Pointer Colors Dev}"
+if ! security find-identity -v -p codesigning | grep -q "\"$IDENTITY\""; then
+  echo "Signing identity \"$IDENTITY\" not found; signing ad-hoc." >&2
+  IDENTITY="-"
+fi
+codesign --force --sign "$IDENTITY" --options runtime "$APP"
 
 echo "Built: $APP"
