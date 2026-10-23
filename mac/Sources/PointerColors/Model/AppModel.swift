@@ -46,6 +46,17 @@ final class AppModel {
     let settings = AppSettings()
     let hotKeys = HotKeyCenter()
     private let pointer = SystemPointer()
+    @ObservationIgnored private var automationStore: Automation?
+
+    /// Appearance and per-display rules. Created on first use so it can call back into the model.
+    var automation: Automation {
+        if let automationStore { return automationStore }
+        let created = Automation(settings: settings,
+                                 applyPair: { [weak self] id in self?.applyPair(id: id) },
+                                 applyScale: { [weak self] size in self?.setScale(size) })
+        automationStore = created
+        return created
+    }
 
     init() {
         selectedID = PointerPair.builtIns[0].id
@@ -56,6 +67,7 @@ final class AppModel {
         refreshFromSystem()
         reapplyIfNeeded()
         registerShortcuts()
+        automation.applyAppearancePair()
     }
 
     var selectedPair: PointerPair { library.pair(id: selectedID) ?? PointerPair.builtIns[0] }
@@ -86,6 +98,13 @@ final class AppModel {
         apply(selectedPair)
     }
 
+    /// Applies a pair by id unless it's already on screen. Used by automation.
+    func applyPair(id: String) {
+        guard let pair = library.pair(id: id), pair != appliedPair else { return }
+        selectedID = pair.id
+        apply(pair)
+    }
+
     func reset() {
         do {
             try pointer.resetColors()
@@ -107,6 +126,17 @@ final class AppModel {
             settings.lastAppliedScale = value
         } catch {
             scale = pointer.currentScale()
+            fail(error)
+        }
+    }
+
+    /// Nil when this macOS doesn't expose the setting.
+    var shakeToFind: Bool? { pointer.shakeToFindEnabled }
+
+    func setShakeToFind(_ enabled: Bool) {
+        do {
+            try pointer.setShakeToFind(enabled)
+        } catch {
             fail(error)
         }
     }

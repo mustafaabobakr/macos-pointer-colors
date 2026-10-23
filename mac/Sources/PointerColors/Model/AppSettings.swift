@@ -47,6 +47,34 @@ struct AppSettings {
         }
     }
 
+    /// Switch pairs when macOS changes between light and dark appearance.
+    var followsAppearance: Bool {
+        get { defaults.bool(forKey: Key.followsAppearance) }
+        nonmutating set { defaults.set(newValue, forKey: Key.followsAppearance) }
+    }
+
+    var lightPairID: String {
+        get { defaults.string(forKey: Key.lightPairID) ?? PointerPair.classic.id }
+        nonmutating set { defaults.set(newValue, forKey: Key.lightPairID) }
+    }
+
+    var darkPairID: String {
+        get { defaults.string(forKey: Key.darkPairID) ?? PointerPair.builtIns[0].id }
+        nonmutating set { defaults.set(newValue, forKey: Key.darkPairID) }
+    }
+
+    /// Use a different pointer size on each display.
+    var perDisplaySizes: Bool {
+        get { defaults.bool(forKey: Key.perDisplaySizes) }
+        nonmutating set { defaults.set(newValue, forKey: Key.perDisplaySizes) }
+    }
+
+    /// Pointer size per display, keyed by the display's UUID.
+    var displaySizes: [String: Double] {
+        get { defaults.dictionary(forKey: Key.displaySizes) as? [String: Double] ?? [:] }
+        nonmutating set { defaults.set(newValue, forKey: Key.displaySizes) }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }
@@ -76,6 +104,11 @@ struct AppSettings {
         static let playSoundOnApply = "playSoundOnApply"
         static let textSize = "textSize"
         static let shortcuts = "shortcuts"
+        static let followsAppearance = "followsAppearance"
+        static let lightPairID = "lightPairID"
+        static let darkPairID = "darkPairID"
+        static let perDisplaySizes = "perDisplaySizes"
+        static let displaySizes = "displaySizes"
         static let lastAppliedPairID = "lastAppliedPairID"
         static let lastAppliedScale = "lastAppliedScale"
     }

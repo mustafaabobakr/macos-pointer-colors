@@ -5,6 +5,8 @@ enum SystemPointerError: LocalizedError, Equatable {
     case permissionDenied
     /// The private UniversalAccess function for live pointer size is missing on this macOS.
     case sizeAPIUnavailable
+    /// Another private UniversalAccess function is missing on this macOS.
+    case featureUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -12,6 +14,8 @@ enum SystemPointerError: LocalizedError, Equatable {
             return "macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app."
         case .sizeAPIUnavailable:
             return "This version of macOS doesn't offer live pointer size changes."
+        case .featureUnavailable:
+            return "This version of macOS doesn't offer that setting."
         }
     }
 }
@@ -88,6 +92,15 @@ struct SystemPointer {
             set(Self.scaleKey, previous as CFNumber)
             throw SystemPointerError.permissionDenied
         }
+    }
+
+    // MARK: Shake to find
+
+    var shakeToFindEnabled: Bool? { universalAccess.shakeToFindEnabled() }
+
+    func setShakeToFind(_ enabled: Bool) throws {
+        guard universalAccess.setShakeToFind(enabled) else { throw SystemPointerError.featureUnavailable }
+        guard synchronize() else { throw SystemPointerError.permissionDenied }
     }
 
     // MARK: Preferences

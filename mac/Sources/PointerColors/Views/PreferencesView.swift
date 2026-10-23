@@ -10,6 +10,8 @@ struct PreferencesView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             PairsPreferences(model: model)
                 .tabItem { Label("Pairs", systemImage: "cursorarrow") }
+            AutomationPreferences(model: model)
+                .tabItem { Label("Automation", systemImage: "wand.and.stars") }
             AboutPreferences()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
