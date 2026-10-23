@@ -41,6 +41,7 @@ private struct AppColorRow: View {
     let automation: Automation
     let bundleID: String
     let pairs: [PointerPair]
+    @Environment(\.appTextScale) private var scale
 
     private var appURL: URL? { NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) }
     private var appName: String {
@@ -51,17 +52,12 @@ private struct AppColorRow: View {
         HStack(spacing: 8) {
             if let appURL {
                 Image(nsImage: NSWorkspace.shared.icon(forFile: appURL.path))
-                    .resizable().frame(width: 20, height: 20).accessibilityHidden(true)
+                    .resizable().frame(width: 32 * scale, height: 32 * scale).accessibilityHidden(true)
             }
             Text(appName).lineLimit(1)
             Spacer()
-            Picker(selection: selection) {
-                ForEach(pairs) { Text($0.name).tag(Optional($0.id)) }
-            } label: {
-                Text("Pair for \(appName)")
-            }
-            .labelsHidden()
-            .fixedSize()
+            PairMenuButton(selection: selection, pairs: pairs,
+                           accessibilityTitle: String(localized: "Pair for \(appName)"), allowsNone: false)
             Button { automation.setPair(nil, forApp: bundleID) } label: {
                 Image(systemName: "minus.circle.fill")
             }

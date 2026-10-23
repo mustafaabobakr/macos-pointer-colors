@@ -41,7 +41,8 @@ private struct DisplayColorRow: View {
                 Text("(current)").appFont(.caption, weight: .semibold).foregroundStyle(Color.accentColor)
             }
             Spacer(minLength: 8)
-            PairMenuButton(selection: selection, pairs: pairs, displayName: display.name)
+            PairMenuButton(selection: selection, pairs: pairs,
+                           accessibilityTitle: String(localized: "Colors on \(display.name)"))
         }
     }
 
@@ -53,10 +54,13 @@ private struct DisplayColorRow: View {
 
 /// A pop-up list of pairs, each with a pointer preview. Built from the live pair list on every
 /// open, so new custom pairs show up, and it follows the app's Text size setting.
-private struct PairMenuButton: View {
+/// Shared by the per-display rows in the menu and the per-app rows in Preferences.
+struct PairMenuButton: View {
     @Binding var selection: String?
     let pairs: [PointerPair]
-    let displayName: String
+    let accessibilityTitle: String
+    /// Offers "Same as all displays" (a nil selection) at the top.
+    var allowsNone = true
     @State private var isOpen = false
     @Environment(\.appTextScale) private var scale
 
@@ -73,12 +77,14 @@ private struct PairMenuButton: View {
             // Fixed size, so picking a longer or shorter pair name never shifts the row.
             .frame(width: 150 * scale, height: 20 * scale)
         }
-        .accessibilityLabel("Colors on \(displayName)")
+        .accessibilityLabel(accessibilityTitle)
         .popover(isPresented: $isOpen, arrowEdge: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
-                    row(nil)
-                    Divider().padding(.vertical, 2)
+                    if allowsNone {
+                        row(nil)
+                        Divider().padding(.vertical, 2)
+                    }
                     ForEach(pairs) { row($0) }
                 }
                 .padding(6)
