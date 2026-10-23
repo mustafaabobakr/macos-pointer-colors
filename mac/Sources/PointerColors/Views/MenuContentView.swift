@@ -50,6 +50,7 @@ struct MenuContentView: View {
         .padding(14)
         .frame(width: 380 * scale)
         .appTextScale(scale)
+        .preferredColorScheme(model.theme.colorScheme)
         .onAppear { model.refreshFromSystem() }
     }
 
@@ -305,7 +306,7 @@ private struct PerDisplayToggle: View {
 
     var body: some View {
         Toggle("Separate size for each display", isOn: $automation.perDisplaySizes)
-            .toggleStyle(.checkbox)
+            .toggleStyle(.switch).controlSize(.mini)
             .appFont(.caption)
     }
 }

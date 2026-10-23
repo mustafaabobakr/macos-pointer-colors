@@ -14,7 +14,7 @@ struct AppColorsIndicator: View {
         if !automation.appRuleIDs.isEmpty {
             HStack(spacing: 8) {
                 Toggle("Different pair for each app", isOn: $automation.perAppColors)
-                    .toggleStyle(.checkbox)
+                    .toggleStyle(.switch).controlSize(.mini)
                     .appFont(.caption)
                 Spacer(minLength: 4)
                 Button(action: showPreferences) { iconStack }

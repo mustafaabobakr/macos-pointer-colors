@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 /// The app's own light/dark look. System follows macOS.
 enum AppTheme: String, CaseIterable, Identifiable {
@@ -19,6 +20,15 @@ enum AppTheme: String, CaseIterable, Identifiable {
         case .system: return nil
         case .light: return NSAppearance(named: .aqua)
         case .dark: return NSAppearance(named: .darkAqua)
+        }
+    }
+
+    /// For SwiftUI windows the AppKit appearance doesn't reach, like the menu-bar panel.
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 

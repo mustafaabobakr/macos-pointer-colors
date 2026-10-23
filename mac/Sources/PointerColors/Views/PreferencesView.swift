@@ -19,6 +19,7 @@ struct PreferencesView: View {
         }
         .frame(width: 560 * model.textScale, height: 520 * model.textScale)
         .appTextScale(model.textScale)
+        .preferredColorScheme(model.theme.colorScheme)
     }
 }
 
@@ -202,7 +203,7 @@ private struct PairRow: View {
                 get: { !model.library.hiddenIDs.contains(pair.id) },
                 set: { model.setHidden(!$0, pair: pair) }
             ))
-            .toggleStyle(.checkbox)
+            .toggleStyle(.switch).controlSize(.mini)
         }
         .padding(.vertical, 2)
     }
@@ -257,7 +258,7 @@ private struct UpdateSection: View {
                 Link("Download the new version", destination: url)
             }
             Toggle("Check automatically once a day", isOn: $autoCheck)
-                .toggleStyle(.checkbox)
+                .toggleStyle(.switch).controlSize(.mini)
                 .onChange(of: autoCheck) { model.checksForUpdatesAutomatically = autoCheck }
         }
         .onAppear { autoCheck = model.checksForUpdatesAutomatically }

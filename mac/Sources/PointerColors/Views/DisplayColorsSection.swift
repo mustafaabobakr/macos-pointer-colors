@@ -9,7 +9,7 @@ struct DisplayColorsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Toggle("Separate colors for each display", isOn: $automation.perDisplayColors)
-                .toggleStyle(.checkbox)
+                .toggleStyle(.switch).controlSize(.mini)
                 .appFont(.caption)
             if automation.perDisplayColors {
                 Text("The pair above is the default for all displays.")
