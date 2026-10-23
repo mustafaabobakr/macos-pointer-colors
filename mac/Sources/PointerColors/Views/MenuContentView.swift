@@ -128,6 +128,11 @@ struct MenuContentView: View {
 
     private var footer: some View {
         VStack(alignment: .leading, spacing: 2) {
+            MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
+                NSApp.activate()
+                openSettings()
+            }
+            .keyboardShortcut(",")
             MenuRow(title: model.isCheckingForUpdates ? String(localized: "Checking for Updates…") : String(localized: "Check for Updates…"),
                     shortcut: nil) {
                 if let url = model.availableUpdateURL { NSWorkspace.shared.open(url) } else { Task { await model.checkForUpdates() } }
@@ -137,15 +142,10 @@ struct MenuContentView: View {
                 Text(model.availableUpdateURL == nil ? message : String(localized: "\(message) Click above to download."))
                     .appFont(.caption2).foregroundStyle(.secondary).padding(.horizontal, 6)
             }
-            MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
-                NSApp.activate()
-                openSettings()
-            }
-            .keyboardShortcut(",")
             MenuRow(title: String(localized: "Browse pairs on the website"), shortcut: nil) {
                 NSWorkspace.shared.open(URL(string: "https://macos-pointer-colors.pages.dev")!)
             }
-            MenuRow(title: String(localized: "Quit Pointer Colors"), shortcut: "⌘Q") { NSApp.terminate(nil) }
+            MenuRow(title: String(localized: "Quit"), shortcut: "⌘Q") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
         }
     }
