@@ -38,6 +38,9 @@ final class AppModel {
     var theme: AppTheme = .saved {
         didSet { theme.save(); theme.apply() }
     }
+    var menuTint: MenuTint = .saved {
+        didSet { menuTint.save() }
+    }
     /// Whether macOS itself is in dark mode, kept current for the System theme.
     var systemIsDark = AppTheme.systemIsDark
 

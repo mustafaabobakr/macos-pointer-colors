@@ -52,6 +52,9 @@ private struct GeneralPreferences: View {
                     ForEach(AppTheme.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                Picker("Menu tint", selection: $model.menuTint) {
+                    ForEach(MenuTint.allCases) { Text($0.title).tag($0) }
+                }
                 Picker(selection: $model.textSize) {
                     ForEach(TextSize.allCases) { Text($0.title).tag($0) }
                 } label: {
