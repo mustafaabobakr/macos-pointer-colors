@@ -170,3 +170,7 @@
 "Remove %@" = "إزالة %@";
 "Edit app pairs in Preferences › Automation" = "عدّل أزواج التطبيقات من الإعدادات › الأتمتة";
 "Apps with their own pair: %lld" = "تطبيقات لها زوج خاص: %lld";
+"Theme" = "السمة";
+"System" = "النظام";
+"Light" = "فاتح";
+"Dark" = "داكن";

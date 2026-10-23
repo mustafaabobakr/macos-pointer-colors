@@ -34,6 +34,9 @@ final class AppModel {
     var textSize: TextSize {
         didSet { settings.textSize = textSize }
     }
+    var theme: AppTheme = .saved {
+        didSet { theme.save(); theme.apply() }
+    }
 
     /// The factor for the app's own text and layout, resolved for the current main screen.
     var textScale: CGFloat {
@@ -67,6 +70,7 @@ final class AppModel {
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
+        DispatchQueue.main.async { [theme] in theme.apply() }
         shortcuts = settings.shortcuts
         refreshFromSystem()
         reapplyIfNeeded()

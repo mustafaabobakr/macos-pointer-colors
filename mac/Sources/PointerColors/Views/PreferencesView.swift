@@ -47,6 +47,10 @@ private struct GeneralPreferences: View {
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
             }
             Section("Appearance") {
+                Picker("Theme", selection: $model.theme) {
+                    ForEach(AppTheme.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
                 Picker(selection: $model.textSize) {
                     ForEach(TextSize.allCases) { Text($0.title).tag($0) }
                 } label: {
