@@ -105,25 +105,32 @@ struct MenuContentView: View {
         }
     }
 
+    /// Three rows of tiles; more pairs scroll inside, so custom pairs never stretch the menu.
+    private var pairGridHeight: CGFloat { (3 * 62 + 2 * 6) * scale }
+
     private var pairGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("PAIRS").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
-            LazyVGrid(columns: columns, spacing: 6) {
-                ForEach(model.library.visible) { pair in
-                    PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
-                }
+            HStack {
+                Text("PAIRS").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
+                Spacer()
+                // Kept outside the scroll area so it's always reachable.
                 Button { isAddingCustom = true } label: {
-                    VStack(spacing: 4) {
-                        Image(systemName: "plus").appFont(.body)
-                        Text("Custom").appFont(.tile)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 58 * scale)
-                    .contentShape(Rectangle())
-                    .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(style: .init(lineWidth: 1, dash: [3])).foregroundStyle(.tertiary))
+                    Label("Custom", systemImage: "plus").appFont(.caption)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.borderless)
+                .help("Add a custom pair")
                 .accessibilityLabel("Add a custom pair")
             }
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 6) {
+                    ForEach(model.library.visible) { pair in
+                        PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
+                    }
+                }
+                .padding(.trailing, 2)
+            }
+            .frame(height: pairGridHeight)
+            .scrollIndicators(.automatic)
         }
     }
 
