@@ -1,0 +1,208 @@
+import SwiftUI
+
+/// The popover shown from the menu-bar icon.
+struct MenuContentView: View {
+    @Bindable var model: AppModel
+    @State private var isAddingCustom = false
+    @Environment(\.openSettings) private var openSettings
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if model.needsFullDiskAccess { PermissionBanner(model: model) }
+            header
+            sizeRow
+            pairGrid
+            if isAddingCustom {
+                CustomPairEditor(title: "New custom pair", initial: nil) { name, outline, fill in
+                    model.addCustom(name: name, outline: outline, fill: fill)
+                    isAddingCustom = false
+                } onCancel: {
+                    isAddingCustom = false
+                }
+            }
+            actions
+            Divider()
+            footer
+        }
+        .padding(14)
+        .frame(width: 380)
+        .onAppear { model.refreshFromSystem() }
+    }
+
+    private var header: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12).fill(Color(white: 0.96))
+                PointerGlyph(pair: model.selectedPair, lineWidth: 1.8)
+                    .frame(height: 16 + 12 * model.scale)
+            }
+            .frame(width: 104, height: 104)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(model.selectedPair.name).font(.title3.bold())
+                HStack(spacing: 6) {
+                    HexButton(label: "Outline", color: model.selectedPair.outline) { model.copyHex(outline: true) }
+                    HexButton(label: "Fill", color: model.selectedPair.fill) { model.copyHex(outline: false) }
+                }
+                Text(model.status.message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var sizeRow: some View {
+        HStack(spacing: 10) {
+            Text("Pointer size").font(.caption).frame(width: 74, alignment: .leading)
+            Slider(value: Binding(get: { model.scale }, set: { model.setScale($0) }),
+                   in: SystemPointer.minimumScale...SystemPointer.maximumScale) {
+                Text("Pointer size")
+            } minimumValueLabel: {
+                Image(systemName: "textformat.size.smaller").accessibilityHidden(true)
+            } maximumValueLabel: {
+                Image(systemName: "textformat.size.larger").accessibilityHidden(true)
+            }
+            .labelsHidden()
+            Text(String(format: "%.2f×", model.scale))
+                .font(.caption.monospacedDigit())
+                .frame(width: 40, alignment: .trailing)
+        }
+    }
+
+    private var pairGrid: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("PAIRS").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(model.library.visible) { pair in
+                    PairTile(pair: pair, isSelected: pair.id == model.selectedID) { model.select(pair) }
+                }
+                Button { isAddingCustom = true } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: "plus").font(.body)
+                        Text("Custom").font(.system(size: 10.5))
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 58)
+                    .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(style: .init(lineWidth: 1, dash: [3])).foregroundStyle(.tertiary))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Add a custom pair")
+            }
+        }
+    }
+
+    private var actions: some View {
+        HStack(spacing: 8) {
+            Button("Apply to pointer") { model.applySelected() }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+                .keyboardShortcut(.defaultAction)
+            Button("Reset") { model.reset() }
+                .controlSize(.large)
+                .help("Back to black and white at normal size")
+        }
+    }
+
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            MenuRow(title: "Preferences…", shortcut: "⌘,") {
+                NSApp.activate()
+                openSettings()
+            }
+            .keyboardShortcut(",")
+            MenuRow(title: "Browse pairs on the website", shortcut: nil) {
+                NSWorkspace.shared.open(URL(string: "https://macos-pointer-colors.pages.dev")!)
+            }
+            MenuRow(title: "Quit Pointer Colors", shortcut: "⌘Q") { NSApp.terminate(nil) }
+                .keyboardShortcut("q")
+        }
+    }
+}
+
+private struct PermissionBanner: View {
+    let model: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Full Disk Access needed for colors", systemImage: "lock")
+                .font(.callout.weight(.semibold))
+            Text("macOS protects the pointer color settings. Turn on Pointer Colors in Full Disk Access, then reopen this menu. Pointer size and copying hex codes work without it.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Button("Open Full Disk Access settings") { model.openFullDiskAccessSettings() }
+                .controlSize(.small)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 10).fill(.orange.opacity(0.15)))
+    }
+}
+
+private struct HexButton: View {
+    let label: String
+    let color: RGBA
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                RoundedRectangle(cornerRadius: 3).fill(color.color).frame(width: 10, height: 10)
+                    .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(.white.opacity(0.3)))
+                Text("\(label) \(color.hex)").font(.caption.monospacedDigit())
+            }
+        }
+        .controlSize(.small)
+        .help("Copy \(color.hex)")
+        .accessibilityLabel("Copy \(label.lowercased()) hex \(color.hex)")
+    }
+}
+
+private struct PairTile: View {
+    let pair: PointerPair
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                PointerGlyph(pair: pair).frame(height: 23)
+                Text(pair.name)
+                    .font(.system(size: 10.5))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity, minHeight: 58)
+            .padding(.vertical, 2)
+            .background(RoundedRectangle(cornerRadius: 10).fill(isSelected ? Color.accentColor.opacity(0.18) : .clear))
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(isSelected ? Color.accentColor : .clear))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(pair.name)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+private struct MenuRow: View {
+    let title: String
+    let shortcut: String?
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+                if let shortcut { Text(shortcut).foregroundStyle(.secondary) }
+            }
+            .frame(minHeight: 26)
+            .padding(.horizontal, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}

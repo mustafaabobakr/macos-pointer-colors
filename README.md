@@ -21,6 +21,19 @@ A small gallery of pointer outline and fill color pairs for macOS, with a live p
 3. Do the same for **Pointer fill color**.
 4. Use **Reset** to go back to black and white.
 
+## Mac app (work in progress)
+
+`mac/` holds a native SwiftUI menu-bar app that applies pairs directly: pick a pair, drag the pointer size slider, add custom pairs, and set preferences.
+
+```sh
+mac/scripts/build-app.sh
+open "mac/build/Pointer Colors.app"
+```
+
+- **Pointer size** changes live through `UACursorSetScale`, the private UniversalAccess call System Settings uses. No permission needed.
+- **Pointer colors** are written to `com.apple.universalaccess`, which macOS only lets third-party apps write with **Full Disk Access**. The app explains this and links to the setting.
+- It uses private API and isn't sandboxed, so it can't ship on the Mac App Store.
+
 ## Run locally
 
 It's a single static file with no build step:
