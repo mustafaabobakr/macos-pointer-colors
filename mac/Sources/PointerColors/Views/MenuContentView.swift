@@ -115,9 +115,10 @@ struct MenuContentView: View {
                 Spacer()
                 // Kept outside the scroll area so it's always reachable.
                 Button { isAddingCustom = true } label: {
-                    Label("Custom", systemImage: "plus").appFont(.caption)
+                    Label("Add custom", systemImage: "plus.circle.fill").appFont(.caption, weight: .semibold)
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
                 .help("Add a custom pair")
                 .accessibilityLabel("Add a custom pair")
             }
