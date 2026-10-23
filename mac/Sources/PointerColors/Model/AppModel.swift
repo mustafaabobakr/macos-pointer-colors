@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SwiftUI
 
 /// What the menu shows under the pair name.
 enum ApplyStatus: Equatable {
@@ -37,6 +38,12 @@ final class AppModel {
     var theme: AppTheme = .saved {
         didSet { theme.save(); theme.apply() }
     }
+    /// Whether macOS itself is in dark mode, kept current for the System theme.
+    var systemIsDark = AppTheme.systemIsDark
+
+    /// Always a concrete scheme: SwiftUI keeps the last forced scheme when given nil, so
+    /// System resolves to what macOS is showing right now.
+    var colorScheme: ColorScheme { theme.colorScheme ?? (systemIsDark ? .dark : .light) }
 
     /// The factor for the app's own text and layout, resolved for the current main screen.
     var textScale: CGFloat {
@@ -71,6 +78,7 @@ final class AppModel {
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
         DispatchQueue.main.async { [theme] in theme.apply() }
+        observeSystemAppearance()
         shortcuts = settings.shortcuts
         refreshFromSystem()
         reapplyIfNeeded()
@@ -282,5 +290,18 @@ final class AppModel {
 
     private func updateStatus() {
         status = appliedPair?.id == selectedID ? .applied : .notApplied
+    }
+}
+
+extension AppModel {
+    /// Follows macOS light/dark changes so the System theme updates live.
+    func observeSystemAppearance() {
+        let name = Notification.Name("AppleInterfaceThemeChangedNotification")
+        DistributedNotificationCenter.default().addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+            // The new style is written just after the notification.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                MainActor.assumeIsolated { self?.systemIsDark = AppTheme.systemIsDark }
+            }
+        }
     }
 }

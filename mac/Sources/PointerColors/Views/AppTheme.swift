@@ -36,6 +36,10 @@ enum AppTheme: String, CaseIterable, Identifiable {
         NSApp.appearance = appearance
     }
 
+    static var systemIsDark: Bool {
+        UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?["AppleInterfaceStyle"] as? String == "Dark"
+    }
+
     static var saved: AppTheme {
         UserDefaults.standard.string(forKey: "appTheme").flatMap(AppTheme.init(rawValue:)) ?? .system
     }

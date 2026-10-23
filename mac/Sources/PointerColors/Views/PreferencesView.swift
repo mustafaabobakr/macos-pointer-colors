@@ -19,7 +19,7 @@ struct PreferencesView: View {
         }
         .frame(width: 560 * model.textScale, height: 520 * model.textScale)
         .appTextScale(model.textScale)
-        .preferredColorScheme(model.theme.colorScheme)
+        .preferredColorScheme(model.colorScheme)
     }
 }
 

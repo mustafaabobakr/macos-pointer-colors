@@ -50,7 +50,7 @@ struct MenuContentView: View {
         .padding(14)
         .frame(width: 380 * scale)
         .appTextScale(scale)
-        .preferredColorScheme(model.theme.colorScheme)
+        .preferredColorScheme(model.colorScheme)
         .onAppear { model.refreshFromSystem() }
     }
 
