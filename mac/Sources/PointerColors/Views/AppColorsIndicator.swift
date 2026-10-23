@@ -32,7 +32,6 @@ struct AppColorsIndicator: View {
             ForEach(ids.prefix(Self.visibleIcons), id: \.self) { id in
                 AppIcon(bundleID: id)
                     .frame(width: 22 * scale, height: 22 * scale)
-                    .opacity(automation.perAppColors ? 1 : 0.45)
             }
             if extra > 0 {
                 Text("+\(extra)")
@@ -43,6 +42,8 @@ struct AppColorsIndicator: View {
                     .padding(.leading, 12 * scale)
             }
         }
+        // Icons and the "+N" badge fade together while per-app pairs are off.
+        .opacity(automation.perAppColors ? 1 : 0.45)
     }
 
     private func showPreferences() {
