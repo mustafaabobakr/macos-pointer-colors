@@ -151,6 +151,48 @@
       "group": "neon"
     },
     {
+      "id": "glow-vermilion",
+      "name": "Glow vermilion",
+      "outline": "FF4000",
+      "fill": "421100",
+      "group": "neon"
+    },
+    {
+      "id": "glow-emerald",
+      "name": "Glow emerald",
+      "outline": "00FF40",
+      "fill": "00701C",
+      "group": "neon"
+    },
+    {
+      "id": "glow-azure",
+      "name": "Glow azure",
+      "outline": "0582FF",
+      "fill": "001C38",
+      "group": "neon"
+    },
+    {
+      "id": "glow-blue",
+      "name": "Glow blue",
+      "outline": "7575FF",
+      "fill": "000075",
+      "group": "neon"
+    },
+    {
+      "id": "glow-indigo",
+      "name": "Glow indigo",
+      "outline": "906BFF",
+      "fill": "1B006B",
+      "group": "neon"
+    },
+    {
+      "id": "glow-purple",
+      "name": "Glow purple",
+      "outline": "CD38FF",
+      "fill": "320042",
+      "group": "neon"
+    },
+    {
       "id": "glacier",
       "name": "Glacier",
       "outline": "FFFFFF",
