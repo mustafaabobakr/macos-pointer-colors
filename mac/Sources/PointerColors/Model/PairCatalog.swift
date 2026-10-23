@@ -49,10 +49,11 @@ enum PairCatalog {
         let outline: String
         let fill: String
         let system: PointerPair.SystemDefault?
+        let group: String?
 
         var pair: PointerPair? {
             guard let o = RGBA(hex: outline), let f = RGBA(hex: fill) else { return nil }
-            return PointerPair(id: id, name: name, outline: o, fill: f, system: system)
+            return PointerPair(id: id, name: name, outline: o, fill: f, system: system, group: group)
         }
     }
 }

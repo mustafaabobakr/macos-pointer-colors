@@ -15,6 +15,7 @@ struct MenuContentView: View {
             sizeRow
             VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
             pairGrid
+                .padding(.vertical, 8 * scale)
             if isAddingCustom {
                 CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
                     model.addCustom(name: name, outline: outline, fill: fill)
@@ -123,9 +124,16 @@ struct MenuContentView: View {
                 .accessibilityLabel("Add a custom pair")
             }
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 6) {
-                    ForEach(model.library.visible) { pair in
-                        PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(PairSection.sections(for: model.library.visible)) { section in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(section.title).appFont(.caption, weight: .semibold).foregroundStyle(.secondary)
+                            LazyVGrid(columns: columns, spacing: 6) {
+                                ForEach(section.pairs) { pair in
+                                    PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
+                                }
+                            }
+                        }
                     }
                 }
                 .padding(.trailing, 2)

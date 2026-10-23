@@ -13,6 +13,8 @@ struct PointerPair: Codable, Hashable, Identifiable {
     var fill: RGBA
     var isCustom: Bool = false
     var system: SystemDefault?
+    /// Heading in pairs.json: "default", "neon" or "colors". Nil for custom pairs.
+    var group: String?
 
     static func custom(name: String, outline: RGBA, fill: RGBA) -> PointerPair {
         PointerPair(id: "custom-\(UUID().uuidString)", name: name, outline: outline, fill: fill, isCustom: true)

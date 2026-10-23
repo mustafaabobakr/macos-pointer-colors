@@ -32,3 +32,21 @@ final class PairCatalogTests: XCTestCase {
         XCTAssertEqual(hard, ["sakura"])
     }
 }
+
+final class PairSectionTests: XCTestCase {
+    func testSectionsComeInOrderWithDefaultsAndNeonTogether() throws {
+        let pairs = try PairCatalog.decode(Data(contentsOf: PairCatalog.repoURL))
+        let custom = PointerPair.custom(name: "Mine", outline: RGBA(hex: "FFFFFF")!, fill: RGBA(hex: "123456")!)
+        let sections = PairSection.sections(for: pairs + [custom])
+        XCTAssertEqual(sections.map(\.id), ["default", "neon", "colors", "custom"])
+        XCTAssertEqual(sections[0].pairs.map(\.id), ["macos-light", "macos-dark"])
+        XCTAssertTrue(sections[1].pairs.contains { $0.id == "aqua-mint" })
+        XCTAssertEqual(sections[3].pairs.map(\.name), ["Mine"])
+    }
+
+    func testPairsAreGroupedContiguouslyInTheFile() throws {
+        let groups = try PairCatalog.decode(Data(contentsOf: PairCatalog.repoURL)).map { $0.group ?? "" }
+        let runs = groups.enumerated().filter { $0.offset == 0 || groups[$0.offset - 1] != $0.element }.map(\.element)
+        XCTAssertEqual(runs, ["default", "neon", "colors"], "the website shows pairs in file order")
+    }
+}

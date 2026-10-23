@@ -87,6 +87,8 @@ input[type=range]{accent-color:var(--ink)}
 .ctx span{position:absolute;left:10px;bottom:7px;font-size:.75rem;padding:1px 7px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}
 
 .how{margin-top:36px;max-width:68ch}
+.group{grid-column:1/-1;margin:10px 0 2px;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.group:first-child{margin-top:0}
 .credit{margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
 .credit a{color:var(--ink)}
 .how h2{font-size:1.35rem;margin:0 0 8px;letter-spacing:-.01em}
@@ -171,7 +173,8 @@ input[type=range]{accent-color:var(--ink)}
 <script type="module">
 // pairs.json is the one list shared with the Mac app.
 const PAIRS = (await (await fetch("pairs.json")).json()).pairs
-  .map(p=>({name:p.name, o:"#"+p.outline, f:"#"+p.fill, system:p.system}));
+  .map(p=>({name:p.name, o:"#"+p.outline, f:"#"+p.fill, system:p.system, group:p.group}));
+const GROUP_TITLES={default:"Default",neon:"Neon",colors:"Colors"};
 const START = PAIRS.find(p=>!p.system) || PAIRS[0];
 const ARROW = "M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z";
 const arrowSVG = (o,f,w=1.7)=>`<path d="${ARROW}" fill="${f}" stroke="${o}" stroke-width="${w}" stroke-linejoin="round"/>`;
@@ -181,6 +184,7 @@ const $ = id=>document.getElementById(id);
 const list=$("list"), pointer=$("pointer"), stage=$("stage");
 
 PAIRS.forEach((p,i)=>{
+  if(i===0||PAIRS[i-1].group!==p.group){const h=document.createElement("h3");h.className="group";h.textContent=GROUP_TITLES[p.group]||"Colors";list.appendChild(h);}
   const b=document.createElement("button");
   b.className="swatch"; b.setAttribute("aria-pressed", p===START);
   b.innerHTML=`<svg viewBox="0 0 24 32" aria-hidden="true">${arrowSVG(p.o,p.f,2)}</svg><span><b>${p.name}</b><small>${p.o} / ${p.f}</small></span>`;
