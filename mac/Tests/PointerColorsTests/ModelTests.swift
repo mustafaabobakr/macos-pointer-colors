@@ -25,6 +25,23 @@ final class RGBATests: XCTestCase {
     }
 }
 
+final class ContrastTests: XCTestCase {
+    func testWhiteOnBlackIsMaximum() {
+        XCTAssertEqual(RGBA(hex: "FFFFFF")!.contrast(with: RGBA(hex: "000000")!), 21, accuracy: 0.01)
+    }
+
+    func testClassicIsVisibleEverywhere() {
+        XCTAssertNil(PairVisibility(.classic).warning)
+    }
+
+    func testPastelPairIsHardOnLight() {
+        let pastel = PointerPair(id: "p", name: "Pastel", outline: RGBA(hex: "FFF5F0")!, fill: RGBA(hex: "FFE3D8")!)
+        let visibility = PairVisibility(pastel)
+        XCTAssertTrue(visibility.hardOnLight)
+        XCTAssertFalse(visibility.hardOnDark)
+    }
+}
+
 final class TextSizeTests: XCTestCase {
     func testAutomaticIsLargeOnlyOnWideScreens() {
         XCTAssertEqual(TextSize.automatic.factor(screenWidth: 1512), 1)

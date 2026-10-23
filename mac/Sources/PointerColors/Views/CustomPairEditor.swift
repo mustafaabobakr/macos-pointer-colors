@@ -36,6 +36,7 @@ struct CustomPairEditor: View {
                     Text("Fill \(RGBA(fill).hex)").appFont(.caption, monospacedDigits: true)
                 }
             }
+            ContrastWarning(pair: preview)
             HStack {
                 Spacer()
                 Button("Cancel", action: onCancel)

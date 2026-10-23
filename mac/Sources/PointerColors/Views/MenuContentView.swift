@@ -54,6 +54,7 @@ struct MenuContentView: View {
                     .appFont(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                ContrastWarning(pair: model.selectedPair)
             }
         }
     }
