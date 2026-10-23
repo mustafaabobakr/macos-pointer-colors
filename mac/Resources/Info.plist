@@ -8,6 +8,8 @@
 	<string>Pointer Colors</string>
 	<key>CFBundleExecutable</key>
 	<string>PointerColors</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.mustafaabobakr.PointerColors</string>
 	<key>CFBundleInfoDictionaryVersion</key>

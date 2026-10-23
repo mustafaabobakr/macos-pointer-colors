@@ -15,6 +15,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/PointerColors" "$APP/Contents/MacOS/PointerColors"
 cp "$MAC_DIR/Resources/Info.plist" "$APP/Contents/Info.plist"
+cp "$MAC_DIR/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 
 # Ad-hoc signature so macOS can track the app for Full Disk Access and login items.
 # For distribution, re-sign with a Developer ID and notarize.
