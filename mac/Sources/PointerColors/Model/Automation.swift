@@ -44,9 +44,17 @@ final class Automation {
         didSet {
             settings.perDisplayColors = perDisplayColors
             updateDisplayTracking()
-            if !perDisplayColors, let main = mainPairID() { showPair(main) }
+            refreshColors()
         }
     }
+    /// When on, an app can have its own pair, applied while it's in front. App rules beat display rules.
+    var perAppColors: Bool {
+        didSet { settings.perAppColors = perAppColors; refreshColors() }
+    }
+    /// Pair id per app bundle id.
+    private(set) var appPairs: [String: String]
+    /// The app in front, ignoring Pointer Colors itself so opening its windows changes nothing.
+    private(set) var frontmostBundleID: String?
     private(set) var displaySizes: [String: Double]
     /// Pair id per display UUID. A missing entry means "same as all displays".
     private(set) var displayPairs: [String: String]
@@ -80,6 +88,9 @@ final class Automation {
         perDisplayColors = settings.perDisplayColors
         displaySizes = settings.displaySizes
         displayPairs = settings.displayPairs
+        perAppColors = settings.perAppColors
+        appPairs = settings.appPairs
+        frontmostBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
         observeSystem()
         updateDisplayTracking()
     }
@@ -137,13 +148,49 @@ final class Automation {
 
     /// Re-applies the rule for the display under the pointer, e.g. after the main pair changed.
     func applyCurrentDisplayColors() {
-        guard let id = lastDisplayID else { return }
-        applyColors(for: id)
+        applyColors(for: lastDisplayID)
     }
 
-    private func applyColors(for displayID: String) {
-        guard perDisplayColors, let id = displayPairs[displayID] ?? mainPairID() else { return }
+    // MARK: Per-app colors
+
+    /// Apps with their own pair, sorted by bundle id.
+    var appRuleIDs: [String] { appPairs.keys.sorted() }
+
+    func pairID(forApp bundleID: String) -> String? { appPairs[bundleID] }
+
+    /// Nil removes the app's rule.
+    func setPair(_ pairID: String?, forApp bundleID: String) {
+        appPairs[bundleID] = pairID
+        settings.appPairs = appPairs
+        if bundleID == frontmostBundleID { refreshColors() }
+    }
+
+    private func applyColors(for displayID: String?) {
+        guard let id = targetPairID(displayID: displayID) else { return }
         showPair(id)
+    }
+
+    /// App rule first, then display rule, then the main pair. Nil when no rules are on.
+    private func targetPairID(displayID: String?) -> String? {
+        guard perAppColors || perDisplayColors else { return nil }
+        if perAppColors, let app = frontmostBundleID, let id = appPairs[app] { return id }
+        if perDisplayColors, let displayID, let id = displayPairs[displayID] { return id }
+        return mainPairID()
+    }
+
+    /// Applies the rules, or the main pair once every rule is off.
+    private func refreshColors() {
+        if perAppColors || perDisplayColors {
+            applyColors(for: lastDisplayID)
+        } else if let main = mainPairID() {
+            showPair(main)
+        }
+    }
+
+    private func frontmostAppChanged(_ app: NSRunningApplication?) {
+        guard let id = app?.bundleIdentifier, id != Bundle.main.bundleIdentifier else { return }
+        frontmostBundleID = id
+        if perAppColors { applyColors(for: lastDisplayID) }
     }
 
     private var tracksDisplays: Bool { perDisplaySizes || perDisplayColors }
@@ -173,6 +220,11 @@ final class Automation {
     // MARK: System notifications
 
     private func observeSystem() {
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
+                                                          object: nil, queue: .main) { [weak self] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            MainActor.assumeIsolated { self?.frontmostAppChanged(app) }
+        }
         let themeChanged = Notification.Name("AppleInterfaceThemeChangedNotification")
         DistributedNotificationCenter.default().addObserver(forName: themeChanged, object: nil, queue: .main) { [weak self] _ in
             // The new style is written just after the notification; give it a moment.

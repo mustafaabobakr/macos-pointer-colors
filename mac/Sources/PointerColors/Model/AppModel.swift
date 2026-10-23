@@ -95,7 +95,7 @@ final class AppModel {
     /// The grid highlights the main pair. With per-display colors, what's on screen may be a
     /// display's own pair, so the saved main pair wins there.
     private func syncSelection() {
-        if settings.perDisplayColors, let main = settings.lastAppliedPairID, library.pair(id: main) != nil {
+        if settings.perDisplayColors || settings.perAppColors, let main = settings.lastAppliedPairID, library.pair(id: main) != nil {
             selectedID = main
         } else if let appliedPair {
             selectedID = appliedPair.id

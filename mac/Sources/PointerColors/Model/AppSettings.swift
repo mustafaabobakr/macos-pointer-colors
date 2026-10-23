@@ -87,6 +87,18 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: "displayPairs") }
     }
 
+    /// Let each app have its own pair.
+    var perAppColors: Bool {
+        get { defaults.bool(forKey: "perAppColors") }
+        nonmutating set { defaults.set(newValue, forKey: "perAppColors") }
+    }
+
+    /// Pair id per app bundle id.
+    var appPairs: [String: String] {
+        get { defaults.dictionary(forKey: "appPairs") as? [String: String] ?? [:] }
+        nonmutating set { defaults.set(newValue, forKey: "appPairs") }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }
