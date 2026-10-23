@@ -75,6 +75,18 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: Key.displaySizes) }
     }
 
+    /// Let each display have its own pair.
+    var perDisplayColors: Bool {
+        get { defaults.bool(forKey: "perDisplayColors") }
+        nonmutating set { defaults.set(newValue, forKey: "perDisplayColors") }
+    }
+
+    /// Pair id per display UUID; displays not listed use the main pair.
+    var displayPairs: [String: String] {
+        get { defaults.dictionary(forKey: "displayPairs") as? [String: String] ?? [:] }
+        nonmutating set { defaults.set(newValue, forKey: "displayPairs") }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }

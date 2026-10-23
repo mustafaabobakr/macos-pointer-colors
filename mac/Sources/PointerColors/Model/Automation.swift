@@ -39,7 +39,17 @@ final class Automation {
     var perDisplaySizes: Bool {
         didSet { settings.perDisplaySizes = perDisplaySizes; updateDisplayTracking() }
     }
+    /// When on, a display can have its own pair; displays without one use the main pair.
+    var perDisplayColors: Bool {
+        didSet {
+            settings.perDisplayColors = perDisplayColors
+            updateDisplayTracking()
+            if !perDisplayColors, let main = mainPairID() { showPair(main) }
+        }
+    }
     private(set) var displaySizes: [String: Double]
+    /// Pair id per display UUID. A missing entry means "same as all displays".
+    private(set) var displayPairs: [String: String]
     private(set) var displays: [DisplayInfo] = DisplayInfo.current()
     /// The display the pointer is on, while per-display sizes are on.
     private(set) var lastDisplayID: String?
@@ -47,17 +57,29 @@ final class Automation {
     @ObservationIgnored private let settings: AppSettings
     @ObservationIgnored private let applyPair: (String) -> Void
     @ObservationIgnored private let applyScale: (Double) -> Void
+    /// Puts a pair on screen without making it the main pair.
+    @ObservationIgnored private let showPair: (String) -> Void
+    /// The pair chosen for all displays.
+    @ObservationIgnored private let mainPairID: () -> String?
     @ObservationIgnored private var displayTimer: Timer?
 
-    init(settings: AppSettings, applyPair: @escaping (String) -> Void, applyScale: @escaping (Double) -> Void) {
+    init(settings: AppSettings,
+         applyPair: @escaping (String) -> Void,
+         applyScale: @escaping (Double) -> Void,
+         showPair: @escaping (String) -> Void,
+         mainPairID: @escaping () -> String?) {
         self.settings = settings
         self.applyPair = applyPair
         self.applyScale = applyScale
+        self.showPair = showPair
+        self.mainPairID = mainPairID
         followsAppearance = settings.followsAppearance
         lightPairID = settings.lightPairID
         darkPairID = settings.darkPairID
         perDisplaySizes = settings.perDisplaySizes
+        perDisplayColors = settings.perDisplayColors
         displaySizes = settings.displaySizes
+        displayPairs = settings.displayPairs
         observeSystem()
         updateDisplayTracking()
     }
@@ -100,11 +122,37 @@ final class Automation {
         settings.displaySizes = [:]
     }
 
+    // MARK: Per-display colors
+
+    func pairID(for display: DisplayInfo) -> String? {
+        displayPairs[display.id]
+    }
+
+    /// Nil goes back to "same as all displays".
+    func setPair(_ pairID: String?, for display: DisplayInfo) {
+        displayPairs[display.id] = pairID
+        settings.displayPairs = displayPairs
+        if display.id == lastDisplayID { applyColors(for: display.id) }
+    }
+
+    /// Re-applies the rule for the display under the pointer, e.g. after the main pair changed.
+    func applyCurrentDisplayColors() {
+        guard let id = lastDisplayID else { return }
+        applyColors(for: id)
+    }
+
+    private func applyColors(for displayID: String) {
+        guard perDisplayColors, let id = displayPairs[displayID] ?? mainPairID() else { return }
+        showPair(id)
+    }
+
+    private var tracksDisplays: Bool { perDisplaySizes || perDisplayColors }
+
     private func updateDisplayTracking() {
         displayTimer?.invalidate()
         displayTimer = nil
         lastDisplayID = nil
-        guard perDisplaySizes else { return }
+        guard tracksDisplays else { return }
         // Deferred: running it during init would call back into the model before it holds this object.
         DispatchQueue.main.async { [weak self] in self?.checkPointerDisplay() }
         displayTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in
@@ -112,13 +160,14 @@ final class Automation {
         }
     }
 
-    /// Applies the stored size when the pointer crosses onto another display.
+    /// Applies the stored size and colors when the pointer crosses onto another display.
     private func checkPointerDisplay() {
         let location = NSEvent.mouseLocation
         guard let screen = NSScreen.screens.first(where: { NSMouseInRect(location, $0.frame, false) }),
               let display = DisplayInfo(screen: screen), display.id != lastDisplayID else { return }
         lastDisplayID = display.id
-        if let size = displaySizes[display.id] { applyScale(size) }
+        if perDisplaySizes, let size = displaySizes[display.id] { applyScale(size) }
+        applyColors(for: display.id)
     }
 
     // MARK: System notifications

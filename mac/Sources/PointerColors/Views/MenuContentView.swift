@@ -15,6 +15,8 @@ struct MenuContentView: View {
             sizeRow
             VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
             pairGrid
+            DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
+                .disabled(model.needsFullDiskAccess)
             if isAddingCustom {
                 CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
                     model.addCustom(name: name, outline: outline, fill: fill)

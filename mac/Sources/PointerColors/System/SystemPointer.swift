@@ -25,7 +25,8 @@ enum SystemPointerError: LocalizedError, Equatable {
 ///
 /// Colors and size live in the `com.apple.universalaccess` preferences domain
 /// (`cursorOutline`, `cursorFill`, `mouseDriverCursorSize`).
-/// That domain is privacy-protected: third-party apps can only write it with Full Disk Access.
+/// That domain is privacy-protected: a direct write needs Full Disk Access, so when it is refused
+/// the app falls back to Apple's `defaults` tool (see DefaultsTool).
 /// After writing, the Universal Access "mouse settings changed" notification is posted so the
 /// system can pick the new colors up.
 ///
@@ -50,26 +51,24 @@ struct SystemPointer {
         return (outline, fill)
     }
 
+    /// Writes both colors directly, or through `defaults` when macOS refuses the direct write.
     func apply(_ pair: PointerPair) throws {
         set(Self.outlineKey, pair.outline.preferenceValue as CFDictionary)
         set(Self.fillKey, pair.fill.preferenceValue as CFDictionary)
-        guard synchronize() else { throw SystemPointerError.permissionDenied }
+        if !synchronize() {
+            let written = DefaultsTool.write(Self.outlineKey as String, color: pair.outline)
+                && DefaultsTool.write(Self.fillKey as String, color: pair.fill)
+            guard written else { throw SystemPointerError.permissionDenied }
+        }
         universalAccess.postMouseSettingsChanged()
     }
 
-    /// Clears both color keys so macOS falls back to black and white.
-    func resetColors() throws {
-        set(Self.outlineKey, nil)
-        set(Self.fillKey, nil)
-        guard synchronize() else { throw SystemPointerError.permissionDenied }
-        universalAccess.postMouseSettingsChanged()
-    }
-
-    /// True when this process may change pointer settings (Full Disk Access is granted).
+    /// True when pointer settings can be changed, directly or through `defaults`.
     func canWriteSettings() -> Bool {
-        let current = copy(Self.outlineKey)
-        set(Self.outlineKey, current)
-        return synchronize()
+        let current = copy(Self.scaleKey)
+        set(Self.scaleKey, current)
+        if synchronize() { return true }
+        return DefaultsTool.write(Self.scaleKey as String, number: currentScale())
     }
 
     // MARK: Size
@@ -79,19 +78,21 @@ struct SystemPointer {
         return (copy(Self.scaleKey) as? NSNumber)?.doubleValue ?? Self.minimumScale
     }
 
-    /// Changes the size live and saves it. `UACursorSetScale` alone only updates this process:
-    /// without Full Disk Access the save never reaches the system and the size snaps back.
+    /// Changes the size live and saves it. `UACursorSetScale` alone only updates this process, so
+    /// the size is also saved directly or, when that's refused, through `defaults`.
     func setScale(_ scale: Double) throws {
         let value = scale.clamped(to: Self.minimumScale...Self.maximumScale)
         let previous = currentScale()
         guard universalAccess.setCursorScale(value) else { throw SystemPointerError.sizeAPIUnavailable }
         set(Self.scaleKey, value as CFNumber)
-        guard synchronize() else {
-            // Undo the in-process change so the app doesn't report a size the system never took.
-            _ = universalAccess.setCursorScale(previous)
-            set(Self.scaleKey, previous as CFNumber)
-            throw SystemPointerError.permissionDenied
+        if synchronize() || DefaultsTool.write(Self.scaleKey as String, number: value) {
+            universalAccess.postMouseSettingsChanged()
+            return
         }
+        // Undo the in-process change so the app doesn't report a size the system never took.
+        _ = universalAccess.setCursorScale(previous)
+        set(Self.scaleKey, previous as CFNumber)
+        throw SystemPointerError.permissionDenied
     }
 
     // MARK: Shake to find
@@ -100,7 +101,10 @@ struct SystemPointer {
 
     func setShakeToFind(_ enabled: Bool) throws {
         guard universalAccess.setShakeToFind(enabled) else { throw SystemPointerError.featureUnavailable }
-        guard synchronize() else { throw SystemPointerError.permissionDenied }
+        if synchronize() { return }
+        // The same switch as a global default: true turns shake-to-find off.
+        let written = DefaultsTool.write("CGDisableCursorLocationMagnification", bool: !enabled, domain: "-g")
+        guard written else { throw SystemPointerError.permissionDenied }
     }
 
     // MARK: Preferences

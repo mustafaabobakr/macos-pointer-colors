@@ -145,3 +145,9 @@
 "Now: %@" = "الآن: %@";
 "(current)" = "(الحالية)";
 "Reset to the macOS default, normal size" = "العودة إلى الإعداد الافتراضي في macOS بالحجم العادي";
+"Separate colors for each display" = "ألوان منفصلة لكل شاشة";
+"The pair above is the default for all displays." = "الزوج أعلاه هو الافتراضي لكل الشاشات.";
+"Same as all displays" = "مثل كل الشاشات";
+"Colors on %@" = "الألوان على %@";
+"Created by" = "من إعداد";
+"Mostafa Abobakr" = "مصطفى أبوبكر";

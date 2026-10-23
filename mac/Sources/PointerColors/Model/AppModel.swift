@@ -55,7 +55,9 @@ final class AppModel {
         if let automationStore { return automationStore }
         let created = Automation(settings: settings,
                                  applyPair: { [weak self] id in self?.applyPair(id: id) },
-                                 applyScale: { [weak self] size in self?.setScale(size) })
+                                 applyScale: { [weak self] size in self?.setScale(size) },
+                                 showPair: { [weak self] id in self?.showPair(id: id) },
+                                 mainPairID: { [weak self] in self?.settings.lastAppliedPairID ?? self?.selectedID })
         automationStore = created
         return created
     }
@@ -86,8 +88,18 @@ final class AppModel {
         scale = pointer.currentScale()
         needsFullDiskAccess = !pointer.canWriteSettings()
         launchAtLogin = settings.launchAtLogin
-        if let appliedPair { selectedID = appliedPair.id }
+        syncSelection()
         updateStatus()
+    }
+
+    /// The grid highlights the main pair. With per-display colors, what's on screen may be a
+    /// display's own pair, so the saved main pair wins there.
+    private func syncSelection() {
+        if settings.perDisplayColors, let main = settings.lastAppliedPairID, library.pair(id: main) != nil {
+            selectedID = main
+        } else if let appliedPair {
+            selectedID = appliedPair.id
+        }
     }
 
     // MARK: Actions
@@ -105,6 +117,20 @@ final class AppModel {
     func choose(_ pair: PointerPair) {
         select(pair)
         applySelected()
+        // A display with its own pair keeps it; the choice becomes the pair for every other one.
+        automation.applyCurrentDisplayColors()
+    }
+
+    /// Puts a pair on screen for the current display only, keeping the main pair as it is.
+    func showPair(id: String) {
+        guard let pair = library.pair(id: id), pair != appliedPair else { return }
+        do {
+            try pointer.apply(pair)
+            appliedPair = pair
+            updateStatus()
+        } catch {
+            fail(error)
+        }
     }
 
     /// Applies a pair by id unless it's already on screen. Used by automation.

@@ -215,6 +215,10 @@ private struct AboutPreferences: View {
             PointerGlyph(pair: PointerPair.featured, lineWidth: 2).frame(height: 48)
             Text("Pointer Colors").appFont(.title2, weight: .bold)
             Text("Version \(version)").foregroundStyle(.secondary)
+            HStack(spacing: 4) {
+                Text("Created by")
+                Link("Mostafa Abobakr", destination: URL(string: "https://github.com/mustafaabobakr")!)
+            }
             HStack(spacing: 16) {
                 Link("Website", destination: URL(string: "https://macos-pointer-colors.pages.dev")!)
                 Link("GitHub", destination: URL(string: "https://github.com/mustafaabobakr/macos-pointer-colors")!)
