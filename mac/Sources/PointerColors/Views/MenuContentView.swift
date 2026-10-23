@@ -161,6 +161,7 @@ struct MenuContentView: View {
                                 ForEach(section.pairs) { pair in
                                     PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
                                         .contextMenu { if pair.isCustom { customPairMenu(pair) } }
+                                        .overlay(alignment: .top) { if pair.isCustom { customPairButtons(pair) } }
                                 }
                             }
                         }
@@ -171,6 +172,26 @@ struct MenuContentView: View {
             .frame(height: pairGridHeight)
             .scrollIndicators(.automatic)
         }
+    }
+
+    /// Small edit and delete buttons on a custom tile's top corners.
+    private func customPairButtons(_ pair: PointerPair) -> some View {
+        HStack {
+            Button { isAddingCustom = false; editingPair = pair } label: {
+                Image(systemName: "pencil.circle.fill")
+            }
+            .help("Edit \(pair.name)")
+            .accessibilityLabel("Edit \(pair.name)")
+            Spacer()
+            Button { pairToDelete = pair } label: {
+                Image(systemName: "trash.circle.fill").foregroundStyle(.white, .red)
+            }
+            .help("Delete \(pair.name)")
+            .accessibilityLabel("Delete \(pair.name)")
+        }
+        .buttonStyle(.plain)
+        .appFont(.callout)
+        .padding(2)
     }
 
     @ViewBuilder private func customPairMenu(_ pair: PointerPair) -> some View {
