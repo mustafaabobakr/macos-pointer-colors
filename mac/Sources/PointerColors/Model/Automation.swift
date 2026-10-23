@@ -5,6 +5,8 @@ import Observation
 struct DisplayInfo: Identifiable, Equatable {
     let id: String
     let name: String
+    /// The MacBook's own screen.
+    let isBuiltIn: Bool
 
     static func current() -> [DisplayInfo] {
         NSScreen.screens.compactMap(DisplayInfo.init(screen:))
@@ -16,6 +18,7 @@ struct DisplayInfo: Identifiable, Equatable {
               let string = CFUUIDCreateString(nil, uuid) as String? else { return nil }
         id = string
         name = screen.localizedName
+        isBuiltIn = CGDisplayIsBuiltin(number.uint32Value) != 0
     }
 }
 

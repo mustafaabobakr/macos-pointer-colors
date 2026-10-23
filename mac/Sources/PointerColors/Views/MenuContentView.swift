@@ -275,7 +275,7 @@ private struct DisplaySizeRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
-                Image(systemName: "display").accessibilityHidden(true)
+                Image(systemName: display.isBuiltIn ? "laptopcomputer" : "display").accessibilityHidden(true)
                 Text(display.name).appFont(.caption).lineLimit(1)
                 if isCurrent {
                     Text("(current)").appFont(.caption, weight: .semibold).foregroundStyle(Color.accentColor)
