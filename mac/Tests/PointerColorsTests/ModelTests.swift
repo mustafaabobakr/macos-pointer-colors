@@ -25,6 +25,18 @@ final class RGBATests: XCTestCase {
     }
 }
 
+final class TextSizeTests: XCTestCase {
+    func testAutomaticIsLargeOnlyOnWideScreens() {
+        XCTAssertEqual(TextSize.automatic.factor(screenWidth: 1512), 1)
+        XCTAssertEqual(TextSize.automatic.factor(screenWidth: 2560), TextSize.large.factor(screenWidth: 0))
+    }
+
+    func testFixedSizesIgnoreScreen() {
+        XCTAssertEqual(TextSize.huge.factor(screenWidth: 800), 1.5)
+        XCTAssertEqual(TextSize.standard.factor(screenWidth: 5000), 1)
+    }
+}
+
 final class PairLibraryTests: XCTestCase {
     private var defaults: UserDefaults!
 

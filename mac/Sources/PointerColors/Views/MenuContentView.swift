@@ -27,27 +27,30 @@ struct MenuContentView: View {
             footer
         }
         .padding(14)
-        .frame(width: 380)
+        .frame(width: 380 * scale)
+        .appTextScale(scale)
         .onAppear { model.refreshFromSystem() }
     }
+
+    private var scale: CGFloat { model.textScale }
 
     private var header: some View {
         HStack(spacing: 14) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12).fill(Color(white: 0.96))
                 PointerGlyph(pair: model.selectedPair, lineWidth: 1.8)
-                    .frame(height: 16 + 12 * model.scale)
+                    .frame(height: (16 + 12 * model.scale) * scale)
             }
-            .frame(width: 104, height: 104)
+            .frame(width: 104 * scale, height: 104 * scale)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(model.selectedPair.name).font(.title3.bold())
+                Text(model.selectedPair.name).appFont(.title3, weight: .bold)
                 HStack(spacing: 6) {
                     HexButton(label: "Outline", color: model.selectedPair.outline) { model.copyHex(outline: true) }
                     HexButton(label: "Fill", color: model.selectedPair.fill) { model.copyHex(outline: false) }
                 }
                 Text(model.status.message)
-                    .font(.caption)
+                    .appFont(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -59,7 +62,7 @@ struct MenuContentView: View {
             sizeControls.disabled(model.needsFullDiskAccess)
             if model.needsFullDiskAccess {
                 Text("Pointer size needs Full Disk Access.")
-                    .font(.caption2)
+                    .appFont(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
@@ -67,7 +70,7 @@ struct MenuContentView: View {
 
     private var sizeControls: some View {
         HStack(spacing: 10) {
-            Text("Pointer size").font(.caption).frame(width: 74, alignment: .leading)
+            Text("Pointer size").appFont(.caption).frame(width: 74 * scale, alignment: .leading)
             Slider(value: Binding(get: { model.scale }, set: { model.setScale($0) }),
                    in: SystemPointer.minimumScale...SystemPointer.maximumScale) {
                 Text("Pointer size")
@@ -78,8 +81,8 @@ struct MenuContentView: View {
             }
             .labelsHidden()
             Text(String(format: "%.2f×", model.scale))
-                .font(.caption.monospacedDigit())
-                .frame(width: 40, alignment: .trailing)
+                .appFont(.caption, monospacedDigits: true)
+                .frame(width: 40 * scale, alignment: .trailing)
             Button { model.resetScale() } label: {
                 Image(systemName: "arrow.counterclockwise")
             }
@@ -92,17 +95,17 @@ struct MenuContentView: View {
 
     private var pairGrid: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("PAIRS").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+            Text("PAIRS").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(model.library.visible) { pair in
-                    PairTile(pair: pair, isSelected: pair.id == model.selectedID) { model.select(pair) }
+                    PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.select(pair) }
                 }
                 Button { isAddingCustom = true } label: {
                     VStack(spacing: 4) {
-                        Image(systemName: "plus").font(.body)
-                        Text("Custom").font(.system(size: 10.5))
+                        Image(systemName: "plus").appFont(.body)
+                        Text("Custom").appFont(.tile)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 58)
+                    .frame(maxWidth: .infinity, minHeight: 58 * scale)
                     .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(style: .init(lineWidth: 1, dash: [3])).foregroundStyle(.tertiary))
                 }
                 .buttonStyle(.plain)
@@ -146,9 +149,9 @@ private struct PermissionBanner: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label("Full Disk Access needed", systemImage: "lock")
-                .font(.callout.weight(.semibold))
+                .appFont(.callout, weight: .semibold)
             Text("macOS protects the pointer color and size settings. Turn on Pointer Colors in Full Disk Access, then quit and reopen the app. Copying hex codes works without it.")
-                .font(.caption)
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             Button("Open Full Disk Access settings") { model.openFullDiskAccessSettings() }
@@ -170,7 +173,7 @@ private struct HexButton: View {
             HStack(spacing: 6) {
                 RoundedRectangle(cornerRadius: 3).fill(color.color).frame(width: 10, height: 10)
                     .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(.white.opacity(0.3)))
-                Text("\(label) \(color.hex)").font(.caption.monospacedDigit())
+                Text("\(label) \(color.hex)").appFont(.caption, monospacedDigits: true)
             }
         }
         .controlSize(.small)
@@ -182,18 +185,19 @@ private struct HexButton: View {
 private struct PairTile: View {
     let pair: PointerPair
     let isSelected: Bool
+    let scale: CGFloat
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 4) {
-                PointerGlyph(pair: pair).frame(height: 23)
+                PointerGlyph(pair: pair).frame(height: 23 * scale)
                 Text(pair.name)
-                    .font(.system(size: 10.5))
+                    .appFont(.tile)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
             }
-            .frame(maxWidth: .infinity, minHeight: 58)
+            .frame(maxWidth: .infinity, minHeight: 58 * scale)
             .padding(.vertical, 2)
             .background(RoundedRectangle(cornerRadius: 10).fill(isSelected ? Color.accentColor.opacity(0.18) : .clear))
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(isSelected ? Color.accentColor : .clear))

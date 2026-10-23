@@ -13,7 +13,8 @@ struct PreferencesView: View {
             AboutPreferences()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        .frame(width: 560, height: 520)
+        .frame(width: 560 * model.textScale, height: 520 * model.textScale)
+        .appTextScale(model.textScale)
     }
 }
 
@@ -40,6 +41,14 @@ private struct GeneralPreferences: View {
                 }
                 Toggle("Play a sound when a pair is applied", isOn: $sound)
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
+            }
+            Section("Appearance") {
+                Picker(selection: $model.textSize) {
+                    ForEach(TextSize.allCases) { Text($0.title).tag($0) }
+                } label: {
+                    Text("Text size")
+                    Text("Size of the menu and this window. Automatic uses Large on big screens.")
+                }
             }
             Section("Permission") {
                 LabeledContent("Pointer colors and size") {
@@ -69,7 +78,7 @@ private struct PairsPreferences: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Hidden pairs stay out of the menu-bar grid. Custom pairs can be edited or deleted.")
-                .font(.callout)
+                .appFont(.callout)
                 .foregroundStyle(.secondary)
             List(model.library.all) { pair in
                 PairRow(model: model, pair: pair) { editing = pair }
@@ -82,7 +91,7 @@ private struct PairsPreferences: View {
                 Button("Import…", action: importPairs)
                 Button("Export…", action: exportPairs).disabled(model.library.custom.isEmpty)
             }
-            if let errorMessage { Text(errorMessage).font(.caption).foregroundStyle(.red) }
+            if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
         }
         .padding(20)
     }
@@ -143,7 +152,7 @@ private struct PairRow: View {
             PointerGlyph(pair: pair).frame(height: 20)
             VStack(alignment: .leading) {
                 Text(pair.name)
-                Text("\(pair.outline.hex) / \(pair.fill.hex)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                Text("\(pair.outline.hex) / \(pair.fill.hex)").appFont(.caption, monospacedDigits: true).foregroundStyle(.secondary)
             }
             Spacer()
             if pair.isCustom {
@@ -168,14 +177,14 @@ private struct AboutPreferences: View {
     var body: some View {
         VStack(spacing: 10) {
             PointerGlyph(pair: PointerPair.builtIns[0], lineWidth: 2).frame(height: 48)
-            Text("Pointer Colors").font(.title2.bold())
+            Text("Pointer Colors").appFont(.title2, weight: .bold)
             Text("Version \(version)").foregroundStyle(.secondary)
             HStack(spacing: 16) {
                 Link("Website", destination: URL(string: "https://macos-pointer-colors.pages.dev")!)
                 Link("GitHub", destination: URL(string: "https://github.com/mustafaabobakr/macos-pointer-colors")!)
             }
             Text("Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display.")
-                .font(.caption)
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 380)

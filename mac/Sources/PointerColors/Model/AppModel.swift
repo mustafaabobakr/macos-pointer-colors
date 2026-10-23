@@ -31,6 +31,14 @@ final class AppModel {
     var iconInPairColors: Bool {
         didSet { settings.iconInPairColors = iconInPairColors }
     }
+    var textSize: TextSize {
+        didSet { settings.textSize = textSize }
+    }
+
+    /// The factor for the app's own text and layout, resolved for the current main screen.
+    var textScale: CGFloat {
+        textSize.factor(screenWidth: NSScreen.main?.frame.width ?? 0)
+    }
 
     let settings = AppSettings()
     private let pointer = SystemPointer()
@@ -39,6 +47,7 @@ final class AppModel {
         selectedID = PointerPair.builtIns[0].id
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
+        textSize = settings.textSize
         refreshFromSystem()
         reapplyIfNeeded()
     }

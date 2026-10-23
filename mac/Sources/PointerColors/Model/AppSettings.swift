@@ -27,6 +27,11 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: Key.playSoundOnApply) }
     }
 
+    var textSize: TextSize {
+        get { defaults.string(forKey: Key.textSize).flatMap(TextSize.init(rawValue:)) ?? .automatic }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: Key.textSize) }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }
@@ -54,6 +59,7 @@ struct AppSettings {
         static let reapplyAtLaunch = "reapplyAtLaunch"
         static let iconInPairColors = "iconInPairColors"
         static let playSoundOnApply = "playSoundOnApply"
+        static let textSize = "textSize"
         static let lastAppliedPairID = "lastAppliedPairID"
         static let lastAppliedScale = "lastAppliedScale"
     }

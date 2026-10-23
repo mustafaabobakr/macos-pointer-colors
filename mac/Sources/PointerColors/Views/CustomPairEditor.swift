@@ -23,17 +23,17 @@ struct CustomPairEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(title).font(.callout.weight(.semibold))
+                Text(title).appFont(.callout, weight: .semibold)
                 Spacer()
                 PointerGlyph(pair: preview).frame(height: 22)
             }
             TextField("Name", text: $name)
             HStack(spacing: 16) {
                 ColorPicker(selection: $outline, supportsOpacity: false) {
-                    Text("Outline \(RGBA(outline).hex)").font(.caption.monospacedDigit())
+                    Text("Outline \(RGBA(outline).hex)").appFont(.caption, monospacedDigits: true)
                 }
                 ColorPicker(selection: $fill, supportsOpacity: false) {
-                    Text("Fill \(RGBA(fill).hex)").font(.caption.monospacedDigit())
+                    Text("Fill \(RGBA(fill).hex)").appFont(.caption, monospacedDigits: true)
                 }
             }
             HStack {
