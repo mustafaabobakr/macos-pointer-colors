@@ -101,6 +101,12 @@ final class AppModel {
         apply(selectedPair)
     }
 
+    /// Picking a pair in the menu applies it straight away.
+    func choose(_ pair: PointerPair) {
+        select(pair)
+        applySelected()
+    }
+
     /// Applies a pair by id unless it's already on screen. Used by automation.
     func applyPair(id: String) {
         guard let pair = library.pair(id: id), pair != appliedPair else { return }

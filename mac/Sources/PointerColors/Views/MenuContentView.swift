@@ -18,6 +18,7 @@ struct MenuContentView: View {
             if isAddingCustom {
                 CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
                     model.addCustom(name: name, outline: outline, fill: fill)
+                    model.applySelected()
                     isAddingCustom = false
                 } onCancel: {
                     isAddingCustom = false
@@ -108,7 +109,7 @@ struct MenuContentView: View {
             Text("PAIRS").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(model.library.visible) { pair in
-                    PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.select(pair) }
+                    PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
                 }
                 Button { isAddingCustom = true } label: {
                     VStack(spacing: 4) {
@@ -125,16 +126,11 @@ struct MenuContentView: View {
     }
 
     private var actions: some View {
-        HStack(spacing: 8) {
-            Button("Apply to pointer") { model.applySelected() }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-                .keyboardShortcut(.defaultAction)
-            Button("Reset") { model.reset() }
-                .controlSize(.large)
-                .help("Back to black and white at normal size")
+        Button { model.reset() } label: {
+            Text("Reset to black and white").frame(maxWidth: .infinity)
         }
+        .controlSize(.large)
+        .help("Back to black and white at normal size")
     }
 
     private var footer: some View {
