@@ -15,7 +15,15 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/PointerColors" "$APP/Contents/MacOS/PointerColors"
 cp "$MAC_DIR/Resources/Info.plist" "$APP/Contents/Info.plist"
-cp "$MAC_DIR/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
+
+# Compile the Icon Composer icon: Assets.car carries the Liquid Glass version,
+# AppIcon.icns is the flat fallback for older macOS. Needs Xcode 26 or later.
+xcrun actool "$MAC_DIR/Resources/AppIcon.icon" \
+  --compile "$APP/Contents/Resources" \
+  --platform macosx --minimum-deployment-target 14.0 \
+  --app-icon AppIcon \
+  --output-partial-info-plist "$MAC_DIR/build/icon-partial.plist" \
+  --output-format human-readable-text >/dev/null
 
 # Ad-hoc signature so macOS can track the app for Full Disk Access and login items.
 # For distribution, re-sign with a Developer ID and notarize.
