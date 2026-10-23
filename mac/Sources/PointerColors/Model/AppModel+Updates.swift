@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 
 extension AppModel {
     private static let lastUpdateCheckKey = "lastUpdateCheck"
@@ -38,5 +38,18 @@ extension AppModel {
     var availableUpdateURL: URL? {
         if case .available(_, let url) = updateResult { return url }
         return nil
+    }
+}
+
+extension AppModel {
+    /// Relaunches the app, e.g. after granting Full Disk Access (which only applies to a fresh process).
+    func restartApp() {
+        let path = Bundle.main.bundlePath
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/sh")
+        // Wait until this process has exited, then open the bundle again.
+        task.arguments = ["-c", "while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done; open \"$0\"", path]
+        try? task.run()
+        NSApp.terminate(nil)
     }
 }

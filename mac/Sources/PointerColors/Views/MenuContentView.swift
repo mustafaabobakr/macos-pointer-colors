@@ -131,6 +131,7 @@ struct MenuContentView: View {
 
     private var footer: some View {
         VStack(alignment: .leading, spacing: 2) {
+            MenuRow(title: String(localized: "Restart Pointer Colors"), shortcut: nil) { model.restartApp() }
             MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
                 NSApp.activate()
                 openSettings()
