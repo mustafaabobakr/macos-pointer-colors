@@ -6,7 +6,7 @@ import SwiftUI
 struct AppColorsIndicator: View {
     @Bindable var automation: Automation
     @Environment(\.appTextScale) private var scale
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openPreferences) private var openPreferences
 
     private static let visibleIcons = 3
 
@@ -47,8 +47,7 @@ struct AppColorsIndicator: View {
     }
 
     private func showPreferences() {
-        NSApp.activate()
-        openSettings()
+        openPreferences()
     }
 }
 

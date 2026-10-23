@@ -4,6 +4,11 @@ import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
+    private var statusBar: StatusBarController?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        statusBar = StatusBarController(model: model)
+    }
 
     func application(_ application: NSApplication, open urls: [URL]) {
         urls.compactMap(PairLink.init(url:)).forEach(confirm)
