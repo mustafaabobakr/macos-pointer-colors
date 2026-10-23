@@ -42,6 +42,8 @@ struct MenuContentView: View {
             }
             DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
                 .disabled(model.needsFullDiskAccess)
+            AppColorsIndicator(automation: model.automation)
+                .disabled(model.needsFullDiskAccess)
             Divider()
             footer
         }

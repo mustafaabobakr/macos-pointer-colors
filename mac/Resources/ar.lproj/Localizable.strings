@@ -168,3 +168,5 @@
 "Add App…" = "إضافة تطبيق…";
 "Pair for %@" = "الزوج لـ %@";
 "Remove %@" = "إزالة %@";
+"Edit app pairs in Preferences › Automation" = "عدّل أزواج التطبيقات من الإعدادات › الأتمتة";
+"Apps with their own pair: %lld" = "تطبيقات لها زوج خاص: %lld";
