@@ -24,7 +24,14 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;line-height:1.5}
 html[lang="ar"] body{font-family:"IBM Plex Sans Arabic","Bricolage Grotesque",-apple-system,system-ui,sans-serif}
 .wrap{max-width:1180px;margin:0 auto;padding:32px 20px 56px}
-.top{display:flex;justify-content:flex-end;margin:-12px 0 8px}
+.top{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:-12px 0 8px}
+.gh{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:3px 4px 3px 10px;border:1px solid var(--line);border-radius:10px;background:var(--chip);color:var(--ink);text-decoration:none;font-size:.85rem;font-weight:600}
+html[dir="rtl"] .gh{padding:3px 10px 3px 4px}
+.gh:hover{background:var(--surface)}
+.gh>svg{width:16px;height:16px;flex:none}
+.gh .stars{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:7px;background:var(--surface);font-variant-numeric:tabular-nums;font-weight:600}
+.gh .stars svg{width:12px;height:12px;color:#e3b341}
+.gh .stars[hidden]{display:none}
 .lang{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px;gap:2px}
 .lang button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:.85rem;padding:4px 10px;border-radius:7px;cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.15)}
@@ -35,7 +42,9 @@ html[lang="ar"] h1{letter-spacing:0}
 @media (max-width:860px){.layout{grid-template-columns:1fr}}
 
 /* palette list */
-.list{display:flex;flex-direction:column;gap:6px}
+/* The list scrolls on its own and stays beside the preview while the page scrolls. */
+.list{display:flex;flex-direction:column;gap:6px;max-height:min(80vh,780px);overflow-y:auto;overscroll-behavior:contain;position:sticky;top:16px;padding-inline-end:6px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+@media (max-width:860px){.list{position:static;max-height:420px}}
 .swatch{display:flex;align-items:center;gap:14px;width:100%;padding:10px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer}
 .swatch:hover{background:var(--chip)}
 .swatch[aria-pressed="true"]{background:var(--surface);border-color:var(--line);box-shadow:0 1px 0 var(--line)}
@@ -101,15 +110,41 @@ input[type=range]{accent-color:var(--ink)}
 .how strong{color:var(--ink);font-weight:600}
 
 /* Mac app */
-.mac{margin-top:44px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:28px}
-@media (max-width:860px){.mac{grid-template-columns:1fr;padding:20px}}
-.mac p{color:var(--muted);margin:0 0 14px;max-width:60ch}
-.mac ul{margin:0 0 18px;padding-inline-start:1.2em;color:var(--muted)}
-.mac li{margin:3px 0}
-.mac img{width:100%;height:auto;max-height:620px;object-fit:cover;object-position:top;border-radius:14px;border:1px solid var(--line);display:block}
-.download{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:var(--on-accent);text-decoration:none;font-weight:600;padding:11px 18px;border-radius:12px;min-height:44px}
+/* Always dark, lit by the selected pair: --glow-a / --glow-b are set from script. */
+.mac{--glow-a:#00FFDA;--glow-b:#008A59;position:relative;isolation:isolate;overflow:hidden;margin-top:64px;border-radius:32px;padding:clamp(28px,5.5vw,72px);background:#08090c;color:#f4f5f8;border:1px solid rgba(255,255,255,.08);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(32px,5vw,72px);align-items:center;color-scheme:dark}
+.mac::before{content:"";position:absolute;inset:-25%;z-index:-2;background:radial-gradient(38% 46% at 82% 22%,var(--glow-a),transparent 70%),radial-gradient(42% 50% at 64% 96%,var(--glow-b),transparent 70%);filter:blur(60px);opacity:.42;transition:background .8s ease}
+.mac::after{content:"";position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(70% 80% at 25% 45%,#000 20%,transparent 75%);mask-image:radial-gradient(70% 80% at 25% 45%,#000 20%,transparent 75%)}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);border-radius:999px;padding:6px 14px;margin:0 0 26px}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--glow-a);box-shadow:0 0 14px var(--glow-a)}
+html[lang="ar"] .eyebrow{letter-spacing:0}
+.mac h2{font-size:clamp(2.6rem,6vw,5rem);line-height:.96;letter-spacing:-.045em;font-weight:800;margin:0 0 22px;color:#fff}
+.mac h2 em{font-style:normal;background:linear-gradient(100deg,var(--glow-a) 10%,#fff 85%);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[lang="ar"] .mac h2{letter-spacing:0;line-height:1.18}
+.mac .pitch{font-size:clamp(1.02rem,1.35vw,1.18rem);color:rgba(255,255,255,.72);max-width:44ch;margin:0 0 30px}
+.features{list-style:none;padding:0;margin:0 0 34px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.features li{padding:14px 16px 15px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.86);font-size:.92rem;line-height:1.4;transition:border-color .3s,background .3s}
+.features li:hover{border-color:color-mix(in srgb,var(--glow-a) 45%,transparent);background:rgba(255,255,255,.055)}
+.features b{display:block;font-size:.72rem;letter-spacing:.12em;color:var(--glow-a);margin:0 0 6px;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.features{grid-template-columns:1fr}}
+.cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.download{display:inline-flex;align-items:center;gap:12px;background:#fff;color:#0b0c10;text-decoration:none;font-weight:700;font-size:1.02rem;padding:0 26px;border-radius:999px;min-height:54px;box-shadow:0 14px 40px -14px var(--glow-a);transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.download:hover{transform:translateY(-2px);box-shadow:0 20px 50px -14px var(--glow-a)}
 .download svg{width:18px;height:18px}
-.fine{font-size:.82rem;color:var(--muted);margin:10px 0 0}
+.ghost{display:inline-flex;align-items:center;gap:8px;min-height:54px;padding:0 22px;border-radius:999px;border:1px solid rgba(255,255,255,.2);color:#fff;text-decoration:none;font-weight:600;transition:background .25s,border-color .25s}
+.ghost:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.35)}
+.ghost svg{width:16px;height:16px}
+.mac .fine{font-size:.82rem;color:rgba(255,255,255,.52);margin:18px 0 0;max-width:52ch}
+.mac a:focus-visible{outline-color:#fff}
+/* Screenshot on a tilt; straightens on hover. The big pointer floats over its corner. */
+.shot{position:relative;perspective:1600px}
+.shot img{width:100%;height:auto;max-height:660px;object-fit:cover;object-position:top;display:block;border-radius:24px;border:1px solid rgba(255,255,255,.12);transform:rotateY(-14deg) rotateX(7deg) rotateZ(1.5deg);box-shadow:0 60px 120px -40px rgba(0,0,0,.85),-40px 40px 90px -50px var(--glow-a);-webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent);transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.shot:hover img{transform:rotateY(0) rotateX(0) rotateZ(0)}
+html[dir="rtl"] .shot img{transform:rotateY(14deg) rotateX(7deg) rotateZ(-1.5deg)}
+html[dir="rtl"] .shot:hover img{transform:none}
+.float{position:absolute;width:clamp(68px,8vw,110px);height:auto;inset-inline-start:-7%;top:52%;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6)) drop-shadow(0 0 26px var(--glow-a));animation:bob 6s ease-in-out infinite;pointer-events:none}
+@keyframes bob{50%{transform:translateY(-16px) rotate(-6deg)}}
+@media (max-width:860px){.mac{grid-template-columns:1fr;border-radius:24px}.shot img{transform:none;max-height:540px}.float{inset-inline-start:auto;inset-inline-end:-2%;top:auto;bottom:12%}}
+@media (prefers-reduced-motion:reduce){.float{animation:none}.shot img,html[dir="rtl"] .shot img{transform:none}}
 
 .credit{margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
 .credit a{color:var(--ink)}
@@ -121,6 +156,11 @@ input[type=range]{accent-color:var(--ink)}
 <body>
 <div class="wrap">
   <div class="top">
+    <a class="gh" id="gh" href="https://github.com/mustafaabobakr/macos-pointer-colors">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span data-i18n="star">Star on GitHub</span>
+      <span class="stars" id="stars" hidden><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .25a.75.75 0 0 1 .67.42l1.88 3.8 4.2.61a.75.75 0 0 1 .41 1.28l-3.04 2.96.72 4.18a.75.75 0 0 1-1.09.79L8 12.33l-3.75 1.97a.75.75 0 0 1-1.09-.79l.72-4.18L.84 6.37a.75.75 0 0 1 .41-1.28l4.2-.61L7.33.67A.75.75 0 0 1 8 .25Z"/></svg><span id="starCount"></span></span>
+    </a>
     <div class="lang" role="group" aria-label="Language">
       <button data-lang="en" aria-pressed="true" lang="en">English</button>
       <button data-lang="ar" aria-pressed="false" lang="ar">العربية</button>
@@ -196,21 +236,31 @@ input[type=range]{accent-color:var(--ink)}
 
   <section class="mac" id="mac" aria-labelledby="macTitle">
     <div>
-      <h2 id="macTitle" data-i18n="macTitle">Pointer Colors for Mac</h2>
-      <p data-i18n="macLede">A free menu-bar app that applies a pair in one click, so you never type hex codes.</p>
-      <ul>
-        <li data-i18n="mac1">Every pair on this page, plus your own</li>
-        <li data-i18n="mac2">Pointer size slider, a separate color and size for each display, and a pair for each app</li>
-        <li data-i18n="mac3">Switches pairs with light and dark appearance</li>
-        <li data-i18n="mac4">Keyboard shortcuts, contrast warnings, English and Arabic</li>
+      <p class="eyebrow"><i aria-hidden="true"></i><span data-i18n="macEyebrow">Pointer Colors for Mac · Free</span></p>
+      <h2 id="macTitle" data-i18n="macHeadline">Your pointer,<br><em>one click</em> away.</h2>
+      <p class="pitch" data-i18n="macLede">A menu-bar app that applies any pair instantly. No hex codes, no digging through System Settings.</p>
+      <ul class="features">
+        <li><b aria-hidden="true">01</b><span data-i18n="mac1">Every pair on this page, plus your own</span></li>
+        <li><b aria-hidden="true">02</b><span data-i18n="mac2">A separate color and size for each display, and a pair for each app</span></li>
+        <li><b aria-hidden="true">03</b><span data-i18n="mac3">Switches pairs with light and dark appearance</span></li>
+        <li><b aria-hidden="true">04</b><span data-i18n="mac4">Keyboard shortcuts, contrast warnings, English and Arabic</span></li>
       </ul>
-      <a class="download" id="download" href="https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest/download/Pointer-Colors.dmg">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
-        <span data-i18n="download">Download for macOS</span>
-      </a>
+      <div class="cta">
+        <a class="download" id="download" href="https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest/download/Pointer-Colors.dmg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          <span data-i18n="download">Download for macOS</span>
+        </a>
+        <a class="ghost" href="https://github.com/mustafaabobakr/macos-pointer-colors">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span data-i18n="viewSource">View source</span>
+        </a>
+      </div>
       <p class="fine" data-i18n="macFine">macOS 14 or later. The app isn't notarized yet: the first time, right-click it and choose Open, or allow it in System Settings › Privacy &amp; Security.</p>
     </div>
-    <img src="docs/mac-app.png" width="1140" height="2526" alt="The Pointer Colors menu-bar app showing pairs, a size slider and previews" data-i18n-alt="macShot" loading="lazy">
+    <div class="shot">
+      <img src="docs/mac-app.png" width="1140" height="2526" alt="The Pointer Colors menu-bar app showing pairs, a size slider and previews" data-i18n-alt="macShot" loading="lazy">
+      <svg class="float" id="floatPointer" viewBox="0 0 24 32" aria-hidden="true"></svg>
+    </div>
   </section>
 
   <footer class="credit"><span data-i18n="createdBy">Created by</span> <a href="https://github.com/mustafaabobakr" data-i18n="author">Mostafa Abobakr</a> · <a href="https://github.com/mustafaabobakr/macos-pointer-colors" data-i18n="source">Source on GitHub</a></footer>
@@ -234,10 +284,13 @@ const AR = {
   how2: "انقر <strong>لون حدود المؤشر</strong>، واختر تبويب أشرطة التمرير، واضبطه على Hex Color، ثم الصق رمز الحدود.",
   how3: "كرّر الأمر مع <strong>لون تعبئة المؤشر</strong>.",
   how4: "تريده أكبر؟ اسحب <strong>حجم المؤشر</strong> في الشاشة نفسها. يعيد زر <strong>إعادة تعيين</strong> الأسود والأبيض.",
-  macTitle: "Pointer Colors للماك",
-  macLede: "تطبيق مجاني في شريط القوائم يطبّق الزوج بنقرة واحدة، دون كتابة رموز الألوان.",
+  macEyebrow: "Pointer Colors للماك · مجاني",
+  macHeadline: "مؤشرك،<br><em>على بُعد نقرة</em>.",
+  macLede: "تطبيق في شريط القوائم يطبّق أي زوج فورًا. بلا رموز ألوان، وبلا بحث في إعدادات النظام.",
+  viewSource: "عرض الشيفرة",
+  star: "نجمة على GitHub",
   mac1: "كل الأزواج في هذه الصفحة، إضافة إلى أزواجك",
-  mac2: "شريط لحجم المؤشر، ولون وحجم منفصلان لكل شاشة، وزوج لكل تطبيق",
+  mac2: "لون وحجم منفصلان لكل شاشة، وزوج لكل تطبيق",
   mac3: "يبدّل الأزواج مع المظهر الفاتح والداكن",
   mac4: "اختصارات لوحة المفاتيح، وتنبيهات التباين، والعربية والإنجليزية",
   download: "تنزيل لنظام macOS",
@@ -324,6 +377,35 @@ function apply(o,f){
   $("chipF").style.background=f;
   $("pickO").value=o.toLowerCase(); $("pickF").value=f.toLowerCase();
   $("contexts").innerHTML=CTX.map(([k,bg])=>`<div class="ctx" style="background:${bg}"><svg viewBox="0 0 24 32">${arrowSVG(o,f)}</svg><span>${t(k)}</span></div>`).join("");
+  lightMacSection(o,f);
+}
+
+// The Mac section glows in the selected pair. The brighter color leads, so a dark outline
+// (like macOS dark) never turns the light off.
+const luminance=hex=>{ const n=parseInt(hex.slice(1),16); return (0.2126*(n>>16&255)+0.7152*(n>>8&255)+0.0722*(n&255))/255; };
+function lightMacSection(o,f){
+  const [a,b]=luminance(o)>=luminance(f)?[o,f]:[f,o];
+  const glowA=luminance(a)<0.25?"#7aa2ff":a;
+  const mac=$("mac");
+  mac.style.setProperty("--glow-a",glowA);
+  mac.style.setProperty("--glow-b",luminance(b)<0.08?glowA:b);
+  $("floatPointer").innerHTML=arrowSVG(o,f,1.4);
+}
+
+// Star count for the header link, cached for an hour so the page doesn't call GitHub on every visit.
+async function loadStars(){
+  const key="stars", cached=JSON.parse(store.get(key)||"null");
+  let count=cached&&Date.now()-cached.t<3600e3?cached.n:null;
+  if(count===null){
+    try{
+      const r=await fetch("https://api.github.com/repos/mustafaabobakr/macos-pointer-colors");
+      if(!r.ok) return;
+      count=(await r.json()).stargazers_count;
+      store.set(key,JSON.stringify({n:count,t:Date.now()}));
+    }catch(e){ return; }
+  }
+  $("starCount").textContent=new Intl.NumberFormat(lang==="ar"?"ar":"en",{notation:"compact"}).format(count);
+  $("stars").hidden=false;
 }
 function clearSel(){ selectedName=null; document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false")); }
 $("pickO").oninput=e=>{clearSel();apply(e.target.value.toUpperCase(),cur.f)};
@@ -361,6 +443,7 @@ function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("sho
 const d=new Date(); $("clock").textContent=d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
 setLang(lang);
 renderList(); apply(cur.o,cur.f); center();
+loadStars();
 </script>
 </body>
 </html>
