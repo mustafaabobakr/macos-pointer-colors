@@ -23,7 +23,7 @@
 
 <br>
 
-macOS lets you recolor the pointer, but only through two hex fields buried in System Settings. **Pointer Colors** gives you a gallery of outline and fill pairs to try on a fake desktop, and a menu-bar app that applies one in a single click.
+**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 47 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
 
 ## Two ways to use it
 
@@ -70,7 +70,8 @@ The macOS defaults for light and dark come first, then the neon and color pairs.
       <h3>Install</h3>
       <ol>
         <li><a href="https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest/download/Pointer-Colors.dmg">Download <code>Pointer-Colors.dmg</code></a> and drag <b>Pointer Colors</b> into Applications.</li>
-        <li>The app isn't notarized yet, so the first time, <b>right-click it and choose Open</b>, or allow it in <b>System Settings › Privacy &amp; Security</b>.</li>
+        <li>The app is <ins><b>not notarized yet</b></ins>, so the first time, <b>right-click it and choose Open</b>, allow it in <b>System Settings › Privacy &amp; Security</b>, or run this in Terminal:
+<pre><code>xattr -cr "/Applications/Pointer Colors.app"</code></pre></li>
         <li>Click the pointer in the menu bar and pick a pair.</li>
       </ol>
       <h3>Good to know</h3>
@@ -94,6 +95,26 @@ Copy the two codes from the website, then:
 2. Click **Pointer outline color**, choose the sliders tab, set it to **Hex Color**, and paste the outline code.
 3. Do the same for **Pointer fill color**.
 4. Drag **Pointer size** if you want it bigger. **Reset** brings back black and white.
+
+## FAQ
+
+**How do I change the mouse pointer color on a Mac?**<br>
+Open **System Settings › Accessibility › Display**, scroll to **Pointer**, and set **Pointer outline color** and **Pointer fill color** with hex codes from [the website](https://macos-pointer-colors.pages.dev). Or use the Pointer Colors app to apply a pair in one click.
+
+**How do I make the cursor bigger on macOS?**<br>
+Drag **Pointer size** on the same settings screen, or use the size slider in the app, which can also set a different size on each display.
+
+**How do I reset the pointer to black and white?**<br>
+Click **Reset Colors** under Pointer in System Settings, or pick the **macOS light** or **macOS dark** pair.
+
+**Which pointer colors are easiest to see?**<br>
+A pair where the outline or the fill stands out on both white pages and dark apps. The website shows each pair on four backgrounds, and the app warns when a pair is hard to see.
+
+**macOS says the app can't be opened or verified. What do I do?**<br>
+It's not notarized yet. Right-click it and choose **Open**, allow it in **System Settings › Privacy & Security**, or run `xattr -cr "/Applications/Pointer Colors.app"` in Terminal.
+
+**Is it free?**<br>
+Yes. The website and the app are free and open source.
 
 ## Build it yourself
 
