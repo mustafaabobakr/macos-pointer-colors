@@ -26,7 +26,6 @@ private struct GeneralPreferences: View {
     @Bindable var model: AppModel
     @State private var reapply = false
     @State private var sound = false
-    @State private var highlight = false
 
     var body: some View {
         Form {
@@ -43,11 +42,6 @@ private struct GeneralPreferences: View {
                 Toggle(isOn: $model.iconInPairColors) {
                     Text("Draw the menu-bar icon in my colors")
                     Text("Off shows a plain icon that follows the menu bar.")
-                }
-                Toggle(isOn: Binding(get: { highlight },
-                                     set: { highlight = $0; model.setHighlightFollowsPointer($0) })) {
-                    Text("Match the text highlight color to the pointer")
-                    Text("Selected text uses a light tint of your pair. Turning it off brings back your own color.")
                 }
                 Toggle("Play a sound when a pair is applied", isOn: $sound)
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
@@ -74,7 +68,6 @@ private struct GeneralPreferences: View {
         .onAppear {
             reapply = model.settings.reapplyAtLaunch
             sound = model.settings.playSoundOnApply
-            highlight = model.settings.highlightFollowsPointer
             model.refreshFromSystem()
         }
     }

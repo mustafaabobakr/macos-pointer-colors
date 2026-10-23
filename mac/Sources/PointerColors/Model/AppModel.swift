@@ -121,24 +121,12 @@ final class AppModel {
         automation.applyCurrentDisplayColors()
     }
 
-    /// Turns the highlight option on (matching what's on screen now) or off (restoring the old color).
-    func setHighlightFollowsPointer(_ enabled: Bool) {
-        settings.highlightFollowsPointer = enabled
-        if enabled { HighlightColor.apply(for: menuBarPair) } else { HighlightColor.restore() }
-    }
-
-    private func syncHighlight(with pair: PointerPair) {
-        guard settings.highlightFollowsPointer else { return }
-        HighlightColor.apply(for: pair)
-    }
-
     /// Puts a pair on screen for the current display only, keeping the main pair as it is.
     func showPair(id: String) {
         guard let pair = library.pair(id: id), pair != appliedPair else { return }
         do {
             try pointer.apply(pair)
             appliedPair = pair
-            syncHighlight(with: pair)
             updateStatus()
         } catch {
             fail(error)
@@ -270,7 +258,6 @@ final class AppModel {
             try pointer.apply(pair)
             settings.lastAppliedPairID = pair.id
             if settings.playSoundOnApply { NSSound(named: "Pop")?.play() }
-            syncHighlight(with: pair)
             refreshFromSystem()
         } catch {
             fail(error)

@@ -154,7 +154,9 @@
 "%@ Click above to download." = "%@ انقر أعلاه للتنزيل.";
 "Quit" = "إنهاء";
 "Add custom" = "إضافة مخصص";
-"Match the text highlight color to the pointer" = "مطابقة لون تمييز النص مع المؤشر";
-"Selected text uses a light tint of your pair. Turning it off brings back your own color." = "يستخدم النص المحدد درجة فاتحة من زوجك. عند الإيقاف يعود لونك السابق.";
 "Neon" = "نيون";
 "Colors" = "ألوان";
+"Edit…" = "تعديل…";
+"Delete…" = "حذف…";
+"Delete “%@”?" = "هل تريد حذف «%@»؟";
+"This can't be undone." = "لا يمكن التراجع عن ذلك.";

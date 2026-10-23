@@ -4,6 +4,8 @@ import SwiftUI
 struct MenuContentView: View {
     @Bindable var model: AppModel
     @State private var isAddingCustom = false
+    @State private var editingPair: PointerPair?
+    @State private var pairToDelete: PointerPair?
     @Environment(\.openSettings) private var openSettings
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
@@ -25,6 +27,20 @@ struct MenuContentView: View {
                     isAddingCustom = false
                 }
             }
+            if let editingPair {
+                CustomPairEditor(title: String(localized: "Edit pair"), initial: editingPair) { name, outline, fill in
+                    var updated = editingPair
+                    updated.name = name.isEmpty ? editingPair.name : name
+                    updated.outline = outline
+                    updated.fill = fill
+                    model.updateCustom(updated)
+                    if model.selectedID == updated.id { model.applySelected() }
+                    self.editingPair = nil
+                } onCancel: {
+                    self.editingPair = nil
+                }
+                .id(editingPair.id)
+            }
             DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
                 .disabled(model.needsFullDiskAccess)
             Divider()
@@ -34,9 +50,22 @@ struct MenuContentView: View {
         .frame(width: 380 * scale)
         .appTextScale(scale)
         .onAppear { model.refreshFromSystem() }
+        .confirmationDialog(deleteTitle, isPresented: Binding(get: { pairToDelete != nil },
+                                                              set: { if !$0 { pairToDelete = nil } })) {
+            Button("Delete", role: .destructive) {
+                if let pair = pairToDelete { model.removeCustom(pair) }
+                pairToDelete = nil
+            }
+        } message: {
+            Text("This can't be undone.")
+        }
     }
 
     private var scale: CGFloat { model.textScale }
+
+    private var deleteTitle: String {
+        String(localized: "Delete “\(pairToDelete?.name ?? "")”?")
+    }
 
     private var header: some View {
         HStack(spacing: 14) {
@@ -131,6 +160,7 @@ struct MenuContentView: View {
                             LazyVGrid(columns: columns, spacing: 6) {
                                 ForEach(section.pairs) { pair in
                                     PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
+                                        .contextMenu { if pair.isCustom { customPairMenu(pair) } }
                                 }
                             }
                         }
@@ -141,6 +171,11 @@ struct MenuContentView: View {
             .frame(height: pairGridHeight)
             .scrollIndicators(.automatic)
         }
+    }
+
+    @ViewBuilder private func customPairMenu(_ pair: PointerPair) -> some View {
+        Button("Edit…") { isAddingCustom = false; editingPair = pair }
+        Button("Delete…", role: .destructive) { pairToDelete = pair }
     }
 
     private var footer: some View {

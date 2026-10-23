@@ -81,6 +81,76 @@
       "group": "neon"
     },
     {
+      "id": "neon-cyan",
+      "name": "Neon cyan",
+      "outline": "00FFFF",
+      "fill": "006B7A",
+      "group": "neon"
+    },
+    {
+      "id": "neon-magenta",
+      "name": "Neon magenta",
+      "outline": "FF00FF",
+      "fill": "6A006A",
+      "group": "neon"
+    },
+    {
+      "id": "toxic-green",
+      "name": "Toxic green",
+      "outline": "AAFF00",
+      "fill": "3D5C00",
+      "group": "neon"
+    },
+    {
+      "id": "hot-coral",
+      "name": "Hot coral",
+      "outline": "FF6E8A",
+      "fill": "8A0F2E",
+      "group": "neon"
+    },
+    {
+      "id": "laser-purple",
+      "name": "Laser purple",
+      "outline": "9D4DFF",
+      "fill": "2E0066",
+      "group": "neon"
+    },
+    {
+      "id": "ultra-blue",
+      "name": "Ultra blue",
+      "outline": "4D7CFF",
+      "fill": "001A80",
+      "group": "neon"
+    },
+    {
+      "id": "neon-teal",
+      "name": "Neon teal",
+      "outline": "1DFFB0",
+      "fill": "00664A",
+      "group": "neon"
+    },
+    {
+      "id": "plasma-gold",
+      "name": "Plasma gold",
+      "outline": "FFD000",
+      "fill": "7A4A00",
+      "group": "neon"
+    },
+    {
+      "id": "synthwave",
+      "name": "Synthwave",
+      "outline": "FF3CAC",
+      "fill": "2B1A6B",
+      "group": "neon"
+    },
+    {
+      "id": "arctic-neon",
+      "name": "Arctic neon",
+      "outline": "8CFFFF",
+      "fill": "00527A",
+      "group": "neon"
+    },
+    {
       "id": "glacier",
       "name": "Glacier",
       "outline": "FFFFFF",
