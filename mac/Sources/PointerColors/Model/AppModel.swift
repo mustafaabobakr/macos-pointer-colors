@@ -96,6 +96,13 @@ final class AppModel {
         }
     }
 
+    /// Back to the macOS default size, leaving the colors alone.
+    func resetScale() {
+        setScale(SystemPointer.minimumScale)
+    }
+
+    var isDefaultScale: Bool { abs(scale - SystemPointer.minimumScale) < 0.01 }
+
     func copyHex(outline: Bool) {
         let hex = outline ? selectedPair.outline.hex : selectedPair.fill.hex
         NSPasteboard.general.clearContents()

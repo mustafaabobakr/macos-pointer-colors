@@ -69,6 +69,13 @@ struct MenuContentView: View {
             Text(String(format: "%.2f×", model.scale))
                 .font(.caption.monospacedDigit())
                 .frame(width: 40, alignment: .trailing)
+            Button { model.resetScale() } label: {
+                Image(systemName: "arrow.counterclockwise")
+            }
+            .buttonStyle(.borderless)
+            .disabled(model.isDefaultScale)
+            .help("Reset pointer size to default")
+            .accessibilityLabel("Reset pointer size to default")
         }
     }
 
