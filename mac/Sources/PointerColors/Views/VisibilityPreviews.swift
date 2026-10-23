@@ -48,10 +48,10 @@ enum PreviewBackground: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .lightPage: return "Light page"
-        case .darkApp: return "Dark app"
-        case .photo: return "Photo"
-        case .spreadsheet: return "Spreadsheet"
+        case .lightPage: return String(localized: "Light page")
+        case .darkApp: return String(localized: "Dark app")
+        case .photo: return String(localized: "Photo")
+        case .spreadsheet: return String(localized: "Spreadsheet")
         }
     }
 

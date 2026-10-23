@@ -15,6 +15,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/PointerColors" "$APP/Contents/MacOS/PointerColors"
 cp "$MAC_DIR/Resources/Info.plist" "$APP/Contents/Info.plist"
+cp -R "$MAC_DIR/Resources/en.lproj" "$MAC_DIR/Resources/ar.lproj" "$APP/Contents/Resources/"
 
 # Compile the Icon Composer icon: Assets.car carries the Liquid Glass version,
 # AppIcon.icns is the flat fallback for older macOS. Needs Xcode 26 or later.

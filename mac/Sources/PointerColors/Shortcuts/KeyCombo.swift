@@ -54,11 +54,11 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
-        case .nextPair: return "Apply the next pair"
-        case .previousPair: return "Apply the previous pair"
-        case .biggerPointer: return "Make the pointer bigger"
-        case .smallerPointer: return "Make the pointer smaller"
-        case .resetPointer: return "Reset to black and white, normal size"
+        case .nextPair: return String(localized: "Apply the next pair")
+        case .previousPair: return String(localized: "Apply the previous pair")
+        case .biggerPointer: return String(localized: "Make the pointer bigger")
+        case .smallerPointer: return String(localized: "Make the pointer smaller")
+        case .resetPointer: return String(localized: "Reset to black and white, normal size")
         }
     }
 }

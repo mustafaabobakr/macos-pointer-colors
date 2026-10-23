@@ -17,7 +17,7 @@ struct PairLink: Equatable {
               let fill = value("fill").flatMap(RGBA.init(hex:)) else { return nil }
         let trimmed = (value("name") ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         // Cap the length: the link comes from outside the app.
-        name = String((trimmed.isEmpty ? "From the website" : trimmed).prefix(40))
+        name = String((trimmed.isEmpty ? String(localized: "From the website") : trimmed).prefix(40))
         self.outline = outline
         self.fill = fill
     }

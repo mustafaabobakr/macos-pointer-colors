@@ -12,11 +12,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Links come from outside, so nothing is applied without the user saying so.
     private func confirm(_ link: PairLink) {
         let alert = NSAlert()
-        alert.messageText = "Add “\(link.name)” to Pointer Colors?"
-        alert.informativeText = "Outline \(link.outline.hex), fill \(link.fill.hex)."
-        alert.addButton(withTitle: "Add and Apply")
-        alert.addButton(withTitle: "Add")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = String(localized: "Add “\(link.name)” to Pointer Colors?")
+        alert.informativeText = String(localized: "Outline \(link.outline.hex), fill \(link.fill.hex).")
+        alert.addButton(withTitle: String(localized: "Add and Apply"))
+        alert.addButton(withTitle: String(localized: "Add"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         NSApp.activate()
         switch alert.runModal() {
         case .alertFirstButtonReturn: model.add(link, apply: true)

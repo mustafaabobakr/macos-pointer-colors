@@ -23,7 +23,20 @@ A small gallery of pointer outline and fill color pairs for macOS, with a live p
 
 ## Mac app (work in progress)
 
-`mac/` holds a native SwiftUI menu-bar app that applies pairs directly: pick a pair, drag the pointer size slider, add custom pairs, and set preferences.
+`mac/` holds a native SwiftUI menu-bar app that applies pairs directly.
+
+- Pick a pair and apply it, or add your own with color pickers
+- Pointer size slider with a reset button
+- Visibility previews on a light page, dark app, photo and spreadsheet
+- Contrast warning when a pair is hard to see on light or dark screens
+- Global keyboard shortcuts (none assigned until you record one)
+- Automation: one pair for light appearance and one for dark, a pointer size per display, and the "Shake mouse pointer to locate" toggle
+- "Add to Pointer Colors for Mac" on the website opens the app through `pointercolors://add` links
+- Text size setting for the app itself (Automatic uses Large on big screens)
+- Optional update check against GitHub Releases (off by default)
+- English and Arabic
+
+Building needs Xcode 26 or later (for the Liquid Glass icon):
 
 ```sh
 mac/scripts/build-app.sh

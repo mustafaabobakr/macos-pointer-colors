@@ -46,7 +46,7 @@ private struct AppearanceSection: View {
         }
     }
 
-    private func pairPicker(_ title: String, selection: Binding<String>) -> some View {
+    private func pairPicker(_ title: LocalizedStringKey, selection: Binding<String>) -> some View {
         Picker(title, selection: selection) {
             ForEach(pairs) { Text($0.name).tag($0.id) }
         }

@@ -28,10 +28,10 @@ extension AppModel {
     var updateMessage: String? {
         switch updateResult {
         case .none: return nil
-        case .upToDate: return "You're up to date."
-        case .available(let version, _): return "Version \(version) is available."
-        case .noReleases: return "No releases are published yet."
-        case .failed(let reason): return "Couldn't check: \(reason)"
+        case .upToDate: return String(localized: "You're up to date.")
+        case .available(let version, _): return String(localized: "Version \(version) is available.")
+        case .noReleases: return String(localized: "No releases are published yet.")
+        case .failed(let reason): return String(localized: "Couldn't check: \(reason)")
         }
     }
 

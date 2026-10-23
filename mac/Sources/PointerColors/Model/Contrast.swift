@@ -32,9 +32,9 @@ struct PairVisibility: Equatable {
     /// Nil when the pair is easy to see everywhere.
     var warning: String? {
         switch (hardOnLight, hardOnDark) {
-        case (true, true): return "Hard to see on light and dark screens"
-        case (true, false): return "Hard to see on light screens"
-        case (false, true): return "Hard to see on dark screens"
+        case (true, true): return String(localized: "Hard to see on light and dark screens")
+        case (true, false): return String(localized: "Hard to see on light screens")
+        case (false, true): return String(localized: "Hard to see on dark screens")
         case (false, false): return nil
         }
     }

@@ -15,7 +15,7 @@ struct CustomPairEditor: View {
         self.title = title
         self.onSave = onSave
         self.onCancel = onCancel
-        _name = State(initialValue: initial?.name ?? "My pair")
+        _name = State(initialValue: initial?.name ?? String(localized: "My pair"))
         _outline = State(initialValue: initial?.outline.color ?? .white)
         _fill = State(initialValue: initial?.fill.color ?? Color(red: 1, green: 0.435, blue: 0.659))
     }

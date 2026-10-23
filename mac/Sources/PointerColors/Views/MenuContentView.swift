@@ -16,7 +16,7 @@ struct MenuContentView: View {
             VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
             pairGrid
             if isAddingCustom {
-                CustomPairEditor(title: "New custom pair", initial: nil) { name, outline, fill in
+                CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
                     model.addCustom(name: name, outline: outline, fill: fill)
                     isAddingCustom = false
                 } onCancel: {
@@ -47,8 +47,8 @@ struct MenuContentView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(model.selectedPair.name).appFont(.title3, weight: .bold)
                 HStack(spacing: 6) {
-                    HexButton(label: "Outline", color: model.selectedPair.outline) { model.copyHex(outline: true) }
-                    HexButton(label: "Fill", color: model.selectedPair.fill) { model.copyHex(outline: false) }
+                    HexButton(label: String(localized: "Outline"), color: model.selectedPair.outline) { model.copyHex(outline: true) }
+                    HexButton(label: String(localized: "Fill"), color: model.selectedPair.fill) { model.copyHex(outline: false) }
                 }
                 Text(model.status.message)
                     .appFont(.caption)
@@ -131,15 +131,15 @@ struct MenuContentView: View {
 
     private var footer: some View {
         VStack(alignment: .leading, spacing: 2) {
-            MenuRow(title: "Preferences…", shortcut: "⌘,") {
+            MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
                 NSApp.activate()
                 openSettings()
             }
             .keyboardShortcut(",")
-            MenuRow(title: "Browse pairs on the website", shortcut: nil) {
+            MenuRow(title: String(localized: "Browse pairs on the website"), shortcut: nil) {
                 NSWorkspace.shared.open(URL(string: "https://macos-pointer-colors.pages.dev")!)
             }
-            MenuRow(title: "Quit Pointer Colors", shortcut: "⌘Q") { NSApp.terminate(nil) }
+            MenuRow(title: String(localized: "Quit Pointer Colors"), shortcut: "⌘Q") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
         }
     }

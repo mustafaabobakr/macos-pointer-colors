@@ -120,7 +120,7 @@ private struct PairsPreferences: View {
     }
 
     @ViewBuilder private var editor: some View {
-        CustomPairEditor(title: editing == nil ? "New custom pair" : "Edit pair", initial: editing) { name, outline, fill in
+        CustomPairEditor(title: editing == nil ? String(localized: "New custom pair") : String(localized: "Edit pair"), initial: editing) { name, outline, fill in
             if var pair = editing {
                 pair.name = name; pair.outline = outline; pair.fill = fill
                 model.updateCustom(pair)
@@ -147,7 +147,7 @@ private struct PairsPreferences: View {
             try model.importCustom(from: Data(contentsOf: url))
             errorMessage = nil
         } catch {
-            errorMessage = "Couldn't import that file: \(error.localizedDescription)"
+            errorMessage = String(localized: "Couldn't import that file: \(error.localizedDescription)")
         }
     }
 
@@ -160,7 +160,7 @@ private struct PairsPreferences: View {
             try model.exportCustom().write(to: url)
             errorMessage = nil
         } catch {
-            errorMessage = "Couldn't export: \(error.localizedDescription)"
+            errorMessage = String(localized: "Couldn't export: \(error.localizedDescription)")
         }
     }
 }

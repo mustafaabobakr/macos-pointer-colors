@@ -10,11 +10,11 @@ enum TextSize: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .automatic: return "Automatic"
-        case .standard: return "Default"
-        case .large: return "Large"
-        case .extraLarge: return "Extra large"
-        case .huge: return "Huge"
+        case .automatic: return String(localized: "Automatic")
+        case .standard: return String(localized: "Default")
+        case .large: return String(localized: "Large")
+        case .extraLarge: return String(localized: "Extra large")
+        case .huge: return String(localized: "Huge")
         }
     }
 

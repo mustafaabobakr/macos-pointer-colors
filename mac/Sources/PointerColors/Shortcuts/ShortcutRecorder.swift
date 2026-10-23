@@ -21,7 +21,7 @@ struct ShortcutRecorder: View {
                     .appFont(.caption, monospacedDigits: true)
                     .frame(minWidth: 110)
             }
-            .help(isRecording ? "Press a shortcut. Esc cancels, Delete clears." : "Click to record a shortcut")
+            .help(isRecording ? String(localized: "Press a shortcut. Esc cancels, Delete clears.") : String(localized: "Click to record a shortcut"))
             if combo != nil && !isRecording {
                 Button { onRecord(nil) } label: { Image(systemName: "xmark.circle.fill") }
                     .buttonStyle(.borderless)
@@ -36,8 +36,8 @@ struct ShortcutRecorder: View {
     }
 
     private var buttonTitle: String {
-        if isRecording { return "Type shortcut…" }
-        return combo?.displayString ?? "Record shortcut"
+        if isRecording { return String(localized: "Type shortcut…") }
+        return combo?.displayString ?? String(localized: "Record shortcut")
     }
 
     private func toggle() {
@@ -76,7 +76,7 @@ struct ShortcutRecorder: View {
 
     private func record(_ event: NSEvent) {
         guard let combo = KeyCombo(event: event) else {
-            hint = "Include ⌘, ⌥ or ⌃"
+            hint = String(localized: "Include ⌘, ⌥ or ⌃")
             return
         }
         hint = nil

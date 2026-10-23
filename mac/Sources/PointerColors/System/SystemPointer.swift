@@ -11,11 +11,11 @@ enum SystemPointerError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return "macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app."
+            return String(localized: "macOS blocked the change. Give Pointer Colors Full Disk Access, then reopen the app.")
         case .sizeAPIUnavailable:
-            return "This version of macOS doesn't offer live pointer size changes."
+            return String(localized: "This version of macOS doesn't offer live pointer size changes.")
         case .featureUnavailable:
-            return "This version of macOS doesn't offer that setting."
+            return String(localized: "This version of macOS doesn't offer that setting.")
         }
     }
 }

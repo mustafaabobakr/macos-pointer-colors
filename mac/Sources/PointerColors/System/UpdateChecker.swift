@@ -31,7 +31,7 @@ struct UpdateChecker {
     /// Pure decision logic, split out so it can be tested without the network.
     static func result(data: Data, status: Int, current: String) -> Result {
         if status == 404 { return .noReleases }
-        guard status == 200 else { return .failed("GitHub answered \(status).") }
+        guard status == 200 else { return .failed(String(localized: "GitHub answered \(status).")) }
         guard let release = try? JSONDecoder().decode(Release.self, from: data),
               let url = URL(string: release.htmlURL) else { return .failed("Couldn't read the release.") }
         let latest = release.tagName.trimmingCharacters(in: CharacterSet(charactersIn: "vV"))

@@ -10,9 +10,9 @@ enum ApplyStatus: Equatable {
 
     var message: String {
         switch self {
-        case .applied: return "Currently applied"
-        case .notApplied: return "Not applied yet"
-        case .copied(let what): return "\(what) copied"
+        case .applied: return String(localized: "Currently applied")
+        case .notApplied: return String(localized: "Not applied yet")
+        case .copied(let what): return String(localized: "\(what) copied")
         case .failed(let reason): return reason
         }
     }
@@ -155,7 +155,7 @@ final class AppModel {
         let hex = outline ? selectedPair.outline.hex : selectedPair.fill.hex
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(hex, forType: .string)
-        status = .copied("\(outline ? "Outline" : "Fill") \(hex)")
+        status = .copied("\(outline ? String(localized: "Outline") : String(localized: "Fill")) \(hex)")
     }
 
     func openFullDiskAccessSettings() {
@@ -166,7 +166,7 @@ final class AppModel {
     // MARK: Library
 
     func addCustom(name: String, outline: RGBA, fill: RGBA) {
-        let pair = PointerPair.custom(name: name.isEmpty ? "Custom" : name, outline: outline, fill: fill)
+        let pair = PointerPair.custom(name: name.isEmpty ? String(localized: "Custom") : name, outline: outline, fill: fill)
         library.add(pair)
         select(pair)
     }
@@ -210,7 +210,7 @@ final class AppModel {
         do {
             try settings.setLaunchAtLogin(enabled)
         } catch {
-            status = .failed("Couldn't change Launch at login: \(error.localizedDescription)")
+            status = .failed(String(localized: "Couldn't change Launch at login: \(error.localizedDescription)"))
         }
         launchAtLogin = settings.launchAtLogin
     }
