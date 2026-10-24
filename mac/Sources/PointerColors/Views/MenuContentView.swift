@@ -44,7 +44,7 @@ struct MenuContentView: View {
                 .disabled(model.needsFullDiskAccess)
             AppColorsIndicator(automation: model.automation)
                 .disabled(model.needsFullDiskAccess)
-            HighlightMenuRow(highlight: model.highlight)
+            HighlightMenuSection(highlight: model.highlight)
             Divider()
             footer
         }
@@ -284,50 +284,33 @@ private struct PairTile: View {
     }
 }
 
-/// Pulse and laser switches, one click each from the menu; both can be on. The details are in
-/// Preferences › Highlight.
-private struct HighlightMenuRow: View {
+/// Pulse and laser switches in the menu, styled like its other switches; both can be on. The
+/// details are in Preferences › Highlight.
+private struct HighlightMenuSection: View {
     let highlight: PointerHighlight
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text("Highlight").appFont(.caption)
-            Spacer(minLength: 4)
+        VStack(alignment: .leading, spacing: 6) {
+            Text("HIGHLIGHT").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
             ForEach(HighlightEffect.allCases) { effect in
-                HighlightChip(effect: effect, isOn: highlight.isOn(effect)) {
-                    highlight.setOn(!highlight.isOn(effect), effect)
-                }
+                Toggle(effect.menuTitle, isOn: Binding(get: { highlight.isOn(effect) },
+                                                       set: { highlight.setOn($0, effect) }))
+                    .toggleStyle(.switch).controlSize(.mini)
+                    .appFont(.caption)
+                    .help(effect.menuHelp)
             }
         }
     }
 }
 
-/// A small capsule switch: filled with a check when on, outlined when off.
-private struct HighlightChip: View {
-    let effect: HighlightEffect
-    let isOn: Bool
-    let action: () -> Void
+private extension HighlightEffect {
+    var menuTitle: String {
+        self == .pulse ? String(localized: "Pulse on each click") : String(localized: "Laser pointer")
+    }
 
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: isOn ? "checkmark" : effect.systemImage)
-                    .font(.system(size: 9, weight: .bold))
-                Text(effect.title).appFont(.caption, weight: .medium)
-            }
-            .padding(.horizontal, 9)
-            .padding(.vertical, 3)
-            .foregroundStyle(isOn ? Color.white : Color.secondary)
-            .background(Capsule().fill(isOn ? Color.accentColor : Color.primary.opacity(0.06)))
-            .overlay(Capsule().stroke(isOn ? Color.clear : Color.primary.opacity(0.18), lineWidth: 1))
-            .contentShape(Capsule())
-        }
-        .buttonStyle(.plain)
-        .help(effect == .pulse ? String(localized: "A ring where you click")
-                               : String(localized: "A glowing dot, and a trail as you drag"))
-        .accessibilityLabel(effect.title)
-        .accessibilityValue(isOn ? String(localized: "On") : String(localized: "Off"))
-        .accessibilityAddTraits(isOn ? .isSelected : [])
+    var menuHelp: String {
+        self == .pulse ? String(localized: "A ring where you click")
+                       : String(localized: "A glowing dot, and a trail as you drag")
     }
 }
 

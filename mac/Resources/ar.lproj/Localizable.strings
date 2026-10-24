@@ -122,6 +122,9 @@
 "Laser" = "ليزر";
 "Click a picture to turn it on or off. Use one, both, or neither." = "انقر صورة لتشغيلها أو إيقافها. استخدم واحدة أو الاثنتين أو لا شيء.";
 "A ring where you click" = "حلقة حيث تنقر";
+"HIGHLIGHT" = "الإبراز";
+"Pulse on each click" = "نبضة عند كل نقرة";
+"Laser pointer" = "مؤشر ليزر";
 "A glowing dot, and a trail as you drag" = "نقطة متوهجة وأثر أثناء السحب";
 "On" = "تشغيل";
 "Ring around the pointer" = "حلقة حول المؤشر";
