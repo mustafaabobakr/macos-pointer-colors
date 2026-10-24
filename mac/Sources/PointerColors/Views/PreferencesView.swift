@@ -2,24 +2,88 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct PreferencesView: View {
+    static let windowID = "preferences"
+
     let model: AppModel
 
+    @State private var tab: PreferencesTab = .general
+
     var body: some View {
-        TabView {
-            GeneralPreferences(model: model)
-                .tabItem { Label("General", systemImage: "gearshape") }
-            PairsPreferences(model: model)
-                .tabItem { Label("Pairs", systemImage: "cursorarrow") }
-            AutomationPreferences(model: model)
-                .tabItem { Label("Automation", systemImage: "wand.and.stars") }
-            ShortcutsPreferences(model: model)
-                .tabItem { Label("Shortcuts", systemImage: "command") }
-            AboutPreferences(model: model)
-                .tabItem { Label("About", systemImage: "info.circle") }
+        VStack(spacing: 0) {
+            PreferencesTabBar(selection: $tab)
+            Divider()
+            tabContent.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(width: 560 * model.textScale, height: 520 * model.textScale)
+        // Fixed width, resizable height: drag the window taller to see more of a long tab.
+        .frame(width: 560 * model.textScale)
+        .frame(minHeight: 380 * model.textScale, idealHeight: 520 * model.textScale, maxHeight: .infinity)
         .appTextScale(model.textScale)
         .preferredColorScheme(model.colorScheme)
+    }
+
+    @ViewBuilder private var tabContent: some View {
+        switch tab {
+        case .general: GeneralPreferences(model: model)
+        case .pairs: PairsPreferences(model: model)
+        case .automation: AutomationPreferences(model: model)
+        case .shortcuts: ShortcutsPreferences(model: model)
+        case .about: AboutPreferences(model: model)
+        }
+    }
+}
+
+private enum PreferencesTab: CaseIterable, Identifiable {
+    case general, pairs, automation, shortcuts, about
+
+    var id: Self { self }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .general: "General"
+        case .pairs: "Pairs"
+        case .automation: "Automation"
+        case .shortcuts: "Shortcuts"
+        case .about: "About"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .general: "gearshape"
+        case .pairs: "cursorarrow"
+        case .automation: "wand.and.stars"
+        case .shortcuts: "command"
+        case .about: "info.circle"
+        }
+    }
+}
+
+/// Icon-over-label tabs, like a Settings window's toolbar. A plain window draws TabView as text
+/// tabs, and this window can't be a Settings window, which SwiftUI keeps at a fixed size.
+private struct PreferencesTabBar: View {
+    @Binding var selection: PreferencesTab
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(PreferencesTab.allCases) { tab in
+                Button { selection = tab } label: {
+                    VStack(spacing: 3) {
+                        Image(systemName: tab.symbol).font(.system(size: 18)).frame(height: 22)
+                        Text(tab.title).appFont(.caption)
+                    }
+                    .frame(minWidth: 64)
+                    .padding(.vertical, 6).padding(.horizontal, 6)
+                    .foregroundStyle(selection == tab ? Color.accentColor : .secondary)
+                    .background(selection == tab ? Color.primary.opacity(0.08) : .clear,
+                                in: RoundedRectangle(cornerRadius: 7))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selection == tab ? .isSelected : [])
+            }
+        }
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -248,7 +312,10 @@ private struct AboutPreferences: View {
             Divider().frame(maxWidth: 300).padding(.vertical, 6)
             UpdateSection(model: model)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        // Scrolls, so the window can be made shorter than this tab's content.
+        .scrollableIfNeeded()
     }
 }
 
@@ -278,6 +345,16 @@ private struct UpdateSection: View {
             }
             .fixedSize()
             .onChange(of: schedule) { model.updateSchedule = schedule }
+        }
+    }
+}
+
+private extension View {
+    /// Centred when it fits, scrolling when the window is shorter than the content.
+    func scrollableIfNeeded() -> some View {
+        ViewThatFits(in: .vertical) {
+            self.frame(maxHeight: .infinity)
+            ScrollView { self }
         }
     }
 }

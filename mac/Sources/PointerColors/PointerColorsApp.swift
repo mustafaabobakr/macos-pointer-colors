@@ -14,8 +14,11 @@ struct PointerColorsApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        Settings {
+        // A plain window rather than a Settings scene: SwiftUI keeps a Settings window at a fixed
+        // size, and this one should be resizable in height.
+        Window(String(localized: "Preferences"), id: PreferencesView.windowID) {
             PreferencesView(model: model)
         }
+        .windowResizability(.contentMinSize)
     }
 }

@@ -5,7 +5,7 @@ struct MenuContentView: View {
     @Bindable var model: AppModel
     @State private var isAddingCustom = false
     @State private var editingPair: PointerPair?
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
@@ -201,7 +201,7 @@ struct MenuContentView: View {
         VStack(alignment: .leading, spacing: 2) {
             MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
                 NSApp.activate()
-                openSettings()
+                openWindow(id: PreferencesView.windowID)
             }
             .keyboardShortcut(",")
             MenuRow(title: model.updateActionTitle, subtitle: model.menuUpdateLine, shortcut: nil) {
