@@ -52,7 +52,11 @@ struct MenuContentView: View {
         .frame(width: 380 * scale)
         .appTextScale(scale)
         .preferredColorScheme(model.colorScheme)
-        .onAppear { model.refreshFromSystem() }
+        .onAppear {
+            model.refreshFromSystem()
+            model.menuOpened()
+        }
+        .onDisappear { model.menuClosed() }
     }
 
     private var scale: CGFloat { model.textScale }

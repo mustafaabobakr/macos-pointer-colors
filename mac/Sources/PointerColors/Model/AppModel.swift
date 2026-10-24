@@ -68,6 +68,8 @@ final class AppModel {
     var isInstallingUpdate = false
     /// Why the last in-place install failed, until the next check.
     var updateInstallError: String?
+    /// The last check that reached GitHub, reused when the menu opens again soon after.
+    @ObservationIgnored var lastUpdateCheck: (date: Date, result: UpdateChecker.Result)?
     var shortcuts: [ShortcutAction: KeyCombo] = [:]
     var shortcutConflicts: Set<ShortcutAction> = []
 
