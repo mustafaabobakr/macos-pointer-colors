@@ -337,6 +337,9 @@ private struct UpdateSection: View {
             if let message = model.updateMessage {
                 Text(message).appFont(.caption).foregroundStyle(.secondary)
             }
+            if let update = model.availableUpdateNotes {
+                ReleaseNotesView(version: update.version, notes: update.notes, height: 160)
+            }
             if let url = model.availableUpdateURL {
                 Link("Download the new version", destination: url)
             }

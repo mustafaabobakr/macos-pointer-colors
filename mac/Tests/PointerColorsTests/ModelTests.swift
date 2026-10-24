@@ -125,7 +125,7 @@ final class UpdateCheckerTests: XCTestCase {
     func testReadsGitHubRelease() {
         let json = #"{"tag_name":"v0.2.0","html_url":"https://github.com/x/y/releases/tag/v0.2.0"}"#.data(using: .utf8)!
         let result = UpdateChecker.result(data: json, status: 200, current: "0.1.0")
-        XCTAssertEqual(result, .available(version: "0.2.0", url: URL(string: "https://github.com/x/y/releases/tag/v0.2.0")!, download: nil))
+        XCTAssertEqual(result, .available(version: "0.2.0", url: URL(string: "https://github.com/x/y/releases/tag/v0.2.0")!, download: nil, notes: nil))
         XCTAssertEqual(UpdateChecker.result(data: json, status: 200, current: "0.2.0"), .upToDate)
     }
 
@@ -138,7 +138,24 @@ final class UpdateCheckerTests: XCTestCase {
         let result = UpdateChecker.result(data: json, status: 200, current: "0.2.0")
         XCTAssertEqual(result, .available(version: "0.3.0",
                                           url: URL(string: "https://github.com/x/y/releases/tag/v0.3.0")!,
-                                          download: URL(string: "https://github.com/x/y/releases/download/v0.3.0/Pointer-Colors.dmg")!))
+                                          download: URL(string: "https://github.com/x/y/releases/download/v0.3.0/Pointer-Colors.dmg")!,
+                                          notes: nil))
+    }
+
+    func testWhatsNewStopsAtTheInstallInstructions() {
+        let body = """
+        **Pointer Colors 0.3.3** adds things.
+
+        - **One thing.** Details.
+
+        **Updating from 0.3.0:** open the menu.
+
+        **Install:** open the DMG.
+        """
+        XCTAssertEqual(UpdateChecker.whatsNew(in: body), "**Pointer Colors 0.3.3** adds things.\n\n- **One thing.** Details.")
+        XCTAssertEqual(UpdateChecker.whatsNew(in: "Just notes."), "Just notes.")
+        XCTAssertNil(UpdateChecker.whatsNew(in: "**Install:** open the DMG."))
+        XCTAssertNil(UpdateChecker.whatsNew(in: nil))
     }
 
     func testMissingReleasesAndErrors() {

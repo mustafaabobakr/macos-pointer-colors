@@ -108,19 +108,25 @@ extension AppModel {
         switch updateResult {
         case .none: return nil
         case .upToDate: return String(localized: "You're up to date (\(UpdateChecker().currentVersion)).")
-        case .available(let version, _, _): return String(localized: "Version \(version) is available.")
+        case .available(let version, _, _, _): return String(localized: "Version \(version) is available.")
         case .noReleases: return String(localized: "No releases are published yet.")
         case .failed(let reason): return String(localized: "Couldn't check: \(reason)")
         }
     }
 
     var availableUpdateURL: URL? {
-        if case .available(_, let url, _) = updateResult { return url }
+        if case .available(_, let url, _, _) = updateResult { return url }
         return nil
     }
 
     var availableUpdateDownload: URL? {
-        if case .available(_, _, let download) = updateResult { return download }
+        if case .available(_, _, let download, _) = updateResult { return download }
         return nil
+    }
+
+    /// What changed in the available version, for the menu and Preferences.
+    var availableUpdateNotes: (version: String, notes: String)? {
+        guard case .available(let version, _, _, let notes?) = updateResult else { return nil }
+        return (version, notes)
     }
 }

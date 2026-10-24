@@ -208,6 +208,10 @@ struct MenuContentView: View {
                 model.performUpdateAction()
             }
             .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
+            if let update = model.availableUpdateNotes {
+                ReleaseNotesView(version: update.version, notes: update.notes, height: 110 * scale)
+                    .padding(.horizontal, 6).padding(.bottom, 4)
+            }
             MenuRow(title: String(localized: "Browse pairs on the website"), shortcut: nil) {
                 NSWorkspace.shared.open(URL(string: "https://macos-pointer-colors.pages.dev")!)
             }

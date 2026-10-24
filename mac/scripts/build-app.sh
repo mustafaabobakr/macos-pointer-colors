@@ -12,8 +12,12 @@ cd "$MAC_DIR"
 # the SDK, and AppKit then draws pre-Liquid Glass controls for compatibility.
 SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
 LINK_FLAGS="-Xlinker -platform_version -Xlinker macos -Xlinker 14.0 -Xlinker $SDK_VERSION"
-swift build -c "$CONFIG" $LINK_FLAGS
-BIN_DIR="$(swift build -c "$CONFIG" $LINK_FLAGS --show-bin-path)"
+# Universal: one binary for Apple silicon and Intel Macs. Override with ARCHS="arm64" for a quicker
+# local build.
+ARCH_FLAGS=""
+for arch in ${ARCHS:-arm64 x86_64}; do ARCH_FLAGS="$ARCH_FLAGS --arch $arch"; done
+swift build -c "$CONFIG" $ARCH_FLAGS $LINK_FLAGS
+BIN_DIR="$(swift build -c "$CONFIG" $ARCH_FLAGS $LINK_FLAGS --show-bin-path)"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
@@ -50,4 +54,4 @@ codesign --force --sign "$IDENTITY" --options runtime "$APP"
 touch "$APP"
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$APP"
 
-echo "Built: $APP"
+echo "Built: $APP ($(lipo -archs "$APP/Contents/MacOS/PointerColors"))"
