@@ -19,14 +19,15 @@ struct HighlightDemoPad: View {
         .onContinuousHover(coordinateSpace: .local, perform: hovered)
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local).onChanged(dragged).onEnded(ended))
         .onAppear { scene.style = style }
-        .onChange(of: highlight.mode) { scene.clear() }
+        .onChange(of: highlight.pulseOn) { scene.clear() }
+        .onChange(of: highlight.laserOn) { scene.clear() }
         .task { await pruneWhileShown() }
         .accessibilityLabel("Highlight demo")
     }
 
     private var hint: String {
-        highlight.mode == .off && !highlight.showsRing
-            ? String(localized: "Choose Pulse or Laser below, then try it here.")
+        !highlight.isActive
+            ? String(localized: "Turn on Pulse or Laser above, then try it here.")
             : String(localized: "Move, click and drag here to try it.")
     }
 

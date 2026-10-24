@@ -120,7 +120,7 @@ final class HighlightOverlay {
         default: scene.move(to: point, now: now, settings: settings)
         }
         // A plain move changes nothing on screen unless the ring or the laser follows it.
-        guard scene.style.showsRing || settings.mode == .laser || type != .mouseMoved else { return }
+        guard scene.style.showsRing || settings.laserOn || type != .mouseMoved else { return }
         scene.revision += 1
     }
 
@@ -195,22 +195,22 @@ final class HighlightScene {
     /// The laser dot follows the pointer.
     func move(to point: CGPoint, now: TimeInterval, settings: PointerHighlight) {
         pointer = point
-        guard settings.mode == .laser else { return }
+        guard settings.laserOn else { return }
         laserDot = LaserDot(point: point, updatedAt: now)
     }
 
     /// Dragging moves the dot and, with the trail on, draws.
     func drag(to point: CGPoint, now: TimeInterval, settings: PointerHighlight) {
         move(to: point, now: now, settings: settings)
-        guard settings.mode == .laser, settings.laserTrail else { return }
+        guard settings.laserOn, settings.laserTrail else { return }
         extendStroke(to: point)
     }
 
-    /// A click starts a pulse, or a laser trail with the left button.
+    /// A click starts a pulse, and a laser trail with the left button; both when both are on.
     func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, settings: PointerHighlight) {
         pointer = point
-        if settings.mode == .laser, settings.laserTrail, isLeft { startStroke(at: point) }
-        guard settings.mode == .pulse, isLeft || settings.pulsesOnRightClick else { return }
+        if settings.laserOn, settings.laserTrail, isLeft { startStroke(at: point) }
+        guard settings.pulseOn, isLeft || settings.pulsesOnRightClick else { return }
         pulses.append(Pulse(point: point, start: now))
     }
 

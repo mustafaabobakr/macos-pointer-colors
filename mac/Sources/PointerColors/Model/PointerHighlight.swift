@@ -1,9 +1,8 @@
 import Foundation
 import Observation
 
-/// What happens on screen as you click and drag, for demos and recordings.
-enum HighlightMode: String, CaseIterable, Identifiable {
-    case off
+/// The two highlight effects. Each has its own switch, so either, both or neither can be on.
+enum HighlightEffect: String, CaseIterable, Identifiable {
     /// A ring that grows and fades where you click.
     case pulse
     /// A glowing dot that follows the pointer, and a fading trail while you drag.
@@ -13,9 +12,15 @@ enum HighlightMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .off: return String(localized: "Off")
         case .pulse: return String(localized: "Pulse")
         case .laser: return String(localized: "Laser")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .pulse: return "circle.dashed"
+        case .laser: return "scribble"
         }
     }
 }
@@ -24,7 +29,8 @@ enum HighlightMode: String, CaseIterable, Identifiable {
 @MainActor
 @Observable
 final class PointerHighlight {
-    var mode: HighlightMode { didSet { save(mode.rawValue, Key.mode) } }
+    var pulseOn: Bool { didSet { save(pulseOn, Key.pulseOn) } }
+    var laserOn: Bool { didSet { save(laserOn, Key.laserOn) } }
     /// A ring that stays around the pointer, on its own or together with a mode.
     var showsRing: Bool { didSet { save(showsRing, Key.ring) } }
 
@@ -58,7 +64,10 @@ final class PointerHighlight {
         defaults.register(defaults: [Key.pulsePair: true, Key.pulseSize: 1.0, Key.pulseDuration: 0.45,
                                      Key.pulseRight: true, Key.laserPair: true, Key.laserSize: 1.0,
                                      Key.laserTrail: true, Key.laserFade: 0.9])
-        mode = defaults.string(forKey: Key.mode).flatMap(HighlightMode.init(rawValue:)) ?? .off
+        // Builds before the switches stored one choice: off, pulse or laser.
+        let earlier = defaults.string(forKey: Key.oldMode)
+        pulseOn = defaults.object(forKey: Key.pulseOn) as? Bool ?? (earlier == "pulse")
+        laserOn = defaults.object(forKey: Key.laserOn) as? Bool ?? (earlier == "laser")
         showsRing = defaults.bool(forKey: Key.ring)
         pulseUsesPairColor = defaults.bool(forKey: Key.pulsePair)
         pulseColor = Self.color(defaults, Key.pulseColor) ?? RGBA(hex: "FF9F0A")!
@@ -73,7 +82,15 @@ final class PointerHighlight {
     }
 
     /// True when anything needs the overlay.
-    var isActive: Bool { showsRing || mode != .off }
+    var isActive: Bool { showsRing || pulseOn || laserOn }
+
+    func isOn(_ effect: HighlightEffect) -> Bool {
+        effect == .pulse ? pulseOn : laserOn
+    }
+
+    func setOn(_ on: Bool, _ effect: HighlightEffect) {
+        if effect == .pulse { pulseOn = on } else { laserOn = on }
+    }
 
     /// The pulse color: the pair's outline unless overridden.
     func pulseColor(for pair: PointerPair) -> RGBA {
@@ -99,7 +116,9 @@ final class PointerHighlight {
     }
 
     private enum Key {
-        static let mode = "highlightMode"
+        static let oldMode = "highlightMode"
+        static let pulseOn = "highlightPulse"
+        static let laserOn = "highlightLaser"
         static let ring = "highlightRing"
         static let pulsePair = "highlightPulseUsesPair"
         static let pulseColor = "highlightPulseColor"

@@ -284,21 +284,25 @@ private struct PairTile: View {
     }
 }
 
-/// Off, pulse or laser, one click from the menu. The details are in Preferences › Highlight.
+/// Pulse and laser switches, one click each from the menu; both can be on. The details are in
+/// Preferences › Highlight.
 private struct HighlightMenuRow: View {
-    @Bindable var highlight: PointerHighlight
+    let highlight: PointerHighlight
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Text("Highlight").appFont(.caption)
             Spacer(minLength: 4)
-            Picker("Highlight", selection: $highlight.mode) {
-                ForEach(HighlightMode.allCases) { Text($0.title).tag($0) }
+            ForEach(HighlightEffect.allCases) { effect in
+                Toggle(isOn: Binding(get: { highlight.isOn(effect) }, set: { highlight.setOn($0, effect) })) {
+                    Label(effect.title, systemImage: effect.systemImage).appFont(.caption)
+                }
+                .toggleStyle(.button)
+                .controlSize(.small)
+                .tint(.accentColor)
+                .help(effect == .pulse ? String(localized: "A ring where you click")
+                                       : String(localized: "A glowing dot, and a trail as you drag"))
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .controlSize(.small)
-            .fixedSize()
         }
     }
 }

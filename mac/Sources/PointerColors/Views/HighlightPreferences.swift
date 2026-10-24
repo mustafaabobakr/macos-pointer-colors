@@ -12,15 +12,13 @@ struct HighlightPreferences: View {
     var body: some View {
         Form {
             Section {
-                HighlightPreviewCards(mode: highlight.mode, style: style, pair: pair)
-                HighlightDemoPad(highlight: highlight, style: style)
-                Picker(selection: $highlight.mode) {
-                    ForEach(HighlightMode.allCases) { Text($0.title).tag($0) }
-                } label: {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Highlight")
-                    Text("Pulse marks each click. Laser leaves a glowing dot and a trail as you drag.")
+                    Text("Click a picture to turn it on or off. Use one, both, or neither.")
+                        .appFont(.caption).foregroundStyle(.secondary)
                 }
-                .pickerStyle(.segmented)
+                HighlightPreviewCards(highlight: highlight, style: style, pair: pair)
+                HighlightDemoPad(highlight: highlight, style: style)
                 Toggle(isOn: $highlight.showsRing) {
                     Text("Ring around the pointer")
                     Text("Makes the pointer easy to follow. Works with any highlight, or on its own.")
@@ -46,7 +44,7 @@ private struct PulseSection: View {
                         range: PointerHighlight.pulseDurationRange, format: "%.2f s")
             Toggle("Pulse on right-clicks too", isOn: $highlight.pulsesOnRightClick)
         }
-        .disabled(highlight.mode != .pulse)
+        .disabled(!highlight.pulseOn)
     }
 }
 
@@ -67,7 +65,7 @@ private struct LaserSection: View {
                         range: PointerHighlight.trailFadeRange, format: "%.1f s")
                 .disabled(!highlight.laserTrail)
         }
-        .disabled(highlight.mode != .laser)
+        .disabled(!highlight.laserOn)
     }
 }
 

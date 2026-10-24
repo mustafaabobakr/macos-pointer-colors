@@ -120,7 +120,10 @@
 "Off" = "إيقاف";
 "Pulse" = "نبضة";
 "Laser" = "ليزر";
-"Pulse marks each click. Laser leaves a glowing dot and a trail as you drag." = "تُبرز النبضة كل نقرة. ويترك الليزر نقطة متوهجة وأثرًا أثناء السحب.";
+"Click a picture to turn it on or off. Use one, both, or neither." = "انقر صورة لتشغيلها أو إيقافها. استخدم واحدة أو الاثنتين أو لا شيء.";
+"A ring where you click" = "حلقة حيث تنقر";
+"A glowing dot, and a trail as you drag" = "نقطة متوهجة وأثر أثناء السحب";
+"On" = "تشغيل";
 "Ring around the pointer" = "حلقة حول المؤشر";
 "Makes the pointer easy to follow. Works with any highlight, or on its own." = "تجعل متابعة المؤشر سهلة. تعمل مع أي إبراز أو وحدها.";
 "Uses the outline of the pair on screen." = "يستخدم لون حدود الزوج المطبَّق.";
@@ -135,10 +138,9 @@
 "Draw a trail while dragging" = "رسم أثر أثناء السحب";
 "Hold the mouse button and move to draw; the trail fades after you let go." = "اضغط زر الفأرة مع التحريك للرسم، ويتلاشى الأثر بعد الإفلات.";
 "Trail fades after" = "يتلاشى الأثر بعد";
-"Choose Pulse or Laser below, then try it here." = "اختر النبضة أو الليزر أدناه، ثم جرّبه هنا.";
+"Turn on Pulse or Laser above, then try it here." = "شغّل النبضة أو الليزر أعلاه، ثم جرّبه هنا.";
 "Move, click and drag here to try it." = "حرّك المؤشر وانقر واسحب هنا للتجربة.";
 "Highlight demo" = "تجربة الإبراز";
-"%@ preview" = "معاينة %@";
 "Website" = "الموقع";
 "GitHub" = "GitHub";
 "Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display." = "يغيّر إعدادات حدود المؤشر وتعبئته وحجمه نفسها الموجودة في إعدادات النظام › تسهيلات الاستخدام › الشاشة.";

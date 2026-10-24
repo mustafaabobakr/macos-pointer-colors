@@ -1,38 +1,56 @@
 import SwiftUI
 
 /// Still pictures of the pulse and the laser with the current colors and settings, drawn by the
-/// same code as the real overlay. The selected one is outlined.
+/// same code as the real overlay. Each is also its switch: click to turn it on or off.
 struct HighlightPreviewCards: View {
-    let mode: HighlightMode
+    let highlight: PointerHighlight
     let style: HighlightStyle
     let pair: PointerPair
 
     var body: some View {
         HStack(spacing: 10) {
-            card(.pulse)
-            card(.laser)
+            ForEach(HighlightEffect.allCases) { card($0) }
         }
     }
 
-    private func card(_ kind: HighlightMode) -> some View {
-        VStack(spacing: 4) {
-            HighlightPreviewImage(kind: kind, style: style, pair: pair)
-                .frame(height: 96)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(kind == mode ? Color.accentColor : .clear, lineWidth: 2)
-                }
-            Text(kind.title).appFont(.caption).foregroundStyle(kind == mode ? .primary : .secondary)
+    private func card(_ effect: HighlightEffect) -> some View {
+        let isOn = highlight.isOn(effect)
+        return Button { highlight.setOn(!isOn, effect) } label: {
+            VStack(spacing: 4) {
+                HighlightPreviewImage(kind: effect, style: style, pair: pair)
+                    .frame(height: 96)
+                    .opacity(isOn ? 1 : 0.45)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(isOn ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: isOn ? 2 : 1)
+                    }
+                    .overlay(alignment: .topTrailing) { badge(isOn) }
+                Label(effect.title, systemImage: effect.systemImage)
+                    .appFont(.caption, weight: isOn ? .semibold : .regular)
+                    .foregroundStyle(isOn ? .primary : .secondary)
+            }
+            .contentShape(Rectangle())
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(kind.title) preview")
+        .buttonStyle(.plain)
+        .accessibilityLabel(effect.title)
+        .accessibilityValue(isOn ? String(localized: "On") : String(localized: "Off"))
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+
+    /// A check when on, an empty circle when off, like a checkbox on the picture.
+    private func badge(_ isOn: Bool) -> some View {
+        Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(isOn ? Color.accentColor : .white.opacity(0.6))
+            .background(Circle().fill(isOn ? .white : .clear).padding(2))
+            .padding(6)
     }
 }
 
 /// One frozen frame: three pulses fading at different stages, or a laser trail with its dot.
 private struct HighlightPreviewImage: View {
-    let kind: HighlightMode
+    let kind: HighlightEffect
     let style: HighlightStyle
     let pair: PointerPair
 
