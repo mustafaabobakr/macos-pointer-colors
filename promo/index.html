@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pointer Colors: promo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  The promo film. Everything on screen is a function of one time value: seek(t) draws the frame
+  at t seconds. Open this file to watch it (space plays/pauses, the bar scrubs); render.mjs steps
+  through it frame by frame and encodes the MP4. No animation here runs on its own clock.
+-->
+<style>
+:root{--ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;--display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body{display:grid;place-items:center}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#050608;font-family:var(--ui);transform-origin:center;flex:none}
+#bg{position:absolute;inset:0;background:radial-gradient(60% 70% at 50% 35%,#16202a 0%,#07090c 60%,#030405 100%)}
+#glow{position:absolute;inset:-20%;background:radial-gradient(30% 30% at 50% 45%,var(--g,#00FFDA),transparent 70%);opacity:0;filter:blur(80px)}
+#scene{position:absolute;inset:0;perspective:1800px;perspective-origin:50% 50%}
+#world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
+.obj{position:absolute;left:0;top:0;transform-style:preserve-3d}
+
+/* ---------- MacBook Pro ---------- */
+.lid{position:absolute;width:1560px;height:1012px;border-radius:38px 38px 14px 14px;background:linear-gradient(#0d0d0f,#111114);box-shadow:inset 0 0 0 2px #2a2b30,inset 0 0 0 4px #050506;transform-style:preserve-3d}
+.lid .screen{position:absolute;left:24px;top:30px;width:1512px;height:945px;border-radius:12px;overflow:hidden;background:#000}
+.lid .notch{position:absolute;left:50%;top:30px;width:200px;height:32px;margin-left:-100px;background:#0b0b0d;border-radius:0 0 14px 14px;z-index:5}
+.lid .back{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,#3a3b40,#26272b);transform:translateZ(-14px) rotateY(180deg);backface-visibility:hidden}
+.lid .edge{position:absolute;left:0;bottom:-7px;width:100%;height:14px;background:linear-gradient(#3b3c41,#1d1e21);transform:rotateX(90deg);transform-origin:top}
+.base{position:absolute;width:1640px;height:1100px;border-radius:14px 14px 40px 40px;background:linear-gradient(#34353a,#2a2b2f 40%,#232428);transform-origin:top center;transform:rotateX(90deg);box-shadow:inset 0 2px 0 #4a4b51}
+.base .keys{position:absolute;left:150px;top:60px;width:1340px;height:540px;border-radius:18px;background:repeating-linear-gradient(90deg,#141518 0 86px,#1f2024 86px 92px),#141518;opacity:.92}
+.base .keys::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,transparent 0 84px,#26272b 84px 92px)}
+.base .pad{position:absolute;left:470px;top:660px;width:700px;height:400px;border-radius:22px;background:linear-gradient(#2e2f34,#27282c);box-shadow:inset 0 0 0 2px #3a3b40}
+.base .lip{position:absolute;left:0;bottom:-10px;width:100%;height:20px;background:#17181b;transform:rotateX(-90deg);transform-origin:top}
+
+/* ---------- External displays ---------- */
+.mon .frame{position:absolute;width:2444px;height:1394px;border-radius:22px;background:#0b0c0e;box-shadow:inset 0 0 0 3px #2c2d32;transform-style:preserve-3d}
+.mon .screen{position:absolute;left:22px;top:22px;width:2400px;height:1350px;border-radius:6px;overflow:hidden;background:#000}
+.mon .off{position:absolute;left:22px;top:22px;transform:translateZ(2px);width:2400px;height:1350px;border-radius:6px;background:#020203;pointer-events:none}
+.mon .frame .back{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,#d9dadd,#9fa1a6);transform:translateZ(-40px) rotateY(180deg);backface-visibility:hidden}
+.mon .neck{position:absolute;width:240px;height:620px;background:linear-gradient(90deg,#9a9ca1,#d6d7da 45%,#8d8f94);border-radius:10px;transform:translateZ(-60px)}
+.mon .foot{position:absolute;width:820px;height:520px;border-radius:30px;background:linear-gradient(#cfd0d3,#a8aaae);transform-origin:top center;transform:rotateX(90deg)}
+
+/* ---------- Desk ---------- */
+.desk-plane{position:absolute;width:12000px;height:7000px;transform-origin:top center;transform:rotateX(90deg);background:radial-gradient(40% 45% at 50% 22%,#262b33 0%,#14171c 55%,#07080a 100%)}
+
+/* ---------- macOS desktop ---------- */
+.dt{position:absolute;inset:0;overflow:hidden}
+.wp{position:absolute;inset:0}
+.wp.light{opacity:0}
+.mb{position:absolute;left:0;right:0;top:0;height:30px;display:flex;align-items:center;gap:22px;padding:0 18px;font:500 14px var(--ui);color:#fff;background:rgba(0,0,0,.18);z-index:3}
+.mb b{font-weight:700}
+.mb .apple{font-size:17px}
+.mb .sp{flex:1}
+.mb .icon{display:flex;align-items:center;justify-content:center;width:32px;height:24px;border-radius:6px}
+.mb .icon svg{width:13px;height:17px}
+.mb .glyph{opacity:.95;font-size:14px}
+.dock{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:10px;padding:9px 11px;border-radius:22px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);z-index:2}
+.dock i{display:block;width:58px;height:58px;border-radius:14px}
+.win{position:absolute;border-radius:14px;background:rgba(246,246,248,.95);box-shadow:0 30px 70px rgba(0,0,0,.4),0 0 0 1px rgba(0,0,0,.15);overflow:hidden;z-index:1}
+.win .bar{height:40px;display:flex;align-items:center;gap:9px;padding:0 16px;background:#ececef;border-bottom:1px solid #dcdce0}
+.win .bar i{width:13px;height:13px;border-radius:50%;display:block}
+.win .t{position:absolute;left:50%;top:11px;transform:translateX(-50%);font:600 14px var(--ui);color:#333}
+.win .rows{padding:22px 26px;display:flex;flex-direction:column;gap:14px}
+.win .rows span{display:block;height:14px;border-radius:7px;background:#d9dadf}
+.win .side{position:absolute;left:0;top:40px;bottom:0;width:210px;background:#e4e5ea}
+.ptr{position:absolute;left:0;top:0;width:24px;height:32px;overflow:visible;transform-origin:3px 2px;z-index:20;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.ring{position:absolute;left:0;top:0;width:80px;height:80px;margin:-40px 0 0 -40px;border-radius:50%;border:4px solid;opacity:0;z-index:19}
+.click{position:absolute;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.55);opacity:0;z-index:19}
+
+/* ---------- Pointer Colors menu ---------- */
+.pop{position:absolute;top:36px;width:388px;padding:14px;border-radius:16px;background:rgba(32,33,38,.97);border:1px solid rgba(255,255,255,.14);box-shadow:0 26px 60px rgba(0,0,0,.55);color:#eceef2;font:13px var(--ui);transform-origin:92% 0;z-index:10;opacity:0}
+.pop .hd{display:flex;gap:14px;align-items:center}
+.pop .pv{width:96px;height:96px;flex:none;border-radius:12px;background:#f2f2f4;display:grid;place-items:center}
+.pop .pv svg{width:34px;height:45px;overflow:visible}
+.pop .nm{font:700 17px var(--ui);margin-bottom:6px}
+.pop .chips{display:flex;gap:6px}
+.pop .chip{display:flex;align-items:center;gap:5px;font-size:11.5px;padding:3px 7px;border-radius:6px;background:#2c2e34;border:1px solid #3a3d45}
+.pop .chip i{width:9px;height:9px;border-radius:2px;display:block}
+.pop .st{font-size:11.5px;color:#9aa0ac;margin-top:6px}
+.pop .row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:12px;color:#c4c8d0}
+.pop .track{position:relative;flex:1;height:5px;border-radius:3px;background:#40434b}
+.pop .fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#0a84ff}
+.pop .thumb{position:absolute;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#f4f4f6;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.pop .val{width:42px;text-align:right;font-variant-numeric:tabular-nums}
+.pop .lbl{margin-top:14px;font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#9aa0ac}
+.pop .sub{margin-top:8px;font-size:11.5px;font-weight:600;color:#9aa0ac}
+.pop .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.pop .tile{position:relative;height:50px;border-radius:8px;overflow:hidden;display:grid;place-items:center}
+.pop .tile svg{width:15px;height:20px;overflow:visible}
+.pop .tile span{position:absolute;left:4px;bottom:3px;font-size:9.5px;font-weight:600;color:#fff;background:rgba(0,0,0,.45);border-radius:8px;padding:0 5px}
+.pop .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px}
+.pop .pair{height:58px;border-radius:10px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;color:#d5d8de}
+.pop .pair svg{width:17px;height:22px;overflow:visible}
+.pop .pair.on{background:rgba(10,132,255,.18);border-color:#0a84ff}
+.pop .tg{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:12.5px}
+.pop .sw{position:relative;width:38px;height:22px;border-radius:11px;background:#4a4d55}
+.pop .sw::after{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transform:translateX(var(--k,0px))}
+.pop .drows{overflow:hidden;height:0}
+.pop .drow{display:flex;align-items:center;gap:8px;height:34px;font-size:12px}
+.pop .drow em{font-style:normal;flex:1}
+.pop .drow .pick{display:flex;align-items:center;gap:6px;padding:3px 9px;border-radius:7px;background:#2c2e34;border:1px solid #3a3d45;font-size:11.5px;min-width:150px}
+.pop .drow .pick svg{width:11px;height:15px;overflow:visible}
+.pop hr{border:0;border-top:1px solid #383b43;margin:12px 0 8px}
+.pop .mi{display:flex;justify-content:space-between;padding:5px 6px;font-size:13px}
+.pop .mi span{color:#9aa0ac}
+
+/* ---------- Titles ---------- */
+.cap{position:absolute;left:120px;bottom:110px;line-height:1.02;font:800 92px/1 var(--display);letter-spacing:-.035em;color:#fff;opacity:0;text-shadow:0 8px 40px rgba(0,0,0,.6);white-space:nowrap}
+.cap em{font-style:normal;color:var(--c,#00FFDA)}
+.chips3{position:absolute;inset:0;pointer-events:none}
+.fchip{position:absolute;padding:16px 26px;border-radius:999px;background:rgba(18,20,26,.72);border:1px solid rgba(255,255,255,.16);color:#fff;font:600 30px var(--ui);opacity:0;white-space:nowrap;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.fchip i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:12px;vertical-align:middle;background:var(--c)}
+#end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;color:#fff;text-align:center}
+#end img{width:210px;height:210px;filter:drop-shadow(0 30px 60px rgba(0,255,218,.35))}
+#end h2{margin:0;font:800 104px/1 var(--display);letter-spacing:-.04em}
+#end p{margin:0;font:500 34px var(--ui);color:rgba(255,255,255,.7)}
+#end .url{margin-top:8px;padding:14px 30px;border-radius:999px;background:#fff;color:#0b0c10;font:700 30px var(--ui)}
+#fade{position:absolute;inset:0;background:#000;pointer-events:none}
+#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(0,0,0,.55))}
+
+/* ---------- Player (not in the render) ---------- */
+#player{position:fixed;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:10px 16px;background:rgba(0,0,0,.7);color:#fff;font:13px var(--ui)}
+#player input{flex:1}
+body.render #player{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+  <div id="glow"></div>
+  <div id="scene"><div id="world">
+    <div class="obj" id="deskObj"><div class="desk-plane"></div></div>
+    <div class="obj mon" id="m1"><div class="frame"><div class="screen" id="s1"></div><div class="off" id="off1"></div><div class="back"></div></div><div class="neck"></div><div class="foot"></div></div>
+    <div class="obj mon" id="m2"><div class="frame"><div class="screen" id="s2"></div><div class="off" id="off2"></div><div class="back"></div></div><div class="neck"></div><div class="foot"></div></div>
+    <div class="obj" id="mbp"><div class="base"><div class="keys"></div><div class="pad"></div><div class="lip"></div></div><div class="lid"><div class="screen" id="s0"></div><div class="notch"></div><div class="back"></div><div class="edge"></div></div></div>
+  </div></div>
+  <div id="vignette"></div>
+  <div class="cap" id="cap1">Your Mac pointer,<br><em id="cap1b">impossible to lose.</em></div>
+  <div class="cap" id="cap2">One click. <em>Any color.</em></div>
+  <div class="cap" id="cap3">Any <em>size.</em></div>
+  <div class="cap" id="cap4">A color for <em>every display.</em></div>
+  <div class="cap" id="cap5">And it keeps <em>up with you.</em></div>
+  <div class="chips3">
+    <div class="fchip" id="f1" style="--c:#FFD60A"><i></i>Light &amp; dark appearance</div>
+    <div class="fchip" id="f2" style="--c:#FF2BD6"><i></i>A pair for each app</div>
+    <div class="fchip" id="f3" style="--c:#00E5FF"><i></i>Keyboard shortcuts</div>
+    <div class="fchip" id="f4" style="--c:#39FF14"><i></i>47 pairs · English &amp; العربية</div>
+  </div>
+  <div id="end">
+    <img src="assets/icon.png" alt="">
+    <h2>Pointer Colors</h2>
+    <p>Free for macOS</p>
+    <div class="url">macos-pointer-colors.pages.dev</div>
+  </div>
+  <div id="fade"></div>
+</div>
+<div id="player"><button id="play">Play</button><input id="scrub" type="range" min="0" max="38" step="0.001" value="0"><span id="time">0.00</span></div>
+
+<script>
+// ============================================================ data
+const PAIRS = {
+  "macos-light":  { name: "macOS light",   o: "#FFFFFF", f: "#000000" },
+  "macos-dark":   { name: "macOS dark",    o: "#000000", f: "#FFFFFF" },
+  "aqua-mint":    { name: "Aqua mint",     o: "#00FFDA", f: "#008A59" },
+  "neon":         { name: "Neon",          o: "#39FF14", f: "#7C3AED" },
+  "neon-pink":    { name: "Neon pink",     o: "#FF2BD6", f: "#8A005F" },
+  "neon-lime":    { name: "Neon lime",     o: "#39FF14", f: "#1E7A00" },
+  "electric-blue":{ name: "Electric blue", o: "#00E5FF", f: "#005A8A" },
+};
+const ARROW = "M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z";
+const arrow = (p, w = 1.6) => `<path d="${ARROW}" fill="${p.f}" stroke="${p.o}" stroke-width="${w}" stroke-linejoin="round"/>`;
+const DURATION = 38;
+
+// ============================================================ easing + keyframes
+const E = {
+  lin: x => x,
+  io: x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2,          // in-out cubic
+  io5: x => x < .5 ? 16 * x ** 5 : 1 - Math.pow(-2 * x + 2, 5) / 2,          // in-out quint, for big camera moves
+  out: x => 1 - Math.pow(1 - x, 3),
+  outExpo: x => x === 1 ? 1 : 1 - Math.pow(2, -10 * x),
+  back: x => { const c = 1.5; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); },
+};
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const mix = (a, b, k) => Array.isArray(a) ? a.map((v, i) => v + (b[i] - v) * k) : a + (b - a) * k;
+/** frames: [[t, value, ease?], ...]; ease applies to the segment ending at that frame. */
+function track(frames, t) {
+  if (t <= frames[0][0]) return frames[0][1];
+  for (let i = 1; i < frames.length; i++) {
+    const [t1, v1, ease = "io"] = frames[i], [t0, v0] = frames[i - 1];
+    if (t <= t1) return mix(v0, v1, E[ease](clamp((t - t0) / (t1 - t0))));
+  }
+  return frames[frames.length - 1][1];
+}
+/** 0 → 1 → 0 envelope: fades in over `inDur` from t0, out over `outDur` ending at t1. */
+const env = (t, t0, t1, inDur = .5, outDur = .5) => Math.min(E.out(clamp((t - t0) / inDur)), E.io(clamp((t1 - t) / outDur)));
+const $ = id => document.getElementById(id);
+
+// ============================================================ build the desktops
+const WALLPAPERS = [
+  { dark: "radial-gradient(120% 90% at 15% 10%,#ffb36b 0%,transparent 55%),radial-gradient(90% 90% at 90% 20%,#ff5f8f 0%,transparent 60%),radial-gradient(120% 100% at 50% 110%,#3b2fb8 0%,#5a3fd9 40%,transparent 75%),#7a4bd8",
+    light: "radial-gradient(120% 90% at 15% 10%,#ffe2c4 0%,transparent 55%),radial-gradient(90% 90% at 90% 20%,#ffc6d6 0%,transparent 60%),linear-gradient(160deg,#f5f1ff,#d9d2ff)" },
+  { dark: "radial-gradient(90% 80% at 20% 20%,#1fb6c9 0%,transparent 60%),radial-gradient(90% 90% at 85% 90%,#1b3fae 0%,transparent 65%),#0d1f45",
+    light: "radial-gradient(90% 80% at 20% 20%,#bdf2f7 0%,transparent 60%),linear-gradient(160deg,#eef7ff,#cfe0ff)" },
+  { dark: "radial-gradient(90% 80% at 80% 20%,#ff8a3d 0%,transparent 60%),radial-gradient(90% 90% at 15% 90%,#8b2fc9 0%,transparent 65%),#2a1240",
+    light: "radial-gradient(90% 80% at 80% 20%,#ffd9bf 0%,transparent 60%),linear-gradient(160deg,#fff5ee,#ead7ff)" },
+];
+const DOCK = ["#5ac8fa,#0a84ff", "#ffd60a,#ff9f0a", "#30d158,#248a3d", "#ff6482,#ff2d55", "#bf5af2,#5e5ce6", "#64d2ff,#5e5ce6", "#ff9f0a,#ff453a"];
+
+function windowHTML({ x, y, w, h, title, side }) {
+  const rows = Array.from({ length: Math.floor((h - 90) / 28) }, (_, i) => `<span style="width:${55 + ((i * 37) % 40)}%"></span>`).join("");
+  return `<div class="win" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="t">${title}</div></div>
+    ${side ? '<div class="side"></div>' : ""}<div class="rows" style="${side ? "margin-left:210px" : ""}">${rows}</div></div>`;
+}
+
+function desktopHTML(i, { app, windows }) {
+  const wp = WALLPAPERS[i];
+  return `<div class="dt">
+    <div class="wp" style="background:${wp.dark}"></div><div class="wp light" style="background:${wp.light}"></div>
+    <div class="mb"><span class="apple"></span><b>${app}</b><span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span>
+      <span class="sp"></span>${i === 0 ? '<span class="icon" id="status"><svg viewBox="0 0 24 32"></svg></span>' : ""}
+      <span class="glyph">􀙇</span><span class="glyph">􀊫</span><span>Fri 9:41 AM</span></div>
+    ${windows.map(windowHTML).join("")}
+    <div class="dock">${DOCK.map(g => `<i style="background:linear-gradient(${g})"></i>`).join("")}</div>
+    <div class="click" id="click${i}"></div><div class="ring" id="ring${i}"></div>
+    <svg class="ptr" id="p${i}" viewBox="0 0 24 32"></svg>
+  </div>`;
+}
+
+$("s0").innerHTML = desktopHTML(0, { app: "Finder", windows: [{ x: 170, y: 150, w: 760, h: 520, title: "Documents", side: true }] });
+$("s1").innerHTML = desktopHTML(1, { app: "Xcode", windows: [{ x: 260, y: 170, w: 1300, h: 860, title: "PointerColors — MenuContentView.swift", side: true }, { x: 1640, y: 300, w: 560, h: 640, title: "Simulator" }] });
+$("s2").innerHTML = desktopHTML(2, { app: "Safari", windows: [{ x: 360, y: 150, w: 1680, h: 1000, title: "macos-pointer-colors.pages.dev" }] });
+
+// ---------- the Pointer Colors menu, inside the MacBook screen
+const tile = (name, bg) => `<div class="tile" style="background:${bg}"><svg viewBox="0 0 24 32" data-pv></svg><span>${name}</span></div>`;
+const pairBtn = id => `<div class="pair" id="pair-${id}"><svg viewBox="0 0 24 32">${arrow(PAIRS[id], 2)}</svg>${PAIRS[id].name}</div>`;
+const dispRow = (icon, name, pick) => `<div class="drow"><span>${icon}</span><em>${name}</em><span class="pick">${pick ? `<svg viewBox="0 0 24 32">${arrow(PAIRS[pick], 2)}</svg>${PAIRS[pick].name}` : "Same as all displays"}</span></div>`;
+$("s0").querySelector(".dt").insertAdjacentHTML("beforeend", `
+<div class="pop" id="pop" style="left:1080px">
+  <div class="hd"><div class="pv"><svg viewBox="0 0 24 32" id="popPv"></svg></div>
+    <div><div class="nm" id="popName"></div><div class="chips"><span class="chip"><i id="chipO"></i><span id="hexO"></span></span><span class="chip"><i id="chipF"></i><span id="hexF"></span></span></div><div class="st">Currently applied</div></div></div>
+  <div class="row"><span>Pointer size</span><div class="track" id="track"><div class="fill" id="fill"></div><div class="thumb" id="thumb"></div></div><span class="val" id="sizeVal">1.00×</span></div>
+  <div class="lbl">PREVIEW</div>
+  <div class="tiles">${tile("Light page", "#fff")}${tile("Dark app", "#1c1c1e")}${tile("Photo", "linear-gradient(135deg,#2f6b4f,#c9a86a 60%,#86b9d8)")}${tile("Spreadsheet", "repeating-linear-gradient(0deg,#fff 0 9px,#dadde3 9px 10px)")}</div>
+  <div class="lbl">PAIRS</div>
+  <div class="sub">Default</div><div class="grid">${pairBtn("macos-light")}${pairBtn("macos-dark")}</div>
+  <div class="sub">Neon</div><div class="grid">${["aqua-mint", "neon", "neon-pink", "neon-lime", "electric-blue"].map(pairBtn).join("")}</div>
+  <div class="tg" id="tgRow"><span>Separate colors for each display</span><span class="sw" id="sw"></span></div>
+  <div class="drows" id="drows">${dispRow("􀟛", "Built-in Display", null)}${dispRow("􀢹", "Left display", "neon-pink")}${dispRow("􀢹", "Right display", "electric-blue")}</div>
+  <hr><div class="mi">Preferences…<span>⌘,</span></div><div class="mi">Quit Pointer Colors<span>⌘Q</span></div>
+</div>`);
+
+/** Where an element sits inside its screen, in that screen's own pixels (unaffected by the 3D). */
+function inScreen(el, dx = .5, dy = .5) {
+  let x = 0, y = 0, n = el;
+  const screen = el.closest(".screen");
+  while (n && n !== screen) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+  return [x + el.offsetWidth * dx, y + el.offsetHeight * dy];
+}
+
+// ============================================================ layout in the world
+// MacBook lid centred at the origin; the desk is the plane at y = +506 (the lid's bottom edge).
+const DESK_Y = 506;
+function place(id, x, y, z, ry = 0, extra = "") { $(id).style.transform = `translate3d(${x}px,${y}px,${z}px) rotateY(${ry}deg) ${extra}`; }
+// lid and base inside #mbp
+document.querySelector("#mbp .lid").style.transform = "translate(-780px,-506px)";
+document.querySelector("#mbp .base").style.transform = `translate(-820px,${DESK_Y}px) rotateX(90deg)`;
+for (const m of ["m1", "m2"]) {
+  const root = $(m);
+  root.querySelector(".frame").style.transform = "translate(-1222px,-697px)";
+  root.querySelector(".neck").style.transform = "translate(-120px,560px) translateZ(-60px)";
+  root.querySelector(".foot").style.transform = "translate(-410px,1180px) translateZ(-60px) rotateX(90deg)";
+}
+const MON_Y = DESK_Y - 1180;      // foot sits on the desk
+place("m1", -1330, MON_Y, -1500, 16);
+place("m2", 1330, MON_Y, -1500, -16);
+place("deskObj", -6000, DESK_Y, 0, 0, "translateZ(-2600px)");
+document.querySelector(".desk-plane").style.transform = "rotateX(90deg)";
+
+// Screen centres in world space, for the camera.
+const SCREEN0 = { x: 0, y: -506 + 30 + 472.5 };   // lid top + bezel + half the screen
+const s0 = (sx, sy) => [SCREEN0.x - 756 + sx, SCREEN0.y - 472.5 + sy, 0];
+
+// ============================================================ the script (all times in seconds)
+const STATUS = inScreen($("status"));
+const PAIR = id => inScreen($("pair-" + id));
+const THUMB_X0 = inScreen($("track"), 0, .5), TRACK_W = $("track").offsetWidth;
+const TOGGLE = inScreen($("sw"));
+const SIZE = [[9.9, 1], [11.6, 2.4, "io"]];                 // pointer size over time
+const sizeAt = t => track(SIZE, t);
+const thumbAt = t => [THUMB_X0[0] + TRACK_W * (sizeAt(t) - 1) / 3, THUMB_X0[1]];
+
+// Pointer: one track per screen; it is only drawn on a screen during that screen's window.
+const P = {
+  0: { from: 0, to: 19.9, frames: [[0, [520, 640]], [2.6, [880, 520]], [4.9, STATUS, "io"], [5.3, STATUS], [6.9, PAIR("aqua-mint"), "io"], [7.6, PAIR("aqua-mint")],
+       [9.4, THUMB_X0, "io"], [9.9, THUMB_X0], [11.6, thumbAt(11.6), "io"], [12.0, thumbAt(11.6)], [13.3, TOGGLE, "io"], [14.2, TOGGLE], [16.2, [900, 560], "io"], [19.9, [560, 2], "io"]] },
+  1: { from: 19.9, to: 22.7, frames: [[19.9, [2050, 1348]], [21.3, [1500, 760], "out"], [22.7, [2398, 640], "io"]] },
+  2: { from: 22.7, to: 25.6, frames: [[22.7, [2, 640]], [24.2, [1000, 700], "out"], [25.6, [700, 1348], "io"]] },
+  3: { from: 25.6, to: 40, screen: 0, frames: [[25.6, [1300, 2]], [27.2, [760, 520], "out"], [31.5, [700, 560]]] },
+};
+const CLICKS = [[5.3, 0], [7.6, 0], [9.9, 0], [14.2, 0]];   // [time, screen]
+// Which pair each screen's pointer shows.
+const pairOn = (screen, t) => {
+  if (t < 7.6) return "macos-light";
+  if (screen === 1 && t >= 19.9) return "neon-pink";
+  if (screen === 2 && t >= 22.7) return "electric-blue";
+  return "aqua-mint";
+};
+// Camera: target (x, y, z), zoom (translateZ toward the target), tilt rx, turn ry.
+const CAM = [
+  [0,    { t: s0(756, 472), z: 230, rx: 0, ry: 0 }],
+  [3.4,  { t: s0(756, 460), z: 300, rx: 0, ry: 0 }, "io"],
+  [5.3,  { t: s0(1150, 150), z: 830, rx: 0, ry: 0 }, "io5"],
+  [6.8,  { t: s0(1010, 330), z: 420, rx: 0, ry: 0 }, "io"],
+  [14.6, { t: s0(1000, 345), z: 450, rx: 0, ry: 0 }, "io"],
+  [17.0, { t: [0, -60, 0], z: -650, rx: -9, ry: 24 }, "io5"],
+  [19.9, { t: [0, -560, -700], z: -3100, rx: -12, ry: 12 }, "io"],
+  [21.4, { t: [-650, -620, -900], z: -2500, rx: -11, ry: 15 }, "io"],
+  [24.2, { t: [650, -620, -900], z: -2500, rx: -11, ry: -8 }, "io"],
+  [27.0, { t: [0, -520, -700], z: -2950, rx: -10, ry: -12 }, "io"],
+  [31.5, { t: [0, -500, -700], z: -3150, rx: -11, ry: -18 }, "io"],
+  [38,   { t: [0, -400, -700], z: -5200, rx: -14, ry: -24 }, "io"],
+];
+function cameraAt(t) {
+  const asArr = c => [...c.t, c.z, c.rx, c.ry];
+  const v = track(CAM.map(([tt, c, e]) => [tt, asArr(c), e]), t);
+  return { t: [v[0], v[1], v[2]], z: v[3], rx: v[4], ry: v[5] };
+}
+
+// ============================================================ draw a frame
+function seek(t) {
+  t = clamp(t, 0, DURATION);
+  // camera
+  const c = cameraAt(t);
+  $("world").style.transform = `translateZ(${c.z}px) rotateX(${c.rx}deg) rotateY(${c.ry}deg) translate3d(${-c.t[0]}px,${-c.t[1]}px,${-c.t[2]}px)`;
+
+  // pointers
+  const size = sizeAt(t);
+  for (const key of Object.keys(P)) {
+    const seg = P[key], screen = seg.screen ?? Number(key);
+    const el = $("p" + screen);
+    if (t < seg.from || t >= seg.to) { if (el.dataset.seg === key) el.style.opacity = 0; continue; }
+    const [x, y] = track(seg.frames, t);
+    const pair = PAIRS[pairOn(screen, t)];
+    el.dataset.seg = key;
+    el.style.opacity = 1;
+    el.innerHTML = arrow(pair);
+    // bigger on the external displays so it reads at the wide shot
+    const k = screen === 0 ? 1.15 : 3.6;
+    el.style.transform = `translate(${x - 3}px,${y - 2}px) scale(${size * k})`;
+  }
+  for (const s of [0, 1, 2]) { const segs = Object.entries(P).filter(([k, p]) => (p.screen ?? Number(k)) === s); if (!segs.some(([, p]) => t >= p.from && t < p.to)) $("p" + s).style.opacity = 0; }
+
+  // click pulses and colour rings
+  for (const s of [0, 1, 2]) { $("click" + s).style.opacity = 0; $("ring" + s).style.opacity = 0; }
+  for (const [ct, s] of CLICKS) {
+    const k = (t - ct) / .45;
+    if (k < 0 || k > 1) continue;
+    const [x, y] = track(P[s].frames, ct), el = $("click" + s);
+    el.style.opacity = (1 - k) * .8;
+    el.style.transform = `translate(${x}px,${y}px) scale(${.4 + k * 1.2})`;
+  }
+  const RINGS = [[7.6, 0, "aqua-mint", 1.2], [19.9, 1, "neon-pink", 2.4], [22.7, 2, "electric-blue", 2.4], [25.6, 0, "aqua-mint", 1.6]];
+  for (const [rt, s, id, scale] of RINGS) {
+    const k = (t - rt) / .9;
+    if (k < 0 || k > 1) continue;
+    const segKey = Object.keys(P).find(key => { const p = P[key]; return (p.screen ?? Number(key)) === s && rt >= p.from && rt < p.to; });
+    const [x, y] = track(P[segKey].frames, t);
+    const el = $("ring" + s);
+    el.style.borderColor = PAIRS[id].o;
+    el.style.boxShadow = `0 0 30px ${PAIRS[id].o}`;
+    el.style.opacity = (1 - k);
+    el.style.transform = `translate(${x}px,${y}px) scale(${(.3 + E.outExpo(k) * 1.6) * scale})`;
+  }
+
+  // the menu
+  const open = clamp((t - 5.35) / .45), close = clamp((t - 14.5) / .35);
+  const shown = E.back(open) * (1 - E.io(close));
+  const pop = $("pop");
+  pop.style.opacity = Math.min(1, open * 2) * (1 - close);
+  pop.style.transform = `scale(${.9 + .1 * shown}) translateY(${(1 - shown) * -10}px)`;
+  const sel = pairOn(0, t), sp = PAIRS[sel];
+  $("popPv").innerHTML = arrow(sp, 1.8);
+  $("popPv").style.transform = `scale(${.7 + .3 * size})`;
+  $("popName").textContent = sp.name;
+  $("chipO").style.background = sp.o; $("chipF").style.background = sp.f;
+  $("hexO").textContent = "Outline " + sp.o.slice(1); $("hexF").textContent = "Fill " + sp.f.slice(1);
+  document.querySelectorAll("#pop [data-pv]").forEach(svg => { svg.innerHTML = arrow(sp, 2); });
+  document.querySelectorAll("#pop .pair").forEach(el => el.classList.toggle("on", el.id === "pair-" + sel));
+  const thumb = thumbAt(t);
+  $("thumb").style.left = (thumb[0] - THUMB_X0[0]) + "px";
+  $("fill").style.width = (thumb[0] - THUMB_X0[0]) + "px";
+  $("sizeVal").textContent = size.toFixed(2) + "×";
+  const on = E.io(clamp((t - 14.2) / .25));
+  $("sw").style.background = on > .5 ? "#0a84ff" : "#4a4d55";
+  $("sw").style.setProperty("--k", (16 * on) + "px");
+  $("drows").style.height = (102 * E.out(clamp((t - 14.25) / .35))) + "px";
+  $("status").querySelector("svg").innerHTML = arrow(PAIRS[sel], 2.2);
+  $("status").style.background = open > 0 && close < 1 ? "rgba(255,255,255,.25)" : "transparent";
+
+  // the external displays wake as the camera pulls out
+  const wake = E.io(clamp((t - 16.4) / 1.6));
+  $("off1").style.opacity = 1 - wake; $("off2").style.opacity = 1 - clamp(wake * 1.15);
+
+  // light appearance from 27.6
+  const light = E.io(clamp((t - 27.6) / 1.2));
+  document.querySelectorAll(".wp.light").forEach(el => { el.style.opacity = light; });
+  document.querySelectorAll(".mb").forEach(el => { el.style.color = light > .5 ? "#1d1d1f" : "#fff"; el.style.background = `rgba(${light > .5 ? "255,255,255" : "0,0,0"},.18)`; });
+
+  // ambient glow follows the pointer colour
+  const g = t < 7.6 ? null : (t >= 19.9 && t < 22.7 ? "neon-pink" : t >= 22.7 && t < 25.6 ? "electric-blue" : "aqua-mint");
+  $("glow").style.setProperty("--g", g ? PAIRS[g].o : "#7aa2ff");
+  $("glow").style.opacity = (g ? .16 : .05) * clamp((t - 6) / 2) * (1 - clamp((t - 33) / 3));
+
+  // captions
+  const caps = [["cap1", .8, 3.6], ["cap2", 7.9, 10.0], ["cap3", 10.4, 12.8], ["cap4", 17.6, 21.6], ["cap5", 27.3, 31.0]];
+  for (const [id, a, b] of caps) {
+    const k = env(t, a, b, .7, .6), el = $(id);
+    el.style.opacity = k;
+    el.style.transform = `translateY(${(1 - k) * 30}px)`;
+    el.style.filter = `blur(${(1 - k) * 10}px)`;
+  }
+  $("cap1b").style.opacity = E.out(clamp((t - 1.6) / .6));
+  $("cap1").style.setProperty("--c", PAIRS["aqua-mint"].o);
+  $("cap2").style.setProperty("--c", PAIRS["aqua-mint"].o);
+  $("cap4").style.setProperty("--c", PAIRS["neon-pink"].o);
+
+  // feature chips
+  const CH = [["f1", 28.2, [180, 220]], ["f2", 28.7, [1200, 300]], ["f3", 29.2, [260, 760]], ["f4", 29.7, [1150, 820]]];
+  for (const [id, a, [x, y]] of CH) {
+    const k = env(t, a, 31.6, .8, .7), el = $(id);
+    el.style.opacity = k;
+    el.style.transform = `translate(${x}px,${y + (1 - k) * 40}px) scale(${.92 + .08 * k})`;
+  }
+
+  // end card and fades
+  const endK = E.io(clamp((t - 32.6) / 1.4));
+  $("end").style.opacity = endK * (1 - clamp((t - 37.2) / .8));
+  $("end").style.transform = `scale(${.94 + .06 * endK})`;
+  $("scene").style.opacity = 1 - .8 * E.io(clamp((t - 32) / 2));
+  $("fade").style.opacity = Math.max(1 - clamp(t / .9), clamp((t - 37.2) / .8));
+  return t;
+}
+
+// ============================================================ player
+const params = new URLSearchParams(location.search);
+if (params.has("render")) document.body.classList.add("render");
+function fit() {
+  if (document.body.classList.contains("render")) return;
+  const s = Math.min(innerWidth / 1920, (innerHeight - 50) / 1080);
+  $("stage").style.transform = `scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+let playing = false, start = 0, now = Number(params.get("t") || 0);
+function frame(ts) {
+  if (!playing) return;
+  now = (ts - start) / 1000;
+  if (now >= DURATION) { now = DURATION; playing = false; $("play").textContent = "Play"; }
+  seek(now); $("scrub").value = now; $("time").textContent = now.toFixed(2);
+  requestAnimationFrame(frame);
+}
+$("play").onclick = () => { playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; if (now >= DURATION) now = 0; start = performance.now() - now * 1000; requestAnimationFrame(frame); };
+$("scrub").oninput = e => { now = +e.target.value; playing = false; $("play").textContent = "Play"; seek(now); $("time").textContent = now.toFixed(2); };
+addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); $("play").click(); } });
+window.seek = seek; window.DURATION = DURATION;
+seek(now);
+</script>
+</body>
+</html>
