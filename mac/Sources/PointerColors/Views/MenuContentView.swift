@@ -44,6 +44,7 @@ struct MenuContentView: View {
                 .disabled(model.needsFullDiskAccess)
             AppColorsIndicator(automation: model.automation)
                 .disabled(model.needsFullDiskAccess)
+            HighlightMenuSection(highlight: model.highlight)
             Divider()
             footer
         }
@@ -284,6 +285,36 @@ private struct PairTile: View {
         .buttonStyle(.plain)
         .accessibilityLabel(pair.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+/// Pulse and laser switches in the menu, styled like its other switches; both can be on. The
+/// details are in Preferences › Highlight.
+private struct HighlightMenuSection: View {
+    let highlight: PointerHighlight
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("HIGHLIGHT").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
+            ForEach(HighlightEffect.allCases) { effect in
+                Toggle(effect.menuTitle, isOn: Binding(get: { highlight.isOn(effect) },
+                                                       set: { highlight.setOn($0, effect) }))
+                    .toggleStyle(.switch).controlSize(.mini)
+                    .appFont(.caption)
+                    .help(effect.menuHelp)
+            }
+        }
+    }
+}
+
+private extension HighlightEffect {
+    var menuTitle: String {
+        self == .pulse ? String(localized: "Pulse on each click") : String(localized: "Laser pointer")
+    }
+
+    var menuHelp: String {
+        self == .pulse ? String(localized: "A ring where you click")
+                       : String(localized: "A glowing dot, and a trail as you drag")
     }
 }
 
