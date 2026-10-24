@@ -105,7 +105,7 @@ final class AppModel {
         reapplyIfNeeded()
         registerShortcuts()
         automation.applyAppearancePair()
-        Task { await checkForUpdatesIfDue() }
+        startUpdateSchedule()
     }
 
     var selectedPair: PointerPair { library.pair(id: selectedID) ?? PointerPair.featured }

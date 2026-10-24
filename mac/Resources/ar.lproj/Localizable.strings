@@ -11,6 +11,7 @@
 "Apply to pointer" = "تطبيق على المؤشر";
 "Reset" = "إعادة تعيين";
 "Preferences…" = "الإعدادات…";
+"Preferences" = "الإعدادات";
 "Browse pairs on the website" = "تصفّح الأزواج على الموقع";
 "Quit Pointer Colors" = "إنهاء Pointer Colors";
 "Outline" = "الحدود";
@@ -120,7 +121,11 @@
 "GitHub" = "GitHub";
 "Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display." = "يغيّر إعدادات حدود المؤشر وتعبئته وحجمه نفسها الموجودة في إعدادات النظام › تسهيلات الاستخدام › الشاشة.";
 "Check for Updates…" = "التحقق من التحديثات…";
-"Check automatically once a day" = "التحقق تلقائيًا مرة يوميًا";
+"Check automatically" = "التحقق تلقائيًا";
+"Never" = "أبدًا";
+"Every day" = "كل يوم";
+"Every week" = "كل أسبوع";
+"Every month" = "كل شهر";
 "Download the new version" = "تنزيل الإصدار الجديد";
 "You're up to date (%@)." = "لديك أحدث إصدار (%@).";
 "Version %@ is available." = "الإصدار %@ متاح.";
@@ -153,6 +158,7 @@
 "Checking for Updates…" = "جارٍ التحقق من التحديثات…";
 "Install Update and Relaunch" = "تثبيت التحديث وإعادة التشغيل";
 "Install and Relaunch" = "تثبيت وإعادة التشغيل";
+"What's new in %@" = "ما الجديد في %@";
 "Installing Update…" = "جارٍ تثبيت التحديث…";
 "Installing the update…" = "جارٍ تثبيت التحديث…";
 "Couldn't install: %@" = "تعذّر التثبيت: %@";

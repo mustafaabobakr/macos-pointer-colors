@@ -53,7 +53,7 @@
       <ul>
         <li><b>One click</b> applies a pair, no hex codes</li>
         <li><b>Per display</b>: a different color and size on each screen</li>
-        <li><b>Per app</b>: a pair that follows the app in front</li>
+        <li><b>Per app</b>: a pair that follows the app under the pointer, or the app in front</li>
         <li><b>Light and dark</b>: switches pairs with the system appearance</li>
         <li><b>Shortcuts</b>, contrast warnings, shake to find</li>
         <li><b>Your own pairs</b>, import and export</li>
@@ -82,7 +82,7 @@ The macOS defaults for light and dark come first, then the neon and color pairs.
       </ol>
       <h3>Good to know</h3>
       <ul>
-        <li>macOS 14 or later.</li>
+        <li>macOS 14 or later, on Apple silicon or Intel.</li>
         <li>If a color or size doesn't change, turn on Pointer Colors under <b>System Settings › Privacy &amp; Security › Full Disk Access</b>. The app says when it needs this.</li>
         <li>It changes the same settings as <b>System Settings › Accessibility › Display › Pointer</b>, through private macOS APIs. That's why it isn't on the Mac App Store.</li>
       </ul>

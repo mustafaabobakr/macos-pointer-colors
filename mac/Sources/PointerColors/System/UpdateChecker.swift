@@ -4,8 +4,9 @@ import Foundation
 struct UpdateChecker {
     enum Result: Equatable {
         case upToDate
-        /// `download` is the release's DMG, when it has one, for installing in place.
-        case available(version: String, url: URL, download: URL?)
+        /// `download` is the release's DMG, when it has one, for installing in place. `notes` is
+        /// what changed, from the release notes.
+        case available(version: String, url: URL, download: URL?, notes: String?)
         case noReleases
         case failed(String)
     }
@@ -46,7 +47,16 @@ struct UpdateChecker {
         let latest = release.tagName.trimmingCharacters(in: CharacterSet(charactersIn: "vV"))
         guard isNewer(latest, than: current) else { return .upToDate }
         let download = release.assets.first { $0.name == dmgName }.flatMap { URL(string: $0.downloadURL) }
-        return .available(version: latest, url: url, download: download)
+        return .available(version: latest, url: url, download: download, notes: whatsNew(in: release.body))
+    }
+
+    /// The part of the release notes about what changed: everything before the install
+    /// instructions, which start at "**Updating from" or "**Install:**" in every release.
+    static func whatsNew(in body: String?) -> String? {
+        guard let body else { return nil }
+        let cut = ["**Updating from", "**Install:**"].compactMap { body.range(of: $0)?.lowerBound }.min()
+        let notes = body[..<(cut ?? body.endIndex)].trimmingCharacters(in: .whitespacesAndNewlines)
+        return notes.isEmpty ? nil : notes
     }
 
     /// Numeric, part by part: 0.10.0 is newer than 0.9.3.
@@ -63,11 +73,13 @@ struct UpdateChecker {
     private struct Release: Decodable {
         let tagName: String
         let htmlURL: String
+        let body: String?
         let assets: [Asset]
 
         enum CodingKeys: String, CodingKey {
             case tagName = "tag_name"
             case htmlURL = "html_url"
+            case body
             case assets
         }
 
@@ -75,6 +87,7 @@ struct UpdateChecker {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             tagName = try container.decode(String.self, forKey: .tagName)
             htmlURL = try container.decode(String.self, forKey: .htmlURL)
+            body = try container.decodeIfPresent(String.self, forKey: .body)
             assets = try container.decodeIfPresent([Asset].self, forKey: .assets) ?? []
         }
     }
