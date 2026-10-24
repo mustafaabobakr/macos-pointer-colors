@@ -72,7 +72,6 @@ function noiseHit(t0, dur, { amp = .2, from = 6000, to = from, q = .7, pan = 0, 
 }
 const hat = (t, amp = .06, open = false) => noiseHit(t, open ? .22 : .05, { amp, from: 9000, q: .3, pan: .25, send: .05, decay: open ? .2 : .04 });
 const clap = t => { for (const d of [0, .011, .022]) noiseHit(t + d, .16, { amp: .22, from: 1600, q: .5, send: .35, decay: .12 }); };
-const riser = (t, dur) => { noiseHit(t, dur, { amp: .22, from: 400, to: 9000, q: .25, shape: "rise", send: .45 }); tone(t, dur, 110, { type: "saw", amp: .05, attack: dur * .9, decay: dur * 3, sweep: 2.2 / dur, cutoff: 2500, send: .4 }); };
 const click = t => { tone(t, .006, 3200, { type: "sine", amp: .25, decay: .006, send: .05, pan: .2 }); tone(t + .004, .03, 900, { type: "tri", amp: .18, decay: .03, send: .05, pan: .2 }); };
 
 // ---------- the score
@@ -83,7 +82,6 @@ const chordAt = t => CHORDS[Math.floor(Math.max(0, t - 5) / BAR) % 4];
 for (const m of [45, 57, 60, 64]) tone(0, 4.75, midi(m), { type: "saw", amp: .055, attack: 1.2, decay: 30, cutoff: 700, detune: (m % 3) * .002, send: .5, pan: (m % 2 ? -.4 : .4) });
 for (let t = 0; t < 4.75; t += .25) hat(t, t % BEAT === 0 ? .035 : .018);
 for (let t = 0; t < 4.6; t += BEAT) tone(t, .18, 55, { type: "sine", amp: .22, decay: .16, send: .05 });
-riser(2.6, 2.2);
 
 // Groove (5–24): kick, clap, hats, bass, ducked pad, then an arpeggio.
 for (let t = 5; t < 24 - 1e-9; t += BEAT) {
@@ -109,7 +107,6 @@ for (let t = 7; t < 24 - 1e-9; t += .125) {       // 16th-note arpeggio from the
 }
 for (let t = 16; t < 23.5; t += .25) noiseHit(t, .06, { amp: .03, from: 5000, q: .5, pan: -.35, send: .1, decay: .05 });   // shaker in the features
 for (let i = 0; i < 8; i++) noiseHit(23.5 + i * .0625, .07, { amp: .06 + i * .02, from: 1800, q: .5, send: .3, decay: .06 });  // fill
-riser(22.8, 1.2);
 
 // End (24–30): a long Am(add9) chord with a bell on top.
 for (const m of [45, 57, 60, 64, 71]) tone(24, 5.6, midi(m), { type: "saw", amp: .05, attack: .02, decay: 9, cutoff: 1600, send: .7, pan: (m % 2 ? -.4 : .4) });
