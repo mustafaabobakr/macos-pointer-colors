@@ -4,12 +4,21 @@ import Foundation
 struct UpdateChecker {
     enum Result: Equatable {
         case upToDate
-        case available(version: String, url: URL)
+        /// `download` is the release's DMG, when it has one, for installing in place.
+        case available(version: String, url: URL, download: URL?)
         case noReleases
         case failed(String)
     }
 
     static let latestReleaseURL = URL(string: "https://api.github.com/repos/mustafaabobakr/macos-pointer-colors/releases/latest")!
+    /// The release file the updater installs from.
+    static let dmgName = "Pointer-Colors.dmg"
+
+    /// The GitHub release, unless the `updateFeedURL` default points somewhere else, which is how
+    /// an update is tried out from a local server before it's published.
+    static var feedURL: URL {
+        UserDefaults.standard.string(forKey: "updateFeedURL").flatMap(URL.init(string:)) ?? latestReleaseURL
+    }
 
     var session: URLSession = .shared
 
@@ -18,7 +27,7 @@ struct UpdateChecker {
     }
 
     func check() async -> Result {
-        var request = URLRequest(url: Self.latestReleaseURL)
+        var request = URLRequest(url: Self.feedURL)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         do {
             let (data, response) = try await session.data(for: request)
@@ -35,7 +44,9 @@ struct UpdateChecker {
         guard let release = try? JSONDecoder().decode(Release.self, from: data),
               let url = URL(string: release.htmlURL) else { return .failed("Couldn't read the release.") }
         let latest = release.tagName.trimmingCharacters(in: CharacterSet(charactersIn: "vV"))
-        return isNewer(latest, than: current) ? .available(version: latest, url: url) : .upToDate
+        guard isNewer(latest, than: current) else { return .upToDate }
+        let download = release.assets.first { $0.name == dmgName }.flatMap { URL(string: $0.downloadURL) }
+        return .available(version: latest, url: url, download: download)
     }
 
     /// Numeric, part by part: 0.10.0 is newer than 0.9.3.
@@ -52,10 +63,29 @@ struct UpdateChecker {
     private struct Release: Decodable {
         let tagName: String
         let htmlURL: String
+        let assets: [Asset]
 
         enum CodingKeys: String, CodingKey {
             case tagName = "tag_name"
             case htmlURL = "html_url"
+            case assets
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            tagName = try container.decode(String.self, forKey: .tagName)
+            htmlURL = try container.decode(String.self, forKey: .htmlURL)
+            assets = try container.decodeIfPresent([Asset].self, forKey: .assets) ?? []
+        }
+    }
+
+    private struct Asset: Decodable {
+        let name: String
+        let downloadURL: String
+
+        enum CodingKeys: String, CodingKey {
+            case name
+            case downloadURL = "browser_download_url"
         }
     }
 }

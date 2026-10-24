@@ -125,8 +125,20 @@ final class UpdateCheckerTests: XCTestCase {
     func testReadsGitHubRelease() {
         let json = #"{"tag_name":"v0.2.0","html_url":"https://github.com/x/y/releases/tag/v0.2.0"}"#.data(using: .utf8)!
         let result = UpdateChecker.result(data: json, status: 200, current: "0.1.0")
-        XCTAssertEqual(result, .available(version: "0.2.0", url: URL(string: "https://github.com/x/y/releases/tag/v0.2.0")!))
+        XCTAssertEqual(result, .available(version: "0.2.0", url: URL(string: "https://github.com/x/y/releases/tag/v0.2.0")!, download: nil))
         XCTAssertEqual(UpdateChecker.result(data: json, status: 200, current: "0.2.0"), .upToDate)
+    }
+
+    func testReadsTheDMGForInstallingInPlace() {
+        let json = #"""
+        {"tag_name":"v0.3.0","html_url":"https://github.com/x/y/releases/tag/v0.3.0","assets":[
+          {"name":"Notes.txt","browser_download_url":"https://github.com/x/y/releases/download/v0.3.0/Notes.txt"},
+          {"name":"Pointer-Colors.dmg","browser_download_url":"https://github.com/x/y/releases/download/v0.3.0/Pointer-Colors.dmg"}]}
+        """#.data(using: .utf8)!
+        let result = UpdateChecker.result(data: json, status: 200, current: "0.2.0")
+        XCTAssertEqual(result, .available(version: "0.3.0",
+                                          url: URL(string: "https://github.com/x/y/releases/tag/v0.3.0")!,
+                                          download: URL(string: "https://github.com/x/y/releases/download/v0.3.0/Pointer-Colors.dmg")!))
     }
 
     func testMissingReleasesAndErrors() {
@@ -141,5 +153,16 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(settings.appRuleTrigger, .pointer)
         settings.appRuleTrigger = .frontmost
         XCTAssertEqual(settings.appRuleTrigger, .frontmost)
+    }
+}
+
+final class AppUpdaterTests: XCTestCase {
+    func testRefusesCopiesThatCantReplaceThemselves() {
+        let translocated = URL(fileURLWithPath: "/private/var/folders/x/AppTranslocation/ABC/d/Pointer Colors.app")
+        XCTAssertEqual(AppUpdater.installBlocker(for: translocated), .notInstalled)
+        // A folder the app can't write to, like /System/Applications.
+        XCTAssertEqual(AppUpdater.installBlocker(for: URL(fileURLWithPath: "/System/Applications/Calculator.app")), .folderNotWritable)
+        let writable = FileManager.default.temporaryDirectory.appendingPathComponent("Pointer Colors.app")
+        XCTAssertNil(AppUpdater.installBlocker(for: writable))
     }
 }

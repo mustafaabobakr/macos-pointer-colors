@@ -65,6 +65,9 @@ final class AppModel {
 
     var updateResult: UpdateChecker.Result?
     var isCheckingForUpdates = false
+    var isInstallingUpdate = false
+    /// Why the last in-place install failed, until the next check.
+    var updateInstallError: String?
     var shortcuts: [ShortcutAction: KeyCombo] = [:]
     var shortcutConflicts: Set<ShortcutAction> = []
 

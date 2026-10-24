@@ -260,8 +260,12 @@ private struct UpdateSection: View {
         VStack(spacing: 8) {
             HStack {
                 Button("Check for Updates…") { Task { await model.checkForUpdates() } }
-                    .disabled(model.isCheckingForUpdates)
-                if model.isCheckingForUpdates { ProgressView().controlSize(.small) }
+                    .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
+                if model.availableUpdateDownload != nil {
+                    Button("Install and Relaunch") { Task { await model.installUpdate() } }
+                        .disabled(model.isInstallingUpdate)
+                }
+                if model.isCheckingForUpdates || model.isInstallingUpdate { ProgressView().controlSize(.small) }
             }
             if let message = model.updateMessage {
                 Text(message).appFont(.caption).foregroundStyle(.secondary)
