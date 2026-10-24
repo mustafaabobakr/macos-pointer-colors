@@ -72,17 +72,8 @@ function noiseHit(t0, dur, { amp = .2, from = 6000, to = from, q = .7, pan = 0, 
 }
 const hat = (t, amp = .06, open = false) => noiseHit(t, open ? .22 : .05, { amp, from: 9000, q: .3, pan: .25, send: .05, decay: open ? .2 : .04 });
 const clap = t => { for (const d of [0, .011, .022]) noiseHit(t + d, .16, { amp: .22, from: 1600, q: .5, send: .35, decay: .12 }); };
-const whoosh = (t, dur, amp = .32, up = true) => noiseHit(t, dur, { amp, from: up ? 300 : 5000, to: up ? 5000 : 400, q: .35, shape: "swell", send: .4, pan: up ? -.3 : .3 });
 const riser = (t, dur) => { noiseHit(t, dur, { amp: .22, from: 400, to: 9000, q: .25, shape: "rise", send: .45 }); tone(t, dur, 110, { type: "saw", amp: .05, attack: dur * .9, decay: dur * 3, sweep: 2.2 / dur, cutoff: 2500, send: .4 }); };
-function impact(t, amp = 1) {
-  const s = Math.floor(t * SR);
-  let phase = 0;
-  for (let n = 0; n < SR * 2.4; n++) { const tt = n / SR, f = 32 + 70 * Math.exp(-tt * 6); phase += f / SR; put(s + n, Math.sin(2 * Math.PI * phase) * Math.exp(-tt * 1.6) * .8 * amp, 0, .2); }
-  noiseHit(t, .9, { amp: .45 * amp, from: 3000, to: 500, q: .4, send: .8, decay: .6 });
-}
 const click = t => { tone(t, .006, 3200, { type: "sine", amp: .25, decay: .006, send: .05, pan: .2 }); tone(t + .004, .03, 900, { type: "tri", amp: .18, decay: .03, send: .05, pan: .2 }); };
-const shimmer = (t, root = 81) => [0, 4, 7, 12].forEach((iv, i) => tone(t + i * .045, .7, midi(root + iv), { type: "sine", amp: .07, decay: .5, send: .7, pan: (i - 1.5) * .3 }));
-const pop = t => { tone(t, .08, 520, { type: "sine", amp: .16, decay: .08, sweep: 4, send: .3 }); };
 
 // ---------- the score
 const CHORDS = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];   // Am F C G
@@ -120,22 +111,21 @@ for (let t = 16; t < 23.5; t += .25) noiseHit(t, .06, { amp: .03, from: 5000, q:
 for (let i = 0; i < 8; i++) noiseHit(23.5 + i * .0625, .07, { amp: .06 + i * .02, from: 1800, q: .5, send: .3, decay: .06 });  // fill
 riser(22.8, 1.2);
 
-// End (24–30): impact and a long Am(add9) chord with a bell on top.
-impact(24);
+// End (24–30): a long Am(add9) chord with a bell on top.
 for (const m of [45, 57, 60, 64, 71]) tone(24, 5.6, midi(m), { type: "saw", amp: .05, attack: .02, decay: 9, cutoff: 1600, send: .7, pan: (m % 2 ? -.4 : .4) });
 [81, 76, 72, 69].forEach((m, i) => tone(24 + i * .25, 2.5, midi(m), { type: "sine", amp: .07, decay: 2.2, send: .8, pan: (i - 1.5) * .4 }));
 
-// ---------- sound effects, matched to the picture
-[[1.45, .6], [2.05, .6], [2.65, .6]].forEach(([t, d]) => whoosh(t, d, .3));    // camera whips while searching
-whoosh(4.0, 1.0, .45);                                                          // rush into the MacBook
-impact(5.0, .9);                                                                // the drop
-whoosh(5.0, .8, .18);                                                           // push to the menu bar
+// ---------- sound effects, matched to the picture: only clicks and the size slider
 [6.0, 7.0, 8.0, 10.0].forEach(click);
-shimmer(7.0, 81); shimmer(12.9, 84); shimmer(14.0, 88); shimmer(15.0, 81);
-whoosh(10.5, 2.0, .38, false);                                                  // pull-out
-whoosh(15.8, .7, .2);                                                           // into the feature cards
-[16.5, 17.0, 17.5, 18.0, 18.5, 19.0].forEach(pop);
-whoosh(22.6, .8, .25, false);                                                   // cards out
+
+// The slider drags from 1× to 2.4× between 8.0 s and 9.0 s with the video's in-out cubic easing.
+// One soft tick per 0.1× step, so the ticks speed up and slow down with the thumb.
+const easeInOut = x => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const sliderTick = t => tone(t, .012, 2600, { type: "sine", amp: .07, decay: .012, send: .02, pan: .25 });
+for (let n = 0, last = 10; n <= 1000; n++) {
+  const t = 8.0 + n / 1000, step = Math.floor((1 + 1.4 * easeInOut(n / 1000)) * 10 + 1e-9);
+  if (step !== last) { sliderTick(t); last = step; }
+}
 
 // ---------- reverb (Schroeder: four combs into two all-passes) and master
 function reverb(input) {
