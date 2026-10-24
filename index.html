@@ -298,6 +298,25 @@ html[dir="rtl"] .shot:hover img{transform:none}
   .panel input[type=color]{flex:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.layer .hp{animation:none}.layer{transform:none}}
+
+/* Mobile: nothing may be wider than the screen. */
+.layout>*,.hero>*,.mac>*{min-width:0}
+.btn-primary,.btn-secondary{font:inherit;font-weight:700;cursor:pointer;border:0}
+.btn-secondary{border:1px solid var(--line)}
+@media (max-width:860px){
+  .stage{min-height:0;aspect-ratio:4/3}
+  .controls{gap:12px}
+  label.size{flex:1 1 100%}
+  label.size input{flex:1}
+  .lang button,.seg button,.copy,.gh,.cmd button{min-height:44px}
+  .panel input[type=color]{width:44px;height:44px}
+  .panel{flex-wrap:wrap}
+  .mac{padding:24px 18px}
+  .cta>a{flex:1 1 100%;justify-content:center}
+  .features{grid-template-columns:1fr}
+  .shot img{max-height:420px}
+}
+.ctx span{font-size:.78rem}.features b{font-size:.75rem}.eyebrow{font-size:.76rem}
 </style>
 </head>
 <body>
@@ -319,8 +338,8 @@ html[dir="rtl"] .shot:hover img{transform:none}
       <h1 data-i18n="title">Your Mac pointer,<br><em>impossible to&nbsp;lose.</em></h1>
       <p class="lede" data-i18n="lede">Try outline and fill color pairs on a live macOS desktop, copy the hex codes, or apply one in a click with the free menu-bar app.</p>
       <div class="hero-cta">
-        <a class="btn-primary" href="#tool"><span data-i18n="browse">Try the pairs</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
-        <a class="btn-secondary" href="#mac" data-i18n="getApp">Get the Mac app</a>
+        <button type="button" class="btn-primary" data-scroll="tool"><span data-i18n="browse">Try the pairs</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+        <button type="button" class="btn-secondary" data-scroll="mac" data-i18n="getApp">Get the Mac app</button>
       </div>
       <dl class="stats">
         <div><dt id="statCount">47</dt><dd data-i18n="statPairs">color pairs</dd></div>
@@ -670,6 +689,10 @@ const d=new Date(); $("clock").textContent=d.toLocaleDateString("en-US",{weekday
 setLang(lang);
 renderList(); apply(cur.o,cur.f); drawHeroCompanions(); touchHint(); center();
 loadStars();
+
+// Always start at the top: no section anchors in the URL.
+if(location.hash){history.replaceState(null,"",location.pathname+location.search);scrollTo(0,0);}
+document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>$(b.dataset.scroll).scrollIntoView({behavior:reduceMotion.matches?"auto":"smooth",block:"start"}));
 </script>
 </body>
 </html>
