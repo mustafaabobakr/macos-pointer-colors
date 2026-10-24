@@ -2,11 +2,11 @@
 // Renders promo/index.html to video by stepping its timeline one frame at a time in headless Chrome.
 // No npm packages: it speaks the Chrome DevTools Protocol over Node's built-in WebSocket.
 //
-//   node promo/render.mjs                         → promo/out/pointer-colors-promo.mp4 (1080p, 60 fps)
+//   node promo/music.mjs && node promo/render.mjs → promo/out/pointer-colors-promo.mp4 (1080p, 60 fps, with music)
 //   node promo/render.mjs --fps 30 --out x.mp4
 //   node promo/render.mjs --stills 0,5.6,18,24    → promo/out/still-<t>.png, for checking shots
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -95,7 +95,11 @@ async function main() {
     }
 
     const frames = Math.round(duration * FPS);
-    const ffmpeg = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "mjpeg", "-i", "-",
+    // The soundtrack from music.mjs, if it has been made.
+    const music = join(OUT_DIR, "music.wav");
+    const audio = existsSync(music) ? ["-i", music, "-c:a", "aac", "-b:a", "256k", "-shortest"] : [];
+    if (!audio.length) console.warn("No promo/out/music.wav: rendering silent. Run node promo/music.mjs first.");
+    const ffmpeg = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "mjpeg", "-i", "-", ...audio,
       "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", "-movflags", "+faststart", OUT], { stdio: ["pipe", "inherit", "inherit"] });
     const started = Date.now();
     for (let f = 0; f < frames; f++) {

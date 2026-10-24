@@ -119,6 +119,31 @@ body{display:grid;place-items:center}
 #fade{position:absolute;inset:0;background:#000;pointer-events:none}
 #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(0,0,0,.55))}
 
+/* ---------- Problem opening ---------- */
+.spot{position:absolute;inset:0;z-index:18;opacity:0;pointer-events:none}
+.cap.center{left:0;right:0;bottom:auto;top:50%;text-align:center;transform-origin:center;text-shadow:0 6px 50px rgba(0,0,0,.9),0 0 140px rgba(0,0,0,.8)}
+.cap .warn{color:#FFD60A}
+
+/* ---------- Feature cards ---------- */
+#features{position:absolute;inset:0;pointer-events:none}
+#features .fh{position:absolute;left:0;right:0;top:92px;text-align:center;font:800 64px/1 var(--display);letter-spacing:-.03em;color:#fff;opacity:0}
+#features .fh em{font-style:normal;color:#00FFDA}
+.cards{position:absolute;left:150px;right:150px;top:210px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.card{position:relative;height:360px;border-radius:28px;background:rgba(20,22,28,.82);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 70px rgba(0,0,0,.5);overflow:hidden;opacity:0}
+.card .mini{position:absolute;left:18px;right:18px;top:18px;height:220px;border-radius:18px;overflow:hidden;background:#101217}
+.card h3{position:absolute;left:30px;bottom:62px;margin:0;font:700 32px var(--display);letter-spacing:-.02em;color:#fff}
+.card p{position:absolute;left:30px;right:30px;bottom:26px;margin:0;font:500 20px var(--ui);color:rgba(255,255,255,.6)}
+.mini svg.mp{position:absolute;width:44px;height:58px;overflow:visible;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
+.mini .appi{position:absolute;top:70px;width:84px;height:84px;border-radius:20px}
+.mini .appi span{position:absolute;left:0;right:0;bottom:-30px;text-align:center;font:600 16px var(--ui);color:rgba(255,255,255,.7)}
+.mini .key{position:absolute;top:66px;width:96px;height:96px;border-radius:18px;background:linear-gradient(#3a3c44,#2a2c33);box-shadow:0 8px 0 #17181c,inset 0 1px 0 rgba(255,255,255,.12);display:grid;place-items:center;font:600 42px var(--ui);color:#fff}
+.mini .badge{position:absolute;left:50%;top:150px;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;border-radius:999px;background:rgba(255,159,10,.18);border:1px solid rgba(255,159,10,.6);color:#FFB340;font:600 17px var(--ui)}
+.mini .wheel{position:absolute;left:46px;top:30px;width:160px;height:160px;border-radius:50%;background:conic-gradient(red,#ff0,lime,cyan,blue,#f0f,red);box-shadow:0 0 0 6px rgba(255,255,255,.08)}
+.mini .wheel::after{content:"";position:absolute;inset:58px;border-radius:50%;background:#101217}
+.mini .strip{position:absolute;left:0;top:44px;display:flex;gap:26px;white-space:nowrap}
+.mini .strip svg{width:40px;height:52px;overflow:visible;flex:none}
+.mini .langs{position:absolute;left:0;right:0;top:140px;text-align:center;font:700 30px var(--display);color:#fff}
+
 /* ---------- Player (not in the render) ---------- */
 #player{position:fixed;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:10px 16px;background:rgba(0,0,0,.7);color:#fff;font:13px var(--ui)}
 #player input{flex:1}
@@ -136,16 +161,22 @@ body.render #player{display:none}
     <div class="obj" id="mbp"><div class="base"><div class="keys"></div><div class="pad"></div><div class="lip"></div></div><div class="lid"><div class="screen" id="s0"></div><div class="notch"></div><div class="back"></div><div class="edge"></div></div></div>
   </div></div>
   <div id="vignette"></div>
-  <div class="cap" id="cap1">Your Mac pointer,<br><em id="cap1b">impossible to lose.</em></div>
+  <div class="cap" id="cap0">Where's your pointer?</div>
+  <div class="cap" id="cap0b">Big screens. Busy windows.<br><span class="warn">A tiny black arrow.</span></div>
+  <div class="cap center" id="cap1">Make it <em>impossible to lose.</em></div>
   <div class="cap" id="cap2">One click. <em>Any color.</em></div>
   <div class="cap" id="cap3">Any <em>size.</em></div>
   <div class="cap" id="cap4">A color for <em>every display.</em></div>
-  <div class="cap" id="cap5">And it keeps <em>up with you.</em></div>
-  <div class="chips3">
-    <div class="fchip" id="f1" style="--c:#FFD60A"><i></i>Light &amp; dark appearance</div>
-    <div class="fchip" id="f2" style="--c:#FF2BD6"><i></i>A pair for each app</div>
-    <div class="fchip" id="f3" style="--c:#00E5FF"><i></i>Keyboard shortcuts</div>
-    <div class="fchip" id="f4" style="--c:#39FF14"><i></i>47 pairs · English &amp; العربية</div>
+  <div id="features">
+    <div class="fh">And everything else, <em>built in.</em></div>
+    <div class="cards">
+      <div class="card" id="c1"><div class="mini" id="m-ld"><svg class="mp" viewBox="0 0 24 32" style="left:150px;top:70px"></svg><div class="appi" id="ld-icon" style="left:auto;right:40px;top:70px;width:70px;height:70px;border-radius:50%"></div></div><h3>Light &amp; dark</h3><p>Switches pairs with the appearance</p></div>
+      <div class="card" id="c2"><div class="mini" id="m-app"><div class="appi" style="left:40px;background:linear-gradient(#5ac8fa,#0a84ff)"><span>Xcode</span></div><div class="appi" style="left:180px;background:linear-gradient(#ff6482,#bf5af2)"><span>Figma</span></div><div class="appi" style="left:320px;background:linear-gradient(#64d2ff,#30d158)"><span>Safari</span></div><svg class="mp" viewBox="0 0 24 32"></svg></div><h3>A pair for each app</h3><p>Follows the app in front</p></div>
+      <div class="card" id="c3"><div class="mini" id="m-keys"><div class="key" style="left:50px">⌃</div><div class="key" style="left:166px">⌥</div><div class="key" style="left:282px">P</div><svg class="mp" viewBox="0 0 24 32" style="left:420px;top:90px;width:34px;height:44px"></svg></div><h3>Keyboard shortcuts</h3><p>Next pair, bigger, reset</p></div>
+      <div class="card" id="c4"><div class="mini" id="m-con" style="background:#fff"><svg class="mp" viewBox="0 0 24 32" style="left:50%;margin-left:-22px;top:62px"></svg><div class="badge">⚠ Hard to see on light screens</div></div><h3>Contrast warnings</h3><p>Know when a pair gets lost</p></div>
+      <div class="card" id="c5"><div class="mini" id="m-own"><div class="wheel" id="wheel"></div><svg class="mp" viewBox="0 0 24 32" style="left:300px;top:76px;width:56px;height:74px"></svg></div><h3>Your own pairs</h3><p>Pick any outline and fill</p></div>
+      <div class="card" id="c6"><div class="mini" id="m-pairs"><div class="strip" id="strip"></div><div class="langs" id="langs">47 pairs</div></div><h3>47 pairs</h3><p>English &amp; العربية</p></div>
+    </div>
   </div>
   <div id="end">
     <img src="assets/icon.png" alt="">
@@ -155,7 +186,7 @@ body.render #player{display:none}
   </div>
   <div id="fade"></div>
 </div>
-<div id="player"><button id="play">Play</button><input id="scrub" type="range" min="0" max="38" step="0.001" value="0"><span id="time">0.00</span></div>
+<div id="player"><button id="play">Play</button><input id="scrub" type="range" min="0" max="30" step="0.001" value="0"><span id="time">0.00</span></div>
 
 <script>
 // ============================================================ data
@@ -170,7 +201,7 @@ const PAIRS = {
 };
 const ARROW = "M3 2 L3 24 L8.6 18.8 L12.2 27.2 L16 25.6 L12.4 17.4 L19.8 17.4 Z";
 const arrow = (p, w = 1.6) => `<path d="${ARROW}" fill="${p.f}" stroke="${p.o}" stroke-width="${w}" stroke-linejoin="round"/>`;
-const DURATION = 38;
+const DURATION = 30;
 
 // ============================================================ easing + keyframes
 const E = {
@@ -223,14 +254,14 @@ function desktopHTML(i, { app, windows }) {
       <span class="glyph">􀙇</span><span class="glyph">􀊫</span><span>Fri 9:41 AM</span></div>
     ${windows.map(windowHTML).join("")}
     <div class="dock">${DOCK.map(g => `<i style="background:linear-gradient(${g})"></i>`).join("")}</div>
-    <div class="click" id="click${i}"></div><div class="ring" id="ring${i}"></div>
+    <div class="spot" id="spot${i}"></div><div class="click" id="click${i}"></div><div class="ring" id="ring${i}"></div>
     <svg class="ptr" id="p${i}" viewBox="0 0 24 32"></svg>
   </div>`;
 }
 
-$("s0").innerHTML = desktopHTML(0, { app: "Finder", windows: [{ x: 170, y: 150, w: 760, h: 520, title: "Documents", side: true }] });
-$("s1").innerHTML = desktopHTML(1, { app: "Xcode", windows: [{ x: 260, y: 170, w: 1300, h: 860, title: "PointerColors — MenuContentView.swift", side: true }, { x: 1640, y: 300, w: 560, h: 640, title: "Simulator" }] });
-$("s2").innerHTML = desktopHTML(2, { app: "Safari", windows: [{ x: 360, y: 150, w: 1680, h: 1000, title: "macos-pointer-colors.pages.dev" }] });
+$("s0").innerHTML = desktopHTML(0, { app: "Finder", windows: [{ x: 170, y: 150, w: 760, h: 520, title: "Documents", side: true }, { x: 640, y: 380, w: 620, h: 420, title: "Notes" }] });
+$("s1").innerHTML = desktopHTML(1, { app: "Xcode", windows: [{ x: 120, y: 90, w: 1180, h: 900, title: "PointerColors — MenuContentView.swift", side: true }, { x: 980, y: 420, w: 760, h: 720, title: "Preview", side: true }, { x: 1640, y: 160, w: 640, h: 980, title: "Simulator" }, { x: 1380, y: 760, w: 820, h: 460, title: "Console" }] });
+$("s2").innerHTML = desktopHTML(2, { app: "Safari", windows: [{ x: 160, y: 110, w: 1500, h: 980, title: "macos-pointer-colors.pages.dev" }, { x: 1280, y: 420, w: 960, h: 760, title: "Messages", side: true }] });
 
 // ---------- the Pointer Colors menu, inside the MacBook screen
 const tile = (name, bg) => `<div class="tile" style="background:${bg}"><svg viewBox="0 0 24 32" data-pv></svg><span>${name}</span></div>`;
@@ -282,100 +313,147 @@ document.querySelector(".desk-plane").style.transform = "rotateX(90deg)";
 const SCREEN0 = { x: 0, y: -506 + 30 + 472.5 };   // lid top + bezel + half the screen
 const s0 = (sx, sy) => [SCREEN0.x - 756 + sx, SCREEN0.y - 472.5 + sy, 0];
 
-// ============================================================ the script (all times in seconds)
+// ============================================================ the script (seconds; 120 BPM, a beat is 0.5 s)
+const BEAT = 0.5;
 const STATUS = inScreen($("status"));
 const PAIR = id => inScreen($("pair-" + id));
 const THUMB_X0 = inScreen($("track"), 0, .5), TRACK_W = $("track").offsetWidth;
 const TOGGLE = inScreen($("sw"));
-const SIZE = [[9.9, 1], [11.6, 2.4, "io"]];                 // pointer size over time
+const SIZE = [[8.0, 1], [9.0, 2.4, "io"]];
 const sizeAt = t => track(SIZE, t);
 const thumbAt = t => [THUMB_X0[0] + TRACK_W * (sizeAt(t) - 1) / 3, THUMB_X0[1]];
+const LOST = [1580, 915];                     // where the tiny pointer hides on the left display
 
-// Pointer: one track per screen; it is only drawn on a screen during that screen's window.
-const P = {
-  0: { from: 0, to: 19.9, frames: [[0, [520, 640]], [2.6, [880, 520]], [4.9, STATUS, "io"], [5.3, STATUS], [6.9, PAIR("aqua-mint"), "io"], [7.6, PAIR("aqua-mint")],
-       [9.4, THUMB_X0, "io"], [9.9, THUMB_X0], [11.6, thumbAt(11.6), "io"], [12.0, thumbAt(11.6)], [13.3, TOGGLE, "io"], [14.2, TOGGLE], [16.2, [900, 560], "io"], [19.9, [560, 2], "io"]] },
-  1: { from: 19.9, to: 22.7, frames: [[19.9, [2050, 1348]], [21.3, [1500, 760], "out"], [22.7, [2398, 640], "io"]] },
-  2: { from: 22.7, to: 25.6, frames: [[22.7, [2, 640]], [24.2, [1000, 700], "out"], [25.6, [700, 1348], "io"]] },
-  3: { from: 25.6, to: 40, screen: 0, frames: [[25.6, [1300, 2]], [27.2, [760, 520], "out"], [31.5, [700, 560]]] },
+// Pointer segments. Each draws on one screen during [from, to).
+const P = [
+  { s: 1, from: 0, to: 4.4, frames: [[0, [880, 700]], [1.6, [1300, 840]], [3.1, LOST, "io"], [3.9, [1600, 930]], [4.4, [1560, 1348], "io"]] },
+  { s: 0, from: 4.4, to: 12.9, frames: [[4.4, [620, 2]], [5.0, [900, 420], "out"], [5.8, STATUS, "io"], [6.0, STATUS], [6.6, PAIR("aqua-mint"), "io"], [7.0, PAIR("aqua-mint")],
+       [7.6, THUMB_X0, "io"], [8.0, THUMB_X0], [9.0, thumbAt(9.0), "io"], [9.2, thumbAt(9.0)], [9.8, TOGGLE, "io"], [10.0, TOGGLE], [11.4, [900, 560], "io"], [12.9, [560, 2], "io"]] },
+  { s: 1, from: 12.9, to: 14.0, frames: [[12.9, [2050, 1348]], [13.5, [1500, 760], "out"], [14.0, [2398, 640], "io"]] },
+  { s: 2, from: 14.0, to: 15.0, frames: [[14.0, [2, 640]], [14.5, [1000, 700], "out"], [15.0, [700, 1348], "io"]] },
+  { s: 0, from: 15.0, to: 31, frames: [[15.0, [1300, 2]], [15.8, [760, 520], "out"], [30, [700, 560]]] },
+];
+const segAt = (s, t) => P.find(p => p.s === s && t >= p.from && t < p.to);
+const CLICKS = [6.0, 7.0, 8.0, 10.0];                       // all on the MacBook, on beats
+const RINGS = [[7.0, 0, "aqua-mint", 1.2], [12.9, 1, "neon-pink", 2.4], [14.0, 2, "electric-blue", 2.4], [15.0, 0, "aqua-mint", 1.6]];
+const pairOn = (s, t) => {
+  if (s === 1) return t >= 12.9 ? "neon-pink" : "macos-light";
+  if (s === 2) return t >= 14.0 ? "electric-blue" : "macos-light";
+  return t >= 7.0 ? "aqua-mint" : "macos-light";
 };
-const CLICKS = [[5.3, 0], [7.6, 0], [9.9, 0], [14.2, 0]];   // [time, screen]
-// Which pair each screen's pointer shows.
-const pairOn = (screen, t) => {
-  if (t < 7.6) return "macos-light";
-  if (screen === 1 && t >= 19.9) return "neon-pink";
-  if (screen === 2 && t >= 22.7) return "electric-blue";
-  return "aqua-mint";
-};
-// Camera: target (x, y, z), zoom (translateZ toward the target), tilt rx, turn ry.
+// The camera: target (x, y, z), zoom toward it, tilt rx and turn ry.
+const WIDE = { t: [0, -540, -700], z: -2950, rx: -11, ry: 0 };
 const CAM = [
-  [0,    { t: s0(756, 472), z: 230, rx: 0, ry: 0 }],
-  [3.4,  { t: s0(756, 460), z: 300, rx: 0, ry: 0 }, "io"],
-  [5.3,  { t: s0(1150, 150), z: 830, rx: 0, ry: 0 }, "io5"],
-  [6.8,  { t: s0(1010, 330), z: 420, rx: 0, ry: 0 }, "io"],
-  [14.6, { t: s0(1000, 345), z: 450, rx: 0, ry: 0 }, "io"],
-  [17.0, { t: [0, -60, 0], z: -650, rx: -9, ry: 24 }, "io5"],
-  [19.9, { t: [0, -560, -700], z: -3100, rx: -12, ry: 12 }, "io"],
-  [21.4, { t: [-650, -620, -900], z: -2500, rx: -11, ry: 15 }, "io"],
-  [24.2, { t: [650, -620, -900], z: -2500, rx: -11, ry: -8 }, "io"],
-  [27.0, { t: [0, -520, -700], z: -2950, rx: -10, ry: -12 }, "io"],
-  [31.5, { t: [0, -500, -700], z: -3150, rx: -11, ry: -18 }, "io"],
-  [38,   { t: [0, -400, -700], z: -5200, rx: -14, ry: -24 }, "io"],
+  [0,    { ...WIDE, z: -3150, ry: 6 }],
+  [1.5,  { ...WIDE, z: -2900, ry: -2 }, "io"],
+  [2.0,  { t: [1330, -700, -1500], z: -1100, rx: -6, ry: -15 }, "io5"],                    // search: right display
+  [2.6,  { t: [0, -60, 0], z: -260, rx: -5, ry: 6 }, "io5"],                                  // search: MacBook
+  [3.2,  { t: [-1110, -600, -1500], z: -480, rx: -6, ry: 16 }, "io5"],                        // found it, left display
+  [4.1,  { t: [-1110, -600, -1500], z: -330, rx: -6, ry: 16 }, "io"],
+  [5.0,  { t: s0(756, 472), z: 230, rx: 0, ry: 0 }, "io5"],                                  // rush into the MacBook: the drop
+  [5.8,  { t: s0(1150, 150), z: 830, rx: 0, ry: 0 }, "io5"],
+  [6.5,  { t: s0(1010, 330), z: 420, rx: 0, ry: 0 }, "io"],
+  [10.4, { t: s0(1000, 345), z: 450, rx: 0, ry: 0 }, "io"],
+  [11.4, { t: [0, -60, 0], z: -650, rx: -9, ry: 22 }, "io5"],
+  [12.6, { ...WIDE, z: -3000, rx: -12, ry: 12 }, "io"],
+  [13.4, { t: [-650, -620, -900], z: -2400, rx: -11, ry: 15 }, "io"],
+  [14.5, { t: [650, -620, -900], z: -2400, rx: -11, ry: -8 }, "io"],
+  [15.6, { ...WIDE, z: -2850, rx: -10, ry: -6 }, "io"],
+  [24,   { ...WIDE, z: -3300, rx: -12, ry: -16 }, "io"],
+  [30,   { ...WIDE, z: -4900, rx: -14, ry: -24 }, "io"],
 ];
 function cameraAt(t) {
-  const asArr = c => [...c.t, c.z, c.rx, c.ry];
-  const v = track(CAM.map(([tt, c, e]) => [tt, asArr(c), e]), t);
-  return { t: [v[0], v[1], v[2]], z: v[3], rx: v[4], ry: v[5] };
+  const v = track(CAM.map(([tt, c, e]) => [tt, [...c.t, c.z, c.rx, c.ry], e]), t);
+  return { t: v.slice(0, 3), z: v[3], rx: v[4], ry: v[5] };
 }
+const CAPS = [["cap0", .4, 2.3], ["cap0b", 2.4, 4.4], ["cap1", 5.0, 6.0], ["cap2", 7.0, 8.6], ["cap3", 8.7, 10.3], ["cap4", 12.7, 15.8]];
+const CARD_IN = [16.5, 17.0, 17.5, 18.0, 18.5, 19.0], CARD_OUT = 22.6;
+
+// ============================================================ feature card demos (u = seconds since the card landed)
+const ldIcon = $("ld-icon");
+const DEMOS = {
+  c1(u) {      // light & dark: the card flips appearance and the pointer follows
+    const dark = Math.floor(u / 1.0) % 2 === 1, k = E.io(clamp((u % 1.0) / .3));
+    const on = dark ? k : 1 - k;
+    $("m-ld").style.background = `rgb(${Math.round(242 - 226 * on)},${Math.round(242 - 224 * on)},${Math.round(246 - 223 * on)})`;
+    $("m-ld").querySelector(".mp").innerHTML = arrow(PAIRS[on > .5 ? "macos-dark" : "macos-light"], 1.8);
+    ldIcon.style.background = on > .5 ? "radial-gradient(circle at 65% 35%,transparent 32%,#e9e9ef 33%)" : "radial-gradient(circle,#FFD60A 45%,rgba(255,214,10,.25) 46%)";
+  },
+  c2(u) {      // a pair per app: the active app moves, the pointer takes its pair
+    const ids = ["aqua-mint", "neon-pink", "electric-blue"], xs = [82, 222, 362];
+    const i = Math.floor(u / .8) % 3, j = (i + 1) % 3, k = E.io(clamp((u % .8 - .45) / .35));
+    const el = $("m-app").querySelector(".mp");
+    el.style.left = (xs[i] + (xs[j] - xs[i]) * k + 20) + "px"; el.style.top = "118px";
+    el.innerHTML = arrow(PAIRS[k > .5 ? ids[j] : ids[i]], 1.8);
+    $("m-app").querySelectorAll(".appi").forEach((a, n) => { a.style.transform = `scale(${n === (k > .5 ? j : i) ? 1.08 : .94})`; a.style.opacity = n === (k > .5 ? j : i) ? 1 : .55; });
+  },
+  c3(u) {      // shortcuts: ⌃⌥P pressed in turn, then the pair changes
+    const loop = u % 1.6, n = Math.floor(u / 1.6);
+    $("m-keys").querySelectorAll(".key").forEach((key, i) => { const down = loop > .2 + i * .14 && loop < .95; key.style.transform = `translateY(${down ? 6 : 0}px)`; key.style.boxShadow = down ? "0 2px 0 #17181c,inset 0 1px 0 rgba(255,255,255,.12)" : ""; });
+    const ids = ["aqua-mint", "neon", "neon-pink", "electric-blue"];
+    $("m-keys").querySelector(".mp").innerHTML = arrow(PAIRS[ids[(n + (loop > .95 ? 1 : 0)) % ids.length]], 1.8);
+  },
+  c4(u) {      // contrast warning: a pale pair on a white page, the badge pulses
+    $("m-con").querySelector(".mp").innerHTML = arrow({ o: "#FFF5F0", f: "#FFE3D8" }, 1.8);
+    $("m-con").querySelector(".badge").style.transform = `translateX(-50%) scale(${1 + .05 * Math.sin(u * 6)})`;
+  },
+  c5(u) {      // your own pairs: the wheel turns, the pointer's fill follows
+    $("wheel").style.transform = `rotate(${u * 140}deg)`;
+    const hue = Math.round((u * 140) % 360);
+    $("m-own").querySelector(".mp").innerHTML = arrow({ o: "#FFFFFF", f: `hsl(${hue} 90% 50%)` }, 1.8);
+  },
+  c6(u) {      // 47 pairs: a ticker of pointers; the label alternates languages
+    $("strip").style.transform = `translateX(${-((u * 120) % 792)}px)`;
+    $("langs").textContent = Math.floor(u / 1.2) % 2 ? "٤٧ زوجًا" : "47 pairs";
+  },
+};
+$("strip").innerHTML = Array.from({ length: 24 }, (_, i) => `<svg viewBox="0 0 24 32">${arrow(Object.values(PAIRS)[2 + (i % 5)], 2)}</svg>`).join("");
 
 // ============================================================ draw a frame
 function seek(t) {
   t = clamp(t, 0, DURATION);
-  // camera
   const c = cameraAt(t);
   $("world").style.transform = `translateZ(${c.z}px) rotateX(${c.rx}deg) rotateY(${c.ry}deg) translate3d(${-c.t[0]}px,${-c.t[1]}px,${-c.t[2]}px)`;
 
   // pointers
   const size = sizeAt(t);
-  for (const key of Object.keys(P)) {
-    const seg = P[key], screen = seg.screen ?? Number(key);
-    const el = $("p" + screen);
-    if (t < seg.from || t >= seg.to) { if (el.dataset.seg === key) el.style.opacity = 0; continue; }
+  for (const s of [0, 1, 2]) {
+    const el = $("p" + s), seg = segAt(s, t);
+    if (!seg) { el.style.opacity = 0; continue; }
     const [x, y] = track(seg.frames, t);
-    const pair = PAIRS[pairOn(screen, t)];
-    el.dataset.seg = key;
     el.style.opacity = 1;
-    el.innerHTML = arrow(pair);
-    // bigger on the external displays so it reads at the wide shot
-    const k = screen === 0 ? 1.15 : 3.6;
-    el.style.transform = `translate(${x - 3}px,${y - 2}px) scale(${size * k})`;
+    el.innerHTML = arrow(PAIRS[pairOn(s, t)]);
+    const k = s === 0 ? 1.15 : (t < 5 ? 1.5 : 3.6);            // tiny during "the problem"
+    el.style.transform = `translate(${x - 3}px,${y - 2}px) scale(${(s === 0 ? size : 1) * k})`;
   }
-  for (const s of [0, 1, 2]) { const segs = Object.entries(P).filter(([k, p]) => (p.screen ?? Number(k)) === s); if (!segs.some(([, p]) => t >= p.from && t < p.to)) $("p" + s).style.opacity = 0; }
 
-  // click pulses and colour rings
+  // the spotlight finds the lost pointer
+  const spot = env(t, 3.2, 4.3, .45, .4);
+  $("spot1").style.opacity = spot;
+  $("spot1").style.background = `radial-gradient(circle at ${LOST[0] + 18}px ${LOST[1] + 22}px, transparent ${70 + 200 * (1 - spot)}px, rgba(0,0,0,.72) ${150 + 260 * (1 - spot)}px)`;
+
+  // clicks and colour rings
   for (const s of [0, 1, 2]) { $("click" + s).style.opacity = 0; $("ring" + s).style.opacity = 0; }
-  for (const [ct, s] of CLICKS) {
-    const k = (t - ct) / .45;
+  for (const ct of CLICKS) {
+    const k = (t - ct) / .4;
     if (k < 0 || k > 1) continue;
-    const [x, y] = track(P[s].frames, ct), el = $("click" + s);
-    el.style.opacity = (1 - k) * .8;
-    el.style.transform = `translate(${x}px,${y}px) scale(${.4 + k * 1.2})`;
+    const [x, y] = track(segAt(0, ct).frames, ct);
+    $("click0").style.opacity = (1 - k) * .8;
+    $("click0").style.transform = `translate(${x}px,${y}px) scale(${.4 + k * 1.2})`;
   }
-  const RINGS = [[7.6, 0, "aqua-mint", 1.2], [19.9, 1, "neon-pink", 2.4], [22.7, 2, "electric-blue", 2.4], [25.6, 0, "aqua-mint", 1.6]];
   for (const [rt, s, id, scale] of RINGS) {
-    const k = (t - rt) / .9;
+    const k = (t - rt) / .7;
     if (k < 0 || k > 1) continue;
-    const segKey = Object.keys(P).find(key => { const p = P[key]; return (p.screen ?? Number(key)) === s && rt >= p.from && rt < p.to; });
-    const [x, y] = track(P[segKey].frames, t);
+    const [x, y] = track(segAt(s, rt).frames, t);
     const el = $("ring" + s);
     el.style.borderColor = PAIRS[id].o;
     el.style.boxShadow = `0 0 30px ${PAIRS[id].o}`;
-    el.style.opacity = (1 - k);
+    el.style.opacity = 1 - k;
     el.style.transform = `translate(${x}px,${y}px) scale(${(.3 + E.outExpo(k) * 1.6) * scale})`;
   }
 
   // the menu
-  const open = clamp((t - 5.35) / .45), close = clamp((t - 14.5) / .35);
+  const open = clamp((t - 6.05) / .3), close = clamp((t - 10.45) / .25);
   const shown = E.back(open) * (1 - E.io(close));
   const pop = $("pop");
   pop.style.opacity = Math.min(1, open * 2) * (1 - close);
@@ -392,54 +470,55 @@ function seek(t) {
   $("thumb").style.left = (thumb[0] - THUMB_X0[0]) + "px";
   $("fill").style.width = (thumb[0] - THUMB_X0[0]) + "px";
   $("sizeVal").textContent = size.toFixed(2) + "×";
-  const on = E.io(clamp((t - 14.2) / .25));
+  const on = E.io(clamp((t - 10.0) / .2));
   $("sw").style.background = on > .5 ? "#0a84ff" : "#4a4d55";
   $("sw").style.setProperty("--k", (16 * on) + "px");
-  $("drows").style.height = (102 * E.out(clamp((t - 14.25) / .35))) + "px";
+  $("drows").style.height = (102 * E.out(clamp((t - 10.05) / .3))) + "px";
   $("status").querySelector("svg").innerHTML = arrow(PAIRS[sel], 2.2);
   $("status").style.background = open > 0 && close < 1 ? "rgba(255,255,255,.25)" : "transparent";
 
-  // the external displays wake as the camera pulls out
-  const wake = E.io(clamp((t - 16.4) / 1.6));
-  $("off1").style.opacity = 1 - wake; $("off2").style.opacity = 1 - clamp(wake * 1.15);
-
-  // light appearance from 27.6
-  const light = E.io(clamp((t - 27.6) / 1.2));
-  document.querySelectorAll(".wp.light").forEach(el => { el.style.opacity = light; });
-  document.querySelectorAll(".mb").forEach(el => { el.style.color = light > .5 ? "#1d1d1f" : "#fff"; el.style.background = `rgba(${light > .5 ? "255,255,255" : "0,0,0"},.18)`; });
+  // the external displays dim while the camera is on the MacBook, and wake on the pull-out
+  const dim = E.io(clamp((t - 4.6) / .4)) * (1 - E.io(clamp((t - 10.8) / 1.0)));
+  $("off1").style.opacity = dim * .97; $("off2").style.opacity = dim * .97;
 
   // ambient glow follows the pointer colour
-  const g = t < 7.6 ? null : (t >= 19.9 && t < 22.7 ? "neon-pink" : t >= 22.7 && t < 25.6 ? "electric-blue" : "aqua-mint");
+  const g = t < 7 ? null : (t >= 12.9 && t < 14 ? "neon-pink" : t >= 14 && t < 15 ? "electric-blue" : "aqua-mint");
   $("glow").style.setProperty("--g", g ? PAIRS[g].o : "#7aa2ff");
-  $("glow").style.opacity = (g ? .16 : .05) * clamp((t - 6) / 2) * (1 - clamp((t - 33) / 3));
+  $("glow").style.opacity = (g ? .18 : .05) * clamp((t - 5) / 1.5) * (1 - clamp((t - 27) / 3));
 
   // captions
-  const caps = [["cap1", .8, 3.6], ["cap2", 7.9, 10.0], ["cap3", 10.4, 12.8], ["cap4", 17.6, 21.6], ["cap5", 27.3, 31.0]];
-  for (const [id, a, b] of caps) {
-    const k = env(t, a, b, .7, .6), el = $(id);
+  for (const [id, a, b] of CAPS) {
+    const k = env(t, a, b, .35, .35), el = $(id);
     el.style.opacity = k;
-    el.style.transform = `translateY(${(1 - k) * 30}px)`;
+    const center = el.classList.contains("center");
+    el.style.transform = center ? `translateY(-50%) scale(${.94 + .06 * E.out(clamp((t - a) / .5))})` : `translateY(${(1 - k) * 26}px)`;
     el.style.filter = `blur(${(1 - k) * 10}px)`;
   }
-  $("cap1b").style.opacity = E.out(clamp((t - 1.6) / .6));
   $("cap1").style.setProperty("--c", PAIRS["aqua-mint"].o);
   $("cap2").style.setProperty("--c", PAIRS["aqua-mint"].o);
   $("cap4").style.setProperty("--c", PAIRS["neon-pink"].o);
 
-  // feature chips
-  const CH = [["f1", 28.2, [180, 220]], ["f2", 28.7, [1200, 300]], ["f3", 29.2, [260, 760]], ["f4", 29.7, [1150, 820]]];
-  for (const [id, a, [x, y]] of CH) {
-    const k = env(t, a, 31.6, .8, .7), el = $(id);
-    el.style.opacity = k;
-    el.style.transform = `translate(${x}px,${y + (1 - k) * 40}px) scale(${.92 + .08 * k})`;
-  }
+  // feature cards: the scene dims, cards land on the beat, each runs its own demo
+  const fk = E.io(clamp((t - 15.9) / .5)) * (1 - E.io(clamp((t - 23.2) / .5)));
+  const capDim = env(t, 5.0, 6.0, .3, .3), endDim = E.io(clamp((t - 23.6) / .6));
+  $("scene").style.filter = `blur(${10 * fk + 6 * endDim}px) brightness(${1 - .5 * capDim})`;
+  const fh = env(t, 16.0, 23.3, .4, .4);
+  document.querySelector("#features .fh").style.opacity = fh;
+  document.querySelector("#features .fh").style.transform = `translateY(${(1 - fh) * 24}px)`;
+  ["c1", "c2", "c3", "c4", "c5", "c6"].forEach((id, i) => {
+    const kin = E.back(clamp((t - CARD_IN[i]) / .45)), kout = E.io(clamp((t - CARD_OUT - i * .08) / .4));
+    const el = $(id);
+    el.style.opacity = clamp((t - CARD_IN[i]) / .2) * (1 - kout);
+    el.style.transform = `translateY(${(1 - kin) * 80 - kout * 60}px) scale(${.88 + .12 * kin - .06 * kout})`;
+    if (t >= CARD_IN[i] && kout < 1) DEMOS[id](t - CARD_IN[i]);
+  });
 
   // end card and fades
-  const endK = E.io(clamp((t - 32.6) / 1.4));
-  $("end").style.opacity = endK * (1 - clamp((t - 37.2) / .8));
-  $("end").style.transform = `scale(${.94 + .06 * endK})`;
-  $("scene").style.opacity = 1 - .8 * E.io(clamp((t - 32) / 2));
-  $("fade").style.opacity = Math.max(1 - clamp(t / .9), clamp((t - 37.2) / .8));
+  const endK = E.back(clamp((t - 24.0) / .6));
+  $("end").style.opacity = clamp((t - 24.0) / .3) * (1 - clamp((t - 29.1) / .8));
+  $("end").style.transform = `scale(${.9 + .1 * endK})`;
+  $("scene").style.opacity = 1 - .45 * fk - .62 * endDim;
+  $("fade").style.opacity = Math.max(1 - clamp(t / .5), clamp((t - 29.1) / .8));
   return t;
 }
 

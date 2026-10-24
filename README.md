@@ -144,8 +144,6 @@ python3 -I docs/art/make_readme_art.py   # needs: brew install librsvg
 | [`pairs.json`](pairs.json) | Every pair, shared by the site and the app |
 | [`mac/`](mac) | The SwiftUI menu-bar app, tests and build scripts |
 | [`docs/`](docs) | Screenshots, README art and the social preview |
-| [`promo/`](promo) | The promo film: a scripted 3D scene and its renderer (`node promo/render.mjs`, needs Chrome and ffmpeg) |
-
 The site deploys to Cloudflare Pages from `main`: no framework preset, no build command, output directory `/`.
 
 <br>
