@@ -23,6 +23,11 @@
 
 <br>
 
+<p align="center">
+  <a href="https://macos-pointer-colors.pages.dev/docs/promo/pointer-colors-promo.mp4"><img src="docs/promo/poster.jpg" alt="Watch the 30-second Pointer Colors film" width="100%"></a>
+  <br><sub><a href="https://macos-pointer-colors.pages.dev/docs/promo/pointer-colors-promo.mp4"><b>▶ Watch the 30-second film</b></a></sub>
+</p>
+
 **Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 47 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
 
 ## Two ways to use it
