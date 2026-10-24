@@ -15,7 +15,7 @@
 html,body{margin:0;height:100%;background:#000;overflow:hidden}
 body{display:grid;place-items:center}
 #stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#050608;font-family:var(--ui);transform-origin:center;flex:none}
-#bg{position:absolute;inset:0;background:radial-gradient(60% 70% at 50% 35%,#16202a 0%,#07090c 60%,#030405 100%)}
+#bg{position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 30%,#1b1b1e 0%,#0a0a0b 55%,#000 100%)}
 #glow{position:absolute;inset:-20%;background:radial-gradient(30% 30% at 50% 45%,var(--g,#00FFDA),transparent 70%);opacity:0;filter:blur(80px)}
 #scene{position:absolute;inset:0;perspective:1800px;perspective-origin:50% 50%}
 #world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
@@ -42,7 +42,7 @@ body{display:grid;place-items:center}
 .mon .foot{position:absolute;width:820px;height:520px;border-radius:30px;background:linear-gradient(#cfd0d3,#a8aaae);transform-origin:top center;transform:rotateX(90deg)}
 
 /* ---------- Desk ---------- */
-.desk-plane{position:absolute;width:12000px;height:7000px;transform-origin:top center;transform:rotateX(90deg);background:radial-gradient(40% 45% at 50% 22%,#262b33 0%,#14171c 55%,#07080a 100%)}
+.desk-plane{position:absolute;width:12000px;height:7000px;transform-origin:top center;transform:rotateX(90deg);background:radial-gradient(34% 40% at 50% 24%,#2a2a2e 0%,#141416 50%,#000 100%)}
 
 /* ---------- macOS desktop ---------- */
 .dt{position:absolute;inset:0;overflow:hidden}
@@ -106,43 +106,41 @@ body{display:grid;place-items:center}
 .pop .mi span{color:#9aa0ac}
 
 /* ---------- Titles ---------- */
-.cap{position:absolute;left:120px;bottom:110px;line-height:1.02;font:800 92px/1 var(--display);letter-spacing:-.035em;color:#fff;opacity:0;text-shadow:0 8px 40px rgba(0,0,0,.6);white-space:nowrap}
-.cap em{font-style:normal;color:var(--c,#00FFDA)}
+.hl{position:absolute;left:0;right:0;top:50%;text-align:center;font:600 118px/1.05 var(--display);letter-spacing:-.03em;color:#f5f5f7;opacity:0;white-space:nowrap;text-shadow:0 10px 60px rgba(0,0,0,.7)}
+.hl em,.sub em,.fs h2 em{font-style:normal;background:linear-gradient(90deg,#00FFDA,#4F8BFF 55%,#C77DFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{position:absolute;left:0;right:0;bottom:84px;text-align:center;font:600 58px/1.1 var(--display);letter-spacing:-.02em;color:#f5f5f7;opacity:0;white-space:nowrap;text-shadow:0 6px 40px rgba(0,0,0,.85)}
 .chips3{position:absolute;inset:0;pointer-events:none}
 .fchip{position:absolute;padding:16px 26px;border-radius:999px;background:rgba(18,20,26,.72);border:1px solid rgba(255,255,255,.16);color:#fff;font:600 30px var(--ui);opacity:0;white-space:nowrap;box-shadow:0 20px 50px rgba(0,0,0,.4)}
 .fchip i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:12px;vertical-align:middle;background:var(--c)}
-#end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;color:#fff;text-align:center}
-#end img{width:210px;height:210px;filter:drop-shadow(0 30px 60px rgba(0,255,218,.35))}
-#end h2{margin:0;font:800 104px/1 var(--display);letter-spacing:-.04em}
-#end p{margin:0;font:500 34px var(--ui);color:rgba(255,255,255,.7)}
-#end .url{margin-top:8px;padding:14px 30px;border-radius:999px;background:#fff;color:#0b0c10;font:700 30px var(--ui)}
+#end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;opacity:0;color:#f5f5f7;text-align:center;background:#000}
+#end img{width:230px;height:230px;margin-bottom:14px;filter:drop-shadow(0 30px 70px rgba(0,0,0,.6))}
+#end h2{margin:0;font:600 120px/1 var(--display);letter-spacing:-.035em}
+#end p{margin:0;font:500 44px var(--ui);color:#86868b}
+#end .url{margin-top:26px;font:500 30px var(--ui);color:#86868b;letter-spacing:.01em}
 #fade{position:absolute;inset:0;background:#000;pointer-events:none}
 #vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(0,0,0,.55))}
 
+/* ---------- Feature scenes (one at a time, full screen) ---------- */
+#feat{position:absolute;inset:0;pointer-events:none}
+.fs{position:absolute;inset:0;opacity:0;background:#000;overflow:hidden}
+.fs h2{position:absolute;left:0;right:0;top:120px;margin:0;text-align:center;font:600 104px/1.05 var(--display);letter-spacing:-.03em;color:#f5f5f7}
+.fs p{position:absolute;left:0;right:0;top:252px;margin:0;text-align:center;font:500 40px var(--ui);color:#86868b}
+.fs .demo{position:absolute;left:0;right:0;top:340px;bottom:0}
+.fs .big{position:absolute;left:50%;top:150px;width:240px;height:320px;margin-left:-100px;overflow:visible;filter:drop-shadow(0 30px 50px rgba(0,0,0,.45))}
+.fs .apps{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);display:flex;gap:56px}
+.fs .apps i{display:block;width:150px;height:150px;border-radius:34px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.fs .keys{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);display:flex;gap:30px}
+.fs .keys b{display:grid;place-items:center;width:168px;height:168px;border-radius:30px;background:linear-gradient(#3a3a3e,#232326);box-shadow:0 12px 0 #111,inset 0 1px 0 rgba(255,255,255,.14);font:500 74px var(--ui);color:#f5f5f7}
+.fs .badge{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);padding:18px 34px;border-radius:999px;background:rgba(255,159,10,.14);border:2px solid rgba(255,159,10,.6);color:#d07000;font:600 38px var(--ui);white-space:nowrap}
+.fs .wheel{position:absolute;left:50%;top:60px;width:560px;height:560px;margin-left:-280px;border-radius:50%;background:conic-gradient(#ff3b30,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55,#ff3b30);filter:saturate(1.1)}
+.fs .wheel::after{content:"";position:absolute;inset:150px;border-radius:50%;background:#000}
+.fs .rows{position:absolute;left:0;right:0;top:110px;display:flex;flex-direction:column;gap:60px}
+.fs .row{display:flex;gap:70px;white-space:nowrap;will-change:transform}
+.fs .row svg{width:96px;height:128px;flex:none;overflow:visible}
 /* ---------- Problem opening ---------- */
 .spot{position:absolute;inset:0;z-index:18;opacity:0;pointer-events:none}
-.cap.center{left:0;right:0;bottom:auto;top:50%;text-align:center;transform-origin:center;text-shadow:0 6px 50px rgba(0,0,0,.9),0 0 140px rgba(0,0,0,.8)}
-.cap .warn{color:#FFD60A}
 
-/* ---------- Feature cards ---------- */
-#features{position:absolute;inset:0;pointer-events:none}
-#features .fh{position:absolute;left:0;right:0;top:92px;text-align:center;font:800 64px/1 var(--display);letter-spacing:-.03em;color:#fff;opacity:0}
-#features .fh em{font-style:normal;color:#00FFDA}
-.cards{position:absolute;left:150px;right:150px;top:210px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.card{position:relative;height:360px;border-radius:28px;background:rgba(20,22,28,.82);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 70px rgba(0,0,0,.5);overflow:hidden;opacity:0}
-.card .mini{position:absolute;left:18px;right:18px;top:18px;height:220px;border-radius:18px;overflow:hidden;background:#101217}
-.card h3{position:absolute;left:30px;bottom:62px;margin:0;font:700 32px var(--display);letter-spacing:-.02em;color:#fff}
-.card p{position:absolute;left:30px;right:30px;bottom:26px;margin:0;font:500 20px var(--ui);color:rgba(255,255,255,.6)}
-.mini svg.mp{position:absolute;width:44px;height:58px;overflow:visible;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
-.mini .appi{position:absolute;top:70px;width:84px;height:84px;border-radius:20px}
-.mini .appi span{position:absolute;left:0;right:0;bottom:-30px;text-align:center;font:600 16px var(--ui);color:rgba(255,255,255,.7)}
-.mini .key{position:absolute;top:66px;width:96px;height:96px;border-radius:18px;background:linear-gradient(#3a3c44,#2a2c33);box-shadow:0 8px 0 #17181c,inset 0 1px 0 rgba(255,255,255,.12);display:grid;place-items:center;font:600 42px var(--ui);color:#fff}
-.mini .badge{position:absolute;left:50%;top:150px;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;border-radius:999px;background:rgba(255,159,10,.18);border:1px solid rgba(255,159,10,.6);color:#FFB340;font:600 17px var(--ui)}
-.mini .wheel{position:absolute;left:46px;top:30px;width:160px;height:160px;border-radius:50%;background:conic-gradient(red,#ff0,lime,cyan,blue,#f0f,red);box-shadow:0 0 0 6px rgba(255,255,255,.08)}
-.mini .wheel::after{content:"";position:absolute;inset:58px;border-radius:50%;background:#101217}
-.mini .strip{position:absolute;left:0;top:44px;display:flex;gap:26px;white-space:nowrap}
-.mini .strip svg{width:40px;height:52px;overflow:visible;flex:none}
-.mini .langs{position:absolute;left:0;right:0;top:140px;text-align:center;font:700 30px var(--display);color:#fff}
+.hl .dim{color:#86868b}
 
 /* ---------- Player (not in the render) ---------- */
 #player{position:fixed;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:10px 16px;background:rgba(0,0,0,.7);color:#fff;font:13px var(--ui)}
@@ -161,27 +159,25 @@ body.render #player{display:none}
     <div class="obj" id="mbp"><div class="base"><div class="keys"></div><div class="pad"></div><div class="lip"></div></div><div class="lid"><div class="screen" id="s0"></div><div class="notch"></div><div class="back"></div><div class="edge"></div></div></div>
   </div></div>
   <div id="vignette"></div>
-  <div class="cap" id="cap0">Where's your pointer?</div>
-  <div class="cap" id="cap0b">Big screens. Busy windows.<br><span class="warn">A tiny black arrow.</span></div>
-  <div class="cap center" id="cap1">Make it <em>impossible to lose.</em></div>
-  <div class="cap" id="cap2">One click. <em>Any color.</em></div>
-  <div class="cap" id="cap3">Any <em>size.</em></div>
-  <div class="cap" id="cap4">A color for <em>every display.</em></div>
-  <div id="features">
-    <div class="fh">And everything else, <em>built in.</em></div>
-    <div class="cards">
-      <div class="card" id="c1"><div class="mini" id="m-ld"><svg class="mp" viewBox="0 0 24 32" style="left:150px;top:70px"></svg><div class="appi" id="ld-icon" style="left:auto;right:40px;top:70px;width:70px;height:70px;border-radius:50%"></div></div><h3>Light &amp; dark</h3><p>Switches pairs with the appearance</p></div>
-      <div class="card" id="c2"><div class="mini" id="m-app"><div class="appi" style="left:40px;background:linear-gradient(#5ac8fa,#0a84ff)"><span>Xcode</span></div><div class="appi" style="left:180px;background:linear-gradient(#ff6482,#bf5af2)"><span>Figma</span></div><div class="appi" style="left:320px;background:linear-gradient(#64d2ff,#30d158)"><span>Safari</span></div><svg class="mp" viewBox="0 0 24 32"></svg></div><h3>A pair for each app</h3><p>Follows the app in front</p></div>
-      <div class="card" id="c3"><div class="mini" id="m-keys"><div class="key" style="left:50px">⌃</div><div class="key" style="left:166px">⌥</div><div class="key" style="left:282px">P</div><svg class="mp" viewBox="0 0 24 32" style="left:420px;top:90px;width:34px;height:44px"></svg></div><h3>Keyboard shortcuts</h3><p>Next pair, bigger, reset</p></div>
-      <div class="card" id="c4"><div class="mini" id="m-con" style="background:#fff"><svg class="mp" viewBox="0 0 24 32" style="left:50%;margin-left:-22px;top:62px"></svg><div class="badge">⚠ Hard to see on light screens</div></div><h3>Contrast warnings</h3><p>Know when a pair gets lost</p></div>
-      <div class="card" id="c5"><div class="mini" id="m-own"><div class="wheel" id="wheel"></div><svg class="mp" viewBox="0 0 24 32" style="left:300px;top:76px;width:56px;height:74px"></svg></div><h3>Your own pairs</h3><p>Pick any outline and fill</p></div>
-      <div class="card" id="c6"><div class="mini" id="m-pairs"><div class="strip" id="strip"></div><div class="langs" id="langs">47 pairs</div></div><h3>47 pairs</h3><p>English &amp; العربية</p></div>
-    </div>
+  <div class="hl" id="hA">Big screens.</div>
+  <div class="hl" id="hB">Busy windows.</div>
+  <div class="hl" id="hC">A tiny <span class="dim">black</span> arrow.</div>
+  <div class="hl" id="hD"><span class="dim">Introducing</span><br>Pointer <em>Colors.</em></div>
+  <div class="sub" id="sA">One click. <em>Any color.</em></div>
+  <div class="sub" id="sB">Any size.</div>
+  <div class="sub" id="sC">A color for <em>every display.</em></div>
+  <div id="feat">
+    <section class="fs" id="f1"><h2>Light and dark.</h2><p>Switches with your appearance.</p><div class="demo"><svg class="big" viewBox="0 0 24 32"></svg></div></section>
+    <section class="fs" id="f2"><h2>Every app, <em>its own color.</em></h2><p>Follows the app in front.</p><div class="demo"><svg class="big" viewBox="0 0 24 32"></svg><div class="apps"><i style="background:linear-gradient(#5ac8fa,#0a84ff)"></i><i style="background:linear-gradient(#ff6482,#bf5af2)"></i><i style="background:linear-gradient(#64d2ff,#30d158)"></i></div></div></section>
+    <section class="fs" id="f3"><h2>Shortcuts.</h2><p>Next pair, bigger, reset. From any app.</p><div class="demo"><svg class="big" viewBox="0 0 24 32"></svg><div class="keys"><b>⌃</b><b>⌥</b><b>P</b></div></div></section>
+    <section class="fs" id="f4"><h2>Contrast, <em>checked.</em></h2><p>Know when a pair is hard to see.</p><div class="demo"><svg class="big" viewBox="0 0 24 32"></svg><div class="badge">⚠&nbsp; Hard to see on light screens</div></div></section>
+    <section class="fs" id="f5"><h2>Your colors.</h2><p>Any outline. Any fill.</p><div class="demo"><div class="wheel"></div><svg class="big" viewBox="0 0 24 32"></svg></div></section>
+    <section class="fs" id="f6"><h2><em>47</em> pairs.</h2><p>In English and العربية.</p><div class="demo"><div class="rows"><div class="row" id="rowA"></div><div class="row" id="rowB"></div></div></div></section>
   </div>
   <div id="end">
     <img src="assets/icon.png" alt="">
     <h2>Pointer Colors</h2>
-    <p>Free for macOS</p>
+    <p>Free for Mac.</p>
     <div class="url">macos-pointer-colors.pages.dev</div>
   </div>
   <div id="fade"></div>
@@ -314,7 +310,6 @@ const SCREEN0 = { x: 0, y: -506 + 30 + 472.5 };   // lid top + bezel + half the 
 const s0 = (sx, sy) => [SCREEN0.x - 756 + sx, SCREEN0.y - 472.5 + sy, 0];
 
 // ============================================================ the script (seconds; 120 BPM, a beat is 0.5 s)
-const BEAT = 0.5;
 const STATUS = inScreen($("status"));
 const PAIR = id => inScreen($("pair-" + id));
 const THUMB_X0 = inScreen($("track"), 0, .5), TRACK_W = $("track").offsetWidth;
@@ -326,7 +321,7 @@ const LOST = [1580, 915];                     // where the tiny pointer hides on
 
 // Pointer segments. Each draws on one screen during [from, to).
 const P = [
-  { s: 1, from: 0, to: 4.4, frames: [[0, [880, 700]], [1.6, [1300, 840]], [3.1, LOST, "io"], [3.9, [1600, 930]], [4.4, [1560, 1348], "io"]] },
+  { s: 1, from: 0, to: 4.4, frames: [[0, [700, 520]], [1.4, [1120, 760], "io"], [2.6, LOST, "io"], [3.9, [1600, 930]], [4.4, [1560, 1348], "io"]] },
   { s: 0, from: 4.4, to: 12.9, frames: [[4.4, [620, 2]], [5.0, [900, 420], "out"], [5.8, STATUS, "io"], [6.0, STATUS], [6.6, PAIR("aqua-mint"), "io"], [7.0, PAIR("aqua-mint")],
        [7.6, THUMB_X0, "io"], [8.0, THUMB_X0], [9.0, thumbAt(9.0), "io"], [9.2, thumbAt(9.0)], [9.8, TOGGLE, "io"], [10.0, TOGGLE], [11.4, [900, 560], "io"], [12.9, [560, 2], "io"]] },
   { s: 1, from: 12.9, to: 14.0, frames: [[12.9, [2050, 1348]], [13.5, [1500, 760], "out"], [14.0, [2398, 640], "io"]] },
@@ -334,80 +329,89 @@ const P = [
   { s: 0, from: 15.0, to: 31, frames: [[15.0, [1300, 2]], [15.8, [760, 520], "out"], [30, [700, 560]]] },
 ];
 const segAt = (s, t) => P.find(p => p.s === s && t >= p.from && t < p.to);
-const CLICKS = [6.0, 7.0, 8.0, 10.0];                       // all on the MacBook, on beats
-const RINGS = [[7.0, 0, "aqua-mint", 1.2], [12.9, 1, "neon-pink", 2.4], [14.0, 2, "electric-blue", 2.4], [15.0, 0, "aqua-mint", 1.6]];
+const CLICKS = [6.0, 7.0, 8.0, 10.0];
+const RINGS = [[7.0, 0, "aqua-mint", 1.0], [12.9, 1, "neon-pink", 2.0], [14.0, 2, "electric-blue", 2.0], [15.0, 0, "aqua-mint", 1.4]];
 const pairOn = (s, t) => {
   if (s === 1) return t >= 12.9 ? "neon-pink" : "macos-light";
   if (s === 2) return t >= 14.0 ? "electric-blue" : "macos-light";
   return t >= 7.0 ? "aqua-mint" : "macos-light";
 };
-// The camera: target (x, y, z), zoom toward it, tilt rx and turn ry.
+
+// The camera: slow, eased moves (target x, y, z; zoom; tilt rx; turn ry).
 const WIDE = { t: [0, -540, -700], z: -2950, rx: -11, ry: 0 };
 const CAM = [
-  [0,    { ...WIDE, z: -3150, ry: 6 }],
-  [1.5,  { ...WIDE, z: -2900, ry: -2 }, "io"],
-  [2.0,  { t: [1330, -700, -1500], z: -1100, rx: -6, ry: -15 }, "io5"],                    // search: right display
-  [2.6,  { t: [0, -60, 0], z: -260, rx: -5, ry: 6 }, "io5"],                                  // search: MacBook
-  [3.2,  { t: [-1110, -600, -1500], z: -480, rx: -6, ry: 16 }, "io5"],                        // found it, left display
-  [4.1,  { t: [-1110, -600, -1500], z: -330, rx: -6, ry: 16 }, "io"],
-  [5.0,  { t: s0(756, 472), z: 230, rx: 0, ry: 0 }, "io5"],                                  // rush into the MacBook: the drop
-  [5.8,  { t: s0(1150, 150), z: 830, rx: 0, ry: 0 }, "io5"],
+  [0,    { ...WIDE, z: -3350, ry: 9 }],
+  [2.4,  { t: [-620, -600, -1200], z: -2050, rx: -9, ry: 12 }, "io"],                       // drift toward the left display
+  [4.0,  { t: [-1110, -600, -1500], z: -760, rx: -6, ry: 15 }, "io"],                       // settle on the lost pointer
+  [5.0,  { t: s0(756, 472), z: 230, rx: 0, ry: 0 }, "io5"],                                  // glide into the MacBook
+  [5.8,  { t: s0(1150, 150), z: 830, rx: 0, ry: 0 }, "io"],
   [6.5,  { t: s0(1010, 330), z: 420, rx: 0, ry: 0 }, "io"],
   [10.4, { t: s0(1000, 345), z: 450, rx: 0, ry: 0 }, "io"],
   [11.4, { t: [0, -60, 0], z: -650, rx: -9, ry: 22 }, "io5"],
   [12.6, { ...WIDE, z: -3000, rx: -12, ry: 12 }, "io"],
   [13.4, { t: [-650, -620, -900], z: -2400, rx: -11, ry: 15 }, "io"],
   [14.5, { t: [650, -620, -900], z: -2400, rx: -11, ry: -8 }, "io"],
-  [15.6, { ...WIDE, z: -2850, rx: -10, ry: -6 }, "io"],
-  [24,   { ...WIDE, z: -3300, rx: -12, ry: -16 }, "io"],
-  [30,   { ...WIDE, z: -4900, rx: -14, ry: -24 }, "io"],
+  [16.0, { ...WIDE, z: -3100, rx: -10, ry: -10 }, "io"],
+  [30,   { ...WIDE, z: -3600, rx: -12, ry: -16 }, "lin"],
 ];
 function cameraAt(t) {
   const v = track(CAM.map(([tt, c, e]) => [tt, [...c.t, c.z, c.rx, c.ry], e]), t);
   return { t: v.slice(0, 3), z: v[3], rx: v[4], ry: v[5] };
 }
-const CAPS = [["cap0", .4, 2.3], ["cap0b", 2.4, 4.4], ["cap1", 5.0, 6.0], ["cap2", 7.0, 8.6], ["cap3", 8.7, 10.3], ["cap4", 12.7, 15.8]];
-const CARD_IN = [16.5, 17.0, 17.5, 18.0, 18.5, 19.0], CARD_OUT = 22.6;
+// Headlines replace each other; subtitles sit low and small.
+const HEADS = [["hA", .35, 1.4], ["hB", 1.4, 2.4], ["hC", 2.4, 4.0], ["hD", 5.0, 6.0]];
+const SUBS = [["sA", 7.0, 8.6], ["sB", 8.7, 10.3], ["sC", 12.8, 15.6]];
+const FEAT = [["f1", 16.0], ["f2", 17.5], ["f3", 19.0], ["f4", 20.5], ["f5", 22.0], ["f6", 23.5]];
+const FEAT_LEN = 1.5, END = 24.7;
 
-// ============================================================ feature card demos (u = seconds since the card landed)
-const ldIcon = $("ld-icon");
+// ============================================================ feature demos (u = seconds into the scene)
+const big = id => $(id).querySelector(".big");
 const DEMOS = {
-  c1(u) {      // light & dark: the card flips appearance and the pointer follows
-    const dark = Math.floor(u / 1.0) % 2 === 1, k = E.io(clamp((u % 1.0) / .3));
-    const on = dark ? k : 1 - k;
-    $("m-ld").style.background = `rgb(${Math.round(242 - 226 * on)},${Math.round(242 - 224 * on)},${Math.round(246 - 223 * on)})`;
-    $("m-ld").querySelector(".mp").innerHTML = arrow(PAIRS[on > .5 ? "macos-dark" : "macos-light"], 1.8);
-    ldIcon.style.background = on > .5 ? "radial-gradient(circle at 65% 35%,transparent 32%,#e9e9ef 33%)" : "radial-gradient(circle,#FFD60A 45%,rgba(255,214,10,.25) 46%)";
+  f1(u) {      // light and dark: the whole scene flips, the pointer follows
+    const on = E.io(clamp((u - .55) / .35));
+    const shade = Math.round(255 * (1 - on));
+    $("f1").style.background = `rgb(${shade},${shade},${shade})`;
+    $("f1").querySelector("h2").style.color = on > .5 ? "#f5f5f7" : "#1d1d1f";
+    big("f1").innerHTML = arrow(PAIRS[on > .5 ? "macos-dark" : "macos-light"], 1.2);
   },
-  c2(u) {      // a pair per app: the active app moves, the pointer takes its pair
-    const ids = ["aqua-mint", "neon-pink", "electric-blue"], xs = [82, 222, 362];
-    const i = Math.floor(u / .8) % 3, j = (i + 1) % 3, k = E.io(clamp((u % .8 - .45) / .35));
-    const el = $("m-app").querySelector(".mp");
-    el.style.left = (xs[i] + (xs[j] - xs[i]) * k + 20) + "px"; el.style.top = "118px";
-    el.innerHTML = arrow(PAIRS[k > .5 ? ids[j] : ids[i]], 1.8);
-    $("m-app").querySelectorAll(".appi").forEach((a, n) => { a.style.transform = `scale(${n === (k > .5 ? j : i) ? 1.08 : .94})`; a.style.opacity = n === (k > .5 ? j : i) ? 1 : .55; });
+  f2(u) {      // every app its own colour: the highlight moves, the pointer takes the app's pair
+    const ids = ["aqua-mint", "neon-pink", "electric-blue"], i = Math.min(2, Math.floor(u / .5));
+    big("f2").innerHTML = arrow(PAIRS[ids[i]], 1.2);
+    big("f2").style.top = "40px";
+    $("f2").querySelectorAll(".apps i").forEach((a, n) => { a.style.transform = `scale(${n === i ? 1.12 : .9})`; a.style.opacity = n === i ? 1 : .35; });
   },
-  c3(u) {      // shortcuts: ⌃⌥P pressed in turn, then the pair changes
-    const loop = u % 1.6, n = Math.floor(u / 1.6);
-    $("m-keys").querySelectorAll(".key").forEach((key, i) => { const down = loop > .2 + i * .14 && loop < .95; key.style.transform = `translateY(${down ? 6 : 0}px)`; key.style.boxShadow = down ? "0 2px 0 #17181c,inset 0 1px 0 rgba(255,255,255,.12)" : ""; });
-    const ids = ["aqua-mint", "neon", "neon-pink", "electric-blue"];
-    $("m-keys").querySelector(".mp").innerHTML = arrow(PAIRS[ids[(n + (loop > .95 ? 1 : 0)) % ids.length]], 1.8);
+  f3(u) {      // shortcuts: ⌃⌥P go down in turn, the pair changes when they come up
+    $("f3").querySelectorAll(".keys b").forEach((key, i) => { const down = u > .25 + i * .12 && u < .95; key.style.transform = `translateY(${down ? 10 : 0}px)`; key.style.boxShadow = down ? "0 2px 0 #111,inset 0 1px 0 rgba(255,255,255,.14)" : ""; });
+    big("f3").innerHTML = arrow(PAIRS[u > .95 ? "neon" : "aqua-mint"], 1.2);
+    big("f3").style.top = "10px";
   },
-  c4(u) {      // contrast warning: a pale pair on a white page, the badge pulses
-    $("m-con").querySelector(".mp").innerHTML = arrow({ o: "#FFF5F0", f: "#FFE3D8" }, 1.8);
-    $("m-con").querySelector(".badge").style.transform = `translateX(-50%) scale(${1 + .05 * Math.sin(u * 6)})`;
+  f4(u) {      // contrast checked: a pale pair on white, the warning settles in
+    $("f4").style.background = "#fbfbfd";
+    $("f4").querySelector("h2").style.color = "#1d1d1f";
+    big("f4").innerHTML = arrow({ o: "#FFF5F0", f: "#FFE3D8" }, 1.2);
+    big("f4").style.top = "20px";
+    const k = E.out(clamp((u - .35) / .4));
+    const b = $("f4").querySelector(".badge");
+    b.style.opacity = k; b.style.transform = `translateX(-50%) translateY(${(1 - k) * 20}px)`;
   },
-  c5(u) {      // your own pairs: the wheel turns, the pointer's fill follows
-    $("wheel").style.transform = `rotate(${u * 140}deg)`;
-    const hue = Math.round((u * 140) % 360);
-    $("m-own").querySelector(".mp").innerHTML = arrow({ o: "#FFFFFF", f: `hsl(${hue} 90% 50%)` }, 1.8);
+  f5(u) {      // your colours: the wheel turns, the fill follows the hue at the top
+    const deg = u * 120;
+    $("f5").querySelector(".wheel").style.transform = `rotate(${deg}deg)`;
+    big("f5").innerHTML = arrow({ o: "#FFFFFF", f: `hsl(${Math.round((360 - deg) % 360)} 90% 52%)` }, 1.2);
+    big("f5").style.top = "160px";
   },
-  c6(u) {      // 47 pairs: a ticker of pointers; the label alternates languages
-    $("strip").style.transform = `translateX(${-((u * 120) % 792)}px)`;
-    $("langs").textContent = Math.floor(u / 1.2) % 2 ? "٤٧ زوجًا" : "47 pairs";
+  f6(u) {      // 47 pairs: two rows glide in opposite directions, then gather into the icon
+    const gather = E.io(clamp((u - .9) / .55));
+    $("rowA").style.transform = `translateX(${-200 - u * 260}px) scale(${1 - .75 * gather})`;
+    $("rowB").style.transform = `translateX(${-900 + u * 260}px) scale(${1 - .75 * gather})`;
+    $("f6").querySelector(".rows").style.opacity = 1 - gather;
+    $("f6").querySelector("h2").style.opacity = 1 - gather;
+    $("f6").querySelector("p").style.opacity = 1 - gather;
   },
 };
-$("strip").innerHTML = Array.from({ length: 24 }, (_, i) => `<svg viewBox="0 0 24 32">${arrow(Object.values(PAIRS)[2 + (i % 5)], 2)}</svg>`).join("");
+const ROW_IDS = ["aqua-mint", "neon", "neon-pink", "neon-lime", "electric-blue", "macos-light", "macos-dark"];
+$("rowA").innerHTML = Array.from({ length: 22 }, (_, i) => `<svg viewBox="0 0 24 32">${arrow(PAIRS[ROW_IDS[i % 7]], 1.6)}</svg>`).join("");
+$("rowB").innerHTML = Array.from({ length: 22 }, (_, i) => `<svg viewBox="0 0 24 32">${arrow(PAIRS[ROW_IDS[(i + 3) % 7]], 1.6)}</svg>`).join("");
 
 // ============================================================ draw a frame
 function seek(t) {
@@ -423,14 +427,14 @@ function seek(t) {
     const [x, y] = track(seg.frames, t);
     el.style.opacity = 1;
     el.innerHTML = arrow(PAIRS[pairOn(s, t)]);
-    const k = s === 0 ? 1.15 : (t < 5 ? 1.5 : 3.6);            // tiny during "the problem"
+    const k = s === 0 ? 1.15 : (t < 5 ? 1.4 : 3.6);
     el.style.transform = `translate(${x - 3}px,${y - 2}px) scale(${(s === 0 ? size : 1) * k})`;
   }
 
   // the spotlight finds the lost pointer
-  const spot = env(t, 3.2, 4.3, .45, .4);
+  const spot = env(t, 2.6, 4.3, .6, .4);
   $("spot1").style.opacity = spot;
-  $("spot1").style.background = `radial-gradient(circle at ${LOST[0] + 18}px ${LOST[1] + 22}px, transparent ${70 + 200 * (1 - spot)}px, rgba(0,0,0,.72) ${150 + 260 * (1 - spot)}px)`;
+  $("spot1").style.background = `radial-gradient(circle at ${LOST[0] + 18}px ${LOST[1] + 22}px, transparent ${70 + 220 * (1 - spot)}px, rgba(0,0,0,.75) ${150 + 280 * (1 - spot)}px)`;
 
   // clicks and colour rings
   for (const s of [0, 1, 2]) { $("click" + s).style.opacity = 0; $("ring" + s).style.opacity = 0; }
@@ -438,8 +442,8 @@ function seek(t) {
     const k = (t - ct) / .4;
     if (k < 0 || k > 1) continue;
     const [x, y] = track(segAt(0, ct).frames, ct);
-    $("click0").style.opacity = (1 - k) * .8;
-    $("click0").style.transform = `translate(${x}px,${y}px) scale(${.4 + k * 1.2})`;
+    $("click0").style.opacity = (1 - k) * .7;
+    $("click0").style.transform = `translate(${x}px,${y}px) scale(${.4 + k * 1.1})`;
   }
   for (const [rt, s, id, scale] of RINGS) {
     const k = (t - rt) / .7;
@@ -447,9 +451,9 @@ function seek(t) {
     const [x, y] = track(segAt(s, rt).frames, t);
     const el = $("ring" + s);
     el.style.borderColor = PAIRS[id].o;
-    el.style.boxShadow = `0 0 30px ${PAIRS[id].o}`;
-    el.style.opacity = 1 - k;
-    el.style.transform = `translate(${x}px,${y}px) scale(${(.3 + E.outExpo(k) * 1.6) * scale})`;
+    el.style.boxShadow = `0 0 24px ${PAIRS[id].o}`;
+    el.style.opacity = (1 - k) * .9;
+    el.style.transform = `translate(${x}px,${y}px) scale(${(.3 + E.outExpo(k) * 1.5) * scale})`;
   }
 
   // the menu
@@ -481,43 +485,49 @@ function seek(t) {
   const dim = E.io(clamp((t - 4.6) / .4)) * (1 - E.io(clamp((t - 10.8) / 1.0)));
   $("off1").style.opacity = dim * .97; $("off2").style.opacity = dim * .97;
 
-  // ambient glow follows the pointer colour
+  // a faint wash of the pointer colour; Apple-clean, so kept subtle
   const g = t < 7 ? null : (t >= 12.9 && t < 14 ? "neon-pink" : t >= 14 && t < 15 ? "electric-blue" : "aqua-mint");
   $("glow").style.setProperty("--g", g ? PAIRS[g].o : "#7aa2ff");
-  $("glow").style.opacity = (g ? .18 : .05) * clamp((t - 5) / 1.5) * (1 - clamp((t - 27) / 3));
+  $("glow").style.opacity = (g ? .1 : 0) * clamp((t - 6) / 1.5) * (1 - clamp((t - 15.4) / .6));
 
-  // captions
-  for (const [id, a, b] of CAPS) {
-    const k = env(t, a, b, .35, .35), el = $(id);
+  // headlines (centred, one at a time) and subtitles
+  for (const [id, a, b] of HEADS) {
+    const k = env(t, a, b, .3, .25), el = $(id);
     el.style.opacity = k;
-    const center = el.classList.contains("center");
-    el.style.transform = center ? `translateY(-50%) scale(${.94 + .06 * E.out(clamp((t - a) / .5))})` : `translateY(${(1 - k) * 26}px)`;
-    el.style.filter = `blur(${(1 - k) * 10}px)`;
+    el.style.transform = `translateY(-50%) translateY(${(1 - k) * 18}px)`;
+    el.style.filter = `blur(${(1 - k) * 8}px)`;
   }
-  $("cap1").style.setProperty("--c", PAIRS["aqua-mint"].o);
-  $("cap2").style.setProperty("--c", PAIRS["aqua-mint"].o);
-  $("cap4").style.setProperty("--c", PAIRS["neon-pink"].o);
+  for (const [id, a, b] of SUBS) {
+    const k = env(t, a, b, .3, .3), el = $(id);
+    el.style.opacity = k;
+    el.style.transform = `translateY(${(1 - k) * 14}px)`;
+  }
+  // the scene darkens behind the opening words and the title
+  const textDim = Math.max(env(t, .2, 4.0, .4, .5) * .45, env(t, 5.0, 6.0, .25, .3) * .55);
+  $("scene").style.filter = `brightness(${1 - textDim})`;
 
-  // feature cards: the scene dims, cards land on the beat, each runs its own demo
-  const fk = E.io(clamp((t - 15.9) / .5)) * (1 - E.io(clamp((t - 23.2) / .5)));
-  const capDim = env(t, 5.0, 6.0, .3, .3), endDim = E.io(clamp((t - 23.6) / .6));
-  $("scene").style.filter = `blur(${10 * fk + 6 * endDim}px) brightness(${1 - .5 * capDim})`;
-  const fh = env(t, 16.0, 23.3, .4, .4);
-  document.querySelector("#features .fh").style.opacity = fh;
-  document.querySelector("#features .fh").style.transform = `translateY(${(1 - fh) * 24}px)`;
-  ["c1", "c2", "c3", "c4", "c5", "c6"].forEach((id, i) => {
-    const kin = E.back(clamp((t - CARD_IN[i]) / .45)), kout = E.io(clamp((t - CARD_OUT - i * .08) / .4));
+  // features: the scene fades to black, then one full-screen scene at a time
+  $("scene").style.opacity = 1 - E.io(clamp((t - 15.55) / .45));
+  FEAT.forEach(([id, start], i) => {
+    const last = i === FEAT.length - 1;
+    const kin = E.out(clamp((t - start) / .3)), kout = last ? 0 : E.io(clamp((t - start - FEAT_LEN) / .25));
     const el = $(id);
-    el.style.opacity = clamp((t - CARD_IN[i]) / .2) * (1 - kout);
-    el.style.transform = `translateY(${(1 - kin) * 80 - kout * 60}px) scale(${.88 + .12 * kin - .06 * kout})`;
-    if (t >= CARD_IN[i] && kout < 1) DEMOS[id](t - CARD_IN[i]);
+    const visible = t >= start && (last || t < start + FEAT_LEN + .25) && t < END + .6;
+    el.style.opacity = visible ? kin * (1 - kout) : 0;
+    el.style.transform = `scale(${1.04 - .04 * kin - .02 * kout})`;
+    if (visible) DEMOS[id](t - start);
   });
 
-  // end card and fades
-  const endK = E.back(clamp((t - 24.0) / .6));
-  $("end").style.opacity = clamp((t - 24.0) / .3) * (1 - clamp((t - 29.1) / .8));
-  $("end").style.transform = `scale(${.9 + .1 * endK})`;
-  $("scene").style.opacity = 1 - .45 * fk - .62 * endDim;
+  // end card: the gathered pointers become the icon
+  const ek = E.out(clamp((t - END) / .5));
+  $("end").style.opacity = clamp((t - END) / .25) * (1 - clamp((t - 29.1) / .8));
+  const icon = $("end").querySelector("img");
+  icon.style.transform = `scale(${.55 + .45 * ek})`;
+  icon.style.filter = `blur(${(1 - ek) * 12}px) drop-shadow(0 30px 70px rgba(0,0,0,.6))`;
+  $("end").querySelectorAll("h2,p,.url").forEach((el, i) => {
+    const k = E.out(clamp((t - END - .45 - i * .35) / .45));
+    el.style.opacity = k; el.style.transform = `translateY(${(1 - k) * 16}px)`;
+  });
   $("fade").style.opacity = Math.max(1 - clamp(t / .5), clamp((t - 29.1) / .8));
   return t;
 }
