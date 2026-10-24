@@ -77,68 +77,51 @@ const hat = (t, amp = .06, open = false) => noiseHit(t, open ? .22 : .05, { amp,
 const clap = t => { for (const d of [0, .011, .022]) noiseHit(t + d, .16, { amp: .22, from: 1600, q: .5, send: .35, decay: .12 }); };
 const click = t => { tone(t, .006, 3200, { type: "sine", amp: .25, decay: .006, send: .05, pan: .2 }); tone(t + .004, .03, 900, { type: "tri", amp: .18, decay: .03, send: .05, pan: .2 }); };
 
-// ---------- the score: synthwave in A minor, 120 BPM
-const CHORDS = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];   // Am F C G
+// ---------- the score: minimal electronic in F major, 120 BPM. Clean, bright and spacious.
+const CHORDS = [[53, 57, 60, 64], [57, 60, 64, 67], [50, 53, 57, 60], [46, 50, 53, 57]];   // Fmaj7 Am7 Dm7 B♭maj7
 const chordAt = t => CHORDS[Math.floor(Math.max(0, t - 5) / BAR) % 4];
 const GROOVE_END = 24.5;
 
-/** Supersaw: five detuned saws per note, spread wide. The classic synthwave pad. */
-function supersaw(t0, dur, notes, { amp = .022, cutoff = 2200, attack = .18, decay = 8, sidechain = true, send = .5 } = {}) {
-  for (const m of notes) [-.012, -.006, 0, .006, .012].forEach((d, i) =>
-    tone(t0, dur, midi(m), { type: "saw", amp, attack, decay, cutoff, detune: d, send, pan: (i - 2) * .32, sidechain }));
+/** A soft, bell-like pluck: a sine with a quiet octave partial and a fast decay. */
+function pluck(t, m, { amp = .08, decay = .35, pan = 0, send = .35, echo = .35, cutoff = 5000 } = {}) {
+  tone(t, decay, midi(m), { type: "sine", amp, attack: .003, decay, pan, send, echo, cutoff });
+  tone(t, decay * .5, midi(m + 12), { type: "sine", amp: amp * .28, attack: .002, decay: decay * .4, pan, send, echo, cutoff });
 }
-/** Gated-reverb snare: a short body, a bright burst and a chopped, roomy tail. */
-function snare(t) {
-  tone(t, .12, 190, { type: "tri", amp: .22, decay: .1, sweep: -1.2, send: .1 });
-  noiseHit(t, .3, { amp: .32, from: 2400, q: .55, send: .25, shape: "gate" });
+/** A warm pad: triangles, slightly detuned, slow attack. */
+function pad(t0, dur, notes, { amp = .028, attack = .6, send = .55 } = {}) {
+  for (const m of notes) for (const d of [-.003, .003]) tone(t0, dur, midi(m), { type: "tri", amp, attack, decay: 12, cutoff: 1800, detune: d, send, pan: d > 0 ? .45 : -.45, sidechain: true });
 }
-const tom = (t, m) => tone(t, .32, midi(m), { type: "sine", amp: .32, decay: .26, sweep: -.9, send: .35 });
+const softKick = t => kick(t, .3);
+const rim = t => { tone(t, .02, 1700, { type: "tri", amp: .1, decay: .02, send: .2, pan: -.15 }); noiseHit(t, .03, { amp: .06, from: 4000, q: .6, send: .2, decay: .02 }); };
+const shaker = (t, amp = .018) => noiseHit(t, .05, { amp, from: 8000, q: .4, pan: .3, send: .05, decay: .04 });
 
-// Intro, the problem (0–5): a dark pad that slowly brightens and an arpeggio in the echo. No drums yet.
-supersaw(0, 4.9, [45, 57, 60, 64], { amp: .042, cutoff: 900, attack: 1.4, decay: 30, sidechain: false, send: .6 });
-supersaw(2.4, 2.5, [57, 60, 64], { amp: .03, cutoff: 2400, attack: 1.2, decay: 30, sidechain: false, send: .6 });
-for (let t = .5; t < 4.9; t += .125) {
-  const i = Math.round(t / .125), note = [57, 60, 64, 69][i % 4] + 12;
-  tone(t, .09, midi(note), { type: "saw", amp: .03 + .035 * (t / 4.9), decay: .08, cutoff: 1400 + 1800 * (t / 4.9), send: .2, echo: .55, pan: i % 2 ? -.3 : .3 });
-}
-[[4.5, 50], [4.625, 47], [4.75, 43], [4.875, 40]].forEach(([t, m]) => tom(t, m));     // tom fill into the drop
+// Intro, the problem (0–5): a sparse motif on the beat, ringing in the echo, over a soft pad. No drums.
+pad(0, 4.9, [41, 53, 57, 60, 64], { amp: .03, attack: 1.4 });
+[[.5, 72], [1.0, 76], [1.5, 79], [2.5, 77], [3.0, 76], [3.5, 72], [4.25, 74]].forEach(([t, m]) => pluck(t, m, { amp: .09, decay: .6, echo: .5, pan: (m % 2 ? -.25 : .25) }));
 
-// The drive (5–24.5): kick on every beat, gated snare on 2 and 4, hats, pumping bass, pads, arpeggio.
+// The groove (5–24.5): soft kick, rim on 2 and 4, a quiet shaker, sub bass, pad and a gentle arpeggio.
 for (let t = 5; t < GROOVE_END - 1e-9; t += BEAT) {
-  kick(t, .72);
+  softKick(t);
   const beat = Math.round((t - 5) / BEAT);
-  if (beat % 2 === 1) snare(t);
-  hat(t + .25, .045);
-  if (beat % 2 === 1) hat(t + .25, .035, true);
+  if (beat % 2 === 1) rim(t);
 }
+for (let t = 5; t < GROOVE_END - 1e-9; t += .25) shaker(t, (Math.round((t - 5) / .25) % 2 ? .02 : .012) * (t >= 16 ? 1.3 : 1));
 for (let bar = 0; 5 + bar * BAR < GROOVE_END; bar++) {
-  const t = 5 + bar * BAR, ch = CHORDS[bar % 4];
-  for (let i = 0; i < 8; i++) {                   // 8th-note bass: root, octave, root, octave
-    const bt = t + i * .25;
-    if (bt >= GROOVE_END) break;
-    tone(bt, .2, midi(ch[0] - 24 + (i % 2 ? 12 : 0)), { type: "saw", amp: .15, decay: .18, cutoff: 900, send: .02, sidechain: true });
-    tone(bt, .2, midi(ch[0] - 24), { type: "sine", amp: .12, decay: .18, send: 0, sidechain: true });
-  }
-  supersaw(t, Math.min(BAR, GROOVE_END - t), ch, { amp: .016, cutoff: t >= 16 ? 3000 : 2200 });
+  const t = 5 + bar * BAR, ch = CHORDS[bar % 4], dur = Math.min(BAR, GROOVE_END - t);
+  for (const off of [0, 1.0]) if (t + off < GROOVE_END) tone(t + off, .9, midi(ch[0] - 12), { type: "sine", amp: .11, attack: .01, decay: .9, send: .02, sidechain: true });   // sub, half notes
+  pad(t, dur, ch, { amp: .022, attack: .25 });
 }
-for (let t = 5; t < GROOVE_END - 1e-9; t += .125) {   // 16th-note arpeggio through the ping-pong echo
-  const ch = chordAt(t), i = Math.round((t - 5) / .125);
-  const note = ch[[0, 1, 2, 1][i % 4]] + 12 + (i % 8 >= 4 ? 12 : 0);
-  tone(t, .09, midi(note), { type: "square", amp: .026, decay: .08, cutoff: t >= 16 ? 3600 : 2600, send: .2, echo: .45, pan: i % 2 ? -.35 : .35, sidechain: true });
+for (let t = 5; t < GROOVE_END - 1e-9; t += .25) {       // 8th-note pluck arpeggio
+  const ch = chordAt(t), i = Math.round((t - 5) / .25);
+  pluck(t, ch[[0, 2, 1, 3, 2, 1][i % 6]] + 12, { amp: .045, decay: .28, pan: i % 2 ? -.3 : .3, echo: .25, send: .25 });
 }
-// Lead melody over the feature scenes, with a little portamento between notes.
-const LEAD = [[16.0, .5, 76], [16.5, .5, 74], [17.0, 1.0, 76], [18.0, .5, 79], [18.5, .5, 76], [19.0, 1.0, 74], [20.0, .5, 71], [20.5, .5, 74],
-              [21.0, .5, 72], [21.5, .5, 71], [22.0, 1.0, 69], [23.0, .5, 69], [23.5, .5, 72], [24.0, .7, 76]];
-LEAD.forEach(([t, d, m], i) => {
-  const from = i ? midi(LEAD[i - 1][2]) : 0;
-  for (const det of [-.004, .004]) tone(t, d, midi(m), { type: "saw", amp: .05, attack: .01, decay: 3, cutoff: 3200, detune: det, glideFrom: from, send: .35, echo: .3, pan: det > 0 ? .15 : -.15 });
-  tone(t, d, midi(m - 12), { type: "square", amp: .02, attack: .01, decay: 3, cutoff: 2000, glideFrom: from / 2, send: .3, echo: .2 });
-});
-[[23.75, 48], [23.875, 45], [24.0, 43], [24.125, 40]].forEach(([t, m]) => tom(t, m));   // fill into the end card
+// A glassy bell melody over the feature scenes.
+const MELODY = [[16.0, 84], [16.75, 81], [17.0, 79], [18.0, 84], [18.5, 86], [19.0, 81], [20.0, 77], [20.75, 79], [21.0, 81], [22.0, 76], [22.5, 77], [23.0, 79], [24.0, 81]];
+MELODY.forEach(([t, m]) => pluck(t, m, { amp: .07, decay: .9, echo: .4, send: .5, pan: .1 }));
 
-// End card (24.7–30): drums stop; a wide Am(add9) chord and echoing bells.
-supersaw(24.6, 5.0, [45, 57, 60, 64, 71], { amp: .045, cutoff: 2600, attack: .05, decay: 12, sidechain: false, send: .75 });
-[81, 76, 72, 69].forEach((m, i) => tone(24.7 + i * .375, 1.8, midi(m), { type: "sine", amp: .13, decay: 1.6, send: .6, echo: .5, pan: (i - 1.5) * .4 }));
+// End card (24.5–30): drums stop; a held Fmaj9 and three last bell notes.
+pad(24.5, 5.2, [41, 53, 57, 60, 64, 67], { amp: .032, attack: .3 });
+[[24.7, 84], [25.45, 81], [26.2, 77]].forEach(([t, m]) => pluck(t, m, { amp: .08, decay: 1.4, echo: .5, send: .6 }));
 
 // ---------- sound effects, matched to the picture: only clicks and the size slider
 [6.0, 7.0, 8.0, 10.0].forEach(click);
