@@ -166,3 +166,40 @@ final class AppUpdaterTests: XCTestCase {
         XCTAssertNil(AppUpdater.installBlocker(for: writable))
     }
 }
+
+@MainActor
+final class PointerHighlightTests: XCTestCase {
+    private func makeDefaults() -> UserDefaults {
+        UserDefaults(suiteName: "PointerHighlightTests-\(UUID().uuidString)")!
+    }
+
+    func testOffByDefaultAndRemembered() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(highlight.mode, .off)
+        XCTAssertFalse(highlight.showsRing)
+        XCTAssertFalse(highlight.isActive)
+        highlight.mode = .laser
+        highlight.laserUsesPairColor = false
+        highlight.laserColor = RGBA(hex: "112233")!
+        highlight.pulseDuration = 1.2
+        let reopened = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(reopened.mode, .laser)
+        XCTAssertTrue(reopened.isActive)
+        XCTAssertFalse(reopened.laserUsesPairColor)
+        XCTAssertEqual(reopened.laserColor.hex, "112233")
+        XCTAssertEqual(reopened.pulseDuration, 1.2)
+    }
+
+    func testColorsFollowThePairUnlessOverridden() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        let pair = PointerPair.featured
+        XCTAssertEqual(highlight.pulseColor(for: pair), pair.outline)
+        XCTAssertEqual(highlight.laserColors(for: pair).glow, pair.outline)
+        XCTAssertEqual(highlight.laserColors(for: pair).middle, pair.fill)
+        highlight.pulseUsesPairColor = false
+        highlight.laserUsesPairColor = false
+        XCTAssertEqual(highlight.pulseColor(for: pair), highlight.pulseColor)
+        XCTAssertEqual(highlight.laserColors(for: pair).glow, highlight.laserColor)
+    }
+}

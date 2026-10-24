@@ -116,6 +116,25 @@
 /* About and updates */
 "Pointer Colors" = "Pointer Colors";
 "Version %@" = "الإصدار %@";
+"Highlight" = "الإبراز";
+"Off" = "إيقاف";
+"Pulse" = "نبضة";
+"Laser" = "ليزر";
+"Pulse marks each click. Laser leaves a glowing dot and a trail as you drag." = "تُبرز النبضة كل نقرة. ويترك الليزر نقطة متوهجة وأثرًا أثناء السحب.";
+"Ring around the pointer" = "حلقة حول المؤشر";
+"Makes the pointer easy to follow. Works with any highlight, or on its own." = "تجعل متابعة المؤشر سهلة. تعمل مع أي إبراز أو وحدها.";
+"Uses the outline of the pair on screen." = "يستخدم لون حدود الزوج المطبَّق.";
+"Glows in the outline and fill of the pair on screen." = "يتوهج بلوني الحدود والتعبئة للزوج المطبَّق.";
+"Uses the color you pick." = "يستخدم اللون الذي تختاره.";
+"Pointer pair" = "زوج المؤشر";
+"Custom color" = "لون مخصص";
+"Color" = "اللون";
+"Size" = "الحجم";
+"Length" = "المدة";
+"Pulse on right-clicks too" = "نبضة عند النقر بالزر الأيمن أيضًا";
+"Draw a trail while dragging" = "رسم أثر أثناء السحب";
+"Hold the mouse button and move to draw; the trail fades after you let go." = "اضغط زر الفأرة مع التحريك للرسم، ويتلاشى الأثر بعد الإفلات.";
+"Trail fades after" = "يتلاشى الأثر بعد";
 "Website" = "الموقع";
 "GitHub" = "GitHub";
 "Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display." = "يغيّر إعدادات حدود المؤشر وتعبئته وحجمه نفسها الموجودة في إعدادات النظام › تسهيلات الاستخدام › الشاشة.";
@@ -201,4 +220,3 @@
 "Frosted" = "مُصنفَر";
 "Clear" = "شفاف";
 "Tint strength" = "قوة التلوين";
-"Off" = "إيقاف";

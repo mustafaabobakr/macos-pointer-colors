@@ -44,6 +44,7 @@ struct MenuContentView: View {
                 .disabled(model.needsFullDiskAccess)
             AppColorsIndicator(automation: model.automation)
                 .disabled(model.needsFullDiskAccess)
+            HighlightMenuRow(highlight: model.highlight)
             Divider()
             footer
         }
@@ -280,6 +281,25 @@ private struct PairTile: View {
         .buttonStyle(.plain)
         .accessibilityLabel(pair.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+/// Off, pulse or laser, one click from the menu. The details are in Preferences › Highlight.
+private struct HighlightMenuRow: View {
+    @Bindable var highlight: PointerHighlight
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Highlight").appFont(.caption)
+            Spacer(minLength: 4)
+            Picker("Highlight", selection: $highlight.mode) {
+                ForEach(HighlightMode.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .controlSize(.small)
+            .fixedSize()
+        }
     }
 }
 
