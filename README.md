@@ -6,6 +6,7 @@
   <a href="https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/mustafaabobakr/macos-pointer-colors?style=flat-square&color=00b894&label=release"></a>
   <a href="https://github.com/mustafaabobakr/macos-pointer-colors/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/mustafaabobakr/macos-pointer-colors/total?style=flat-square&color=5b21b6"></a>
   <a href="https://github.com/mustafaabobakr/macos-pointer-colors/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/mustafaabobakr/macos-pointer-colors?style=flat-square&color=e3b341"></a>
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-555?style=flat-square"></a>
   <img alt="macOS 14 or later" src="https://img.shields.io/badge/macOS-14%2B-111?style=flat-square&logo=apple">
   <a href="https://macos-pointer-colors.pages.dev"><img alt="Website" src="https://img.shields.io/badge/try_it-pages.dev-0a84ff?style=flat-square"></a>
 </p>
@@ -122,7 +123,7 @@ It's not notarized yet. Right-click it and choose **Open**, allow it in **System
 macOS keeps the pointer color and size settings in a protected Accessibility preferences file (`com.apple.universalaccess`). Apps from outside the App Store can only change that file with Full Disk Access. Pointer Colors first tries Apple's own `defaults` tool, which usually works without it, and only asks when macOS blocks both. It only touches the pointer color, size and shake-to-find settings, reads no other files, and sends nothing anywhere.
 
 **Is it free?**<br>
-Yes. The website and the app are free and open source.
+Yes. The website and the app are free and open source under the [MIT License](LICENSE). To report a security issue, see [SECURITY.md](SECURITY.md).
 
 ## Build it yourself
 
