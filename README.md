@@ -76,7 +76,7 @@ The macOS defaults for light and dark come first, then the neon and color pairs.
       <h3>Install</h3>
       <ol>
         <li><a href="https://github.com/mustafaabobakr/macos-pointer-colors/releases/latest/download/Pointer-Colors.dmg">Download <code>Pointer-Colors.dmg</code></a> and drag <b>Pointer Colors</b> into Applications.</li>
-        <li>The app is <ins><b>not notarized yet</b></ins>, so the first time, <b>right-click it and choose Open</b>, allow it in <b>System Settings › Privacy &amp; Security</b>, or run this in Terminal:
+        <li>The app is <ins><b>not notarized yet</b></ins>, so the first time, <b>right-click it and choose Open</b>, then click <b>Open Anyway</b> in <b>System Settings › Privacy &amp; Security</b>. Or run this in Terminal, then open it as usual:
 <pre><code>xattr -cr "/Applications/Pointer Colors.app"</code></pre></li>
         <li>Click the pointer in the menu bar and pick a pair.</li>
       </ol>
@@ -117,7 +117,7 @@ Click **Reset Colors** under Pointer in System Settings, or pick the **macOS lig
 A pair where the outline or the fill stands out on both white pages and dark apps. The website shows each pair on four backgrounds, and the app warns when a pair is hard to see.
 
 **macOS says the app can't be opened or verified. What do I do?**<br>
-It's not notarized yet. Right-click it and choose **Open**, allow it in **System Settings › Privacy & Security**, or run `xattr -cr "/Applications/Pointer Colors.app"` in Terminal.
+It's not notarized yet. Right-click it and choose **Open**, then click **Open Anyway** in **System Settings › Privacy & Security**. Or run `xattr -cr "/Applications/Pointer Colors.app"` in Terminal, then open it as usual.
 
 **Why does the app ask for Full Disk Access?**<br>
 macOS keeps the pointer color and size settings in a protected Accessibility preferences file (`com.apple.universalaccess`). Apps from outside the App Store can only change that file with Full Disk Access. Pointer Colors first tries Apple's own `defaults` tool, which usually works without it, and only asks when macOS blocks both. It only touches the pointer color, size and shake-to-find settings, reads no other files, and sends nothing anywhere.
