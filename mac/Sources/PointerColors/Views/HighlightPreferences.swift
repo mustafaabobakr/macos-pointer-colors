@@ -7,11 +7,13 @@ struct HighlightPreferences: View {
     let pair: PointerPair
     let pointerScale: Double
 
+    private var style: HighlightStyle { HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale) }
+
     var body: some View {
         Form {
             Section {
-                HighlightDemoPad(highlight: highlight,
-                                 style: HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale))
+                HighlightPreviewCards(mode: highlight.mode, style: style, pair: pair)
+                HighlightDemoPad(highlight: highlight, style: style)
                 Picker(selection: $highlight.mode) {
                     ForEach(HighlightMode.allCases) { Text($0.title).tag($0) }
                 } label: {
