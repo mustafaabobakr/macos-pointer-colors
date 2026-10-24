@@ -44,6 +44,15 @@
       "codeRepository": "https://github.com/mustafaabobakr/macos-pointer-colors"
     },
     {
+      "@type": "VideoObject",
+      "name": "Pointer Colors for Mac",
+      "description": "30-second film: a lost pointer on busy screens, then Pointer Colors applying a color in one click, a size slider, a color for every display, and its other features.",
+      "thumbnailUrl": "https://macos-pointer-colors.pages.dev/docs/promo/poster.jpg",
+      "contentUrl": "https://macos-pointer-colors.pages.dev/docs/promo/pointer-colors-promo.mp4",
+      "uploadDate": "2026-10-24",
+      "duration": "PT30S"
+    },
+    {
       "@type": "FAQPage",
       "mainEntity": [
         { "@type": "Question", "name": "How do I change the mouse pointer color on a Mac?", "acceptedAnswer": { "@type": "Answer", "text": "Open System Settings › Accessibility › Display, scroll to Pointer, and set Pointer outline color and Pointer fill color with the hex codes from this page. Or use the free Pointer Colors app to apply a pair in one click." } },
@@ -196,6 +205,10 @@ input[type=range]{accent-color:var(--ink)}
 .group{grid-column:1/-1;margin:10px 0 2px;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .group:first-child{margin-top:0}
 .mac h2{font-size:1.35rem;margin:0 0 8px;letter-spacing:-.01em}
+.film{margin:0 0 56px}
+.film h2{margin:0 0 16px;font-size:clamp(1.4rem,2.4vw,2rem);letter-spacing:-.02em}
+.film video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:24px;background:#000;border:1px solid var(--line);box-shadow:0 30px 80px -40px var(--glow-a)}
+@media (max-width:620px){.film video{border-radius:16px}}
 .faq{margin-top:56px;max-width:760px}
 .faq h2{font-size:1.35rem;margin:0 0 12px;letter-spacing:-.01em}
 .faq details{border-top:1px solid var(--line)}
@@ -355,6 +368,13 @@ html[dir="rtl"] .shot:hover img{transform:none}
     </div>
   </header>
 
+  <section class="film" id="film" aria-labelledby="filmTitle">
+    <h2 id="filmTitle" data-i18n="filmTitle">See it in 30 seconds.</h2>
+    <video controls playsinline preload="none" poster="docs/promo/poster.jpg" width="1920" height="1080" aria-label="Pointer Colors promo film" data-i18n-label="filmLabel">
+      <source src="docs/promo/pointer-colors-promo.mp4" type="video/mp4">
+    </video>
+  </section>
+
   <div class="layout" id="tool">
     <div class="list" id="list" role="group" aria-label="Color pairs" data-i18n-label="pairsLabel"></div>
 
@@ -464,6 +484,7 @@ const AR = {
   title: "مؤشر الماك،<br><em>يستحيل أن يضيع.</em>",
   lede: "جرّب أزواج ألوان الحدود والتعبئة على سطح مكتب macOS حيّ، وانسخ رموز الألوان، أو طبّق أيًّا منها بنقرة مع تطبيق شريط القوائم المجاني.",
   browse: "جرّب الأزواج", getApp: "احصل على تطبيق الماك",
+  filmTitle: "شاهده في ٣٠ ثانية.", filmLabel: "فيلم تعريفي بتطبيق Pointer Colors",
   statPairs: "زوج ألوان", statBg: "خلفيات اختبار", statClick: "نقرة للتطبيق",
   pairsLabel: "أزواج الألوان", stageLabel: "سطح مكتب لمعاينة المؤشر", wallpaper: "الخلفية",
   hint: "حرّك الماوس هنا",
