@@ -203,3 +203,62 @@ final class UpdateScheduleTests: XCTestCase {
         XCTAssertEqual(UpdateSchedule.saved(in: defaults), .weekly)
     }
 }
+
+@MainActor
+final class PointerHighlightTests: XCTestCase {
+    private func makeDefaults() -> UserDefaults {
+        UserDefaults(suiteName: "PointerHighlightTests-\(UUID().uuidString)")!
+    }
+
+    func testOffByDefaultAndRemembered() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertFalse(highlight.pulseOn)
+        XCTAssertFalse(highlight.laserOn)
+        XCTAssertFalse(highlight.showsRing)
+        XCTAssertFalse(highlight.isActive)
+        highlight.laserOn = true
+        highlight.laserUsesPairColor = false
+        highlight.laserColor = RGBA(hex: "112233")!
+        highlight.pulseDuration = 1.2
+        let reopened = PointerHighlight(defaults: defaults)
+        XCTAssertTrue(reopened.laserOn)
+        XCTAssertFalse(reopened.pulseOn)
+        XCTAssertTrue(reopened.isActive)
+        XCTAssertFalse(reopened.laserUsesPairColor)
+        XCTAssertEqual(reopened.laserColor.hex, "112233")
+        XCTAssertEqual(reopened.pulseDuration, 1.2)
+    }
+
+    func testColorsFollowThePairUnlessOverridden() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        let pair = PointerPair.featured
+        XCTAssertEqual(highlight.pulseColor(for: pair), pair.outline)
+        XCTAssertEqual(highlight.laserColors(for: pair).glow, pair.outline)
+        XCTAssertEqual(highlight.laserColors(for: pair).middle, pair.fill)
+        highlight.pulseUsesPairColor = false
+        highlight.laserUsesPairColor = false
+        XCTAssertEqual(highlight.pulseColor(for: pair), highlight.pulseColor)
+        XCTAssertEqual(highlight.laserColors(for: pair).glow, highlight.laserColor)
+    }
+
+    func testEarlierSingleChoiceCarriesOver() {
+        let defaults = makeDefaults()
+        defaults.set("pulse", forKey: "highlightMode")
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertTrue(highlight.pulseOn)
+        XCTAssertFalse(highlight.laserOn)
+    }
+
+    func testOneClickWithBothOnPulsesAndStartsATrail() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        highlight.pulseOn = true
+        highlight.laserOn = true
+        let scene = HighlightScene()
+        scene.press(at: CGPoint(x: 10, y: 10), now: 0, isLeft: true, settings: highlight)
+        scene.drag(to: CGPoint(x: 40, y: 10), now: 0.1, settings: highlight)
+        XCTAssertEqual(scene.pulses.count, 1)
+        XCTAssertEqual(scene.strokes.count, 1)
+        XCTAssertNotNil(scene.laserDot)
+    }
+}

@@ -75,6 +75,8 @@ final class AppModel {
 
     let settings = AppSettings()
     let hotKeys = HotKeyCenter()
+    let highlight = PointerHighlight()
+    @ObservationIgnored private var highlightOverlay: HighlightOverlay?
     private let pointer = SystemPointer()
     @ObservationIgnored private var automationStore: Automation?
     /// A display's size waiting for its colors to be drawn.
@@ -105,6 +107,9 @@ final class AppModel {
         reapplyIfNeeded()
         registerShortcuts()
         automation.applyAppearancePair()
+        highlightOverlay = HighlightOverlay(settings: highlight,
+                                            pair: { [weak self] in self?.menuBarPair ?? .featured },
+                                            pointerScale: { [weak self] in self?.scale ?? 1 })
         startUpdateSchedule()
     }
 
@@ -213,6 +218,7 @@ final class AppModel {
     /// Changes the size live, as the slider moves.
     func setScale(_ value: Double) {
         scale = value
+        highlightOverlay?.refresh()
         do {
             try pointer.setScale(value)
             settings.lastAppliedScale = value
@@ -332,6 +338,7 @@ final class AppModel {
 
     private func updateStatus() {
         status = appliedPair?.id == selectedID ? .applied : .notApplied
+        highlightOverlay?.refresh()
     }
 }
 

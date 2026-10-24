@@ -26,6 +26,7 @@ struct PreferencesView: View {
         case .general: GeneralPreferences(model: model)
         case .pairs: PairsPreferences(model: model)
         case .automation: AutomationPreferences(model: model)
+        case .highlight: HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
         case .shortcuts: ShortcutsPreferences(model: model)
         case .about: AboutPreferences(model: model)
         }
@@ -33,7 +34,7 @@ struct PreferencesView: View {
 }
 
 private enum PreferencesTab: CaseIterable, Identifiable {
-    case general, pairs, automation, shortcuts, about
+    case general, pairs, automation, highlight, shortcuts, about
 
     var id: Self { self }
 
@@ -42,6 +43,7 @@ private enum PreferencesTab: CaseIterable, Identifiable {
         case .general: "General"
         case .pairs: "Pairs"
         case .automation: "Automation"
+        case .highlight: "Highlight"
         case .shortcuts: "Shortcuts"
         case .about: "About"
         }
@@ -52,6 +54,7 @@ private enum PreferencesTab: CaseIterable, Identifiable {
         case .general: "gearshape"
         case .pairs: "cursorarrow"
         case .automation: "wand.and.stars"
+        case .highlight: "cursorarrow.rays"
         case .shortcuts: "command"
         case .about: "info.circle"
         }
