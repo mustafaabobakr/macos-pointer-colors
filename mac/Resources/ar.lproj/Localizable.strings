@@ -164,7 +164,10 @@
 "Delete %@" = "حذف %@";
 "Apps" = "التطبيقات";
 "Different pair for each app" = "زوج مختلف لكل تطبيق";
-"Applies while the app is in front. App pairs win over display pairs." = "يُطبَّق ما دام التطبيق في المقدمة. أزواج التطبيقات تتقدم على أزواج الشاشات.";
+"App pairs win over display pairs." = "أزواج التطبيقات تتقدم على أزواج الشاشات.";
+"Applies when" = "يُطبَّق عندما";
+"The pointer is over the app" = "يكون المؤشر فوق التطبيق";
+"The app is in front" = "يكون التطبيق في المقدمة";
 "Add App…" = "إضافة تطبيق…";
 "Pair for %@" = "الزوج لـ %@";
 "Remove %@" = "إزالة %@";

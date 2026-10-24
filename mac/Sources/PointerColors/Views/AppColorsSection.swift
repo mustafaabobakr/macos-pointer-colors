@@ -2,7 +2,8 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Preferences › Automation › Apps: a pair per app, applied while that app is in front.
+/// Preferences › Automation › Apps: a pair per app, applied while the pointer is over the app or
+/// while it's in front.
 struct AppColorsSection: View {
     @Bindable var automation: Automation
     let pairs: [PointerPair]
@@ -11,8 +12,13 @@ struct AppColorsSection: View {
         Section {
             Toggle(isOn: $automation.perAppColors) {
                 Text("Different pair for each app")
-                Text("Applies while the app is in front. App pairs win over display pairs.")
+                Text("App pairs win over display pairs.")
             }
+            Picker("Applies when", selection: $automation.appRuleTrigger) {
+                Text("The pointer is over the app").tag(AppRuleTrigger.pointer)
+                Text("The app is in front").tag(AppRuleTrigger.frontmost)
+            }
+            .disabled(!automation.perAppColors)
             ForEach(automation.appRuleIDs, id: \.self) { bundleID in
                 AppColorRow(automation: automation, bundleID: bundleID, pairs: pairs)
             }
