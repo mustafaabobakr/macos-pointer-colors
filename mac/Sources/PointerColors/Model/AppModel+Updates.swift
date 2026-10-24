@@ -3,8 +3,10 @@ import AppKit
 extension AppModel {
     private static let lastUpdateCheckKey = "lastUpdateCheck"
     private static let autoCheckKey = "checkForUpdatesAutomatically"
+    /// How long a check is reused when the menu opens again. GitHub allows 60 requests an hour.
+    private static let menuCheckInterval: TimeInterval = 5 * 60
 
-    /// Off by default: the app only contacts GitHub when the user asks or turns this on.
+    /// The daily check in the background, off by default. Opening the menu checks either way.
     var checksForUpdatesAutomatically: Bool {
         get { UserDefaults.standard.bool(forKey: Self.autoCheckKey) }
         set { UserDefaults.standard.set(newValue, forKey: Self.autoCheckKey) }
@@ -13,7 +15,9 @@ extension AppModel {
     func checkForUpdates() async {
         isCheckingForUpdates = true
         updateInstallError = nil
-        updateResult = await UpdateChecker().check()
+        let result = await UpdateChecker().check()
+        updateResult = result
+        lastUpdateCheck = (Date(), result)
         isCheckingForUpdates = false
         UserDefaults.standard.set(Date(), forKey: Self.lastUpdateCheckKey)
     }
@@ -24,6 +28,31 @@ extension AppModel {
         let last = UserDefaults.standard.object(forKey: Self.lastUpdateCheckKey) as? Date ?? .distantPast
         guard Date().timeIntervalSince(last) > 24 * 60 * 60 else { return }
         await checkForUpdates()
+    }
+
+    /// Opening the menu checks for updates, reusing a check from the last few minutes.
+    func menuOpened() {
+        guard !isCheckingForUpdates, !isInstallingUpdate else { return }
+        if let recent = recentUpdateCheck {
+            updateResult = recent
+        } else {
+            Task { await checkForUpdates() }
+        }
+    }
+
+    /// Closing the menu clears its update status, such as "You're up to date". An available
+    /// update stays, so the menu still offers it next time.
+    func menuClosed() {
+        guard !isInstallingUpdate, availableUpdateURL == nil else { return }
+        updateResult = nil
+        updateInstallError = nil
+    }
+
+    /// A successful check recent enough to show again without asking GitHub.
+    private var recentUpdateCheck: UpdateChecker.Result? {
+        guard let last = lastUpdateCheck, Date().timeIntervalSince(last.date) < Self.menuCheckInterval else { return nil }
+        if case .failed = last.result { return nil }
+        return last.result
     }
 
     /// Installs the new version in place and relaunches into it (see AppUpdater).
