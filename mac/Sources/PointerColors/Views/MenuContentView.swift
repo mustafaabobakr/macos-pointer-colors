@@ -48,6 +48,9 @@ struct MenuContentView: View {
             footer
         }
         .padding(14)
+        // Never shorter than the content needs: the menu window can come up a line short, and
+        // SwiftUI then squeezed the footer rows into each other.
+        .fixedSize(horizontal: false, vertical: true)
         .menuBackground(model.menuBackgroundStyle)
         .frame(width: 380 * scale)
         .appTextScale(scale)
@@ -201,12 +204,10 @@ struct MenuContentView: View {
                 openSettings()
             }
             .keyboardShortcut(",")
-            MenuRow(title: model.updateActionTitle, shortcut: nil) { model.performUpdateAction() }
-                .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
-            if let message = model.menuUpdateMessage {
-                Text(message)
-                    .appFont(.caption2).foregroundStyle(.secondary).padding(.horizontal, 6)
+            MenuRow(title: model.updateActionTitle, subtitle: model.menuUpdateLine, shortcut: nil) {
+                model.performUpdateAction()
             }
+            .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
             MenuRow(title: String(localized: "Browse pairs on the website"), shortcut: nil) {
                 NSWorkspace.shared.open(URL(string: "https://macos-pointer-colors.pages.dev")!)
             }
@@ -282,15 +283,24 @@ private struct PairTile: View {
     }
 }
 
+/// A menu item. The subtitle sits inside the same button, so the whole item is clickable.
 private struct MenuRow: View {
     let title: String
+    var subtitle: String? = nil
     let shortcut: String?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack {
-                Text(title)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                    if let subtitle {
+                        // One line, so the row keeps its height; the full text shows on hover.
+                        Text(subtitle).appFont(.caption2).foregroundStyle(.secondary)
+                            .lineLimit(1).truncationMode(.tail).help(subtitle)
+                    }
+                }
                 Spacer()
                 if let shortcut { Text(shortcut).foregroundStyle(.secondary) }
             }

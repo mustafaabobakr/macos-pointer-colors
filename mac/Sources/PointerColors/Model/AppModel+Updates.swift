@@ -91,13 +91,10 @@ extension AppModel {
         return String(localized: "Check for Updates…")
     }
 
-    /// The update message plus what clicking the menu row will do.
-    var menuUpdateMessage: String? {
-        guard let message = updateMessage else { return nil }
-        guard !isInstallingUpdate, updateInstallError == nil else { return message }
-        if availableUpdateDownload != nil { return String(localized: "\(message) Click above to install.") }
-        if availableUpdateURL != nil { return String(localized: "\(message) Click above to download.") }
-        return message
+    /// The update row's second line in the menu: the latest status, or the version when there's
+    /// nothing to report.
+    var menuUpdateLine: String {
+        updateMessage ?? String(localized: "Version \(UpdateChecker().currentVersion)")
     }
 
     var updateMessage: String? {
@@ -105,7 +102,7 @@ extension AppModel {
         if let updateInstallError { return String(localized: "Couldn't install: \(updateInstallError)") }
         switch updateResult {
         case .none: return nil
-        case .upToDate: return String(localized: "You're up to date.")
+        case .upToDate: return String(localized: "You're up to date (\(UpdateChecker().currentVersion)).")
         case .available(let version, _, _): return String(localized: "Version \(version) is available.")
         case .noReleases: return String(localized: "No releases are published yet.")
         case .failed(let reason): return String(localized: "Couldn't check: \(reason)")

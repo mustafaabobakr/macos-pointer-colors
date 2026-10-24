@@ -122,7 +122,7 @@
 "Check for Updates…" = "التحقق من التحديثات…";
 "Check automatically once a day" = "التحقق تلقائيًا مرة يوميًا";
 "Download the new version" = "تنزيل الإصدار الجديد";
-"You're up to date." = "لديك أحدث إصدار.";
+"You're up to date (%@)." = "لديك أحدث إصدار (%@).";
 "Version %@ is available." = "الإصدار %@ متاح.";
 "No releases are published yet." = "لم يُنشر أي إصدار بعد.";
 "Couldn't check: %@" = "تعذّر التحقق: %@";
@@ -151,8 +151,6 @@
 "Created by" = "من إعداد";
 "Mostafa Abobakr" = "مصطفى أبوبكر";
 "Checking for Updates…" = "جارٍ التحقق من التحديثات…";
-"%@ Click above to download." = "%@ انقر أعلاه للتنزيل.";
-"%@ Click above to install." = "%@ انقر أعلاه للتثبيت.";
 "Install Update and Relaunch" = "تثبيت التحديث وإعادة التشغيل";
 "Install and Relaunch" = "تثبيت وإعادة التشغيل";
 "Installing Update…" = "جارٍ تثبيت التحديث…";
