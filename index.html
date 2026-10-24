@@ -50,6 +50,7 @@
         { "@type": "Question", "name": "How do I make the cursor bigger on macOS?", "acceptedAnswer": { "@type": "Answer", "text": "Drag Pointer size in System Settings › Accessibility › Display, or use the size slider in Pointer Colors, which can also set a different size on each display." } },
         { "@type": "Question", "name": "How do I reset the pointer to black and white?", "acceptedAnswer": { "@type": "Answer", "text": "Click Reset Colors under Pointer in System Settings › Accessibility › Display, or pick the macOS light or macOS dark pair on this page or in the app." } },
         { "@type": "Question", "name": "Which pointer colors are easiest to see?", "acceptedAnswer": { "@type": "Answer", "text": "Pick a pair where the outline or the fill stands out on both white pages and dark apps. Check it on the four preview tiles; the app also warns when a pair is hard to see." } },
+        { "@type": "Question", "name": "Why does the app ask for Full Disk Access?", "acceptedAnswer": { "@type": "Answer", "text": "macOS keeps the pointer color and size settings in a protected Accessibility preferences file. Apps from outside the App Store can only change that file with Full Disk Access. Pointer Colors first tries Apple's own defaults tool, which usually works without it, and only asks when macOS blocks both. It only touches the pointer color, size and shake-to-find settings, reads no other files, and sends nothing anywhere." } },
         { "@type": "Question", "name": "Is Pointer Colors free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The website and the Mac app are free and open source on GitHub. The app only changes the pointer settings macOS already has." } }
       ]
     }
@@ -448,6 +449,7 @@ html[dir="rtl"] .shot:hover img{transform:none}
     <details><summary data-i18n="q2">How do I make the cursor bigger on macOS?</summary><div class="answer"><p data-i18n="a2">Drag <strong>Pointer size</strong> in System Settings › Accessibility › Display, or use the size slider in Pointer Colors, which can also set a different size on each display.</p></div></details>
     <details><summary data-i18n="q3">How do I reset the pointer to black and white?</summary><div class="answer"><p data-i18n="a3">Click <strong>Reset Colors</strong> under Pointer in System Settings › Accessibility › Display, or pick the <strong>macOS light</strong> or <strong>macOS dark</strong> pair on this page or in the app.</p></div></details>
     <details><summary data-i18n="q4">Which pointer colors are easiest to see?</summary><div class="answer"><p data-i18n="a4">Pick a pair where the outline or the fill stands out on both white pages and dark apps. Check it on the four preview tiles; the app also warns when a pair is hard to see.</p></div></details>
+    <details><summary data-i18n="q6">Why does the app ask for Full Disk Access?</summary><div class="answer"><p data-i18n="a6">macOS keeps the pointer color and size settings in a protected Accessibility preferences file. Apps from outside the App Store can only change that file with Full Disk Access. Pointer Colors first tries Apple's own <code>defaults</code> tool, which usually works without it, and only asks when macOS blocks both. It only touches the pointer color, size and shake-to-find settings, reads no other files, and sends nothing anywhere.</p></div></details>
     <details><summary data-i18n="q5">Is Pointer Colors free?</summary><div class="answer"><p data-i18n="a5">Yes. The website and the Mac app are free and open source on GitHub. The app only changes the pointer settings macOS already has.</p></div></details>
   </section>
 
@@ -491,6 +493,8 @@ const AR = {
   a3: "انقر <strong>إعادة تعيين الألوان</strong> تحت المؤشر في إعدادات النظام › تسهيلات الاستخدام › الشاشة، أو اختر زوج <strong>macOS light</strong> أو <strong>macOS dark</strong> في هذه الصفحة أو في التطبيق.",
   q4: "ما ألوان المؤشر الأسهل رؤية؟",
   a4: "اختر زوجًا تبرز فيه الحدود أو التعبئة على الصفحات البيضاء والتطبيقات الداكنة معًا. جرّبه على بطاقات المعاينة الأربع؛ ويحذّرك التطبيق أيضًا عندما يصعب رؤية الزوج.",
+  q6: "لماذا يطلب التطبيق صلاحية الوصول الكامل إلى القرص؟",
+  a6: "يحفظ macOS إعدادات لون المؤشر وحجمه في ملف تفضيلات محمي لتسهيلات الاستخدام. لا يمكن للتطبيقات من خارج App Store تعديل هذا الملف إلا بصلاحية الوصول الكامل إلى القرص. يجرّب Pointer Colors أولًا أداة <code>defaults</code> من Apple، التي تعمل عادةً بدونها، ولا يطلب الصلاحية إلا إذا منع macOS الطريقتين. لا يغيّر إلا إعدادات لون المؤشر وحجمه وهزّه لتحديد موقعه، ولا يقرأ أي ملفات أخرى، ولا يرسل أي شيء.",
   q5: "هل Pointer Colors مجاني؟",
   a5: "نعم. الموقع وتطبيق الماك مجانيان ومفتوحا المصدر على GitHub. لا يغيّر التطبيق إلا إعدادات المؤشر الموجودة في macOS أصلًا.",
   macShot: "تطبيق Pointer Colors في شريط القوائم يعرض الأزواج وشريط الحجم والمعاينات",

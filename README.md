@@ -113,6 +113,9 @@ A pair where the outline or the fill stands out on both white pages and dark app
 **macOS says the app can't be opened or verified. What do I do?**<br>
 It's not notarized yet. Right-click it and choose **Open**, allow it in **System Settings › Privacy & Security**, or run `xattr -cr "/Applications/Pointer Colors.app"` in Terminal.
 
+**Why does the app ask for Full Disk Access?**<br>
+macOS keeps the pointer color and size settings in a protected Accessibility preferences file (`com.apple.universalaccess`). Apps from outside the App Store can only change that file with Full Disk Access. Pointer Colors first tries Apple's own `defaults` tool, which usually works without it, and only asks when macOS blocks both. It only touches the pointer color, size and shake-to-find settings, reads no other files, and sends nothing anywhere.
+
 **Is it free?**<br>
 Yes. The website and the app are free and open source.
 
@@ -144,8 +147,6 @@ python3 -I docs/art/make_readme_art.py   # needs: brew install librsvg
 | [`pairs.json`](pairs.json) | Every pair, shared by the site and the app |
 | [`mac/`](mac) | The SwiftUI menu-bar app, tests and build scripts |
 | [`docs/`](docs) | Screenshots, README art and the social preview |
-| [`promo/`](promo) | The promo film: a scripted 3D scene and its renderer (`node promo/render.mjs`, needs Chrome and ffmpeg) |
-
 The site deploys to Cloudflare Pages from `main`: no framework preset, no build command, output directory `/`.
 
 <br>
