@@ -166,3 +166,23 @@ final class AppUpdaterTests: XCTestCase {
         XCTAssertNil(AppUpdater.installBlocker(for: writable))
     }
 }
+
+final class UpdateScheduleTests: XCTestCase {
+    func testDueOnlyAfterThePeriod() {
+        let now = Date()
+        let hours: (Double) -> Date = { now.addingTimeInterval(-$0 * 3600) }
+        XCTAssertFalse(UpdateSchedule.daily.isDue(lastCheck: hours(23), now: now))
+        XCTAssertTrue(UpdateSchedule.daily.isDue(lastCheck: hours(24), now: now))
+        XCTAssertFalse(UpdateSchedule.weekly.isDue(lastCheck: hours(24 * 6), now: now))
+        XCTAssertTrue(UpdateSchedule.monthly.isDue(lastCheck: hours(24 * 30), now: now))
+        XCTAssertTrue(UpdateSchedule.daily.isDue(lastCheck: nil, now: now))
+        XCTAssertFalse(UpdateSchedule.off.isDue(lastCheck: nil, now: now))
+    }
+
+    func testDailyByDefaultAndSaved() {
+        let defaults = UserDefaults(suiteName: "UpdateScheduleTests-\(UUID().uuidString)")!
+        XCTAssertEqual(UpdateSchedule.saved(in: defaults), .daily)
+        UpdateSchedule.weekly.save(in: defaults)
+        XCTAssertEqual(UpdateSchedule.saved(in: defaults), .weekly)
+    }
+}

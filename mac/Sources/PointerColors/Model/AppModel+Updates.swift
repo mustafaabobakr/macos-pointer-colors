@@ -2,14 +2,16 @@ import AppKit
 
 extension AppModel {
     private static let lastUpdateCheckKey = "lastUpdateCheck"
-    private static let autoCheckKey = "checkForUpdatesAutomatically"
-    /// How long a check is reused when the menu opens again. GitHub allows 60 requests an hour.
-    private static let menuCheckInterval: TimeInterval = 5 * 60
+    /// How often the background check runs while the app is open.
+    private static let scheduleTick: TimeInterval = 60 * 60
 
-    /// The daily check in the background, off by default. Opening the menu checks either way.
-    var checksForUpdatesAutomatically: Bool {
-        get { UserDefaults.standard.bool(forKey: Self.autoCheckKey) }
-        set { UserDefaults.standard.set(newValue, forKey: Self.autoCheckKey) }
+    var updateSchedule: UpdateSchedule {
+        get { UpdateSchedule.saved() }
+        set { newValue.save(); Task { await checkForUpdatesIfDue() } }
+    }
+
+    private var lastCheckDate: Date? {
+        UserDefaults.standard.object(forKey: Self.lastUpdateCheckKey) as? Date
     }
 
     func checkForUpdates() async {
@@ -22,22 +24,25 @@ extension AppModel {
         UserDefaults.standard.set(Date(), forKey: Self.lastUpdateCheckKey)
     }
 
-    /// At most once a day, and only when automatic checks are on.
+    /// Checks when the chosen schedule says the last check is too old.
     func checkForUpdatesIfDue() async {
-        guard checksForUpdatesAutomatically else { return }
-        let last = UserDefaults.standard.object(forKey: Self.lastUpdateCheckKey) as? Date ?? .distantPast
-        guard Date().timeIntervalSince(last) > 24 * 60 * 60 else { return }
+        guard !isCheckingForUpdates, updateSchedule.isDue(lastCheck: lastCheckDate) else { return }
         await checkForUpdates()
     }
 
-    /// Opening the menu checks for updates, reusing a check from the last few minutes.
+    /// Checks at launch, then every hour whether a scheduled check is due, for as long as the app runs.
+    func startUpdateSchedule() {
+        Task { await checkForUpdatesIfDue() }
+        Timer.scheduledTimer(withTimeInterval: Self.scheduleTick, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { _ = Task { await self?.checkForUpdatesIfDue() } }
+        }
+    }
+
+    /// Opening the menu shows the last result without asking GitHub, unless a scheduled check is due.
     func menuOpened() {
         guard !isCheckingForUpdates, !isInstallingUpdate else { return }
-        if let recent = recentUpdateCheck {
-            updateResult = recent
-        } else {
-            Task { await checkForUpdates() }
-        }
+        if let recent = recentUpdateCheck { updateResult = recent }
+        Task { await checkForUpdatesIfDue() }
     }
 
     /// Closing the menu clears its update status, such as "You're up to date". An available
@@ -48,9 +53,9 @@ extension AppModel {
         updateInstallError = nil
     }
 
-    /// A successful check recent enough to show again without asking GitHub.
+    /// The last successful check from this run, to show again when the menu opens.
     private var recentUpdateCheck: UpdateChecker.Result? {
-        guard let last = lastUpdateCheck, Date().timeIntervalSince(last.date) < Self.menuCheckInterval else { return nil }
+        guard let last = lastUpdateCheck else { return nil }
         if case .failed = last.result { return nil }
         return last.result
     }

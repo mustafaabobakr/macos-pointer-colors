@@ -254,7 +254,7 @@ private struct AboutPreferences: View {
 
 private struct UpdateSection: View {
     @Bindable var model: AppModel
-    @State private var autoCheck = false
+    @State private var schedule = UpdateSchedule.saved()
 
     var body: some View {
         VStack(spacing: 8) {
@@ -273,10 +273,11 @@ private struct UpdateSection: View {
             if let url = model.availableUpdateURL {
                 Link("Download the new version", destination: url)
             }
-            Toggle("Check automatically once a day", isOn: $autoCheck)
-                .toggleStyle(.switch).controlSize(.mini)
-                .onChange(of: autoCheck) { model.checksForUpdatesAutomatically = autoCheck }
+            Picker("Check automatically", selection: $schedule) {
+                ForEach(UpdateSchedule.allCases) { Text($0.title).tag($0) }
+            }
+            .fixedSize()
+            .onChange(of: schedule) { model.updateSchedule = schedule }
         }
-        .onAppear { autoCheck = model.checksForUpdatesAutomatically }
     }
 }

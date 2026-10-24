@@ -120,7 +120,11 @@
 "GitHub" = "GitHub";
 "Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display." = "يغيّر إعدادات حدود المؤشر وتعبئته وحجمه نفسها الموجودة في إعدادات النظام › تسهيلات الاستخدام › الشاشة.";
 "Check for Updates…" = "التحقق من التحديثات…";
-"Check automatically once a day" = "التحقق تلقائيًا مرة يوميًا";
+"Check automatically" = "التحقق تلقائيًا";
+"Never" = "أبدًا";
+"Every day" = "كل يوم";
+"Every week" = "كل أسبوع";
+"Every month" = "كل شهر";
 "Download the new version" = "تنزيل الإصدار الجديد";
 "You're up to date (%@)." = "لديك أحدث إصدار (%@).";
 "Version %@ is available." = "الإصدار %@ متاح.";
