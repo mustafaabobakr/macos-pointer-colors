@@ -3,10 +3,15 @@ import SwiftUI
 /// Preferences › Highlight: the ring, and the pulse and laser for demos and recordings.
 struct HighlightPreferences: View {
     @Bindable var highlight: PointerHighlight
+    /// The pair on screen and the pointer size, so the demo looks like the real thing.
+    let pair: PointerPair
+    let pointerScale: Double
 
     var body: some View {
         Form {
             Section {
+                HighlightDemoPad(highlight: highlight,
+                                 style: HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale))
                 Picker(selection: $highlight.mode) {
                     ForEach(HighlightMode.allCases) { Text($0.title).tag($0) }
                 } label: {

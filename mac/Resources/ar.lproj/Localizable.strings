@@ -135,6 +135,9 @@
 "Draw a trail while dragging" = "رسم أثر أثناء السحب";
 "Hold the mouse button and move to draw; the trail fades after you let go." = "اضغط زر الفأرة مع التحريك للرسم، ويتلاشى الأثر بعد الإفلات.";
 "Trail fades after" = "يتلاشى الأثر بعد";
+"Choose Pulse or Laser below, then try it here." = "اختر النبضة أو الليزر أدناه، ثم جرّبه هنا.";
+"Move, click and drag here to try it." = "حرّك المؤشر وانقر واسحب هنا للتجربة.";
+"Highlight demo" = "تجربة الإبراز";
 "Website" = "الموقع";
 "GitHub" = "GitHub";
 "Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display." = "يغيّر إعدادات حدود المؤشر وتعبئته وحجمه نفسها الموجودة في إعدادات النظام › تسهيلات الاستخدام › الشاشة.";

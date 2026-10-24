@@ -1,13 +1,25 @@
 import SwiftUI
 
-/// One display's share of the highlight overlay. Animates only while something is fading.
+/// Draws a highlight scene. Animates only while something is fading.
 struct HighlightCanvas: View {
     let scene: HighlightScene
-    /// The display's frame in global screen coordinates (origin bottom left).
-    let screenFrame: CGRect
+    /// Turns a scene point into this view's own coordinates (origin top left).
+    let toLocal: (CGPoint) -> CGPoint
+
+    /// One display's share of the overlay; the scene is in global screen coordinates.
+    init(scene: HighlightScene, screenFrame: CGRect) {
+        self.scene = scene
+        toLocal = { CGPoint(x: $0.x - screenFrame.minX, y: screenFrame.maxY - $0.y) }
+    }
+
+    /// A scene already in this view's coordinates, like the demo pad in Preferences.
+    init(scene: HighlightScene) {
+        self.scene = scene
+        toLocal = { $0 }
+    }
 
     var body: some View {
-        let snapshot = HighlightSnapshot(scene: scene, screenFrame: screenFrame)
+        let snapshot = HighlightSnapshot(scene: scene, toLocal: toLocal)
         TimelineView(.animation(paused: !scene.isAnimating)) { timeline in
             Canvas { context, _ in
                 snapshot.draw(in: &context, now: timeline.date.timeIntervalSinceReferenceDate)
@@ -17,8 +29,8 @@ struct HighlightCanvas: View {
     }
 }
 
-/// A copy of the scene for one frame, with points moved into the display's own coordinates.
-private struct HighlightSnapshot {
+/// A copy of the scene for one frame, with points moved into the view's own coordinates.
+struct HighlightSnapshot {
     let style: HighlightStyle
     let pointer: CGPoint
     let pulses: [Pulse]
@@ -26,9 +38,8 @@ private struct HighlightSnapshot {
     let strokes: [LaserStroke]
 
     @MainActor
-    init(scene: HighlightScene, screenFrame: CGRect) {
+    init(scene: HighlightScene, toLocal local: (CGPoint) -> CGPoint) {
         _ = scene.revision
-        let local = { (p: CGPoint) in CGPoint(x: p.x - screenFrame.minX, y: screenFrame.maxY - p.y) }
         style = scene.style
         pointer = local(scene.pointer)
         pulses = scene.pulses.map { Pulse(point: local($0.point), start: $0.start) }

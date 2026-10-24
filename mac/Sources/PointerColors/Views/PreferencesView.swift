@@ -12,7 +12,7 @@ struct PreferencesView: View {
                 .tabItem { Label("Pairs", systemImage: "cursorarrow") }
             AutomationPreferences(model: model)
                 .tabItem { Label("Automation", systemImage: "wand.and.stars") }
-            HighlightPreferences(highlight: model.highlight)
+            HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
                 .tabItem { Label("Highlight", systemImage: "cursorarrow.rays") }
             ShortcutsPreferences(model: model)
                 .tabItem { Label("Shortcuts", systemImage: "command") }
