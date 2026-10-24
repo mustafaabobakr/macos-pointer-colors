@@ -294,16 +294,40 @@ private struct HighlightMenuRow: View {
             Text("Highlight").appFont(.caption)
             Spacer(minLength: 4)
             ForEach(HighlightEffect.allCases) { effect in
-                Toggle(isOn: Binding(get: { highlight.isOn(effect) }, set: { highlight.setOn($0, effect) })) {
-                    Label(effect.title, systemImage: effect.systemImage).appFont(.caption)
+                HighlightChip(effect: effect, isOn: highlight.isOn(effect)) {
+                    highlight.setOn(!highlight.isOn(effect), effect)
                 }
-                .toggleStyle(.button)
-                .controlSize(.small)
-                .tint(.accentColor)
-                .help(effect == .pulse ? String(localized: "A ring where you click")
-                                       : String(localized: "A glowing dot, and a trail as you drag"))
             }
         }
+    }
+}
+
+/// A small capsule switch: filled with a check when on, outlined when off.
+private struct HighlightChip: View {
+    let effect: HighlightEffect
+    let isOn: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: isOn ? "checkmark" : effect.systemImage)
+                    .font(.system(size: 9, weight: .bold))
+                Text(effect.title).appFont(.caption, weight: .medium)
+            }
+            .padding(.horizontal, 9)
+            .padding(.vertical, 3)
+            .foregroundStyle(isOn ? Color.white : Color.secondary)
+            .background(Capsule().fill(isOn ? Color.accentColor : Color.primary.opacity(0.06)))
+            .overlay(Capsule().stroke(isOn ? Color.clear : Color.primary.opacity(0.18), lineWidth: 1))
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .help(effect == .pulse ? String(localized: "A ring where you click")
+                               : String(localized: "A glowing dot, and a trail as you drag"))
+        .accessibilityLabel(effect.title)
+        .accessibilityValue(isOn ? String(localized: "On") : String(localized: "Off"))
+        .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 }
 
