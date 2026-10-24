@@ -20,9 +20,9 @@ rm -f "$DMG"
 hdiutil create -volname "Pointer Colors" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "$DMG" >/dev/null
 rm -rf "$STAGE"
 
-IDENTITY="${SIGN_IDENTITY:-Pointer Colors Dev}"
-if security find-identity -v -p codesigning | grep -q "\"$IDENTITY\""; then
-  codesign --force --sign "$IDENTITY" "$DMG"
-fi
+# The DMG stays unsigned. macOS runs the full notarization check on a downloaded disk image that
+# carries a signature, so one signed with the local self-signed identity is refused with
+# "Apple could not verify…" and never mounts. An unsigned DMG mounts, and Gatekeeper checks the
+# app inside instead. Sign it again only with a Developer ID, once the app is notarized.
 
 echo "Built: $DMG ($(du -h "$DMG" | cut -f1))"
