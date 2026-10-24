@@ -119,6 +119,26 @@ html[lang="ar"] h1{line-height:1.2}
 .btn-primary svg{width:18px;height:18px}
 .btn-secondary{border:1px solid var(--line);color:var(--ink);background:color-mix(in srgb,var(--surface) 60%,transparent)}
 .btn-secondary:hover{background:var(--surface)}
+/* Watch the film: a thumbnail pill; it opens the film in a modal that grows out of it. */
+.btn-watch{display:inline-flex;align-items:center;gap:12px;min-height:54px;padding:6px 20px 6px 6px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 60%,transparent);color:var(--ink);font:inherit;font-weight:700;cursor:pointer;transition:transform .3s cubic-bezier(.2,.8,.2,1),background .25s}
+html[dir="rtl"] .btn-watch{padding:6px 6px 6px 20px}
+.btn-watch:hover{background:var(--surface);transform:translateY(-2px)}
+.btn-watch .thumb{position:relative;display:block;width:72px;height:42px;border-radius:999px;overflow:hidden;flex:none}
+.btn-watch .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.btn-watch:hover .thumb img{transform:scale(1.12)}
+.btn-watch .thumb i{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.28);color:#fff}
+.btn-watch .thumb svg{width:18px;height:18px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+.btn-watch .len{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.vmodal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:clamp(16px,5vw,72px)}
+.vmodal[hidden]{display:none}
+.vbackdrop{position:absolute;inset:0;background:rgba(5,6,8,.62);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);opacity:0}
+.vframe{position:relative;width:min(100%,1280px,calc((100vh - 2 * clamp(16px,5vw,72px)) * 16 / 9));aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:#000;box-shadow:0 50px 120px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.08);transform-origin:top left}
+.vframe video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.vclose{position:absolute;top:14px;inset-inline-end:14px;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:0;background:rgba(20,20,22,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;cursor:pointer;opacity:0;transition:background .2s}
+.vclose:hover{background:rgba(40,40,44,.8)}
+.vclose svg{width:18px;height:18px}
+html.modal-open{overflow:hidden}
+@media (max-width:620px){.vframe{border-radius:14px}.vclose{top:8px;inset-inline-end:8px}}
 .stats{display:flex;flex-wrap:wrap;gap:clamp(22px,4vw,48px);margin:0}
 .stats div{display:flex;flex-direction:column;gap:2px;padding-inline-start:14px;border-inline-start:2px solid color-mix(in srgb,var(--glow-a) 70%,transparent)}
 .stats dt{font-size:clamp(1.8rem,3.2vw,2.6rem);font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -205,10 +225,6 @@ input[type=range]{accent-color:var(--ink)}
 .group{grid-column:1/-1;margin:10px 0 2px;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .group:first-child{margin-top:0}
 .mac h2{font-size:1.35rem;margin:0 0 8px;letter-spacing:-.01em}
-.film{margin:0 0 56px}
-.film h2{margin:0 0 16px;font-size:clamp(1.4rem,2.4vw,2rem);letter-spacing:-.02em}
-.film video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:24px;background:#000;border:1px solid var(--line);box-shadow:0 30px 80px -40px var(--glow-a)}
-@media (max-width:620px){.film video{border-radius:16px}}
 .faq{margin-top:56px;max-width:760px}
 .faq h2{font-size:1.35rem;margin:0 0 12px;letter-spacing:-.01em}
 .faq details{border-top:1px solid var(--line)}
@@ -354,6 +370,10 @@ html[dir="rtl"] .shot:hover img{transform:none}
       <div class="hero-cta">
         <button type="button" class="btn-primary" data-scroll="tool"><span data-i18n="browse">Try the pairs</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
         <button type="button" class="btn-secondary" data-scroll="mac" data-i18n="getApp">Get the Mac app</button>
+        <button type="button" class="btn-watch" id="watchBtn" aria-haspopup="dialog" aria-controls="vmodal">
+          <span class="thumb" aria-hidden="true"><img src="docs/promo/poster.jpg" alt="" width="96" height="54"><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></i></span>
+          <span data-i18n="watch">Watch the film</span><span class="len" aria-hidden="true">0:30</span>
+        </button>
       </div>
       <dl class="stats">
         <div><dt id="statCount">47</dt><dd data-i18n="statPairs">color pairs</dd></div>
@@ -367,13 +387,6 @@ html[dir="rtl"] .shot:hover img{transform:none}
       <span class="layer l3"><svg class="hp" id="hp3" viewBox="0 0 24 32"></svg></span>
     </div>
   </header>
-
-  <section class="film" id="film" aria-labelledby="filmTitle">
-    <h2 id="filmTitle" data-i18n="filmTitle">See it in 30 seconds.</h2>
-    <video controls playsinline preload="none" poster="docs/promo/poster.jpg" width="1920" height="1080" aria-label="Pointer Colors promo film" data-i18n-label="filmLabel">
-      <source src="docs/promo/pointer-colors-promo.mp4" type="video/mp4">
-    </video>
-  </section>
 
   <div class="layout" id="tool">
     <div class="list" id="list" role="group" aria-label="Color pairs" data-i18n-label="pairsLabel"></div>
@@ -475,6 +488,15 @@ html[dir="rtl"] .shot:hover img{transform:none}
 
   <footer class="credit"><span data-i18n="createdBy">Created by</span> <a href="https://github.com/mustafaabobakr" data-i18n="author">Mostafa Abobakr</a> · <a href="https://github.com/mustafaabobakr/macos-pointer-colors" data-i18n="source">Source on GitHub</a></footer>
 </div>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Pointer Colors promo film" data-i18n-label="filmLabel" hidden>
+  <div class="vbackdrop" data-close></div>
+  <div class="vframe" id="vframe">
+    <video id="vplayer" controls playsinline preload="none" poster="docs/promo/poster.jpg" width="1920" height="1080">
+      <source src="docs/promo/pointer-colors-promo.mp4" type="video/mp4">
+    </video>
+    <button type="button" class="vclose" id="vclose" aria-label="Close the film" data-i18n-label="closeFilm" data-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script type="module">
@@ -484,7 +506,7 @@ const AR = {
   title: "مؤشر الماك،<br><em>يستحيل أن يضيع.</em>",
   lede: "جرّب أزواج ألوان الحدود والتعبئة على سطح مكتب macOS حيّ، وانسخ رموز الألوان، أو طبّق أيًّا منها بنقرة مع تطبيق شريط القوائم المجاني.",
   browse: "جرّب الأزواج", getApp: "احصل على تطبيق الماك",
-  filmTitle: "شاهده في ٣٠ ثانية.", filmLabel: "فيلم تعريفي بتطبيق Pointer Colors",
+  watch: "شاهد الفيلم", filmLabel: "فيلم تعريفي بتطبيق Pointer Colors", closeFilm: "إغلاق الفيلم",
   statPairs: "زوج ألوان", statBg: "خلفيات اختبار", statClick: "نقرة للتطبيق",
   pairsLabel: "أزواج الألوان", stageLabel: "سطح مكتب لمعاينة المؤشر", wallpaper: "الخلفية",
   hint: "حرّك الماوس هنا",
@@ -708,6 +730,56 @@ $("copyCmd").onclick=async()=>{
   const cmd=$("xattrCmd").textContent;
   try{ await navigator.clipboard.writeText(cmd); toast(t("cmdCopied")); }catch(e){ toast(cmd); }
 };
+// ---------- the film modal: grows out of the Watch button over a blurred page, shrinks back on close
+(() => {
+  const modal = $("vmodal"), frame = $("vframe"), video = $("vplayer"), btn = $("watchBtn"), closeBtn = $("vclose");
+  const backdrop = modal.querySelector(".vbackdrop");
+  const ease = "cubic-bezier(.2,.8,.2,1)";
+  let opening = null;
+  // The button's thumbnail, expressed as a transform of the full-size frame.
+  const fromThumb = () => {
+    const t = btn.querySelector(".thumb").getBoundingClientRect(), f = frame.getBoundingClientRect();
+    return `translate(${t.left - f.left}px,${t.top - f.top}px) scale(${t.width / f.width},${t.height / f.height})`;
+  };
+  function open() {
+    modal.hidden = false;
+    document.documentElement.classList.add("modal-open");
+    const calm = reduceMotion.matches;
+    backdrop.animate([{ opacity: 0 }, { opacity: 1 }], { duration: calm ? 150 : 420, easing: "ease", fill: "forwards" });
+    opening = frame.animate(calm ? [{ opacity: 0 }, { opacity: 1 }] : [{ transform: fromThumb(), borderRadius: "999px" }, { transform: "none", borderRadius: "24px" }],
+      { duration: calm ? 150 : 620, easing: ease, fill: "both" });
+    closeBtn.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: calm ? 0 : 450, fill: "forwards" });
+    opening.onfinish = () => { video.play().catch(() => {}); };
+    closeBtn.focus({ preventScroll: true });
+  }
+  function close() {
+    if (modal.hidden) return;
+    video.pause();
+    opening?.cancel();
+    const calm = reduceMotion.matches;
+    closeBtn.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" });
+    backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { duration: calm ? 150 : 360, easing: "ease", fill: "forwards" });
+    const shrink = frame.animate(calm ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: "none", borderRadius: "24px", opacity: 1 }, { transform: fromThumb(), borderRadius: "999px", opacity: .6 }],
+      { duration: calm ? 150 : 460, easing: ease, fill: "forwards" });
+    shrink.onfinish = () => {
+      modal.hidden = true;
+      document.documentElement.classList.remove("modal-open");
+      [frame, backdrop, closeBtn].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+      btn.focus({ preventScroll: true });
+    };
+  }
+  btn.addEventListener("click", open);
+  modal.querySelectorAll("[data-close]").forEach(el => el.addEventListener("click", close));
+  modal.addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+    if (e.key !== "Tab") return;
+    // Keep focus inside: the player and the close button.
+    const stops = [video, closeBtn];
+    const i = stops.indexOf(document.activeElement);
+    e.preventDefault();
+    stops[(i + (e.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
+  });
+})();
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1800);}
 
 const d=new Date(); $("clock").textContent=d.toLocaleDateString("en-US",{weekday:"short"})+" "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
