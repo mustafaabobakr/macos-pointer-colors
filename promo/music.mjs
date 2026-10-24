@@ -9,7 +9,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const OUT = resolve(process.argv.includes("--out") ? process.argv[process.argv.indexOf("--out") + 1] : join(HERE, "out", "music.wav"));
+// --sfx-only writes just the click and slider sounds (out/sfx.wav), to lay over a licensed track.
+const SFX_ONLY = process.argv.includes("--sfx-only");
+const OUT = resolve(process.argv.includes("--out") ? process.argv[process.argv.indexOf("--out") + 1] : join(HERE, "out", SFX_ONLY ? "sfx.wav" : "music.wav"));
 const SR = 48000, DUR = 30, N = SR * DUR, BEAT = 0.5, BAR = 2;
 const L = new Float32Array(N), R = new Float32Array(N), SEND = new Float32Array(N), ECHO = new Float32Array(N);   // SEND feeds the reverb, ECHO the ping-pong delay
 
@@ -77,6 +79,7 @@ const hat = (t, amp = .06, open = false) => noiseHit(t, open ? .22 : .05, { amp,
 const clap = t => { for (const d of [0, .011, .022]) noiseHit(t + d, .16, { amp: .22, from: 1600, q: .5, send: .35, decay: .12 }); };
 const click = t => { tone(t, .006, 3200, { type: "sine", amp: .25, decay: .006, send: .05, pan: .2 }); tone(t + .004, .03, 900, { type: "tri", amp: .18, decay: .03, send: .05, pan: .2 }); };
 
+if (!SFX_ONLY) {
 // ---------- the score: minimal electronic in F major, 120 BPM. Clean, bright and spacious.
 const CHORDS = [[53, 57, 60, 64], [57, 60, 64, 67], [50, 53, 57, 60], [46, 50, 53, 57]];   // Fmaj7 Am7 Dm7 B♭maj7
 const chordAt = t => CHORDS[Math.floor(Math.max(0, t - 5) / BAR) % 4];
@@ -123,6 +126,8 @@ MELODY.forEach(([t, m]) => pluck(t, m, { amp: .07, decay: .9, echo: .4, send: .5
 pad(24.5, 5.2, [41, 53, 57, 60, 64, 67], { amp: .032, attack: .3 });
 [[24.7, 84], [25.45, 81], [26.2, 77]].forEach(([t, m]) => pluck(t, m, { amp: .08, decay: 1.4, echo: .5, send: .6 }));
 
+}
+
 // ---------- sound effects, matched to the picture: only clicks and the size slider
 [6.0, 7.0, 8.0, 10.0].forEach(click);
 
@@ -163,7 +168,7 @@ for (let n = 0; n < N; n++) {
   R[n] = Math.tanh((R[n] + wet[n]) * 1.1) * fade;
   peak = Math.max(peak, Math.abs(L[n]), Math.abs(R[n]));
 }
-const gain = .89 / peak;   // about -1 dBFS
+const gain = SFX_ONLY ? .5 : .89 / peak;   // the score peaks near -1 dBFS; effects keep a fixed level for mixing
 
 // ---------- 16-bit stereo WAV
 const data = Buffer.alloc(N * 4);
