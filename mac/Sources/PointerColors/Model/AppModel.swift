@@ -72,6 +72,8 @@ final class AppModel {
     let hotKeys = HotKeyCenter()
     private let pointer = SystemPointer()
     @ObservationIgnored private var automationStore: Automation?
+    /// A display's size waiting for its colors to be drawn.
+    @ObservationIgnored private var pendingScale: RecolorWatch?
 
     /// Appearance and per-display rules. Created on first use so it can call back into the model.
     var automation: Automation {
@@ -80,6 +82,7 @@ final class AppModel {
                                  applyPair: { [weak self] id in self?.applyPair(id: id) },
                                  applyScale: { [weak self] size in self?.setScale(size) },
                                  showPair: { [weak self] id in self?.showPair(id: id) },
+                                 showDisplay: { [weak self] id, size in self?.showDisplay(pairID: id, scale: size) },
                                  mainPairID: { [weak self] in self?.settings.lastAppliedPairID ?? self?.selectedID })
         automationStore = created
         return created
@@ -156,6 +159,27 @@ final class AppModel {
         } catch {
             fail(error)
         }
+    }
+
+    /// Puts a display's pair and size on screen, skipping whatever is already showing.
+    func showDisplay(pairID: String?, scale newScale: Double?) {
+        pendingScale?.cancel()
+        pendingScale = nil
+        let pair = library.pair(id: pairID).flatMap { $0 == appliedPair ? nil : $0 }
+        // Compared with the live size: a cancelled wait may already have changed it.
+        let size = newScale.flatMap { abs($0 - pointer.currentScale()) < 0.001 ? nil : $0 }
+        guard let pair else {
+            if let size { setScale(size) }
+            return
+        }
+        if let size { pendingScale = scaleAfterRecolor(size) }
+        showPair(id: pair.id)
+    }
+
+    /// The size goes live the moment the new colors are drawn, then is saved like any other change.
+    private func scaleAfterRecolor(_ size: Double) -> RecolorWatch {
+        RecolorWatch(onRecolor: { _ = UniversalAccessCore.shared.setCursorScale(size) },
+                     then: { [weak self] in self?.setScale(size) })
     }
 
     /// Applies a pair by id unless it's already on screen. Used by automation.

@@ -93,6 +93,12 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: "perAppColors") }
     }
 
+    /// What makes an app's own pair apply. Defaults to the pointer being over the app.
+    var appRuleTrigger: AppRuleTrigger {
+        get { defaults.string(forKey: "appRuleTrigger").flatMap(AppRuleTrigger.init(rawValue:)) ?? .pointer }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: "appRuleTrigger") }
+    }
+
     /// Pair id per app bundle id.
     var appPairs: [String: String] {
         get { defaults.dictionary(forKey: "appPairs") as? [String: String] ?? [:] }

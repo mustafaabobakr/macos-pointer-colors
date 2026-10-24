@@ -134,3 +134,12 @@ final class UpdateCheckerTests: XCTestCase {
         XCTAssertEqual(UpdateChecker.result(data: Data(), status: 500, current: "0.1.0"), .failed("GitHub answered 500."))
     }
 }
+
+final class AppSettingsTests: XCTestCase {
+    func testAppPairsFollowThePointerByDefault() {
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!)
+        XCTAssertEqual(settings.appRuleTrigger, .pointer)
+        settings.appRuleTrigger = .frontmost
+        XCTAssertEqual(settings.appRuleTrigger, .frontmost)
+    }
+}
