@@ -293,8 +293,11 @@ final class Automation {
     /// Runs on every mouse move, so it stays cheap: a window-number lookup and a rect test until
     /// the pointer reaches another app's window or another display.
     private func pointerMoved() {
-        let appChanged = followsPointerApp && hoverCheckIsDue() && updateHoveredApp()
-        if updatePointerDisplay() {
+        let displayChanged = updatePointerDisplay()
+        // A new display always asks for the app under the pointer: skipping it, a fast move kept the
+        // last display's app, and its app rule, on the new display.
+        let appChanged = followsPointerApp && (hoverCheckIsDue() || displayChanged) && updateHoveredApp()
+        if displayChanged {
             showCurrentDisplay()
         } else if appChanged {
             applyColors(for: lastDisplayID)
