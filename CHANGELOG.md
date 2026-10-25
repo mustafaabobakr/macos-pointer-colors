@@ -3,6 +3,15 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.0 — 2026-10-25
+
+- **Smooth pulses.** Clicking no longer stutters, including right after the pointer moves to another display. Pulses are now animated by macOS itself, and switching displays no longer makes macOS redraw the pointer twice. When displays use different pointer sizes, macOS still pauses briefly to resize the pointer as it crosses.
+- **Ripple pulse.** Choose the pulse style in **Preferences › Highlight › Pulse**: **Ring**, a single ring as before, or **Ripple**, three waves spreading out one after another.
+- **Long presses.** Turn on **Show long presses** to keep a small filled ring under the pointer while you hold the button, with a pulse when you let go, so a press looks different from a click. Off by default.
+- **Highlight colors that show up.** Pairs with a black outline, like Highlighter and Gold, no longer pulse in black: the highlight uses the more colorful of the pair's two colors. **Colors for each pair** in Preferences sets a pulse and a laser color for any pair.
+- **Draw with the laser without selecting text.** Turn on **Draw only while holding ⌥ Option**: a ⌥-drag draws the laser and the app underneath gets no click, so no text is selected.
+- **One pair menu everywhere.** Every place you pick a pair now uses the same list with pointer previews, including the light and dark appearance pairs.
+
 ## 0.3.3 — 2026-10-25
 
 - **Pointer highlight for demos and recordings.** A pulse on each click, a laser pointer that draws a fading trail as you drag, and a ring around the pointer. Turn the pulse and laser on from the menu's new Highlight section; both can be on at once. A new Highlight tab in Preferences has the ring switch, preview pictures, a pad to try it out, and settings for size, length, trail and colors. The highlight takes the pointer pair's colors unless you pick your own.

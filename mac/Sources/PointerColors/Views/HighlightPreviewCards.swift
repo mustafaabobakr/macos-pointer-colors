@@ -87,6 +87,8 @@ private struct HighlightPreviewImage: View {
             Pulse(point: CGPoint(x: size.width * x, y: size.height * y), start: Self.now - age * style.pulseDuration)
         }
         scene.pointer = scene.pulses.last?.point ?? .zero
+        // The pointer is mid long press, so the held ring shows next to the click pulses.
+        if style.showsHold { scene.hold = Hold(point: scene.pointer, start: Self.now - Hold.threshold - 1) }
     }
 
     private func addLaser(to scene: HighlightScene, in size: CGSize) {

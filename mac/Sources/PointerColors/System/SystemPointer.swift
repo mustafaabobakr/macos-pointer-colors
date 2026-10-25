@@ -95,6 +95,17 @@ struct SystemPointer {
         throw SystemPointerError.permissionDenied
     }
 
+    /// Saves a size that is already live, without applying it again. Each `UACursorSetScale`
+    /// makes WindowServer rebuild every pointer image, and while it does, mouse events and the app
+    /// wait; applying the same size twice on a display switch made that wait twice as long.
+    func saveScale(_ scale: Double) throws {
+        let value = scale.clamped(to: Self.minimumScale...Self.maximumScale)
+        set(Self.scaleKey, value as CFNumber)
+        guard synchronize() || DefaultsTool.write(Self.scaleKey as String, number: value) else {
+            throw SystemPointerError.permissionDenied
+        }
+    }
+
     // MARK: Shake to find
 
     var shakeToFindEnabled: Bool? { universalAccess.shakeToFindEnabled() }

@@ -26,7 +26,7 @@ struct PreferencesView: View {
         case .general: GeneralPreferences(model: model)
         case .pairs: PairsPreferences(model: model)
         case .automation: AutomationPreferences(model: model)
-        case .highlight: HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
+        case .highlight: HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pairs: model.library.visible, pointerScale: model.scale)
         case .shortcuts: ShortcutsPreferences(model: model)
         case .about: AboutPreferences(model: model)
         }

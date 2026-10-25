@@ -92,6 +92,9 @@ final class Automation {
     @ObservationIgnored private var hoveredBundleID: String?
     /// The window under the pointer at the last check, so most mouse moves skip the app lookup.
     @ObservationIgnored private var hoveredWindow: Int?
+    /// When the window under the pointer was last asked for, to space the lookups out.
+    @ObservationIgnored private var lastHoverCheck: TimeInterval = 0
+    @ObservationIgnored private var hoverFollowUp: DispatchWorkItem?
     private(set) var displaySizes: [String: Double]
     /// Pair id per display UUID. A missing entry means "same as all displays".
     private(set) var displayPairs: [String: String]
@@ -290,12 +293,35 @@ final class Automation {
     /// Runs on every mouse move, so it stays cheap: a window-number lookup and a rect test until
     /// the pointer reaches another app's window or another display.
     private func pointerMoved() {
-        let appChanged = followsPointerApp && updateHoveredApp()
+        let appChanged = followsPointerApp && hoverCheckIsDue() && updateHoveredApp()
         if updatePointerDisplay() {
             showCurrentDisplay()
         } else if appChanged {
             applyColors(for: lastDisplayID)
         }
+    }
+
+    /// Asking WindowServer which window is under the pointer is a round trip that blocks while it
+    /// is busy, as when it rebuilds pointer images after a display change. Asking on every mouse
+    /// move stalled the app then, so ask at most every 50 ms, and once more when the pointer stops.
+    private func hoverCheckIsDue() -> Bool {
+        scheduleHoverFollowUp()
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastHoverCheck >= 0.05 else { return false }
+        lastHoverCheck = now
+        return true
+    }
+
+    private func scheduleHoverFollowUp() {
+        hoverFollowUp?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, self.followsPointerApp, self.updateHoveredApp() else { return }
+                self.applyColors(for: self.lastDisplayID)
+            }
+        }
+        hoverFollowUp = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08, execute: work)
     }
 
     /// Notes the app whose window is under the pointer. True when it changed.

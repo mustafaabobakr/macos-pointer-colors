@@ -189,7 +189,7 @@ final class AppModel {
     /// The size goes live the moment the new colors are drawn, then is saved like any other change.
     private func scaleAfterRecolor(_ size: Double) -> RecolorWatch {
         RecolorWatch(onRecolor: { _ = UniversalAccessCore.shared.setCursorScale(size) },
-                     then: { [weak self] in self?.setScale(size) })
+                     then: { [weak self] in self?.scaleIsLive(size) })
     }
 
     /// Applies a pair by id unless it's already on screen. Used by automation.
@@ -217,10 +217,19 @@ final class AppModel {
 
     /// Changes the size live, as the slider moves.
     func setScale(_ value: Double) {
+        updateScale(value) { try pointer.setScale($0) }
+    }
+
+    /// Records a size that RecolorWatch already put on screen, without applying it a second time.
+    private func scaleIsLive(_ value: Double) {
+        updateScale(value) { try pointer.saveScale($0) }
+    }
+
+    private func updateScale(_ value: Double, write: (Double) throws -> Void) {
         scale = value
         highlightOverlay?.refresh()
         do {
-            try pointer.setScale(value)
+            try write(value)
             settings.lastAppliedScale = value
             automation.rememberSizeForCurrentDisplay(value)
         } catch {
