@@ -35,7 +35,7 @@
      "title": "Ring or ripple pulses", "caption": "Pick the pulse style, size and length, and show long presses.",
      "sources": ["mac/Sources/PointerColors/Views/HighlightPreferences.swift"]},
     {"id": "laser", "screen": "preferences-highlight", "spot": "laser", "since": "0.4.0",
-     "title": "A laser that draws", "caption": "Drag to draw a fading trail, or draw only while holding ⌥ Option.",
+     "title": "A laser that draws", "caption": "Drag to draw a fading trail, draw only with ⌥ Option, and choose when the dot shows.",
      "sources": ["mac/Sources/PointerColors/Views/HighlightPreferences.swift"]},
     {"id": "highlight-pair-colors", "screen": "preferences-highlight", "spot": "highlight-pair-colors", "since": "0.4.0",
      "title": "Highlight colors per pair", "caption": "Set a pulse and a laser color for any pair.",

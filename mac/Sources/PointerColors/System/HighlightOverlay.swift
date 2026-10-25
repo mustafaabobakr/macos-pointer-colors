@@ -133,12 +133,13 @@ final class HighlightOverlay {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             press(at: point, isLeft: type == .leftMouseDown, optionHeld: optionHeld)
         case .leftMouseDragged:
-            follow(point)
-            if settings.laserDraws(optionHeld: optionHeld) { extendTrail(to: point) }
+            let draws = settings.laserDraws(optionHeld: optionHeld)
+            follow(point, drawing: draws)
+            if draws { extendTrail(to: point) }
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
             release(at: point)
         default:
-            follow(point)
+            follow(point, drawing: false)
         }
     }
 
@@ -155,12 +156,12 @@ final class HighlightOverlay {
     }
 
     /// The ring, the long-press ring and the laser dot follow the pointer.
-    private func follow(_ point: CGPoint) {
+    private func follow(_ point: CGPoint, drawing: Bool) {
         placeRing(at: point)
         for display in displays {
             display.pulses.moveHold(to: local(point, in: display.frame))
         }
-        moveDot(to: point)
+        moveDot(to: point, drawing: drawing)
     }
 
     /// Within reach of a display: an effect near the edge also shows on the display next to it.
@@ -209,9 +210,9 @@ final class HighlightOverlay {
     // MARK: Laser
 
     /// The dot shows only on the displays the pointer is on or near, and leaves the one it moved
-    /// away from at once.
-    private func moveDot(to point: CGPoint) {
-        guard settings.laserOn else { return }
+    /// away from at once. When it isn't shown for this move, it is left to fade.
+    private func moveDot(to point: CGPoint, drawing: Bool) {
+        guard settings.laserDotShows(drawing: drawing) else { return }
         let reach = 16 * style.laserSize
         for display in displays {
             if isNear(point, display.frame, reach: reach) {
@@ -350,7 +351,7 @@ final class HighlightScene {
     func move(to point: CGPoint, now: TimeInterval, settings: PointerHighlight) {
         pointer = point
         if hold?.releasedAt == nil { hold?.point = point }
-        guard settings.laserOn else { return }
+        guard settings.laserDotShows(drawing: false) else { return }
         laserDot = LaserDot(point: point, updatedAt: now)
     }
 
@@ -358,6 +359,7 @@ final class HighlightScene {
     func drag(to point: CGPoint, now: TimeInterval, optionHeld: Bool, settings: PointerHighlight) {
         move(to: point, now: now, settings: settings)
         guard settings.laserDraws(optionHeld: optionHeld) else { return }
+        if settings.laserDotShows(drawing: true) { laserDot = LaserDot(point: point, updatedAt: now) }
         extendStroke(to: point)
     }
 
