@@ -19,6 +19,13 @@ for arch in ${ARCHS:-arm64 x86_64}; do ARCH_FLAGS="$ARCH_FLAGS --arch $arch"; do
 swift build -c "$CONFIG" $ARCH_FLAGS $LINK_FLAGS
 BIN_DIR="$(swift build -c "$CONFIG" $ARCH_FLAGS $LINK_FLAGS --show-bin-path)"
 
+# Quit a copy running from this bundle first. Replacing an app's files while it runs breaks its
+# signature check, so its update button would refuse every download.
+RUNNING_BIN="$APP/Contents/MacOS/PointerColors"
+if pkill -f "^$RUNNING_BIN" 2>/dev/null; then
+  echo "Quit the copy running from $APP." >&2
+  while pgrep -f "^$RUNNING_BIN" >/dev/null; do sleep 0.2; done
+fi
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/PointerColors" "$APP/Contents/MacOS/PointerColors"
@@ -41,14 +48,28 @@ for f in Assets.car AppIcon.icns; do
   [ -s "$APP/Contents/Resources/$f" ] || { echo "error: app icon missing ($f); actool failed" >&2; exit 1; }
 done
 
-# Sign with a stable local identity so macOS keeps Full Disk Access across rebuilds.
-# Override with SIGN_IDENTITY=... ; falls back to ad-hoc ("-") if it isn't in the keychain.
-IDENTITY="${SIGN_IDENTITY:-Pointer Colors Dev}"
-if ! security find-identity -v -p codesigning | grep -q "\"$IDENTITY\""; then
+# Sign with the release identity so macOS keeps Full Disk Access across rebuilds and installed
+# copies accept the build as an update. A git-ignored copy in mac/signing/ (made by
+# export-signing-identity.sh) goes back into the keychain if it's missing there.
+. "$MAC_DIR/scripts/signing.sh"
+IDENTITY="${SIGN_IDENTITY:-$RELEASE_IDENTITY}"
+has_identity() { security find-identity -v -p codesigning | grep -q "\"$IDENTITY\""; }
+if ! has_identity && [ "$IDENTITY" = "$RELEASE_IDENTITY" ] && [ -s "$SIGNING_P12" ]; then
+  echo "Importing \"$IDENTITY\" from $SIGNING_P12 into the login keychain." >&2
+  security import "$SIGNING_P12" -k login.keychain-db -P "$(cat "$SIGNING_PASSWORD_FILE")" -T /usr/bin/codesign >/dev/null
+fi
+if ! has_identity; then
+  # A release signed ad-hoc could never be installed as an update, so only debug builds fall back.
+  [ "$CONFIG" = release ] && { echo "error: signing identity \"$IDENTITY\" not found; run scripts/export-signing-identity.sh on a Mac that has it" >&2; exit 1; }
   echo "Signing identity \"$IDENTITY\" not found; signing ad-hoc." >&2
   IDENTITY="-"
 fi
 codesign --force --sign "$IDENTITY" --options runtime "$APP"
+
+if [ "$CONFIG" = release ]; then
+  LEAF="$(codesign -dr - "$APP" 2>&1 | sed -n 's/.*certificate leaf = H"\([0-9a-fA-F]*\)".*/\1/p' | tr a-f A-F)"
+  [ "$LEAF" = "$RELEASE_CERT_SHA1" ] || { echo "error: signed with certificate ${LEAF:-none}, not the release one ($RELEASE_CERT_SHA1)" >&2; exit 1; }
+fi
 
 # Tell Finder and System Settings to drop their cached copy of the icon.
 touch "$APP"

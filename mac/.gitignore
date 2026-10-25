@@ -1,3 +1,5 @@
 .build/
 build/
 .swiftpm/
+# The signing certificate and key (see scripts/export-signing-identity.sh). Never commit.
+signing/
