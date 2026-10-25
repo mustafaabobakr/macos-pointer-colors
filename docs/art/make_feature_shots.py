@@ -8,8 +8,8 @@ Run through mac/scripts/feature-screenshots.sh, which renders the app first. By 
 
 `seed` turns the demo settings into a plist for `defaults import`. `frame` reads spots.json from
 the raw renders and writes docs/features/<id>.png for each feature in docs/features/features.json
-(or only the ids given): the screen cropped around the feature, everything else dimmed, the
-feature ringed, under its title and caption. Needs rsvg-convert (brew install librsvg).
+(or only the ids given): the whole window or menu on the left, and the feature magnified on the
+right under its title and caption. Needs rsvg-convert (brew install librsvg).
 """
 import base64
 import json
@@ -28,11 +28,11 @@ FEATURES = ROOT / "docs" / "features"
 CATALOG = FEATURES / "features.json"
 
 WIDTH, HEIGHT = 1600, 1000
-CONTEXT = 30                   # points of the screen kept around the feature
-SPOT_PADDING = 8               # points between the feature and its ring
-IMAGE_BOX = (100, 300, 1400, 640)  # x, y, width, height the zoomed screen fits in
-CAPTION_LINE = 40
-MAX_ZOOM = 2.4                 # canvas pixels per screen point
+SCREEN_BOX = (90, 70, 640, 860)   # x, y, width, height the whole window or menu fits in
+COLUMN = (820, 1510)             # left and right edge of the text and the magnifier
+SPOT_PADDING = 10                # points of the screen kept around the feature in the lens
+MAX_ZOOM = 3.0                   # canvas pixels per screen point in the lens
+TITLE_LINE, CAPTION_LINE = 66, 38
 ACCENT = "#00FFDA"
 
 
@@ -49,18 +49,10 @@ def png_size(data):
 
 
 def padded(spot, screen):
-    """The spot with room for its ring, kept inside the screen, in points."""
+    """The spot with a little room around it, kept inside the screen, in points."""
     x, y, w, h = spot
     left, top = max(0, x - SPOT_PADDING), max(0, y - SPOT_PADDING)
     return left, top, min(screen[2], x + w + SPOT_PADDING) - left, min(screen[3], y + h + SPOT_PADDING) - top
-
-
-def crop_for(spot, screen):
-    """The spot plus some context, kept inside the screen, in points."""
-    x, y, w, h = spot
-    left, top = max(0, x - CONTEXT), max(0, y - CONTEXT)
-    right, bottom = min(screen[2], x + w + CONTEXT), min(screen[3], y + h + CONTEXT)
-    return left, top, right - left, bottom - top
 
 
 def wrap(text, limit):
@@ -74,44 +66,76 @@ def wrap(text, limit):
     return lines + [line] if line else lines
 
 
+def text_block(feature):
+    """Eyebrow, title and caption at the top of the right column; returns (svg, bottom y)."""
+    x = COLUMN[0]
+    titles = wrap(feature["title"], 22)
+    captions = wrap(feature["caption"], 44)
+    title_y = 190
+    caption_y = title_y + TITLE_LINE * (len(titles) - 1) + 62
+    title = "".join(f'<tspan x="{x}" dy="{0 if i == 0 else TITLE_LINE}">{escape(t)}</tspan>' for i, t in enumerate(titles))
+    caption = "".join(f'<tspan x="{x}" dy="{0 if i == 0 else CAPTION_LINE}">{escape(c)}</tspan>' for i, c in enumerate(captions))
+    svg = f'''<text x="{x}" y="120" font-family="{FONT}" font-size="20" font-weight="700" letter-spacing="5" fill="{ACCENT}">POINTER COLORS</text>
+  <text y="{title_y}" font-family="{FONT}" font-size="58" font-weight="800" fill="url(#hl)">{title}</text>
+  <text y="{caption_y}" font-family="{FONT}" font-size="27" fill="#aab3c0">{caption}</text>'''
+    return svg, caption_y + CAPTION_LINE * (len(captions) - 1) + 20
+
+
+def placed(view_pt, box, zoom_limit):
+    """Where a view of `view_pt` points sits, centered in `box`, and its zoom."""
+    zoom = min(box[2] / view_pt[2], box[3] / view_pt[3], zoom_limit)
+    w, h = view_pt[2] * zoom, view_pt[3] * zoom
+    return box[0] + (box[2] - w) / 2, box[1] + (box[3] - h) / 2, w, h, zoom
+
+
+def image(shot, pw, ph, view_pt, x, y, w, h, p):
+    return (f'<svg x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" '
+            f'viewBox="{view_pt[0] * p} {view_pt[1] * p} {view_pt[2] * p} {view_pt[3] * p}" preserveAspectRatio="none">'
+            f'<image width="{pw}" height="{ph}" xlink:href="{shot}"/></svg>')
+
+
+def magnifier_badge(cx, cy):
+    """A magnifying glass in an aqua disc, pinned to the lens corner."""
+    return (f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="30" fill="{ACCENT}" filter="url(#soft)"/>'
+            f'<circle cx="{cx - 4:.1f}" cy="{cy - 4:.1f}" r="11" fill="none" stroke="{BG}" stroke-width="4.5"/>'
+            f'<line x1="{cx + 4:.1f}" y1="{cy + 4:.1f}" x2="{cx + 13:.1f}" y2="{cy + 13:.1f}" stroke="{BG}" stroke-width="5" stroke-linecap="round"/>')
+
+
 def svg_for(feature, shot_png, spot, screen, p):
-    spot = padded(spot, screen)
-    cx, cy, cw, ch = crop_for(spot, screen)
-    lines = wrap(feature["caption"], 84)
-    # A second caption line pushes the screen down.
-    extra = CAPTION_LINE * (len(lines) - 1)
-    box_x, box_y, box_w, box_h = IMAGE_BOX[0], IMAGE_BOX[1] + extra, IMAGE_BOX[2], IMAGE_BOX[3] - extra
-    zoom = min(box_w / cw, box_h / ch, MAX_ZOOM)
-    w, h = cw * zoom, ch * zoom
-    x, y = box_x + (box_w - w) / 2, box_y + (box_h - h) / 2
-    # The feature inside the zoomed screen, in canvas pixels.
-    sx, sy = x + (spot[0] - cx) * zoom, y + (spot[1] - cy) * zoom
-    sw, sh = spot[2] * zoom, spot[3] * zoom
     pw, ph = png_size(shot_png)
     shot = "data:image/png;base64," + base64.b64encode(shot_png).decode()
-    caption = "".join(f'<tspan x="100" dy="{0 if i == 0 else CAPTION_LINE}">{escape(line)}</tspan>'
-                      for i, line in enumerate(lines))
+    text, text_bottom = text_block(feature)
+    # The whole screen on the left, small enough to fit.
+    x, y, w, h, scale = placed(screen, SCREEN_BOX, 1.0)
+    lens_pt = padded(spot, screen)
+    sx, sy = x + lens_pt[0] * scale, y + lens_pt[1] * scale
+    sw, sh = lens_pt[2] * scale, lens_pt[3] * scale
+    # The feature up close on the right, under the text.
+    box = (COLUMN[0], text_bottom + 30, COLUMN[1] - COLUMN[0], HEIGHT - 70 - text_bottom - 30)
+    lx, ly, lw, lh, _ = placed(lens_pt, box, MAX_ZOOM)
+    lx = COLUMN[0]
     return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}">
   {backdrop(WIDTH, HEIGHT)}
   <defs>
     <linearGradient id="hl" x1="0" x2="1"><stop offset=".05" stop-color="{ACCENT}"/><stop offset=".95" stop-color="#ffffff"/></linearGradient>
-    <clipPath id="card"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="22"/></clipPath>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="30" stdDeviation="34" flood-color="#000" flood-opacity=".65"/></filter>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".16"/><stop offset="1" stop-color="#ffffff" stop-opacity=".04"/></linearGradient>
+    <clipPath id="screen"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="14"/></clipPath>
+    <clipPath id="lens"><rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20"/></clipPath>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="28" stdDeviation="30" flood-color="#000" flood-opacity=".7"/></filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".5"/></filter>
   </defs>
-  <text x="100" y="118" font-family="{FONT}" font-size="22" font-weight="700" letter-spacing="5" fill="{ACCENT}">POINTER COLORS</text>
-  <text x="100" y="196" font-family="{FONT}" font-size="66" font-weight="800" fill="url(#hl)">{escape(feature["title"])}</text>
-  <text y="252" font-family="{FONT}" font-size="30" fill="#aab3c0">{caption}</text>
-  <rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="22" fill="{BG}" filter="url(#shadow)"/>
-  <g clip-path="url(#card)">
-    <svg x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" viewBox="{cx * p} {cy * p} {cw * p} {ch * p}" preserveAspectRatio="none">
-      <image width="{pw}" height="{ph}" xlink:href="{shot}"/>
-    </svg>
-    <path fill-rule="evenodd" fill="#000" fill-opacity=".5"
-          d="M{x:.1f} {y:.1f}h{w:.1f}v{h:.1f}h{-w:.1f}Z M{sx:.1f} {sy:.1f}h{sw:.1f}v{sh:.1f}h{-sw:.1f}Z"/>
-  </g>
-  <rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="22" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
-  <rect x="{sx:.1f}" y="{sy:.1f}" width="{sw:.1f}" height="{sh:.1f}" rx="16" fill="none" stroke="{ACCENT}" stroke-width="3.5" filter="url(#glow)"/>
+  {text}
+  <rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="14" fill="{BG}" filter="url(#shadow)"/>
+  <g clip-path="url(#screen)">{image(shot, pw, ph, screen, x, y, w, h, p)}</g>
+  <rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="14" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+  <path d="M{sx + sw:.1f} {sy:.1f} L{lx:.1f} {ly:.1f} L{lx:.1f} {ly + lh:.1f} L{sx + sw:.1f} {sy + sh:.1f} Z" fill="url(#beam)"/>
+  <line x1="{sx + sw:.1f}" y1="{sy:.1f}" x2="{lx:.1f}" y2="{ly:.1f}" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.5"/>
+  <line x1="{sx + sw:.1f}" y1="{sy + sh:.1f}" x2="{lx:.1f}" y2="{ly + lh:.1f}" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.5"/>
+  <rect x="{sx:.1f}" y="{sy:.1f}" width="{sw:.1f}" height="{sh:.1f}" rx="6" fill="#ffffff" fill-opacity=".08" stroke="#ffffff" stroke-opacity=".85" stroke-width="2"/>
+  <rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20" fill="{BG}" filter="url(#shadow)"/>
+  <g clip-path="url(#lens)">{image(shot, pw, ph, lens_pt, lx, ly, lw, lh, p)}</g>
+  <rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20" fill="none" stroke="#ffffff" stroke-opacity=".9" stroke-width="4"/>
+  {magnifier_badge(lx + lw - 8, ly + 8)}
 </svg>'''
 
 

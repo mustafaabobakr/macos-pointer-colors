@@ -41,12 +41,15 @@ struct UpdatePromptView: View {
         VStack(alignment: .leading, spacing: 14) {
             header
             notes
-            Toggle("Automatically download and install updates in the future", isOn: $model.installsUpdatesAutomatically)
-                .toggleStyle(.checkbox)
-            if let error = model.updateInstallError {
-                Text("Couldn't install: \(error)").appFont(.caption).foregroundStyle(.red)
+            VStack(alignment: .leading, spacing: 14) {
+                Toggle("Automatically download and install updates in the future", isOn: $model.installsUpdatesAutomatically)
+                    .toggleStyle(.checkbox)
+                if let error = model.updateInstallError {
+                    Text("Couldn't install: \(error)").appFont(.caption).foregroundStyle(.red)
+                }
+                buttons
             }
-            buttons
+            .featureSpot("update-window")
         }
         .padding(.horizontal, 20)
         .padding(.top, 28)
@@ -54,7 +57,6 @@ struct UpdatePromptView: View {
         .frame(width: 580 * model.textScale)
         .appTextScale(model.textScale)
         .preferredColorScheme(model.colorScheme)
-        .featureSpot("update-window")
     }
 
     private var header: some View {
