@@ -1,34 +1,15 @@
 import SwiftUI
 
-/// Draws a highlight scene. Animates only while something on it is fading.
+/// Draws a highlight scene in its own coordinates, like the demo pad in Preferences. Animates only
+/// while something on it is fading, and draws off the main thread.
 ///
-/// Each display has one of these covering it. A display only keeps what is near it, so the others
-/// get an empty picture that never changes and are not redrawn at all, and drawing happens off the
-/// main thread, so a busy frame never holds up mouse events.
+/// The displays don't use this: there the ring, pulses and laser are Core Animation layers
+/// (HighlightOverlay).
 struct HighlightCanvas: View {
     let scene: HighlightScene
-    /// Turns a scene point into this view's own coordinates (origin top left).
-    let toLocal: (CGPoint) -> CGPoint
-    /// This view's area in its own coordinates, to drop what's far outside it. Nil keeps all.
-    let bounds: CGRect?
-
-    /// One display's share of the overlay; the scene is in global screen coordinates.
-    init(scene: HighlightScene, screenFrame: CGRect) {
-        self.scene = scene
-        toLocal = { CGPoint(x: $0.x - screenFrame.minX, y: screenFrame.maxY - $0.y) }
-        bounds = CGRect(origin: .zero, size: screenFrame.size)
-    }
-
-    /// A scene already in this view's coordinates, like the demo pad in Preferences.
-    init(scene: HighlightScene) {
-        self.scene = scene
-        toLocal = { $0 }
-        bounds = nil
-    }
 
     var body: some View {
-        // On a display the pulses are Core Animation layers above this (PulseLayerView).
-        let snapshot = HighlightSnapshot(scene: scene, toLocal: toLocal, bounds: bounds, includesPulses: bounds == nil)
+        let snapshot = HighlightSnapshot(scene: scene, toLocal: { $0 })
         TimelineView(.animation(paused: !snapshot.isAnimating)) { timeline in
             HighlightLayer(snapshot: snapshot,
                            now: snapshot.isAnimating ? timeline.date.timeIntervalSinceReferenceDate : 0)
@@ -52,40 +33,25 @@ private struct HighlightLayer: View, Equatable {
 
 /// A copy of the scene for one frame, with points moved into the view's own coordinates.
 struct HighlightSnapshot: Equatable {
-    private(set) var style: HighlightStyle
-    private(set) var pointer: CGPoint
+    let style: HighlightStyle
+    let pointer: CGPoint
     let pulses: [Pulse]
     let hold: Hold?
     let laserDot: LaserDot?
     let strokes: [LaserStroke]
-    /// The ring around the pointer, when the pointer is on or near this view.
     let showsPointerRing: Bool
 
-    /// Keeps only what reaches into `bounds`, when given.
     @MainActor
-    init(scene: HighlightScene, toLocal local: (CGPoint) -> CGPoint, bounds: CGRect? = nil,
-         includesPulses: Bool = true) {
+    init(scene: HighlightScene, toLocal local: (CGPoint) -> CGPoint) {
         _ = scene.revision
         style = scene.style
-        // The furthest any effect reaches from its point: a ripple at the largest sizes.
-        let reach = 44 * scene.style.pointerScale * scene.style.pulseSize * 1.2 + 40
-        let near = { (p: CGPoint) in bounds.map { $0.insetBy(dx: -reach, dy: -reach).contains(p) } ?? true }
         pointer = local(scene.pointer)
-        showsPointerRing = scene.style.showsRing && near(pointer)
-        pulses = !includesPulses ? [] : scene.pulses.map { Pulse(point: local($0.point), start: $0.start) }
-            .filter { near($0.point) }
-        hold = !includesPulses ? nil : scene.hold.map { Hold(point: local($0.point), start: $0.start, releasedAt: $0.releasedAt) }
-            .flatMap { near($0.point) ? $0 : nil }
+        showsPointerRing = scene.style.showsRing
+        pulses = scene.pulses.map { Pulse(point: local($0.point), start: $0.start) }
+        hold = scene.hold.map { Hold(point: local($0.point), start: $0.start, releasedAt: $0.releasedAt) }
         laserDot = scene.laserDot.map { LaserDot(point: local($0.point), updatedAt: $0.updatedAt) }
-            .flatMap { near($0.point) ? $0 : nil }
         strokes = scene.strokes.map { LaserStroke(points: $0.points.map(local), finishedAt: $0.finishedAt) }
-            .filter { $0.points.contains(where: near) }
-        // Nothing to draw here: a fixed empty picture, so a new pair or size, as when the pointer
-        // moves to another display, doesn't redraw every idle display.
-        if isEmpty { (style, pointer) = (HighlightStyle(), .zero) }
     }
-
-    private var isEmpty: Bool { !isAnimating && !showsPointerRing }
 
     /// Something here is fading, so it needs frames; otherwise one still picture is enough.
     var isAnimating: Bool { !pulses.isEmpty || hold != nil || laserDot != nil || !strokes.isEmpty }

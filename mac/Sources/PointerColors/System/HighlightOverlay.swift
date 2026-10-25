@@ -1,23 +1,23 @@
 import AppKit
 import Observation
-import SwiftUI
 
-/// Draws the ring, pulse and laser in one transparent window per display.
+/// Shows the ring, pulse and laser in one transparent window per display.
 ///
 /// The windows cover whole displays so a laser trail can go anywhere, ignore the mouse so clicks
 /// pass straight through, and show on every Space and over full-screen apps. They exist only while
-/// something is switched on, and the mouse is only watched then.
+/// something is switched on, and the mouse is only watched then. Everything in them is a Core
+/// Animation layer that the app moves or hands an animation to, so nothing is redrawn per frame.
 @MainActor
 final class HighlightOverlay {
     private let settings: PointerHighlight
     private let pair: () -> PointerPair
     private let pointerScale: () -> Double
-    private let scene = HighlightScene()
+    private var style = HighlightStyle()
     private var windows: [NSPanel] = []
-    /// Each display's pulse layers, with the display's frame in global coordinates.
-    private var pulseViews: [(frame: CGRect, view: PulseLayerView)] = []
+    /// Each display's layers, with the display's frame in global coordinates.
+    private var displays: [DisplayLayers] = []
     private var monitors: [Any] = []
-    private var pruneTimer: Timer?
+    private var lostReleaseTimer: Timer?
     /// The windows are catching the mouse so a ⌥-drag draws instead of reaching the app below.
     private var isCapturing = false
 
@@ -38,10 +38,11 @@ final class HighlightOverlay {
         DispatchQueue.main.async { [weak self] in self?.update() }
     }
 
-    /// Redraws in the current pair, size and settings.
+    /// Shows the current pair, size and settings.
     func refresh() {
-        scene.style = HighlightStyle(settings: settings, pair: pair(), pointerScale: pointerScale())
-        scene.revision += 1
+        style = HighlightStyle(settings: settings, pair: pair(), pointerScale: pointerScale())
+        placeRing(at: NSEvent.mouseLocation)
+        displays.forEach { $0.laser.restyleStroke(style) }
     }
 
     // MARK: On and off
@@ -66,7 +67,6 @@ final class HighlightOverlay {
 
     private func start() {
         if windows.isEmpty { rebuildWindows() }
-        scene.pointer = NSEvent.mouseLocation
         guard monitors.isEmpty else { return }
         let global = NSEvent.addGlobalMonitorForEvents(matching: Self.events) { [weak self] event in
             MainActor.assumeIsolated { self?.handle(event.type) }
@@ -76,26 +76,26 @@ final class HighlightOverlay {
             return event
         }
         monitors = [global, local].compactMap { $0 }
-        pruneTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.prune() }
+        lostReleaseTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.endLostPress() }
         }
     }
 
     private func stop() {
         monitors.forEach(NSEvent.removeMonitor)
         monitors = []
-        pruneTimer?.invalidate()
-        pruneTimer = nil
+        lostReleaseTimer?.invalidate()
+        lostReleaseTimer = nil
         windows.forEach { $0.orderOut(nil) }
         windows = []
-        pulseViews = []
-        scene.clear()
+        displays = []
     }
 
     private func rebuildWindows() {
         windows.forEach { $0.orderOut(nil) }
-        pulseViews = []
+        displays = []
         windows = settings.isActive ? NSScreen.screens.map(makeWindow) : []
+        placeRing(at: NSEvent.mouseLocation)
     }
 
     private func makeWindow(for screen: NSScreen) -> NSPanel {
@@ -109,14 +109,14 @@ final class HighlightOverlay {
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
         let bounds = CGRect(origin: .zero, size: screen.frame.size)
         let container = NSView(frame: bounds)
-        let drawing = NSHostingView(rootView: HighlightCanvas(scene: scene, screenFrame: screen.frame))
-        let pulses = PulseLayerView(frame: bounds)
-        for view in [drawing, pulses] as [NSView] {
+        let layers = DisplayLayers(frame: screen.frame, ring: RingLayerView(frame: bounds),
+                                   laser: LaserLayerView(frame: bounds), pulses: PulseLayerView(frame: bounds))
+        for view in [layers.ring, layers.laser, layers.pulses] as [NSView] {
             view.frame = bounds
             view.autoresizingMask = [.width, .height]
             container.addSubview(view)
         }
-        pulseViews.append((screen.frame, pulses))
+        displays.append(layers)
         panel.contentView = container
         panel.setFrame(screen.frame, display: false)
         panel.orderFrontRegardless()
@@ -125,30 +125,63 @@ final class HighlightOverlay {
 
     // MARK: Events
 
-
     private func handle(_ type: NSEvent.EventType) {
         let point = NSEvent.mouseLocation
-        let now = Date.timeIntervalSinceReferenceDate
         let optionHeld = NSEvent.modifierFlags.contains(.option)
         updateCapture(optionHeld: optionHeld)
-        scene.pointer = point
         switch type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            scene.press(at: point, now: now, isLeft: type == .leftMouseDown, optionHeld: optionHeld, settings: settings)
-            pressPulse(at: point, isLeft: type == .leftMouseDown)
+            press(at: point, isLeft: type == .leftMouseDown, optionHeld: optionHeld)
         case .leftMouseDragged:
-            scene.drag(to: point, now: now, optionHeld: optionHeld, settings: settings)
-            pulseViews.forEach { $0.view.moveHold(to: local(point, in: $0.frame)) }
+            follow(point)
+            if settings.laserDraws(optionHeld: optionHeld) { extendTrail(to: point) }
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            scene.release(at: now)
-            releasePulse(at: point)
+            release(at: point)
         default:
-            scene.move(to: point, now: now, settings: settings)
-            pulseViews.forEach { $0.view.moveHold(to: local(point, in: $0.frame)) }
+            follow(point)
         }
-        // A plain move changes nothing on screen unless the ring or the laser follows it.
-        guard scene.style.showsRing || settings.laserOn || type != .mouseMoved else { return }
-        scene.revision += 1
+    }
+
+    /// A click sends out a pulse, and starts a laser trail with the left button; both when both are on.
+    private func press(at point: CGPoint, isLeft: Bool, optionHeld: Bool) {
+        pressPulse(at: point, isLeft: isLeft)
+        if isLeft, settings.laserDraws(optionHeld: optionHeld) { startTrail(at: point) }
+    }
+
+    /// The button came up: the trail fades and, after a long press, a pulse goes out.
+    private func release(at point: CGPoint) {
+        releasePulse(at: point)
+        displays.forEach { $0.laser.finishStroke(fade: style.trailFade) }
+    }
+
+    /// The ring, the long-press ring and the laser dot follow the pointer.
+    private func follow(_ point: CGPoint) {
+        placeRing(at: point)
+        for display in displays {
+            display.pulses.moveHold(to: local(point, in: display.frame))
+        }
+        moveDot(to: point)
+    }
+
+    /// Within reach of a display: an effect near the edge also shows on the display next to it.
+    private func isNear(_ point: CGPoint, _ frame: CGRect, reach: Double) -> Bool {
+        frame.insetBy(dx: -reach, dy: -reach).contains(point)
+    }
+
+    /// A global point in a display's own coordinates (origin bottom left, like the layers).
+    private func local(_ point: CGPoint, in frame: CGRect) -> CGPoint {
+        CGPoint(x: point.x - frame.minX, y: point.y - frame.minY)
+    }
+
+    // MARK: Ring
+
+    /// The ring shows only on the displays the pointer is on or near.
+    private func placeRing(at point: CGPoint) {
+        let reach = 22 * style.pointerScale + 2
+        for display in displays {
+            let spot = isNear(point, display.frame, reach: reach) ? local(point, in: display.frame) : nil
+            display.ring.place(at: spot, style: style)
+        }
     }
 
     // MARK: Pulses
@@ -156,28 +189,46 @@ final class HighlightOverlay {
     /// A pulse, and a long-press ring if the press lasts, on the displays the point is on or near.
     private func pressPulse(at point: CGPoint, isLeft: Bool) {
         guard settings.pulses(isLeft: isLeft) else { return }
-        for (frame, view) in pulseViews where isNear(point, frame) {
-            view.pulse(at: local(point, in: frame), style: scene.style)
-            if settings.pulseShowsHold { view.beginHold(at: local(point, in: frame), style: scene.style) }
+        for display in displays where isNear(point, display.frame, reach: pulseReach) {
+            let spot = local(point, in: display.frame)
+            display.pulses.pulse(at: spot, style: style)
+            if settings.pulseShowsHold { display.pulses.beginHold(at: spot, style: style) }
         }
     }
 
     /// Ends a long-press ring; after a long press, a pulse goes out from where it was let go.
     private func releasePulse(at point: CGPoint) {
-        for (frame, view) in pulseViews where view.endHold() {
-            view.pulse(at: local(point, in: frame), style: scene.style)
+        for display in displays where display.pulses.endHold() {
+            display.pulses.pulse(at: local(point, in: display.frame), style: style)
         }
     }
 
-    /// Within reach of a display: a pulse near the edge also shows on the display next to it.
-    private func isNear(_ point: CGPoint, _ frame: CGRect) -> Bool {
-        let reach = 44 * scene.style.pointerScale * scene.style.pulseSize * 1.2
-        return frame.insetBy(dx: -reach, dy: -reach).contains(point)
+    /// How far a pulse reaches from its point: a ripple at its widest.
+    private var pulseReach: Double { 44 * style.pointerScale * style.pulseSize * 1.2 }
+
+    // MARK: Laser
+
+    /// The dot shows only on the displays the pointer is on or near, and leaves the one it moved
+    /// away from at once.
+    private func moveDot(to point: CGPoint) {
+        guard settings.laserOn else { return }
+        let reach = 16 * style.laserSize
+        for display in displays {
+            if isNear(point, display.frame, reach: reach) {
+                display.laser.moveDot(to: local(point, in: display.frame), style: style)
+            } else {
+                display.laser.hideDot()
+            }
+        }
     }
 
-    /// A global point in a display's own coordinates (origin bottom left, like the layers).
-    private func local(_ point: CGPoint, in frame: CGRect) -> CGPoint {
-        CGPoint(x: point.x - frame.minX, y: point.y - frame.minY)
+    /// A trail is drawn on every display, so a drag can cross from one to the next.
+    private func startTrail(at point: CGPoint) {
+        displays.forEach { $0.laser.startStroke(at: local(point, in: $0.frame), style: style) }
+    }
+
+    private func extendTrail(to point: CGPoint) {
+        displays.forEach { $0.laser.extendStroke(to: local(point, in: $0.frame), style: style) }
     }
 
     /// While the laser needs ⌥ and ⌥ is held, the windows take the mouse: the drag draws, and the
@@ -189,13 +240,19 @@ final class HighlightOverlay {
         windows.forEach { $0.ignoresMouseEvents = !capture }
     }
 
-    /// Drops what has faded, so the drawing stops once nothing is left.
-    private func prune() {
-        let now = Date.timeIntervalSinceReferenceDate
-        // A release that never reached us, e.g. over a window that kept it, still ends the hold.
-        if NSEvent.pressedMouseButtons == 0 { scene.release(at: now) }
-        if scene.prune(at: now) { scene.revision += 1 }
+    /// A release that never reached us, e.g. over a window that kept it, still ends the press.
+    private func endLostPress() {
+        guard NSEvent.pressedMouseButtons == 0 else { return }
+        release(at: NSEvent.mouseLocation)
     }
+}
+
+/// One display's layers, and its frame in global coordinates.
+private struct DisplayLayers {
+    let frame: CGRect
+    let ring: RingLayerView
+    let laser: LaserLayerView
+    let pulses: PulseLayerView
 }
 
 // MARK: - What's on screen
@@ -273,7 +330,7 @@ struct LaserStroke: Equatable {
     var finishedAt: TimeInterval?
 }
 
-/// Everything the canvases draw, in global screen coordinates.
+/// Everything a HighlightCanvas draws, like the demo pad in Preferences, in its own coordinates.
 @MainActor
 @Observable
 final class HighlightScene {
