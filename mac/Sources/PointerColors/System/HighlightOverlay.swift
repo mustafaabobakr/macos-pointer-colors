@@ -14,6 +14,8 @@ final class HighlightOverlay {
     private let pointerScale: () -> Double
     private let scene = HighlightScene()
     private var windows: [NSPanel] = []
+    /// Each display's pulse layers, with the display's frame in global coordinates.
+    private var pulseViews: [(frame: CGRect, view: PulseLayerView)] = []
     private var monitors: [Any] = []
     private var pruneTimer: Timer?
     /// The windows are catching the mouse so a ⌥-drag draws instead of reaching the app below.
@@ -86,11 +88,13 @@ final class HighlightOverlay {
         pruneTimer = nil
         windows.forEach { $0.orderOut(nil) }
         windows = []
+        pulseViews = []
         scene.clear()
     }
 
     private func rebuildWindows() {
         windows.forEach { $0.orderOut(nil) }
+        pulseViews = []
         windows = settings.isActive ? NSScreen.screens.map(makeWindow) : []
     }
 
@@ -103,13 +107,24 @@ final class HighlightOverlay {
         panel.ignoresMouseEvents = true
         panel.level = .screenSaver
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
-        panel.contentView = NSHostingView(rootView: HighlightCanvas(scene: scene, screenFrame: screen.frame))
+        let bounds = CGRect(origin: .zero, size: screen.frame.size)
+        let container = NSView(frame: bounds)
+        let drawing = NSHostingView(rootView: HighlightCanvas(scene: scene, screenFrame: screen.frame))
+        let pulses = PulseLayerView(frame: bounds)
+        for view in [drawing, pulses] as [NSView] {
+            view.frame = bounds
+            view.autoresizingMask = [.width, .height]
+            container.addSubview(view)
+        }
+        pulseViews.append((screen.frame, pulses))
+        panel.contentView = container
         panel.setFrame(screen.frame, display: false)
         panel.orderFrontRegardless()
         return panel
     }
 
     // MARK: Events
+
 
     private func handle(_ type: NSEvent.EventType) {
         let point = NSEvent.mouseLocation
@@ -120,13 +135,49 @@ final class HighlightOverlay {
         switch type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             scene.press(at: point, now: now, isLeft: type == .leftMouseDown, optionHeld: optionHeld, settings: settings)
-        case .leftMouseDragged: scene.drag(to: point, now: now, optionHeld: optionHeld, settings: settings)
-        case .leftMouseUp, .rightMouseUp, .otherMouseUp: scene.release(at: now)
-        default: scene.move(to: point, now: now, settings: settings)
+            pressPulse(at: point, isLeft: type == .leftMouseDown)
+        case .leftMouseDragged:
+            scene.drag(to: point, now: now, optionHeld: optionHeld, settings: settings)
+            pulseViews.forEach { $0.view.moveHold(to: local(point, in: $0.frame)) }
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            scene.release(at: now)
+            releasePulse(at: point)
+        default:
+            scene.move(to: point, now: now, settings: settings)
+            pulseViews.forEach { $0.view.moveHold(to: local(point, in: $0.frame)) }
         }
         // A plain move changes nothing on screen unless the ring or the laser follows it.
         guard scene.style.showsRing || settings.laserOn || type != .mouseMoved else { return }
         scene.revision += 1
+    }
+
+    // MARK: Pulses
+
+    /// A pulse, and a long-press ring if the press lasts, on the displays the point is on or near.
+    private func pressPulse(at point: CGPoint, isLeft: Bool) {
+        guard settings.pulses(isLeft: isLeft) else { return }
+        for (frame, view) in pulseViews where isNear(point, frame) {
+            view.pulse(at: local(point, in: frame), style: scene.style)
+            if settings.pulseShowsHold { view.beginHold(at: local(point, in: frame), style: scene.style) }
+        }
+    }
+
+    /// Ends a long-press ring; after a long press, a pulse goes out from where it was let go.
+    private func releasePulse(at point: CGPoint) {
+        for (frame, view) in pulseViews where view.endHold() {
+            view.pulse(at: local(point, in: frame), style: scene.style)
+        }
+    }
+
+    /// Within reach of a display: a pulse near the edge also shows on the display next to it.
+    private func isNear(_ point: CGPoint, _ frame: CGRect) -> Bool {
+        let reach = 44 * scene.style.pointerScale * scene.style.pulseSize * 1.2
+        return frame.insetBy(dx: -reach, dy: -reach).contains(point)
+    }
+
+    /// A global point in a display's own coordinates (origin bottom left, like the layers).
+    private func local(_ point: CGPoint, in frame: CGRect) -> CGPoint {
+        CGPoint(x: point.x - frame.minX, y: point.y - frame.minY)
     }
 
     /// While the laser needs ⌥ and ⌥ is held, the windows take the mouse: the drag draws, and the
@@ -150,12 +201,12 @@ final class HighlightOverlay {
 // MARK: - What's on screen
 
 /// Colors and sizes for drawing, worked out once per change instead of on every frame.
-struct HighlightStyle {
+struct HighlightStyle: Equatable {
     var showsRing = false
     var ringColor = RGBA(red: 1, green: 1, blue: 1)
     var pulseColor = RGBA(red: 1, green: 1, blue: 1)
-    var laser = (glow: RGBA(red: 1, green: 0, blue: 0), middle: RGBA(red: 1, green: 0, blue: 0),
-                 center: RGBA(red: 1, green: 1, blue: 1))
+    var laser = LaserColors(glow: RGBA(red: 1, green: 0, blue: 0), middle: RGBA(red: 1, green: 0, blue: 0),
+                            center: RGBA(red: 1, green: 1, blue: 1))
     var pointerScale = 1.0
     var pulseSize = 1.0
     var pulseDuration = 0.45
@@ -171,7 +222,8 @@ struct HighlightStyle {
         showsRing = settings.showsRing
         ringColor = pair.highlightColor
         pulseColor = settings.pulseColor(for: pair)
-        laser = settings.laserColors(for: pair)
+        let colors = settings.laserColors(for: pair)
+        laser = LaserColors(glow: colors.glow, middle: colors.middle, center: colors.center)
         self.pointerScale = pointerScale
         pulseSize = settings.pulseSize
         pulseDuration = settings.pulseDuration
@@ -182,14 +234,21 @@ struct HighlightStyle {
     }
 }
 
-struct Pulse {
+/// The laser's glow and core, middle and center.
+struct LaserColors: Equatable {
+    var glow: RGBA
+    var middle: RGBA
+    var center: RGBA
+}
+
+struct Pulse: Equatable {
     let point: CGPoint
     let start: TimeInterval
 }
 
 /// A press held longer than a click: a small filled ring under the pointer until release, when it
 /// fades and a click pulse goes out from it. A quick click never shows it.
-struct Hold {
+struct Hold: Equatable {
     /// Held this long, a press counts as a long press.
     static let threshold: TimeInterval = 0.35
     /// How long the ring takes to grow in, and to fade after release.
@@ -203,13 +262,13 @@ struct Hold {
     var releasedAt: TimeInterval?
 }
 
-struct LaserDot {
+struct LaserDot: Equatable {
     static let fade: TimeInterval = 0.42
     let point: CGPoint
     let updatedAt: TimeInterval
 }
 
-struct LaserStroke {
+struct LaserStroke: Equatable {
     var points: [CGPoint]
     var finishedAt: TimeInterval?
 }
@@ -249,7 +308,7 @@ final class HighlightScene {
     func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, optionHeld: Bool, settings: PointerHighlight) {
         pointer = point
         if isLeft, settings.laserDraws(optionHeld: optionHeld) { startStroke(at: point) }
-        guard settings.pulseOn, isLeft || settings.pulsesOnRightClick else { return }
+        guard settings.pulses(isLeft: isLeft) else { return }
         pulses.append(Pulse(point: point, start: now))
         if settings.pulseShowsHold { hold = Hold(point: point, start: now) }
     }

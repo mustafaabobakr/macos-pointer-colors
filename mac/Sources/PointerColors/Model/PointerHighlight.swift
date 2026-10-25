@@ -125,6 +125,11 @@ final class PointerHighlight {
         if effect == .pulse { pulseOn = on } else { laserOn = on }
     }
 
+    /// This press sends out a pulse: pulses are on, and it's a left click or right clicks count.
+    func pulses(isLeft: Bool) -> Bool {
+        pulseOn && (isLeft || pulsesOnRightClick)
+    }
+
     /// A drag draws a laser trail: the laser and its trail are on and, if it needs ⌥, ⌥ is held.
     func laserDraws(optionHeld: Bool) -> Bool {
         laserOn && laserTrail && (optionHeld || !laserNeedsOption)
