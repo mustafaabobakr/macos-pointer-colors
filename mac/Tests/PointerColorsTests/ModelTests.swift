@@ -154,6 +154,8 @@ final class UpdateCheckerTests: XCTestCase {
         """
         XCTAssertEqual(UpdateChecker.whatsNew(in: body), "**Pointer Colors 0.3.3** adds things.\n\n- **One thing.** Details.")
         XCTAssertEqual(UpdateChecker.whatsNew(in: "Just notes."), "Just notes.")
+        let withShots = "- **One.** A.\n\n  ![One](https://x/one.png)\n\n  ![Two](https://x/two.png)\n\n- **Two.** B.\n\n**Install:** open it."
+        XCTAssertEqual(UpdateChecker.whatsNew(in: withShots), "- **One.** A.\n\n- **Two.** B.")
         XCTAssertNil(UpdateChecker.whatsNew(in: "**Install:** open the DMG."))
         XCTAssertNil(UpdateChecker.whatsNew(in: nil))
     }

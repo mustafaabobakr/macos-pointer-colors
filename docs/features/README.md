@@ -1,7 +1,8 @@
 # Feature screenshots
 
-One marketing picture per feature of the Mac app, used in the release notes on the
-[releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
+One marketing picture per feature of the Mac app. The release notes on the
+[releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases) link to these
+files on `main` directly, so a retaken picture shows up in every release that has it.
 [`features.json`](features.json) lists each feature, the screen and view it's taken from, and the
 source files whose changes mean it must be retaken.
 

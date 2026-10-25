@@ -13,14 +13,18 @@ does not.
   needs demo data to look right, add it to `mac/scripts/feature-demo-settings.json`.
 - **Changed feature:** a change to any file in a feature's `sources` (or to how it looks) means
   its screenshot is retaken at the next release, overwriting `docs/features/<id>.png`. Update its
-  title, caption and `sources` if they no longer fit. A removed feature loses its entry and its PNG.
+  title, caption and `sources` if they no longer fit. A removed feature loses its entry and its PNG,
+  and its image comes out of every release that shows it (otherwise those images break).
 - **When releasing** (not before): run `mac/scripts/feature-screenshots.sh` to retake every
   screenshot (or `… <id> …` for some), look at each new or changed PNG, and commit them with the
   version bump. The script renders offscreen with demo settings in the bare build's own defaults
   domain, so it never touches the installed app's settings or the real pointer.
-- **Release notes:** under each new or changed feature's bullet, embed its screenshot pinned to the
-  release tag, so later retakes don't change old releases:
-  `![<title>](https://raw.githubusercontent.com/mustafaabobakr/macos-pointer-colors/v<version>/docs/features/<id>.png)`
+- **Release notes:** under each new or changed feature's bullet, embed its screenshot straight from
+  `docs/features` on `main`, never an uploaded copy, so every release always shows the current
+  picture. A blank line before it, indented under the bullet:
+  `  ![<title>](https://raw.githubusercontent.com/mustafaabobakr/macos-pointer-colors/main/docs/features/<id>.png)`
+  Every published release already does this for the features it introduced or changed. The app
+  drops these lines when it shows release notes (`UpdateChecker.whatsNew`).
 
 ## Releasing
 

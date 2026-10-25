@@ -52,10 +52,13 @@ struct UpdateChecker {
 
     /// The part of the release notes about what changed: everything before the install
     /// instructions, which start at "**Updating from" or "**Install:**" in every release.
+    /// Screenshot lines are dropped, since the app shows the notes as text.
     static func whatsNew(in body: String?) -> String? {
         guard let body else { return nil }
         let cut = ["**Updating from", "**Install:**"].compactMap { body.range(of: $0)?.lowerBound }.min()
-        let notes = body[..<(cut ?? body.endIndex)].trimmingCharacters(in: .whitespacesAndNewlines)
+        let notes = String(body[..<(cut ?? body.endIndex)])
+            .replacingOccurrences(of: #"\n+[ \t]*!\[[^\]]*\]\([^)]*\)[ \t]*(?=\n|$)"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         return notes.isEmpty ? nil : notes
     }
 
