@@ -12,7 +12,7 @@ APP="$MAC_DIR/build/Pointer Colors.app"
 DMG="$MAC_DIR/build/Pointer-Colors.dmg"
 STAGE="$(mktemp -d)"
 
-"$MAC_DIR/scripts/build-app.sh" release
+BUILD_ENV=prod "$MAC_DIR/scripts/build-app.sh" release
 
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"

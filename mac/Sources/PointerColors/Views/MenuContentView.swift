@@ -47,7 +47,8 @@ struct MenuContentView: View {
                 .featureSpot("display-colors")
             AppColorsIndicator(automation: model.automation)
                 .disabled(model.needsFullDiskAccess)
-            HighlightMenuSection(highlight: model.highlight).featureSpot("menu-highlight")
+            HighlightMenuSection(highlight: model.highlight, pair: model.selectedPair, pointerScale: model.scale,
+                                 scale: scale).featureSpot("menu-highlight")
             Divider()
             footer
         }
@@ -79,7 +80,10 @@ struct MenuContentView: View {
             .frame(width: 104 * scale, height: 104 * scale)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(model.selectedPair.name).appFont(.title3, weight: .bold)
+                HStack(spacing: 6) {
+                    Text(model.selectedPair.name).appFont(.title3, weight: .bold)
+                    if BuildInfo.current.isLocal { LocalBuildTag() }
+                }
                 HStack(spacing: 6) {
                     HexButton(label: String(localized: "Outline"), color: model.selectedPair.outline) { model.copyHex(outline: true) }
                     HexButton(label: String(localized: "Fill"), color: model.selectedPair.fill) { model.copyHex(outline: false) }
@@ -291,33 +295,21 @@ private struct PairTile: View {
     }
 }
 
-/// Pulse and laser switches in the menu, styled like its other switches; both can be on. The
+/// Pictures of the pulse and the laser side by side, each its own switch; both can be on. The
 /// details are in Preferences › Highlight.
 private struct HighlightMenuSection: View {
     let highlight: PointerHighlight
+    let pair: PointerPair
+    let pointerScale: Double
+    let scale: CGFloat
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("HIGHLIGHT").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
-            ForEach(HighlightEffect.allCases) { effect in
-                Toggle(effect.menuTitle, isOn: Binding(get: { highlight.isOn(effect) },
-                                                       set: { highlight.setOn($0, effect) }))
-                    .toggleStyle(.switch).controlSize(.mini)
-                    .appFont(.caption)
-                    .help(effect.menuHelp)
-            }
+            HighlightPreviewCards(highlight: highlight,
+                                  style: HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale),
+                                  pair: pair, imageHeight: 64 * scale)
         }
-    }
-}
-
-private extension HighlightEffect {
-    var menuTitle: String {
-        self == .pulse ? String(localized: "Pulse on each click") : String(localized: "Laser pointer")
-    }
-
-    var menuHelp: String {
-        self == .pulse ? String(localized: "A ring where you click")
-                       : String(localized: "A glowing dot, and a trail as you drag")
     }
 }
 
@@ -410,5 +402,17 @@ private struct DisplaySizeRow: View {
                 .accessibilityLabel("Reset pointer size to default")
             }
         }
+    }
+}
+
+/// Marks a build made on this Mac rather than downloaded from GitHub.
+private struct LocalBuildTag: View {
+    var body: some View {
+        Text("LOCAL")
+            .appFont(.caption2, weight: .bold)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 5).padding(.vertical, 1)
+            .background(Capsule().fill(.orange))
+            .help(BuildInfo.current.localLabel ?? "")
     }
 }

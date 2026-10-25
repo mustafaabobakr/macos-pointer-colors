@@ -18,6 +18,26 @@ enum PulseStyle: String, CaseIterable, Identifiable {
     }
 }
 
+/// When the laser dot follows the pointer.
+enum LaserDotMode: String, CaseIterable, Identifiable {
+    /// On every pointer move.
+    case always
+    /// Only at the tip of a trail being drawn.
+    case whileDrawing
+    /// Never; a trail still draws.
+    case hidden
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .always: return String(localized: "Always")
+        case .whileDrawing: return String(localized: "While drawing")
+        case .hidden: return String(localized: "Hide")
+        }
+    }
+}
+
 /// The two highlight effects. Each has its own switch, so either, both or neither can be on.
 enum HighlightEffect: String, CaseIterable, Identifiable {
     /// A ring that grows and fades where you click.
@@ -76,6 +96,8 @@ final class PointerHighlight {
     /// Draws the laser only while ⌥ Option is held, catching the mouse so nothing underneath is
     /// clicked or selected. Off, the laser draws on any drag and the drag also reaches the app.
     var laserNeedsOption: Bool { didSet { save(laserNeedsOption, Key.laserOption) } }
+    /// When the dot follows the pointer.
+    var laserDot: LaserDotMode { didSet { save(laserDot.rawValue, Key.laserDot) } }
 
     /// Pulse and laser colors chosen for particular pairs, by pair id.
     private(set) var pairPulseColors: [String: RGBA] { didSet { saveColors(pairPulseColors, Key.pairPulse) } }
@@ -110,6 +132,7 @@ final class PointerHighlight {
         laserTrail = defaults.bool(forKey: Key.laserTrail)
         laserTrailFade = defaults.double(forKey: Key.laserFade)
         laserNeedsOption = defaults.bool(forKey: Key.laserOption)
+        laserDot = defaults.string(forKey: Key.laserDot).flatMap(LaserDotMode.init(rawValue:)) ?? .always
         pairPulseColors = Self.colors(defaults, Key.pairPulse)
         pairLaserColors = Self.colors(defaults, Key.pairLaser)
     }
@@ -133,6 +156,16 @@ final class PointerHighlight {
     /// A drag draws a laser trail: the laser and its trail are on and, if it needs ⌥, ⌥ is held.
     func laserDraws(optionHeld: Bool) -> Bool {
         laserOn && laserTrail && (optionHeld || !laserNeedsOption)
+    }
+
+    /// The laser dot shows for this move: always, or only while a trail is `drawing`.
+    func laserDotShows(drawing: Bool) -> Bool {
+        guard laserOn else { return false }
+        switch laserDot {
+        case .always: return true
+        case .whileDrawing: return drawing
+        case .hidden: return false
+        }
     }
 
     /// The custom color when chosen; otherwise the color set for this pair, or the pair's own.
@@ -178,6 +211,7 @@ final class PointerHighlight {
     private enum Key {
         static let oldMode = "highlightMode"
         static let laserOption = "highlightLaserNeedsOption"
+        static let laserDot = "highlightLaserDot"
         static let pairPulse = "highlightPairPulseColors"
         static let pairLaser = "highlightPairLaserColors"
         static let pulseOn = "highlightPulse"

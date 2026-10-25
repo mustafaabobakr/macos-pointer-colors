@@ -81,6 +81,12 @@ private struct LaserSection: View {
                 Text("A ⌥-drag draws the laser and doesn't click the app underneath, so no text gets selected. Without ⌥, clicks and drags work as usual.")
             }
             .disabled(!highlight.laserTrail)
+            Picker(selection: $highlight.laserDot) {
+                ForEach(LaserDotMode.allCases) { Text($0.title).tag($0) }
+            } label: {
+                Text("Dot")
+                Text("When the glowing dot follows the pointer. While drawing, it shows only at the tip of a trail.")
+            }
         }
         .disabled(!highlight.laserOn)
     }

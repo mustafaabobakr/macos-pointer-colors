@@ -377,6 +377,9 @@ private struct AboutPreferences: View {
             PointerGlyph(pair: PointerPair.featured, lineWidth: 2).frame(height: 48)
             Text("Pointer Colors").appFont(.title2, weight: .bold)
             Text("Version \(version)").foregroundStyle(.secondary)
+            if let local = BuildInfo.current.localLabel {
+                Text(local).appFont(.caption).foregroundStyle(.orange)
+            }
             HStack(spacing: 4) {
                 Text("Created by")
                 Link("Mostafa Abobakr", destination: URL(string: "https://github.com/mustafaabobakr")!)

@@ -300,6 +300,27 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(scene.strokes.count, 1)
     }
 
+    func testLaserDotCanShowOnlyWhileDrawing() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        highlight.laserOn = true
+        highlight.laserDot = .whileDrawing
+        let scene = HighlightScene()
+        scene.move(to: .zero, now: 0, settings: highlight)
+        XCTAssertNil(scene.laserDot, "a plain move shows no dot")
+        scene.press(at: .zero, now: 0.1, isLeft: true, optionHeld: false, settings: highlight)
+        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.2, optionHeld: false, settings: highlight)
+        XCTAssertNotNil(scene.laserDot, "drawing shows it")
+    }
+
+    func testLaserDotModes() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        highlight.laserOn = true
+        XCTAssertEqual(highlight.laserDot, .always, "the default")
+        XCTAssertTrue(highlight.laserDotShows(drawing: false))
+        highlight.laserDot = .hidden
+        XCTAssertFalse(highlight.laserDotShows(drawing: true))
+    }
+
     func testQuickClickShowsNoHoldButALongPressDoes() {
         let highlight = PointerHighlight(defaults: makeDefaults())
         highlight.pulseOn = true

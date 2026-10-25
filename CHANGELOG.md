@@ -3,6 +3,13 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.3 — 2026-10-26
+
+- **The laser and the ring keep up across displays.** Moving to another display, the laser dot and the ring around the pointer no longer lag behind. A laser trail that crosses to a display with another pair carries on in that pair's colors.
+- **Choose when the laser dot shows.** **Preferences › Highlight › Laser › Dot** has **Always** (as before), **While drawing**, which shows the dot only at the tip of a trail, and **Hide**.
+- **Highlight pictures in the menu.** The menu's Highlight section shows the pulse and laser pictures from Preferences; click one to turn it on or off.
+- **App pairs on fast moves.** A quick move to another display no longer brings the last display's app pair along when pairs follow the app under the pointer.
+
 ## 0.4.2 — 2026-10-25
 
 - **A proper update window.** When a new version is out, a window shows what changed, with **Skip This Version**, **Install on Quit** and **Install and Relaunch**. A skipped version isn't offered again unless you choose **Check for Updates…**.
