@@ -94,13 +94,6 @@ def image(shot, pw, ph, view_pt, x, y, w, h, p):
             f'<image width="{pw}" height="{ph}" xlink:href="{shot}"/></svg>')
 
 
-def magnifier_badge(cx, cy):
-    """A magnifying glass in an aqua disc, pinned to the lens corner."""
-    return (f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="30" fill="{ACCENT}" filter="url(#soft)"/>'
-            f'<circle cx="{cx - 4:.1f}" cy="{cy - 4:.1f}" r="11" fill="none" stroke="{BG}" stroke-width="4.5"/>'
-            f'<line x1="{cx + 4:.1f}" y1="{cy + 4:.1f}" x2="{cx + 13:.1f}" y2="{cy + 13:.1f}" stroke="{BG}" stroke-width="5" stroke-linecap="round"/>')
-
-
 def svg_for(feature, shot_png, spot, screen, p):
     pw, ph = png_size(shot_png)
     shot = "data:image/png;base64," + base64.b64encode(shot_png).decode()
@@ -122,7 +115,6 @@ def svg_for(feature, shot_png, spot, screen, p):
     <clipPath id="screen"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="14"/></clipPath>
     <clipPath id="lens"><rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20"/></clipPath>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="28" stdDeviation="30" flood-color="#000" flood-opacity=".7"/></filter>
-    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".5"/></filter>
   </defs>
   {text}
   <rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="14" fill="{BG}" filter="url(#shadow)"/>
@@ -135,7 +127,6 @@ def svg_for(feature, shot_png, spot, screen, p):
   <rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20" fill="{BG}" filter="url(#shadow)"/>
   <g clip-path="url(#lens)">{image(shot, pw, ph, lens_pt, lx, ly, lw, lh, p)}</g>
   <rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20" fill="none" stroke="#ffffff" stroke-opacity=".9" stroke-width="4"/>
-  {magnifier_badge(lx + lw - 8, ly + 8)}
 </svg>'''
 
 
