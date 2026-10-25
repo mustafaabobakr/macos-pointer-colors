@@ -16,10 +16,12 @@ final class HighlightOverlay {
     private var windows: [NSPanel] = []
     private var monitors: [Any] = []
     private var pruneTimer: Timer?
+    /// The windows are catching the mouse so a ⌥-drag draws instead of reaching the app below.
+    private var isCapturing = false
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged, .leftMouseDown, .rightMouseDown,
-                                                        .otherMouseDown, .leftMouseUp]
+                                                        .otherMouseDown, .leftMouseUp, .flagsChanged]
 
     init(settings: PointerHighlight, pair: @escaping () -> PointerPair, pointerScale: @escaping () -> Double) {
         self.settings = settings
@@ -111,17 +113,28 @@ final class HighlightOverlay {
     private func handle(_ type: NSEvent.EventType) {
         let point = NSEvent.mouseLocation
         let now = Date.timeIntervalSinceReferenceDate
+        let optionHeld = NSEvent.modifierFlags.contains(.option)
+        updateCapture(optionHeld: optionHeld)
         scene.pointer = point
         switch type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            scene.press(at: point, now: now, isLeft: type == .leftMouseDown, settings: settings)
-        case .leftMouseDragged: scene.drag(to: point, now: now, settings: settings)
+            scene.press(at: point, now: now, isLeft: type == .leftMouseDown, optionHeld: optionHeld, settings: settings)
+        case .leftMouseDragged: scene.drag(to: point, now: now, optionHeld: optionHeld, settings: settings)
         case .leftMouseUp: scene.finishStroke(at: now)
         default: scene.move(to: point, now: now, settings: settings)
         }
         // A plain move changes nothing on screen unless the ring or the laser follows it.
         guard scene.style.showsRing || settings.laserOn || type != .mouseMoved else { return }
         scene.revision += 1
+    }
+
+    /// While the laser needs ⌥ and ⌥ is held, the windows take the mouse: the drag draws, and the
+    /// app underneath gets no click to select text with. A drag already under way keeps its owner.
+    private func updateCapture(optionHeld: Bool) {
+        let capture = settings.laserOn && settings.laserNeedsOption && optionHeld
+        guard capture != isCapturing, NSEvent.pressedMouseButtons == 0 else { return }
+        isCapturing = capture
+        windows.forEach { $0.ignoresMouseEvents = !capture }
     }
 
     /// Drops what has faded, so the drawing stops once nothing is left.
@@ -150,7 +163,7 @@ struct HighlightStyle {
     @MainActor
     init(settings: PointerHighlight, pair: PointerPair, pointerScale: Double) {
         showsRing = settings.showsRing
-        ringColor = pair.outline
+        ringColor = pair.highlightColor
         pulseColor = settings.pulseColor(for: pair)
         laser = settings.laserColors(for: pair)
         self.pointerScale = pointerScale
@@ -200,16 +213,16 @@ final class HighlightScene {
     }
 
     /// Dragging moves the dot and, with the trail on, draws.
-    func drag(to point: CGPoint, now: TimeInterval, settings: PointerHighlight) {
+    func drag(to point: CGPoint, now: TimeInterval, optionHeld: Bool, settings: PointerHighlight) {
         move(to: point, now: now, settings: settings)
-        guard settings.laserOn, settings.laserTrail else { return }
+        guard settings.laserDraws(optionHeld: optionHeld) else { return }
         extendStroke(to: point)
     }
 
     /// A click starts a pulse, and a laser trail with the left button; both when both are on.
-    func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, settings: PointerHighlight) {
+    func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, optionHeld: Bool, settings: PointerHighlight) {
         pointer = point
-        if settings.laserOn, settings.laserTrail, isLeft { startStroke(at: point) }
+        if isLeft, settings.laserDraws(optionHeld: optionHeld) { startStroke(at: point) }
         guard settings.pulseOn, isLeft || settings.pulsesOnRightClick else { return }
         pulses.append(Pulse(point: point, start: now))
     }

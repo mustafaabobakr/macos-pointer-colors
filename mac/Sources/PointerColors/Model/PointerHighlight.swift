@@ -34,7 +34,7 @@ final class PointerHighlight {
     /// A ring that stays around the pointer, on its own or together with a mode.
     var showsRing: Bool { didSet { save(showsRing, Key.ring) } }
 
-    /// Off uses `pulseColor` instead of the pair's outline.
+    /// Off uses `pulseColor` instead of the pair's color.
     var pulseUsesPairColor: Bool { didSet { save(pulseUsesPairColor, Key.pulsePair) } }
     var pulseColor: RGBA { didSet { saveColor(pulseColor, Key.pulseColor) } }
     /// 0.5...2, times the pointer size.
@@ -43,7 +43,7 @@ final class PointerHighlight {
     var pulseDuration: Double { didSet { save(pulseDuration, Key.pulseDuration) } }
     var pulsesOnRightClick: Bool { didSet { save(pulsesOnRightClick, Key.pulseRight) } }
 
-    /// Off uses `laserColor` instead of the pair's outline and fill.
+    /// Off uses `laserColor` instead of the pair's color.
     var laserUsesPairColor: Bool { didSet { save(laserUsesPairColor, Key.laserPair) } }
     var laserColor: RGBA { didSet { saveColor(laserColor, Key.laserColor) } }
     /// 0.5...2, times the default dot and trail width.
@@ -52,6 +52,13 @@ final class PointerHighlight {
     var laserTrail: Bool { didSet { save(laserTrail, Key.laserTrail) } }
     /// Seconds a finished trail takes to fade.
     var laserTrailFade: Double { didSet { save(laserTrailFade, Key.laserFade) } }
+    /// Draws the laser only while ⌥ Option is held, catching the mouse so nothing underneath is
+    /// clicked or selected. Off, the laser draws on any drag and the drag also reaches the app.
+    var laserNeedsOption: Bool { didSet { save(laserNeedsOption, Key.laserOption) } }
+
+    /// Pulse and laser colors chosen for particular pairs, by pair id.
+    private(set) var pairPulseColors: [String: RGBA] { didSet { saveColors(pairPulseColors, Key.pairPulse) } }
+    private(set) var pairLaserColors: [String: RGBA] { didSet { saveColors(pairLaserColors, Key.pairLaser) } }
 
     static let sizeRange = 0.5...2.0
     static let pulseDurationRange = 0.2...1.5
@@ -79,6 +86,9 @@ final class PointerHighlight {
         laserSize = defaults.double(forKey: Key.laserSize)
         laserTrail = defaults.bool(forKey: Key.laserTrail)
         laserTrailFade = defaults.double(forKey: Key.laserFade)
+        laserNeedsOption = defaults.bool(forKey: Key.laserOption)
+        pairPulseColors = Self.colors(defaults, Key.pairPulse)
+        pairLaserColors = Self.colors(defaults, Key.pairLaser)
     }
 
     /// True when anything needs the overlay.
@@ -92,23 +102,45 @@ final class PointerHighlight {
         if effect == .pulse { pulseOn = on } else { laserOn = on }
     }
 
-    /// The pulse color: the pair's outline unless overridden.
-    func pulseColor(for pair: PointerPair) -> RGBA {
-        pulseUsesPairColor ? pair.outline : pulseColor
+    /// A drag draws a laser trail: the laser and its trail are on and, if it needs ⌥, ⌥ is held.
+    func laserDraws(optionHeld: Bool) -> Bool {
+        laserOn && laserTrail && (optionHeld || !laserNeedsOption)
     }
 
-    /// The laser's glow and core, middle and center colors. From the pair: outline, fill, white.
-    /// Overridden: the custom color with a lighter middle.
+    /// The custom color when chosen; otherwise the color set for this pair, or the pair's own.
+    func pulseColor(for pair: PointerPair) -> RGBA {
+        pulseUsesPairColor ? pulsePairColor(pair) : pulseColor
+    }
+
+    /// The laser's glow and core, middle and center: the laser color, a lighter shade, and white.
     func laserColors(for pair: PointerPair) -> (glow: RGBA, middle: RGBA, center: RGBA) {
         let white = RGBA(red: 1, green: 1, blue: 1)
-        guard !laserUsesPairColor else { return (pair.outline, pair.fill, white) }
-        return (laserColor, laserColor.mixed(with: white, by: 0.45), white)
+        let base = laserUsesPairColor ? laserPairColor(pair) : laserColor
+        return (base, base.mixed(with: white, by: 0.45), white)
     }
+
+    /// The pulse color for a pair, ignoring the custom color: set for it, or its own.
+    func pulsePairColor(_ pair: PointerPair) -> RGBA { pairPulseColors[pair.id] ?? pair.highlightColor }
+
+    func laserPairColor(_ pair: PointerPair) -> RGBA { pairLaserColors[pair.id] ?? pair.highlightColor }
+
+    /// Nil goes back to the pair's own color.
+    func setPulseColor(_ color: RGBA?, for pair: PointerPair) { pairPulseColors[pair.id] = color }
+
+    func setLaserColor(_ color: RGBA?, for pair: PointerPair) { pairLaserColors[pair.id] = color }
 
     private func save(_ value: Any, _ key: String) { defaults.set(value, forKey: key) }
 
     private func saveColor(_ color: RGBA, _ key: String) {
         defaults.set(try? JSONEncoder().encode(color), forKey: key)
+    }
+
+    private func saveColors(_ colors: [String: RGBA], _ key: String) {
+        defaults.set(try? JSONEncoder().encode(colors), forKey: key)
+    }
+
+    private static func colors(_ defaults: UserDefaults, _ key: String) -> [String: RGBA] {
+        defaults.data(forKey: key).flatMap { try? JSONDecoder().decode([String: RGBA].self, from: $0) } ?? [:]
     }
 
     private static func color(_ defaults: UserDefaults, _ key: String) -> RGBA? {
@@ -117,6 +149,9 @@ final class PointerHighlight {
 
     private enum Key {
         static let oldMode = "highlightMode"
+        static let laserOption = "highlightLaserNeedsOption"
+        static let pairPulse = "highlightPairPulseColors"
+        static let pairLaser = "highlightPairLaserColors"
         static let pulseOn = "highlightPulse"
         static let laserOn = "highlightLaser"
         static let ring = "highlightRing"
@@ -133,7 +168,23 @@ final class PointerHighlight {
     }
 }
 
+extension PointerPair {
+    /// The color highlights draw in: the more colorful of outline and fill, so a pair with a black
+    /// outline, like Highlighter or Gold, doesn't pulse in black. When both are grey, the lighter.
+    var highlightColor: RGBA {
+        let (outlineChroma, fillChroma) = (outline.chroma, fill.chroma)
+        if abs(outlineChroma - fillChroma) > 0.1 { return outlineChroma > fillChroma ? outline : fill }
+        return outline.luminance >= fill.luminance ? outline : fill
+    }
+}
+
 extension RGBA {
+    /// How colorful: 0 for black, white and greys, up to 1 for pure colors.
+    var chroma: Double { max(red, green, blue) - min(red, green, blue) }
+
+    /// Perceived brightness, 0...1.
+    var luminance: Double { 0.2126 * red + 0.7152 * green + 0.0722 * blue }
+
     /// Moves `fraction` of the way toward `other`.
     func mixed(with other: RGBA, by fraction: Double) -> RGBA {
         RGBA(red: red + (other.red - red) * fraction,

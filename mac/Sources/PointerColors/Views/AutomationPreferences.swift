@@ -47,8 +47,9 @@ private struct AppearanceSection: View {
     }
 
     private func pairPicker(_ title: LocalizedStringKey, selection: Binding<String>) -> some View {
-        Picker(title, selection: selection) {
-            ForEach(pairs) { Text($0.name).tag($0.id) }
+        LabeledContent(title) {
+            PairMenuButton(selection: Binding(get: { selection.wrappedValue }, set: { if let id = $0 { selection.wrappedValue = id } }),
+                           pairs: pairs, accessibilityTitle: String(localized: "Pair for this appearance"), allowsNone: false)
         }
         .disabled(!automation.followsAppearance)
     }

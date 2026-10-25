@@ -233,9 +233,8 @@ final class PointerHighlightTests: XCTestCase {
     func testColorsFollowThePairUnlessOverridden() {
         let highlight = PointerHighlight(defaults: makeDefaults())
         let pair = PointerPair.featured
-        XCTAssertEqual(highlight.pulseColor(for: pair), pair.outline)
-        XCTAssertEqual(highlight.laserColors(for: pair).glow, pair.outline)
-        XCTAssertEqual(highlight.laserColors(for: pair).middle, pair.fill)
+        XCTAssertEqual(highlight.pulseColor(for: pair), pair.highlightColor)
+        XCTAssertEqual(highlight.laserColors(for: pair).glow, pair.highlightColor)
         highlight.pulseUsesPairColor = false
         highlight.laserUsesPairColor = false
         XCTAssertEqual(highlight.pulseColor(for: pair), highlight.pulseColor)
@@ -255,10 +254,47 @@ final class PointerHighlightTests: XCTestCase {
         highlight.pulseOn = true
         highlight.laserOn = true
         let scene = HighlightScene()
-        scene.press(at: CGPoint(x: 10, y: 10), now: 0, isLeft: true, settings: highlight)
-        scene.drag(to: CGPoint(x: 40, y: 10), now: 0.1, settings: highlight)
+        scene.press(at: CGPoint(x: 10, y: 10), now: 0, isLeft: true, optionHeld: false, settings: highlight)
+        scene.drag(to: CGPoint(x: 40, y: 10), now: 0.1, optionHeld: false, settings: highlight)
         XCTAssertEqual(scene.pulses.count, 1)
         XCTAssertEqual(scene.strokes.count, 1)
         XCTAssertNotNil(scene.laserDot)
+    }
+
+    func testHighlightUsesThePairsColorfulSideNotABlackOutline() {
+        let highlighter = PointerPair(id: "h", name: "Highlighter", outline: RGBA(hex: "000000")!, fill: RGBA(hex: "FFFF00")!)
+        XCTAssertEqual(highlighter.highlightColor.hex, "FFFF00")
+        let aquaMint = PointerPair(id: "a", name: "Aqua mint", outline: RGBA(hex: "00FFDA")!, fill: RGBA(hex: "008A59")!)
+        XCTAssertEqual(aquaMint.highlightColor.hex, "00FFDA")
+        let macOSDark = PointerPair(id: "d", name: "macOS dark", outline: RGBA(hex: "000000")!, fill: RGBA(hex: "FFFFFF")!)
+        XCTAssertEqual(macOSDark.highlightColor.hex, "FFFFFF")
+    }
+
+    func testEachPairCanHaveItsOwnColors() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        let pair = PointerPair.featured
+        highlight.setPulseColor(RGBA(hex: "FF0000")!, for: pair)
+        highlight.setLaserColor(RGBA(hex: "0000FF")!, for: pair)
+        let reopened = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(reopened.pulseColor(for: pair).hex, "FF0000")
+        XCTAssertEqual(reopened.laserColors(for: pair).glow.hex, "0000FF")
+        reopened.setPulseColor(nil, for: pair)
+        XCTAssertEqual(reopened.pulseColor(for: pair), pair.highlightColor)
+        reopened.laserUsesPairColor = false
+        XCTAssertEqual(reopened.laserColors(for: pair).glow, reopened.laserColor)
+    }
+
+    func testLaserNeedingOptionDrawsOnlyWithOption() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        highlight.laserOn = true
+        highlight.laserNeedsOption = true
+        let scene = HighlightScene()
+        scene.press(at: .zero, now: 0, isLeft: true, optionHeld: false, settings: highlight)
+        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.1, optionHeld: false, settings: highlight)
+        XCTAssertTrue(scene.strokes.isEmpty)
+        scene.press(at: .zero, now: 0.2, isLeft: true, optionHeld: true, settings: highlight)
+        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.3, optionHeld: true, settings: highlight)
+        XCTAssertEqual(scene.strokes.count, 1)
     }
 }
