@@ -3,3 +3,4 @@
 *.mp4
 # ...except the promo film the website serves.
 !docs/promo/*.mp4
+__pycache__/

@@ -188,7 +188,7 @@ final class AppModel {
 
     /// The size goes live the moment the new colors are drawn, then is saved like any other change.
     private func scaleAfterRecolor(_ size: Double) -> RecolorWatch {
-        RecolorWatch(onRecolor: { _ = UniversalAccessCore.shared.setCursorScale(size) },
+        RecolorWatch(onRecolor: { if !ScreenshotRenderer.isRendering { _ = UniversalAccessCore.shared.setCursorScale(size) } },
                      then: { [weak self] in self?.scaleIsLive(size) })
     }
 

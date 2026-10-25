@@ -8,7 +8,9 @@ struct AutomationPreferences: View {
     var body: some View {
         Form {
             AppearanceSection(automation: model.automation, pairs: model.library.all)
+                .featureSpot("appearance-pairs")
             AppColorsSection(automation: model.automation, pairs: model.library.all)
+                .featureSpot("app-colors")
             Section("Finding the pointer") {
                 Toggle(isOn: Binding(get: { shakeToFind }, set: { shakeToFind = $0; model.setShakeToFind($0) })) {
                     Text("Shake mouse pointer to locate")

@@ -6,7 +6,12 @@ struct PreferencesView: View {
 
     let model: AppModel
 
-    @State private var tab: PreferencesTab = .general
+    @State private var tab: PreferencesTab
+
+    init(model: AppModel, tab: PreferencesTab = .general) {
+        self.model = model
+        _tab = State(initialValue: tab)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,10 +38,12 @@ struct PreferencesView: View {
     }
 }
 
-private enum PreferencesTab: CaseIterable, Identifiable {
+enum PreferencesTab: String, CaseIterable, Identifiable {
     case general, pairs, automation, highlight, shortcuts, about
 
     var id: Self { self }
+    /// Names the tab's picture in feature screenshots.
+    var slug: String { rawValue }
 
     var title: LocalizedStringKey {
         switch self {
@@ -138,6 +145,7 @@ private struct GeneralPreferences: View {
                     Text("Size of the menu and this window. Automatic uses Large on big screens.")
                 }
             }
+            .featureSpot("menu-appearance")
             BackupSection(model: model)
             Section("Permission") {
                 LabeledContent("Pointer colors and size") {
@@ -179,6 +187,7 @@ private struct BackupSection: View {
         } header: {
             Text("Backup")
         }
+        .featureSpot("backup")
         .confirmationDialog("Replace all settings?", isPresented: Binding(
             get: { pendingImport != nil }, set: { if !$0 { pendingImport = nil } }
         )) {
@@ -250,6 +259,7 @@ private struct ShortcutsPreferences: View {
                 Text("They work from any app. None are set until you record one.")
                     .appFont(.caption).foregroundStyle(.secondary)
             }
+            .featureSpot("shortcuts")
         }
         .formStyle(.grouped)
     }
@@ -279,6 +289,7 @@ private struct PairsPreferences: View {
             }
             if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
         }
+        .featureSpot("custom-pairs")
         .padding(20)
     }
 
@@ -380,7 +391,7 @@ private struct AboutPreferences: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 380)
             Divider().frame(maxWidth: 300).padding(.vertical, 6)
-            UpdateSection(model: model)
+            UpdateSection(model: model).featureSpot("updates")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)

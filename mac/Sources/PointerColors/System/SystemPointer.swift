@@ -42,6 +42,9 @@ struct SystemPointer {
     private static let scaleKey = "mouseDriverCursorSize" as CFString
 
     private let universalAccess = UniversalAccessCore.shared
+    /// While rendering feature screenshots the app shows demo settings and must never change the
+    /// real pointer, so every write is skipped.
+    private let isReadOnly = ScreenshotRenderer.isRendering
 
     // MARK: Colors
 
@@ -53,6 +56,7 @@ struct SystemPointer {
 
     /// Writes both colors directly, or through `defaults` when macOS refuses the direct write.
     func apply(_ pair: PointerPair) throws {
+        guard !isReadOnly else { return }
         set(Self.outlineKey, pair.outline.preferenceValue as CFDictionary)
         set(Self.fillKey, pair.fill.preferenceValue as CFDictionary)
         if !synchronize() {
@@ -65,6 +69,7 @@ struct SystemPointer {
 
     /// True when pointer settings can be changed, directly or through `defaults`.
     func canWriteSettings() -> Bool {
+        guard !isReadOnly else { return true }
         let current = copy(Self.scaleKey)
         set(Self.scaleKey, current)
         if synchronize() { return true }
@@ -81,6 +86,7 @@ struct SystemPointer {
     /// Changes the size live and saves it. `UACursorSetScale` alone only updates this process, so
     /// the size is also saved directly or, when that's refused, through `defaults`.
     func setScale(_ scale: Double) throws {
+        guard !isReadOnly else { return }
         let value = scale.clamped(to: Self.minimumScale...Self.maximumScale)
         let previous = currentScale()
         guard universalAccess.setCursorScale(value) else { throw SystemPointerError.sizeAPIUnavailable }
@@ -99,6 +105,7 @@ struct SystemPointer {
     /// makes WindowServer rebuild every pointer image, and while it does, mouse events and the app
     /// wait; applying the same size twice on a display switch made that wait twice as long.
     func saveScale(_ scale: Double) throws {
+        guard !isReadOnly else { return }
         let value = scale.clamped(to: Self.minimumScale...Self.maximumScale)
         set(Self.scaleKey, value as CFNumber)
         guard synchronize() || DefaultsTool.write(Self.scaleKey as String, number: value) else {
@@ -111,6 +118,7 @@ struct SystemPointer {
     var shakeToFindEnabled: Bool? { universalAccess.shakeToFindEnabled() }
 
     func setShakeToFind(_ enabled: Bool) throws {
+        guard !isReadOnly else { return }
         guard universalAccess.setShakeToFind(enabled) else { throw SystemPointerError.featureUnavailable }
         if synchronize() { return }
         // The same switch as a global default: true turns shake-to-find off.
