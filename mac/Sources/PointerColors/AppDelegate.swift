@@ -13,6 +13,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        model.installPendingUpdateAtQuit()
+    }
+
     func application(_ application: NSApplication, open urls: [URL]) {
         urls.compactMap(PairLink.init(url:)).forEach(confirm)
     }

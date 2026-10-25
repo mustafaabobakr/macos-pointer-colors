@@ -26,6 +26,10 @@ restore() {
 cd "$MAC_DIR"
 swift build
 BIN="$(swift build --show-bin-path)/PointerColors"
+# The bare build has no icon, and the update window shows it.
+mkdir -p "$WORK/icon"
+xcrun actool "$MAC_DIR/Resources/AppIcon.icon" --compile "$WORK/icon" --platform macosx \
+  --minimum-deployment-target 14.0 --app-icon AppIcon --output-partial-info-plist "$WORK/icon.plist" >/dev/null
 
 defaults export "$DOMAIN" "$WORK/saved.plist" 2>/dev/null || : > "$WORK/saved.plist"
 saved=true
@@ -33,7 +37,7 @@ python3 -I "$ROOT/docs/art/make_feature_shots.py" seed "$MAC_DIR/scripts/feature
 defaults delete "$DOMAIN" 2>/dev/null || true
 defaults import "$DOMAIN" "$WORK/demo.plist"
 
-"$BIN" --render-features "$WORK/raw"
+"$BIN" --render-features "$WORK/raw" --app-icon "$WORK/icon/AppIcon.icns"
 restore
 
 python3 -I "$ROOT/docs/art/make_feature_shots.py" frame "$WORK/raw" "$@"

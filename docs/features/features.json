@@ -49,6 +49,9 @@
     {"id": "backup", "screen": "preferences-general", "spot": "backup", "since": "0.4.1",
      "title": "Take your settings anywhere", "caption": "Export every setting to one file, and import it on this Mac or another.",
      "sources": ["mac/Sources/PointerColors/Views/PreferencesView.swift", "mac/Sources/PointerColors/Model/SettingsBackup.swift"]},
+    {"id": "update-window", "screen": "update", "spot": "update-window", "since": "0.4.2",
+     "title": "Updates like any Mac app", "caption": "See what's new, then skip it, install on quit, or install and relaunch.",
+     "sources": ["mac/Sources/PointerColors/Views/UpdateWindow.swift", "mac/Sources/PointerColors/Model/AppModel+Updates.swift", "mac/Sources/PointerColors/System/AppUpdater.swift"]},
     {"id": "updates", "screen": "preferences-about", "spot": "updates", "since": "0.3.0",
      "title": "Updates in one click", "caption": "Check on a schedule, read what's new, and install without a security prompt.",
      "sources": ["mac/Sources/PointerColors/Views/PreferencesView.swift", "mac/Sources/PointerColors/Model/AppModel+Updates.swift"]}

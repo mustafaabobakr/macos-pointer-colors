@@ -256,3 +256,14 @@
 "Import and Relaunch" = "استيراد وإعادة التشغيل";
 "Your current settings are replaced by the file's, and Pointer Colors relaunches." = "تُستبدل إعداداتك الحالية بإعدادات الملف، ثم يُعاد تشغيل Pointer Colors.";
 "This isn't a Pointer Colors settings file." = "هذا ليس ملف إعدادات Pointer Colors.";
+"Software Update" = "تحديث البرنامج";
+"A new version of Pointer Colors is ready to install!" = "إصدار جديد من Pointer Colors جاهز للتثبيت!";
+"A new version of Pointer Colors is available!" = "يتوفر إصدار جديد من Pointer Colors!";
+"Pointer Colors %@ has been downloaded and is ready to use! Would you like to install it and relaunch Pointer Colors now?" = "تم تنزيل Pointer Colors %@ وهو جاهز للاستخدام! هل تريد تثبيته وإعادة تشغيل Pointer Colors الآن؟";
+"Pointer Colors %@ is available. You have %@. Would you like to install it and relaunch Pointer Colors now?" = "يتوفر Pointer Colors %1$@. لديك %2$@. هل تريد تثبيته وإعادة تشغيل Pointer Colors الآن؟";
+"No release notes." = "لا توجد ملاحظات إصدار.";
+"Automatically download and install updates in the future" = "تنزيل التحديثات وتثبيتها تلقائيًا في المستقبل";
+"Skip This Version" = "تخطي هذا الإصدار";
+"Install on Quit" = "التثبيت عند الإنهاء";
+"Install updates automatically" = "تثبيت التحديثات تلقائيًا";
+"Version %@ installs when you quit." = "يُثبَّت الإصدار %@ عند الإنهاء.";

@@ -407,7 +407,7 @@ private struct UpdateSection: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Button("Check for Updates…") { Task { await model.checkForUpdates() } }
+                Button("Check for Updates…") { Task { await model.checkForUpdatesNow() } }
                     .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
                 if model.availableUpdateDownload != nil {
                     Button("Install and Relaunch") { Task { await model.installUpdate() } }
@@ -429,6 +429,8 @@ private struct UpdateSection: View {
             }
             .fixedSize()
             .onChange(of: schedule) { model.updateSchedule = schedule }
+            Toggle("Install updates automatically", isOn: $model.installsUpdatesAutomatically)
+                .toggleStyle(.checkbox)
         }
     }
 }

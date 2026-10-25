@@ -24,10 +24,25 @@ extension AppModel {
         UserDefaults.standard.set(Date(), forKey: Self.lastUpdateCheckKey)
     }
 
-    /// Checks when the chosen schedule says the last check is too old.
+    /// Checks when the chosen schedule says the last check is too old, then offers what it found.
     func checkForUpdatesIfDue() async {
         guard !isCheckingForUpdates, updateSchedule.isDue(lastCheck: lastCheckDate) else { return }
         await checkForUpdates()
+        await offerFoundUpdate()
+    }
+
+    /// "Check for Updates…": a new version opens the update window, even one that was skipped.
+    func checkForUpdatesNow() async {
+        await checkForUpdates()
+        if availableUpdateVersion != nil { updateWindow.show(model: self) }
+    }
+
+    /// After an automatic check: nothing for a skipped version; otherwise the update window, or,
+    /// with automatic updates on, a quiet download that installs when the app quits.
+    private func offerFoundUpdate() async {
+        guard let version = availableUpdateVersion, version != settings.skippedUpdateVersion else { return }
+        guard installsUpdatesAutomatically else { return updateWindow.show(model: self) }
+        installsUpdateOnQuit = await prepareUpdate() != nil
     }
 
     /// Checks at launch, then every hour whether a scheduled check is due, for as long as the app runs.
@@ -62,18 +77,57 @@ extension AppModel {
 
     /// Installs the new version in place and relaunches into it (see AppUpdater).
     func installUpdate() async {
-        guard let download = availableUpdateDownload else { return }
         isInstallingUpdate = true
-        updateInstallError = nil
+        guard let staged = await prepareUpdate() else {
+            isInstallingUpdate = false
+            // The release page still has the DMG to install by hand.
+            if let url = availableUpdateURL { NSWorkspace.shared.open(url) }
+            return
+        }
         do {
-            try await AppUpdater.install(from: download)
+            try AppUpdater.finish(staged)
+            preparedUpdate = nil
             try AppUpdater.relaunch()
             NSApp.terminate(nil)
         } catch {
             updateInstallError = error.localizedDescription
             isInstallingUpdate = false
-            // The release page still has the DMG to install by hand.
-            if let url = availableUpdateURL { NSWorkspace.shared.open(url) }
+        }
+    }
+
+    /// Downloads and checks the available version now, and swaps it in when the app quits.
+    func installUpdateOnQuit() async {
+        installsUpdateOnQuit = await prepareUpdate() != nil
+        if installsUpdateOnQuit { updateWindow.close() }
+    }
+
+    /// "Skip This Version": automatic checks stop offering it; Check for Updates… still does.
+    func skipAvailableUpdate() {
+        settings.skippedUpdateVersion = availableUpdateVersion
+        updateWindow.close()
+    }
+
+    /// Called as the app quits: swaps in an update waiting for it. No relaunch.
+    func installPendingUpdateAtQuit() {
+        guard installsUpdateOnQuit, let preparedUpdate else { return }
+        try? AppUpdater.finish(preparedUpdate.staged)
+    }
+
+    /// The staged copy of the available version, downloading and checking it first if needed.
+    /// Nil, with the reason in `updateInstallError`, when it can't be prepared.
+    private func prepareUpdate() async -> URL? {
+        guard let version = availableUpdateVersion, let download = availableUpdateDownload else { return nil }
+        if let preparedUpdate, preparedUpdate.version == version { return preparedUpdate.staged }
+        isPreparingUpdate = true
+        updateInstallError = nil
+        defer { isPreparingUpdate = false }
+        do {
+            let staged = try await AppUpdater.prepare(from: download)
+            preparedUpdate = (version, staged)
+            return staged
+        } catch {
+            updateInstallError = error.localizedDescription
+            return nil
         }
     }
 
@@ -85,7 +139,7 @@ extension AppModel {
         } else if let url = availableUpdateURL {
             NSWorkspace.shared.open(url)
         } else {
-            Task { await checkForUpdates() }
+            Task { await checkForUpdatesNow() }
         }
     }
 
@@ -104,6 +158,9 @@ extension AppModel {
 
     var updateMessage: String? {
         if isInstallingUpdate { return String(localized: "Installing the update…") }
+        if installsUpdateOnQuit, let preparedUpdate {
+            return String(localized: "Version \(preparedUpdate.version) installs when you quit.")
+        }
         if let updateInstallError { return String(localized: "Couldn't install: \(updateInstallError)") }
         switch updateResult {
         case .none: return nil
@@ -112,6 +169,11 @@ extension AppModel {
         case .noReleases: return String(localized: "No releases are published yet.")
         case .failed(let reason): return String(localized: "Couldn't check: \(reason)")
         }
+    }
+
+    var availableUpdateVersion: String? {
+        if case .available(let version, _, _, _) = updateResult { return version }
+        return nil
     }
 
     var availableUpdateURL: URL? {

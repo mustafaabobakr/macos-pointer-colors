@@ -35,6 +35,12 @@ enum AppUpdater {
 
     /// Downloads the DMG, checks the app inside and swaps it in for the app at `appURL`.
     static func install(from dmgURL: URL, replacing appURL: URL = Bundle.main.bundleURL) async throws {
+        try finish(try await prepare(from: dmgURL, replacing: appURL), replacing: appURL)
+    }
+
+    /// Downloads the DMG, checks the app inside and copies it next to the app at `appURL`, ready
+    /// for `finish`. Slow, so it runs before the swap, which is quick enough to do at quit.
+    static func prepare(from dmgURL: URL, replacing appURL: URL = Bundle.main.bundleURL) async throws -> URL {
         if let blocker = installBlocker(for: appURL) { throw blocker }
         let workDir = FileManager.default.temporaryDirectory.appendingPathComponent("PointerColorsUpdate-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
@@ -47,7 +53,17 @@ enum AppUpdater {
 
         let newApp = try appInImage(at: mountPoint)
         guard try isSignedLikeThisApp(newApp) else { throw Failure.signatureMismatch }
-        try replace(appURL, with: newApp)
+        return try stage(newApp, next: appURL)
+    }
+
+    /// Swaps a prepared copy in for the app at `appURL` in one step.
+    static func finish(_ staged: URL, replacing appURL: URL = Bundle.main.bundleURL) throws {
+        do {
+            _ = try FileManager.default.replaceItemAt(appURL, withItemAt: staged)
+        } catch {
+            try? FileManager.default.removeItem(at: staged)
+            throw error
+        }
     }
 
     /// Why the app at `appURL` can't replace itself, checked before anything is downloaded.
@@ -101,20 +117,15 @@ enum AppUpdater {
         return SecStaticCodeCheckValidity(candidate, flags, requirement) == errSecSuccess
     }
 
-    /// Copies the new app next to the old one, then swaps them in one step, so a failure part way
-    /// leaves the old app in place.
-    private static func replace(_ appURL: URL, with newApp: URL) throws {
+    /// Copies the new app next to the old one, so the swap is a single rename and a failure part
+    /// way leaves the old app in place.
+    private static func stage(_ newApp: URL, next appURL: URL) throws -> URL {
         let staged = appURL.deletingLastPathComponent().appendingPathComponent(".\(appURL.lastPathComponent).update")
         try? FileManager.default.removeItem(at: staged)
         try run("/usr/bin/ditto", [newApp.path, staged.path])
         // Nothing should carry the internet mark, but a leftover one would bring the prompt back.
         try? run("/usr/bin/xattr", ["-dr", "com.apple.quarantine", staged.path])
-        do {
-            _ = try FileManager.default.replaceItemAt(appURL, withItemAt: staged)
-        } catch {
-            try? FileManager.default.removeItem(at: staged)
-            throw error
-        }
+        return staged
     }
 
     private static func run(_ path: String, _ arguments: [String]) throws {

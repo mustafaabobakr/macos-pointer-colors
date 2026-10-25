@@ -6,7 +6,8 @@ import SwiftUI
 /// needs no Screen Recording permission. While it runs the real pointer is never changed.
 ///
 /// - `PointerColors --render-screenshot out.png` draws the menu for the website and README.
-/// - `PointerColors --render-features dir` draws the menu and every Preferences tab into `dir`,
+/// - `PointerColors --render-features dir [--app-icon AppIcon.icns]` draws the menu, every
+///   Preferences tab and the update window into `dir`,
 ///   with `spots.json` giving where each `featureSpot` is. mac/scripts/feature-screenshots.sh
 ///   runs it with demo settings and frames the spots into docs/features.
 @MainActor
@@ -41,17 +42,38 @@ enum ScreenshotRenderer {
     // MARK: Feature screenshots
 
     /// One picture per screen; features are framed from these by their spots.
-    private static func screens(_ model: AppModel) -> [(name: String, view: AnyView, height: CGFloat?)] {
+    /// The update window comes last: it needs a demo update, which would change the menu too.
+    private static func screens(_ model: AppModel) -> [(name: String, view: () -> AnyView, height: CGFloat?)] {
         let tabs: [(PreferencesTab, CGFloat)] = [(.general, 860), (.pairs, 520), (.automation, 760),
                                                 (.highlight, 1500), (.shortcuts, 420), (.about, 760)]
-        return [("menu", menu(model), nil)]
-            + tabs.map { tab, height in
-                let view = PreferencesView(model: model, tab: tab).background(Color(nsColor: .windowBackgroundColor))
-                return ("preferences-\(tab.slug)", AnyView(view), height)
-            }
+        let preferences = tabs.map { tab, height in
+            ("preferences-\(tab.slug)", { AnyView(PreferencesView(model: model, tab: tab).background(windowBackground)) }, Optional(height))
+        }
+        let update = ("update", { showDemoUpdate(model); return AnyView(UpdatePromptView(model: model).background(windowBackground)) }, CGFloat?.none)
+        return [("menu", { menu(model) }, nil)] + preferences + [update]
+    }
+
+    private static let windowBackground = Color(nsColor: .windowBackgroundColor)
+
+    /// A downloaded update with notes in the style of the real ones, never installed.
+    private static func showDemoUpdate(_ model: AppModel) {
+        let notes = """
+            **Pointer Colors 0.4.2** brings a new way to update.
+
+            - **Updates like other Mac apps.** A window shows what changed, with **Skip This Version**, **Install on Quit** and **Install and Relaunch**.
+            - **Automatic updates.** Turn them on and new versions download by themselves and install when you quit.
+            - **Back up and move all your settings** with **Export all…** and **Import…** in Preferences › General.
+            """
+        let page = URL(string: "https://github.com/mustafaabobakr/macos-pointer-colors/releases")!
+        model.updateResult = .available(version: "0.4.2", url: page, download: page, notes: notes)
+        model.preparedUpdate = ("0.4.2", FileManager.default.temporaryDirectory)
     }
 
     static func renderFeatures(model: AppModel, into folder: String) {
+        // The bare build has no app icon of its own; the script passes the compiled one.
+        if let icon = argument(after: "--app-icon").flatMap(NSImage.init(contentsOfFile:)) {
+            NSApp.applicationIconImage = icon
+        }
         Task { @MainActor in
             let dir = URL(fileURLWithPath: folder)
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -59,7 +81,7 @@ enum ScreenshotRenderer {
             var ok = true
             for screen in screens(model) {
                 FeatureSpots.reset()
-                let host = makeHost(screen.view, height: screen.height)
+                let host = makeHost(screen.view(), height: screen.height)
                 // Lets onAppear run and lazy content settle before drawing.
                 try? await Task.sleep(for: .milliseconds(600))
                 host.layoutSubtreeIfNeeded()

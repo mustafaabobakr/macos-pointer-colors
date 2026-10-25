@@ -66,6 +66,16 @@ final class AppModel {
     var updateResult: UpdateChecker.Result?
     var isCheckingForUpdates = false
     var isInstallingUpdate = false
+    /// Downloading and checking an update, before it's swapped in.
+    var isPreparingUpdate = false
+    /// A downloaded, checked copy of a new version, waiting next to the app to be swapped in.
+    var preparedUpdate: (version: String, staged: URL)?
+    /// The prepared update is swapped in when the app quits.
+    var installsUpdateOnQuit = false
+    var installsUpdatesAutomatically: Bool {
+        didSet { settings.installsUpdatesAutomatically = installsUpdatesAutomatically }
+    }
+    @ObservationIgnored let updateWindow = UpdateWindowController()
     /// Why the last in-place install failed, until the next check.
     var updateInstallError: String?
     /// The last check that reached GitHub, reused when the menu opens again soon after.
@@ -100,6 +110,7 @@ final class AppModel {
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
+        installsUpdatesAutomatically = settings.installsUpdatesAutomatically
         DispatchQueue.main.async { [theme] in theme.apply() }
         observeSystemAppearance()
         shortcuts = settings.shortcuts
