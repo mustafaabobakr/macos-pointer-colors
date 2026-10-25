@@ -6,6 +6,8 @@ struct HighlightPreviewCards: View {
     let highlight: PointerHighlight
     let style: HighlightStyle
     let pair: PointerPair
+    /// The pictures' height: shorter in the menu than in Preferences.
+    var imageHeight: CGFloat = 96
 
     var body: some View {
         HStack(spacing: 10) {
@@ -18,7 +20,7 @@ struct HighlightPreviewCards: View {
         return Button { highlight.setOn(!isOn, effect) } label: {
             VStack(spacing: 4) {
                 HighlightPreviewImage(kind: effect, style: style, pair: pair)
-                    .frame(height: 96)
+                    .frame(height: imageHeight)
                     .opacity(isOn ? 1 : 0.45)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay {
