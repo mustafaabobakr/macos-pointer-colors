@@ -141,6 +141,8 @@ mac/scripts/make-dmg.sh             # builds mac/build/Pointer-Colors.dmg
 cd mac && swift test                # unit tests
 ```
 
+Release builds must be signed with the **Pointer Colors Dev** certificate, or installed copies refuse them as updates. `mac/scripts/export-signing-identity.sh` saves it from the keychain to `mac/signing/`, which git ignores; the build puts it back into the keychain when it's missing there, and stops if a release would be signed with anything else.
+
 **README art.** The images above are drawn from `pairs.json` and the app screenshot:
 
 ```sh

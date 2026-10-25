@@ -3,6 +3,15 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.2 — 2026-10-25
+
+- **A proper update window.** When a new version is out, a window shows what changed, with **Skip This Version**, **Install on Quit** and **Install and Relaunch**. A skipped version isn't offered again unless you choose **Check for Updates…**.
+- **Automatic updates.** Turn on **Automatically download and install updates in the future** in the update window, or **Install updates automatically** in **Preferences › About**. New versions then download by themselves and install when you quit.
+
+## 0.4.1 — 2026-10-25
+
+- **Back up and move all your settings.** **Preferences › General › Backup** has **Export all…**, which saves every setting to one file: custom pairs, automation, highlight, shortcuts and appearance. **Import…** puts them back on this Mac or another one, then relaunches the app.
+
 ## 0.4.0 — 2026-10-25
 
 - **Smooth pulses.** Clicking no longer stutters, including right after the pointer moves to another display. Pulses are now animated by macOS itself, and switching displays no longer makes macOS redraw the pointer twice. When displays use different pointer sizes, macOS still pauses briefly to resize the pointer as it crosses.

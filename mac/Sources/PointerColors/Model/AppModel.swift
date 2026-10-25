@@ -66,6 +66,16 @@ final class AppModel {
     var updateResult: UpdateChecker.Result?
     var isCheckingForUpdates = false
     var isInstallingUpdate = false
+    /// Downloading and checking an update, before it's swapped in.
+    var isPreparingUpdate = false
+    /// A downloaded, checked copy of a new version, waiting next to the app to be swapped in.
+    var preparedUpdate: (version: String, staged: URL)?
+    /// The prepared update is swapped in when the app quits.
+    var installsUpdateOnQuit = false
+    var installsUpdatesAutomatically: Bool {
+        didSet { settings.installsUpdatesAutomatically = installsUpdatesAutomatically }
+    }
+    @ObservationIgnored let updateWindow = UpdateWindowController()
     /// Why the last in-place install failed, until the next check.
     var updateInstallError: String?
     /// The last check that reached GitHub, reused when the menu opens again soon after.
@@ -100,6 +110,7 @@ final class AppModel {
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
+        installsUpdatesAutomatically = settings.installsUpdatesAutomatically
         DispatchQueue.main.async { [theme] in theme.apply() }
         observeSystemAppearance()
         shortcuts = settings.shortcuts
@@ -188,7 +199,7 @@ final class AppModel {
 
     /// The size goes live the moment the new colors are drawn, then is saved like any other change.
     private func scaleAfterRecolor(_ size: Double) -> RecolorWatch {
-        RecolorWatch(onRecolor: { _ = UniversalAccessCore.shared.setCursorScale(size) },
+        RecolorWatch(onRecolor: { if !ScreenshotRenderer.isRendering { _ = UniversalAccessCore.shared.setCursorScale(size) } },
                      then: { [weak self] in self?.scaleIsLive(size) })
     }
 
@@ -310,6 +321,17 @@ final class AppModel {
     }
 
     // MARK: Settings
+
+    func exportAllSettings() throws -> Data {
+        try SettingsBackup().export()
+    }
+
+    /// Restores every preference from a backup, then relaunches so each part reads it fresh.
+    func importAllSettings(from data: Data) throws {
+        try SettingsBackup().restore(from: data)
+        try AppUpdater.relaunch()
+        NSApp.terminate(nil)
+    }
 
     func setLaunchAtLogin(_ enabled: Bool) {
         do {

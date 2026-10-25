@@ -6,7 +6,12 @@ struct PreferencesView: View {
 
     let model: AppModel
 
-    @State private var tab: PreferencesTab = .general
+    @State private var tab: PreferencesTab
+
+    init(model: AppModel, tab: PreferencesTab = .general) {
+        self.model = model
+        _tab = State(initialValue: tab)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,10 +38,12 @@ struct PreferencesView: View {
     }
 }
 
-private enum PreferencesTab: CaseIterable, Identifiable {
+enum PreferencesTab: String, CaseIterable, Identifiable {
     case general, pairs, automation, highlight, shortcuts, about
 
     var id: Self { self }
+    /// Names the tab's picture in feature screenshots.
+    var slug: String { rawValue }
 
     var title: LocalizedStringKey {
         switch self {
@@ -138,6 +145,8 @@ private struct GeneralPreferences: View {
                     Text("Size of the menu and this window. Automatic uses Large on big screens.")
                 }
             }
+            .featureSpot("menu-appearance")
+            BackupSection(model: model)
             Section("Permission") {
                 LabeledContent("Pointer colors and size") {
                     if model.needsFullDiskAccess {
@@ -153,6 +162,73 @@ private struct GeneralPreferences: View {
             reapply = model.settings.reapplyAtLaunch
             sound = model.settings.playSoundOnApply
             model.refreshFromSystem()
+        }
+    }
+}
+
+/// Export and import of every preference, for moving to another Mac or keeping a copy.
+private struct BackupSection: View {
+    let model: AppModel
+    @State private var pendingImport: Data?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        Section {
+            LabeledContent {
+                HStack {
+                    Button("Import…", action: chooseFile)
+                    Button("Export all…", action: exportAll)
+                }
+            } label: {
+                Text("All settings")
+                Text("Pairs, automation, highlight, shortcuts and appearance in one file.")
+            }
+            if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
+        } header: {
+            Text("Backup")
+        }
+        .featureSpot("backup")
+        .confirmationDialog("Replace all settings?", isPresented: Binding(
+            get: { pendingImport != nil }, set: { if !$0 { pendingImport = nil } }
+        )) {
+            Button("Import and Relaunch", role: .destructive, action: importPending)
+        } message: {
+            Text("Your current settings are replaced by the file's, and Pointer Colors relaunches.")
+        }
+    }
+
+    private func exportAll() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.propertyList]
+        panel.nameFieldStringValue = "Pointer Colors Settings.plist"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try model.exportAllSettings().write(to: url)
+            errorMessage = nil
+        } catch {
+            errorMessage = String(localized: "Couldn't export: \(error.localizedDescription)")
+        }
+    }
+
+    private func chooseFile() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.propertyList]
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            pendingImport = try Data(contentsOf: url)
+            errorMessage = nil
+        } catch {
+            errorMessage = String(localized: "Couldn't import that file: \(error.localizedDescription)")
+        }
+    }
+
+    private func importPending() {
+        guard let data = pendingImport else { return }
+        pendingImport = nil
+        do {
+            try model.importAllSettings(from: data)
+        } catch {
+            errorMessage = String(localized: "Couldn't import that file: \(error.localizedDescription)")
         }
     }
 }
@@ -183,6 +259,7 @@ private struct ShortcutsPreferences: View {
                 Text("They work from any app. None are set until you record one.")
                     .appFont(.caption).foregroundStyle(.secondary)
             }
+            .featureSpot("shortcuts")
         }
         .formStyle(.grouped)
     }
@@ -212,6 +289,7 @@ private struct PairsPreferences: View {
             }
             if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
         }
+        .featureSpot("custom-pairs")
         .padding(20)
     }
 
@@ -313,7 +391,7 @@ private struct AboutPreferences: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 380)
             Divider().frame(maxWidth: 300).padding(.vertical, 6)
-            UpdateSection(model: model)
+            UpdateSection(model: model).featureSpot("updates")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
@@ -329,7 +407,7 @@ private struct UpdateSection: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Button("Check for Updates…") { Task { await model.checkForUpdates() } }
+                Button("Check for Updates…") { Task { await model.checkForUpdatesNow() } }
                     .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
                 if model.availableUpdateDownload != nil {
                     Button("Install and Relaunch") { Task { await model.installUpdate() } }
@@ -351,6 +429,8 @@ private struct UpdateSection: View {
             }
             .fixedSize()
             .onChange(of: schedule) { model.updateSchedule = schedule }
+            Toggle("Install updates automatically", isOn: $model.installsUpdatesAutomatically)
+                .toggleStyle(.checkbox)
         }
     }
 }

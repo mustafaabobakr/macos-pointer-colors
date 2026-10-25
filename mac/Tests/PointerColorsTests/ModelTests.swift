@@ -336,3 +336,38 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(PointerHighlight(defaults: defaults).pulseStyle, .ripple)
     }
 }
+
+final class SettingsBackupTests: XCTestCase {
+    private func makeDefaults() -> (UserDefaults, String) {
+        let name = "SettingsBackupTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        addTeardownBlock { defaults.removePersistentDomain(forName: name) }
+        return (defaults, name)
+    }
+
+    func testRoundTripReplacesSettingsAndSkipsWindowKeys() throws {
+        let (source, sourceName) = makeDefaults()
+        source.set("dark", forKey: "appTheme")
+        source.set(["display-1": 2.0], forKey: "displaySizes")
+        source.set("{0, 0, 10, 10}", forKey: "NSWindow Frame preferences")
+        source.set(Date(), forKey: "lastUpdateCheck")
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export()
+
+        let (target, targetName) = makeDefaults()
+        target.set("light", forKey: "appTheme")
+        target.set(true, forKey: "perAppColors")
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+
+        XCTAssertEqual(target.string(forKey: "appTheme"), "dark")
+        XCTAssertEqual(target.dictionary(forKey: "displaySizes") as? [String: Double], ["display-1": 2.0])
+        XCTAssertNil(target.object(forKey: "perAppColors"))
+        XCTAssertNil(target.object(forKey: "NSWindow Frame preferences"))
+        XCTAssertNil(target.object(forKey: "lastUpdateCheck"))
+    }
+
+    func testRejectsOtherFiles() {
+        let (defaults, name) = makeDefaults()
+        let data = try! PropertyListSerialization.data(fromPropertyList: ["appTheme": "dark"], format: .xml, options: 0)
+        XCTAssertThrowsError(try SettingsBackup(defaults: defaults, domain: name).restore(from: data))
+    }
+}

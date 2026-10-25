@@ -26,9 +26,10 @@ struct HighlightPreferences: View {
                     Text("Makes the pointer easy to follow. Works with any highlight, or on its own.")
                 }
             }
-            PulseSection(highlight: highlight)
-            LaserSection(highlight: highlight)
-            PairColorsSection(highlight: highlight, pairs: pairs, current: pair)
+            .featureSpot("highlight")
+            PulseSection(highlight: highlight).featureSpot("pulse")
+            LaserSection(highlight: highlight).featureSpot("laser")
+            PairColorsSection(highlight: highlight, pairs: pairs, current: pair).featureSpot("highlight-pair-colors")
         }
         .formStyle(.grouped)
     }

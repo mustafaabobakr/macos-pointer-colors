@@ -105,6 +105,18 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: "appPairs") }
     }
 
+    /// The version "Skip This Version" was chosen for. Automatic checks don't offer it again.
+    var skippedUpdateVersion: String? {
+        get { defaults.string(forKey: "skippedUpdateVersion") }
+        nonmutating set { defaults.set(newValue, forKey: "skippedUpdateVersion") }
+    }
+
+    /// Automatic checks download a new version on their own and install it when the app quits.
+    var installsUpdatesAutomatically: Bool {
+        get { defaults.bool(forKey: "installsUpdatesAutomatically") }
+        nonmutating set { defaults.set(newValue, forKey: "installsUpdatesAutomatically") }
+    }
+
     var lastAppliedPairID: String? {
         get { defaults.string(forKey: Key.lastAppliedPairID) }
         nonmutating set { defaults.set(newValue, forKey: Key.lastAppliedPairID) }

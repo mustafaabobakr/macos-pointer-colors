@@ -12,10 +12,12 @@ struct MenuContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if model.needsFullDiskAccess { PermissionBanner(model: model) }
-            header
-            sizeRow
+            header.featureSpot("current-pair")
+            sizeRow.featureSpot("pointer-size")
             VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
+                .featureSpot("previews")
             pairGrid
+                .featureSpot("menu-pairs")
                 .padding(.vertical, 8 * scale)
             if isAddingCustom {
                 CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
@@ -42,9 +44,10 @@ struct MenuContentView: View {
             }
             DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
                 .disabled(model.needsFullDiskAccess)
+                .featureSpot("display-colors")
             AppColorsIndicator(automation: model.automation)
                 .disabled(model.needsFullDiskAccess)
-            HighlightMenuSection(highlight: model.highlight)
+            HighlightMenuSection(highlight: model.highlight).featureSpot("menu-highlight")
             Divider()
             footer
         }

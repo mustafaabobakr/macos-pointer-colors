@@ -1,0 +1,36 @@
+{
+  "about": "Settings the feature screenshots are taken with (mac/scripts/feature-screenshots.sh). They go into the bare build's own 'PointerColors' defaults domain, never the installed app's. Keys under jsonData are stored as JSON data, the way the app saves them.",
+  "settings": {
+    "appTheme": "dark",
+    "updateSchedule": "off",
+    "reapplyAtLaunch": true,
+    "iconInPairColors": true,
+    "lastAppliedPairID": "aqua-mint",
+    "followsAppearance": true,
+    "lightPairID": "electric-blue",
+    "darkPairID": "aqua-mint",
+    "perDisplayColors": true,
+    "perAppColors": true,
+    "appRuleTrigger": "pointer",
+    "appPairs": {"com.apple.Safari": "neon-pink", "com.apple.Terminal": "neon-lime", "com.apple.finder": "electric-blue"},
+    "highlightPulse": true,
+    "highlightLaser": true,
+    "highlightRing": true,
+    "highlightPulseStyle": "ripple",
+    "highlightPulseShowsHold": true
+  },
+  "jsonData": {
+    "customPairs": [
+      {"id": "custom-demo-sunset", "name": "Sunset", "isCustom": true,
+       "outline": {"red": 1.0, "green": 0.42, "blue": 0.21, "alpha": 1}, "fill": {"red": 0.55, "green": 0.1, "blue": 0.36, "alpha": 1}},
+      {"id": "custom-demo-ice", "name": "Ice", "isCustom": true,
+       "outline": {"red": 0.75, "green": 0.95, "blue": 1.0, "alpha": 1}, "fill": {"red": 0.1, "green": 0.35, "blue": 0.6, "alpha": 1}}
+    ],
+    "shortcuts": {
+      "nextPair": {"keyCode": 124, "carbonModifiers": 6144, "keyLabel": "→"},
+      "previousPair": {"keyCode": 123, "carbonModifiers": 6144, "keyLabel": "←"},
+      "biggerPointer": {"keyCode": 24, "carbonModifiers": 6144, "keyLabel": "="},
+      "smallerPointer": {"keyCode": 27, "carbonModifiers": 6144, "keyLabel": "-"}
+    }
+  }
+}
