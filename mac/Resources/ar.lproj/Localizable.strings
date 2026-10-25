@@ -248,3 +248,11 @@
 "Frosted" = "مُصنفَر";
 "Clear" = "شفاف";
 "Tint strength" = "قوة التلوين";
+"Backup" = "النسخ الاحتياطي";
+"All settings" = "كل الإعدادات";
+"Export all…" = "تصدير الكل…";
+"Pairs, automation, highlight, shortcuts and appearance in one file." = "الأزواج والأتمتة والإبراز والاختصارات والمظهر في ملف واحد.";
+"Replace all settings?" = "استبدال كل الإعدادات؟";
+"Import and Relaunch" = "استيراد وإعادة التشغيل";
+"Your current settings are replaced by the file's, and Pointer Colors relaunches." = "تُستبدل إعداداتك الحالية بإعدادات الملف، ثم يُعاد تشغيل Pointer Colors.";
+"This isn't a Pointer Colors settings file." = "هذا ليس ملف إعدادات Pointer Colors.";

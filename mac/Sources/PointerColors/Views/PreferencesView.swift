@@ -138,6 +138,7 @@ private struct GeneralPreferences: View {
                     Text("Size of the menu and this window. Automatic uses Large on big screens.")
                 }
             }
+            BackupSection(model: model)
             Section("Permission") {
                 LabeledContent("Pointer colors and size") {
                     if model.needsFullDiskAccess {
@@ -153,6 +154,72 @@ private struct GeneralPreferences: View {
             reapply = model.settings.reapplyAtLaunch
             sound = model.settings.playSoundOnApply
             model.refreshFromSystem()
+        }
+    }
+}
+
+/// Export and import of every preference, for moving to another Mac or keeping a copy.
+private struct BackupSection: View {
+    let model: AppModel
+    @State private var pendingImport: Data?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        Section {
+            LabeledContent {
+                HStack {
+                    Button("Import…", action: chooseFile)
+                    Button("Export all…", action: exportAll)
+                }
+            } label: {
+                Text("All settings")
+                Text("Pairs, automation, highlight, shortcuts and appearance in one file.")
+            }
+            if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
+        } header: {
+            Text("Backup")
+        }
+        .confirmationDialog("Replace all settings?", isPresented: Binding(
+            get: { pendingImport != nil }, set: { if !$0 { pendingImport = nil } }
+        )) {
+            Button("Import and Relaunch", role: .destructive, action: importPending)
+        } message: {
+            Text("Your current settings are replaced by the file's, and Pointer Colors relaunches.")
+        }
+    }
+
+    private func exportAll() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.propertyList]
+        panel.nameFieldStringValue = "Pointer Colors Settings.plist"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try model.exportAllSettings().write(to: url)
+            errorMessage = nil
+        } catch {
+            errorMessage = String(localized: "Couldn't export: \(error.localizedDescription)")
+        }
+    }
+
+    private func chooseFile() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.propertyList]
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            pendingImport = try Data(contentsOf: url)
+            errorMessage = nil
+        } catch {
+            errorMessage = String(localized: "Couldn't import that file: \(error.localizedDescription)")
+        }
+    }
+
+    private func importPending() {
+        guard let data = pendingImport else { return }
+        pendingImport = nil
+        do {
+            try model.importAllSettings(from: data)
+        } catch {
+            errorMessage = String(localized: "Couldn't import that file: \(error.localizedDescription)")
         }
     }
 }
