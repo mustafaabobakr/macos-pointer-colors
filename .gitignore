@@ -4,3 +4,6 @@
 # ...except the promo film the website serves.
 !docs/promo/*.mp4
 __pycache__/
+# Build settings per environment; mac/.env.example lists the keys.
+mac/.env.local
+mac/.env.prod

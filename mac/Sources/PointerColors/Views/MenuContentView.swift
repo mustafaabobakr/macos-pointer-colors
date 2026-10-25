@@ -79,7 +79,10 @@ struct MenuContentView: View {
             .frame(width: 104 * scale, height: 104 * scale)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(model.selectedPair.name).appFont(.title3, weight: .bold)
+                HStack(spacing: 6) {
+                    Text(model.selectedPair.name).appFont(.title3, weight: .bold)
+                    if BuildInfo.current.isLocal { LocalBuildTag() }
+                }
                 HStack(spacing: 6) {
                     HexButton(label: String(localized: "Outline"), color: model.selectedPair.outline) { model.copyHex(outline: true) }
                     HexButton(label: String(localized: "Fill"), color: model.selectedPair.fill) { model.copyHex(outline: false) }
@@ -318,6 +321,18 @@ private extension HighlightEffect {
     var menuHelp: String {
         self == .pulse ? String(localized: "A ring where you click")
                        : String(localized: "A glowing dot, and a trail as you drag")
+    }
+}
+
+/// Marks a build made on this Mac rather than downloaded from GitHub.
+private struct LocalBuildTag: View {
+    var body: some View {
+        Text("LOCAL")
+            .appFont(.caption2, weight: .bold)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 5).padding(.vertical, 1)
+            .background(Capsule().fill(.orange))
+            .help(BuildInfo.current.localLabel ?? "")
     }
 }
 

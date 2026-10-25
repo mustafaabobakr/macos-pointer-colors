@@ -8,6 +8,14 @@ MAC_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$MAC_DIR/build/Pointer Colors.app"
 
 cd "$MAC_DIR"
+# Build settings: .env.local by default, .env.prod when make-dmg.sh sets BUILD_ENV=prod.
+BUILD_ENV="${BUILD_ENV:-local}"
+ENV_FILE="$MAC_DIR/.env.$BUILD_ENV"
+if [ -f "$ENV_FILE" ]; then set -a; . "$ENV_FILE"; set +a; fi
+BUILD_CHANNEL="${BUILD_CHANNEL:-local}"
+if [ "$BUILD_ENV" = prod ] && [ "$BUILD_CHANNEL" != release ]; then
+  echo "error: $ENV_FILE must set BUILD_CHANNEL=release; see .env.example" >&2; exit 1
+fi
 # Record the real SDK in the binary. SwiftPM otherwise stamps the deployment target (14.0) as
 # the SDK, and AppKit then draws pre-Liquid Glass controls for compatibility.
 SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
@@ -30,6 +38,12 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/PointerColors" "$APP/Contents/MacOS/PointerColors"
 cp "$MAC_DIR/Resources/Info.plist" "$APP/Contents/Info.plist"
+# Which build this is, for the menu: a local build shows its commit and build time.
+COMMIT="$(git -C "$MAC_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+[ -n "$(git -C "$MAC_DIR" status --porcelain 2>/dev/null)" ] && COMMIT="$COMMIT-dirty"
+for entry in "PCBuildChannel $BUILD_CHANNEL" "PCBuildCommit $COMMIT" "PCBuildDate $(date -u +%Y-%m-%dT%H:%M:%SZ)"; do
+  /usr/libexec/PlistBuddy -c "Add :${entry%% *} string ${entry#* }" "$APP/Contents/Info.plist"
+done
 cp -R "$MAC_DIR/Resources/en.lproj" "$MAC_DIR/Resources/ar.lproj" "$APP/Contents/Resources/"
 # The pair list shared with the website lives at the repo root.
 cp "$MAC_DIR/../pairs.json" "$APP/Contents/Resources/pairs.json"

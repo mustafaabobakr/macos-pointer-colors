@@ -153,7 +153,7 @@ extension AppModel {
     /// The update row's second line in the menu: the latest status, or the version when there's
     /// nothing to report.
     var menuUpdateLine: String {
-        updateMessage ?? String(localized: "Version \(UpdateChecker().currentVersion)")
+        updateMessage ?? BuildInfo.current.localLabel ?? String(localized: "Version \(UpdateChecker().currentVersion)")
     }
 
     var updateMessage: String? {
