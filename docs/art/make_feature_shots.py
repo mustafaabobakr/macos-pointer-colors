@@ -126,7 +126,6 @@ def svg_for(feature, shot_png, spot, screen, p):
   <rect x="{sx:.1f}" y="{sy:.1f}" width="{sw:.1f}" height="{sh:.1f}" rx="6" fill="#ffffff" fill-opacity=".08" stroke="#ffffff" stroke-opacity=".85" stroke-width="2"/>
   <rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20" fill="{BG}" filter="url(#shadow)"/>
   <g clip-path="url(#lens)">{image(shot, pw, ph, lens_pt, lx, ly, lw, lh, p)}</g>
-  <rect x="{lx:.1f}" y="{ly:.1f}" width="{lw:.1f}" height="{lh:.1f}" rx="20" fill="none" stroke="#ffffff" stroke-opacity=".9" stroke-width="4"/>
 </svg>'''
 
 
