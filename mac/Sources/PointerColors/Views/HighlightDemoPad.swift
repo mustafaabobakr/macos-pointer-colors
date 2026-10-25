@@ -55,7 +55,7 @@ struct HighlightDemoPad: View {
 
     private func ended(_ value: DragGesture.Value) {
         isDragging = false
-        scene.finishStroke(at: now)
+        scene.release(at: now)
         scene.revision += 1
     }
 

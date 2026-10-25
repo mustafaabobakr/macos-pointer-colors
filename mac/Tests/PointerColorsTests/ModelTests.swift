@@ -297,4 +297,42 @@ final class PointerHighlightTests: XCTestCase {
         scene.drag(to: CGPoint(x: 30, y: 0), now: 0.3, optionHeld: true, settings: highlight)
         XCTAssertEqual(scene.strokes.count, 1)
     }
+
+    func testQuickClickShowsNoHoldButALongPressDoes() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        highlight.pulseOn = true
+        highlight.pulseShowsHold = true
+        let scene = HighlightScene()
+        scene.press(at: .zero, now: 0, isLeft: true, optionHeld: false, settings: highlight)
+        scene.release(at: 0.1)
+        XCTAssertNil(scene.hold, "a click is just a pulse")
+        XCTAssertEqual(scene.pulses.count, 1)
+
+        scene.press(at: .zero, now: 1, isLeft: true, optionHeld: false, settings: highlight)
+        scene.move(to: CGPoint(x: 20, y: 5), now: 1.3, settings: highlight)
+        scene.release(at: 1.6)
+        XCTAssertEqual(scene.hold?.releasedAt, 1.6, "the held ring fades on release")
+        XCTAssertEqual(scene.pulses.last?.start, 1.6, "and a pulse goes out on release")
+        XCTAssertEqual(scene.pulses.last?.point, CGPoint(x: 20, y: 5))
+        XCTAssertEqual(scene.hold?.point, CGPoint(x: 20, y: 5), "the held ring follows the pointer")
+        XCTAssertTrue(scene.prune(at: 1.6 + Hold.release + 0.01))
+        XCTAssertNil(scene.hold)
+    }
+
+    func testLongPressesAreOffByDefault() {
+        let highlight = PointerHighlight(defaults: makeDefaults())
+        highlight.pulseOn = true
+        XCTAssertFalse(highlight.pulseShowsHold)
+        let scene = HighlightScene()
+        scene.press(at: .zero, now: 0, isLeft: true, optionHeld: false, settings: highlight)
+        XCTAssertNil(scene.hold)
+    }
+
+    func testPulseStyleIsRingByDefaultAndRemembered() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(highlight.pulseStyle, .ring)
+        highlight.pulseStyle = .ripple
+        XCTAssertEqual(PointerHighlight(defaults: defaults).pulseStyle, .ripple)
+    }
 }

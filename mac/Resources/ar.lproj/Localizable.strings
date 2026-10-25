@@ -137,6 +137,11 @@
 "Size" = "الحجم";
 "Length" = "المدة";
 "Pulse on right-clicks too" = "نبضة عند النقر بالزر الأيمن أيضًا";
+"Ring" = "حلقة";
+"Ripple" = "تموّج";
+"Style" = "النمط";
+"Show long presses" = "إظهار الضغطات المطوّلة";
+"Holding the button keeps a small filled ring under the pointer, and letting go sends out a pulse, so a press looks different from a click." = "عند إبقاء الزر مضغوطًا تبقى حلقة صغيرة ممتلئة تحت المؤشر، وعند الإفلات تنطلق نبضة، فتبدو الضغطة المطوّلة مختلفة عن النقرة.";
 "Draw a trail while dragging" = "رسم أثر أثناء السحب";
 "Hold the mouse button and move to draw; the trail fades after you let go." = "اضغط زر الفأرة مع التحريك للرسم، ويتلاشى الأثر بعد الإفلات.";
 "Trail fades after" = "يتلاشى الأثر بعد";

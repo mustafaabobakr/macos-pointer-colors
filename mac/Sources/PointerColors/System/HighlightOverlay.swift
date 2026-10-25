@@ -21,7 +21,8 @@ final class HighlightOverlay {
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged, .leftMouseDown, .rightMouseDown,
-                                                        .otherMouseDown, .leftMouseUp, .flagsChanged]
+                                                        .otherMouseDown, .leftMouseUp, .rightMouseUp,
+                                                        .otherMouseUp, .flagsChanged]
 
     init(settings: PointerHighlight, pair: @escaping () -> PointerPair, pointerScale: @escaping () -> Double) {
         self.settings = settings
@@ -120,7 +121,7 @@ final class HighlightOverlay {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             scene.press(at: point, now: now, isLeft: type == .leftMouseDown, optionHeld: optionHeld, settings: settings)
         case .leftMouseDragged: scene.drag(to: point, now: now, optionHeld: optionHeld, settings: settings)
-        case .leftMouseUp: scene.finishStroke(at: now)
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp: scene.release(at: now)
         default: scene.move(to: point, now: now, settings: settings)
         }
         // A plain move changes nothing on screen unless the ring or the laser follows it.
@@ -139,7 +140,10 @@ final class HighlightOverlay {
 
     /// Drops what has faded, so the drawing stops once nothing is left.
     private func prune() {
-        if scene.prune(at: Date.timeIntervalSinceReferenceDate) { scene.revision += 1 }
+        let now = Date.timeIntervalSinceReferenceDate
+        // A release that never reached us, e.g. over a window that kept it, still ends the hold.
+        if NSEvent.pressedMouseButtons == 0 { scene.release(at: now) }
+        if scene.prune(at: now) { scene.revision += 1 }
     }
 }
 
@@ -155,6 +159,8 @@ struct HighlightStyle {
     var pointerScale = 1.0
     var pulseSize = 1.0
     var pulseDuration = 0.45
+    var showsHold = true
+    var pulseStyle = PulseStyle.ring
     var laserSize = 1.0
     var trailFade = 0.9
 
@@ -169,6 +175,8 @@ struct HighlightStyle {
         self.pointerScale = pointerScale
         pulseSize = settings.pulseSize
         pulseDuration = settings.pulseDuration
+        showsHold = settings.pulseShowsHold
+        pulseStyle = settings.pulseStyle
         laserSize = settings.laserSize
         trailFade = settings.laserTrailFade
     }
@@ -177,6 +185,22 @@ struct HighlightStyle {
 struct Pulse {
     let point: CGPoint
     let start: TimeInterval
+}
+
+/// A press held longer than a click: a small filled ring under the pointer until release, when it
+/// fades and a click pulse goes out from it. A quick click never shows it.
+struct Hold {
+    /// Held this long, a press counts as a long press.
+    static let threshold: TimeInterval = 0.35
+    /// How long the ring takes to grow in, and to fade after release.
+    static let grow: TimeInterval = 0.15
+    static let release: TimeInterval = 0.12
+    /// Size against a click pulse's starting ring.
+    static let size = 0.55
+
+    var point: CGPoint
+    let start: TimeInterval
+    var releasedAt: TimeInterval?
 }
 
 struct LaserDot {
@@ -197,17 +221,19 @@ final class HighlightScene {
     var style = HighlightStyle()
     var pointer = CGPoint.zero
     var pulses: [Pulse] = []
+    var hold: Hold?
     var laserDot: LaserDot?
     var strokes: [LaserStroke] = []
     /// Bumped on every change, so the canvases redraw.
     var revision = 0
 
     /// Something is fading, so the canvases keep animating.
-    var isAnimating: Bool { !pulses.isEmpty || laserDot != nil || !strokes.isEmpty }
+    var isAnimating: Bool { !pulses.isEmpty || hold != nil || laserDot != nil || !strokes.isEmpty }
 
     /// The laser dot follows the pointer.
     func move(to point: CGPoint, now: TimeInterval, settings: PointerHighlight) {
         pointer = point
+        if hold?.releasedAt == nil { hold?.point = point }
         guard settings.laserOn else { return }
         laserDot = LaserDot(point: point, updatedAt: now)
     }
@@ -225,6 +251,7 @@ final class HighlightScene {
         if isLeft, settings.laserDraws(optionHeld: optionHeld) { startStroke(at: point) }
         guard settings.pulseOn, isLeft || settings.pulsesOnRightClick else { return }
         pulses.append(Pulse(point: point, start: now))
+        if settings.pulseShowsHold { hold = Hold(point: point, start: now) }
     }
 
     func startStroke(at point: CGPoint) {
@@ -238,6 +265,16 @@ final class HighlightScene {
         strokes[index].points.append(point)
     }
 
+    /// The button came up: ends the trail and, after a long press, fades the held ring and sends
+    /// a pulse out from where it was let go.
+    func release(at time: TimeInterval) {
+        finishStroke(at: time)
+        guard let held = hold, held.releasedAt == nil else { return }
+        guard time - held.start >= Hold.threshold else { hold = nil; return }
+        hold = Hold(point: held.point, start: held.start, releasedAt: time)
+        pulses.append(Pulse(point: held.point, start: time))
+    }
+
     func finishStroke(at time: TimeInterval) {
         guard let index = strokes.lastIndex(where: { $0.finishedAt == nil }) else { return }
         strokes[index].finishedAt = time
@@ -245,15 +282,22 @@ final class HighlightScene {
 
     /// Removes faded items. True when something was removed.
     func prune(at now: TimeInterval) -> Bool {
-        let before = pulses.count + strokes.count + (laserDot == nil ? 0 : 1)
+        let before = liveCount
         pulses.removeAll { now - $0.start > style.pulseDuration }
         strokes.removeAll { stroke in stroke.finishedAt.map { now - $0 > style.trailFade } ?? false }
         if let dot = laserDot, now - dot.updatedAt > LaserDot.fade { laserDot = nil }
-        return pulses.count + strokes.count + (laserDot == nil ? 0 : 1) != before
+        if let released = hold?.releasedAt, now - released > Hold.release { hold = nil }
+        return liveCount != before
+    }
+
+    /// How many things are on screen, to tell when pruning removed one.
+    private var liveCount: Int {
+        pulses.count + strokes.count + (laserDot == nil ? 0 : 1) + (hold == nil ? 0 : 1)
     }
 
     func clear() {
         pulses = []
+        hold = nil
         strokes = []
         laserDot = nil
     }

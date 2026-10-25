@@ -34,6 +34,7 @@ struct HighlightSnapshot {
     let style: HighlightStyle
     let pointer: CGPoint
     let pulses: [Pulse]
+    let hold: Hold?
     let laserDot: LaserDot?
     let strokes: [LaserStroke]
 
@@ -43,6 +44,7 @@ struct HighlightSnapshot {
         style = scene.style
         pointer = local(scene.pointer)
         pulses = scene.pulses.map { Pulse(point: local($0.point), start: $0.start) }
+        hold = scene.hold.map { Hold(point: local($0.point), start: $0.start, releasedAt: $0.releasedAt) }
         laserDot = scene.laserDot.map { LaserDot(point: local($0.point), updatedAt: $0.updatedAt) }
         strokes = scene.strokes.map { LaserStroke(points: $0.points.map(local), finishedAt: $0.finishedAt) }
     }
@@ -51,6 +53,7 @@ struct HighlightSnapshot {
         if style.showsRing { drawRing(in: &context) }
         strokes.forEach { drawStroke($0, now: now, in: &context) }
         pulses.forEach { drawPulse($0, now: now, in: &context) }
+        if let hold { drawHold(hold, now: now, in: &context) }
         if let laserDot { drawDot(laserDot, now: now, in: &context) }
     }
 
@@ -65,12 +68,50 @@ struct HighlightSnapshot {
 
     /// Starts small and bright, then grows and fades.
     private func drawPulse(_ pulse: Pulse, now: TimeInterval, in context: inout GraphicsContext) {
-        let progress = fraction(now - pulse.start, of: style.pulseDuration)
-        guard progress < 1 else { return }
+        let elapsed = now - pulse.start
+        guard elapsed < style.pulseDuration else { return }
+        switch style.pulseStyle {
+        case .ring: drawPulseRing(at: pulse.point, progress: fraction(elapsed, of: style.pulseDuration), in: &context)
+        case .ripple: drawRipple(at: pulse.point, elapsed: elapsed, in: &context)
+        }
+    }
+
+    /// One ring that grows and fades.
+    private func drawPulseRing(at point: CGPoint, progress: Double, in context: inout GraphicsContext) {
         let eased = 1 - (1 - progress) * (1 - progress)
         let side = baseDiameter * style.pulseSize * (0.6 + 1.2 * eased)
-        let circle = Path(ellipseIn: square(at: pulse.point, side: side))
+        let circle = Path(ellipseIn: square(at: point, side: side))
         context.stroke(circle, with: .color(style.pulseColor.color.opacity(0.95 * (1 - eased))), lineWidth: 4)
+    }
+
+    /// Three waves, each leaving a little after the one before, spreading wider and thinner than
+    /// the ring as they fade, like a ripple on water. All three finish within the pulse length.
+    private func drawRipple(at point: CGPoint, elapsed: TimeInterval, in context: inout GraphicsContext) {
+        let wave = style.pulseDuration * 0.7
+        let gap = style.pulseDuration * 0.15
+        for index in 0..<3 {
+            let progress = fraction(elapsed - Double(index) * gap, of: wave)
+            guard progress > 0, progress < 1 else { continue }
+            let eased = 1 - (1 - progress) * (1 - progress)
+            let side = baseDiameter * style.pulseSize * (0.3 + 1.9 * eased)
+            let circle = Path(ellipseIn: square(at: point, side: side))
+            let opacity = 0.9 * (1 - progress) * (1 - progress)
+            context.stroke(circle, with: .color(style.pulseColor.color.opacity(opacity)), lineWidth: 3 - 2 * eased)
+        }
+    }
+
+    /// After a long press: a small filled ring grows in under the pointer and breathes while held,
+    /// then fades on release while a click pulse goes out from it.
+    private func drawHold(_ hold: Hold, now: TimeInterval, in context: inout GraphicsContext) {
+        let shown = fraction(now - hold.start - Hold.threshold, of: Hold.grow)
+        guard shown > 0 else { return }
+        let gone = hold.releasedAt.map { fraction(now - $0, of: Hold.release) } ?? 0
+        let breathe = hold.releasedAt == nil ? 0.04 * sin((now - hold.start) * 2 * .pi / 1.2) : 0
+        let scale = (0.6 + 0.4 * shown + breathe) * Hold.size
+        let opacity = shown * (1 - gone)
+        let circle = Path(ellipseIn: square(at: hold.point, side: baseDiameter * style.pulseSize * scale))
+        context.fill(circle, with: .color(style.pulseColor.color.opacity(0.35 * opacity)))
+        context.stroke(circle, with: .color(style.pulseColor.color.opacity(0.95 * opacity)), lineWidth: 3)
     }
 
     /// A soft glow, then the core, middle and center, fading once the pointer stops.

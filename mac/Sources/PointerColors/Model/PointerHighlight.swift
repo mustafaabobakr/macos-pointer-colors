@@ -1,6 +1,23 @@
 import Foundation
 import Observation
 
+/// How a click pulse looks.
+enum PulseStyle: String, CaseIterable, Identifiable {
+    /// One ring that grows and fades.
+    case ring
+    /// Three thin rings, one after another, like a ripple on water.
+    case ripple
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .ring: return String(localized: "Ring")
+        case .ripple: return String(localized: "Ripple")
+        }
+    }
+}
+
 /// The two highlight effects. Each has its own switch, so either, both or neither can be on.
 enum HighlightEffect: String, CaseIterable, Identifiable {
     /// A ring that grows and fades where you click.
@@ -42,6 +59,10 @@ final class PointerHighlight {
     /// Seconds from click to fully faded.
     var pulseDuration: Double { didSet { save(pulseDuration, Key.pulseDuration) } }
     var pulsesOnRightClick: Bool { didSet { save(pulsesOnRightClick, Key.pulseRight) } }
+    var pulseStyle: PulseStyle { didSet { save(pulseStyle.rawValue, Key.pulseStyle) } }
+    /// A press held past a click keeps a filled ring under the pointer until release. Off by
+    /// default: a long press then shows the same pulse as a click.
+    var pulseShowsHold: Bool { didSet { save(pulseShowsHold, Key.pulseHold) } }
 
     /// Off uses `laserColor` instead of the pair's color.
     var laserUsesPairColor: Bool { didSet { save(laserUsesPairColor, Key.laserPair) } }
@@ -81,6 +102,8 @@ final class PointerHighlight {
         pulseSize = defaults.double(forKey: Key.pulseSize)
         pulseDuration = defaults.double(forKey: Key.pulseDuration)
         pulsesOnRightClick = defaults.bool(forKey: Key.pulseRight)
+        pulseStyle = defaults.string(forKey: Key.pulseStyle).flatMap(PulseStyle.init(rawValue:)) ?? .ring
+        pulseShowsHold = defaults.bool(forKey: Key.pulseHold)
         laserUsesPairColor = defaults.bool(forKey: Key.laserPair)
         laserColor = Self.color(defaults, Key.laserColor) ?? RGBA(hex: "FF3B30")!
         laserSize = defaults.double(forKey: Key.laserSize)
@@ -160,6 +183,8 @@ final class PointerHighlight {
         static let pulseSize = "highlightPulseSize"
         static let pulseDuration = "highlightPulseDuration"
         static let pulseRight = "highlightPulseRightClick"
+        static let pulseStyle = "highlightPulseStyle"
+        static let pulseHold = "highlightPulseShowsHold"
         static let laserPair = "highlightLaserUsesPair"
         static let laserColor = "highlightLaserColor"
         static let laserSize = "highlightLaserSize"

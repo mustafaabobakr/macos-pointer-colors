@@ -41,11 +41,19 @@ private struct PulseSection: View {
         Section("Pulse") {
             ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor,
                               pairHint: String(localized: "Uses the pair's color, set below for each pair."))
+            Picker("Style", selection: $highlight.pulseStyle) {
+                ForEach(PulseStyle.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
             ValueSlider(title: String(localized: "Size"), value: $highlight.pulseSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
             ValueSlider(title: String(localized: "Length"), value: $highlight.pulseDuration,
                         range: PointerHighlight.pulseDurationRange, format: "%.2f s")
             Toggle("Pulse on right-clicks too", isOn: $highlight.pulsesOnRightClick)
+            Toggle(isOn: $highlight.pulseShowsHold) {
+                Text("Show long presses")
+                Text("Holding the button keeps a small filled ring under the pointer, and letting go sends out a pulse, so a press looks different from a click.")
+            }
         }
         .disabled(!highlight.pulseOn)
     }
