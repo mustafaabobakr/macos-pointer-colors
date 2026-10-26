@@ -18,7 +18,7 @@ final class HighlightOverlay {
     private var displays: [DisplayLayers] = []
     private var monitors: [Any] = []
     private var lostReleaseTimer: Timer?
-    /// The windows are catching the mouse so a ⌥-drag draws instead of reaching the app below.
+    /// The windows are catching the mouse so a drag with the laser's keys held draws instead of reaching the app below.
     private var isCapturing = false
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
@@ -127,13 +127,13 @@ final class HighlightOverlay {
 
     private func handle(_ type: NSEvent.EventType) {
         let point = NSEvent.mouseLocation
-        let optionHeld = NSEvent.modifierFlags.contains(.option)
-        updateCapture(optionHeld: optionHeld)
+        let keysHeld = settings.laserKeysHeld(in: NSEvent.modifierFlags)
+        updateCapture(keysHeld: keysHeld)
         switch type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            press(at: point, isLeft: type == .leftMouseDown, optionHeld: optionHeld)
+            press(at: point, isLeft: type == .leftMouseDown, keysHeld: keysHeld)
         case .leftMouseDragged:
-            let draws = settings.laserDraws(optionHeld: optionHeld)
+            let draws = settings.laserDraws(keysHeld: keysHeld)
             follow(point, drawing: draws)
             if draws { extendTrail(to: point) }
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
@@ -144,9 +144,9 @@ final class HighlightOverlay {
     }
 
     /// A click sends out a pulse, and starts a laser trail with the left button; both when both are on.
-    private func press(at point: CGPoint, isLeft: Bool, optionHeld: Bool) {
+    private func press(at point: CGPoint, isLeft: Bool, keysHeld: Bool) {
         pressPulse(at: point, isLeft: isLeft)
-        if isLeft, settings.laserDraws(optionHeld: optionHeld) { startTrail(at: point) }
+        if isLeft, settings.laserDraws(keysHeld: keysHeld) { startTrail(at: point) }
     }
 
     /// The button came up: the trail fades and, after a long press, a pulse goes out.
@@ -232,10 +232,10 @@ final class HighlightOverlay {
         displays.forEach { $0.laser.extendStroke(to: local(point, in: $0.frame), style: style) }
     }
 
-    /// While the laser needs ⌥ and ⌥ is held, the windows take the mouse: the drag draws, and the
+    /// While the laser needs keys and they're held, the windows take the mouse: the drag draws, and the
     /// app underneath gets no click to select text with. A drag already under way keeps its owner.
-    private func updateCapture(optionHeld: Bool) {
-        let capture = settings.laserOn && settings.laserNeedsOption && optionHeld
+    private func updateCapture(keysHeld: Bool) {
+        let capture = settings.laserOn && settings.laserNeedsKeys && keysHeld
         guard capture != isCapturing, NSEvent.pressedMouseButtons == 0 else { return }
         isCapturing = capture
         windows.forEach { $0.ignoresMouseEvents = !capture }
@@ -356,17 +356,17 @@ final class HighlightScene {
     }
 
     /// Dragging moves the dot and, with the trail on, draws.
-    func drag(to point: CGPoint, now: TimeInterval, optionHeld: Bool, settings: PointerHighlight) {
+    func drag(to point: CGPoint, now: TimeInterval, keysHeld: Bool, settings: PointerHighlight) {
         move(to: point, now: now, settings: settings)
-        guard settings.laserDraws(optionHeld: optionHeld) else { return }
+        guard settings.laserDraws(keysHeld: keysHeld) else { return }
         if settings.laserDotShows(drawing: true) { laserDot = LaserDot(point: point, updatedAt: now) }
         extendStroke(to: point)
     }
 
     /// A click starts a pulse, and a laser trail with the left button; both when both are on.
-    func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, optionHeld: Bool, settings: PointerHighlight) {
+    func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, keysHeld: Bool, settings: PointerHighlight) {
         pointer = point
-        if isLeft, settings.laserDraws(optionHeld: optionHeld) { startStroke(at: point) }
+        if isLeft, settings.laserDraws(keysHeld: keysHeld) { startStroke(at: point) }
         guard settings.pulses(isLeft: isLeft) else { return }
         pulses.append(Pulse(point: point, start: now))
         if settings.pulseShowsHold { hold = Hold(point: point, start: now) }

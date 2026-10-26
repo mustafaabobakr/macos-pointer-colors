@@ -3,6 +3,11 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.4 — 2026-10-26
+
+- **Choose the keys that draw the laser.** **Preferences › Highlight › Laser › Keys to hold** sets which keys **Draw only while holding** waits for: ⌘, ⌥, ⌃ or ⇧, alone or together. Click it, press the keys, and let go. It stays ⌥ Option unless you change it.
+- **Launch at login is backed up.** **Export all…** now saves **Launch at login** with the rest of your settings, and **Import…** puts it back.
+
 ## 0.4.3 — 2026-10-26
 
 - **The laser and the ring keep up across displays.** Moving to another display, the laser dot and the ring around the pointer no longer lag behind. A laser trail that crosses to a display with another pair carries on in that pair's colors.

@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import Observation
 
 /// How a click pulse looks.
@@ -93,9 +93,11 @@ final class PointerHighlight {
     var laserTrail: Bool { didSet { save(laserTrail, Key.laserTrail) } }
     /// Seconds a finished trail takes to fade.
     var laserTrailFade: Double { didSet { save(laserTrailFade, Key.laserFade) } }
-    /// Draws the laser only while ⌥ Option is held, catching the mouse so nothing underneath is
+    /// Draws the laser only while `laserKeys` are held, catching the mouse so nothing underneath is
     /// clicked or selected. Off, the laser draws on any drag and the drag also reaches the app.
-    var laserNeedsOption: Bool { didSet { save(laserNeedsOption, Key.laserOption) } }
+    var laserNeedsKeys: Bool { didSet { save(laserNeedsKeys, Key.laserOption) } }
+    /// The keys `laserNeedsKeys` waits for; ⌥ Option unless changed.
+    var laserKeys: HoldKeys { didSet { save(laserKeys.rawValue, Key.laserKeys) } }
     /// When the dot follows the pointer.
     var laserDot: LaserDotMode { didSet { save(laserDot.rawValue, Key.laserDot) } }
 
@@ -113,7 +115,8 @@ final class PointerHighlight {
         self.defaults = defaults
         defaults.register(defaults: [Key.pulsePair: true, Key.pulseSize: 1.0, Key.pulseDuration: 0.45,
                                      Key.pulseRight: true, Key.laserPair: true, Key.laserSize: 1.0,
-                                     Key.laserTrail: true, Key.laserFade: 0.9])
+                                     Key.laserTrail: true, Key.laserFade: 0.9,
+                                     Key.laserKeys: HoldKeys.option.rawValue])
         // Builds before the switches stored one choice: off, pulse or laser.
         let earlier = defaults.string(forKey: Key.oldMode)
         pulseOn = defaults.object(forKey: Key.pulseOn) as? Bool ?? (earlier == "pulse")
@@ -131,7 +134,9 @@ final class PointerHighlight {
         laserSize = defaults.double(forKey: Key.laserSize)
         laserTrail = defaults.bool(forKey: Key.laserTrail)
         laserTrailFade = defaults.double(forKey: Key.laserFade)
-        laserNeedsOption = defaults.bool(forKey: Key.laserOption)
+        laserNeedsKeys = defaults.bool(forKey: Key.laserOption)
+        let keys = HoldKeys(rawValue: defaults.integer(forKey: Key.laserKeys))
+        laserKeys = keys.isEmpty ? .option : keys
         laserDot = defaults.string(forKey: Key.laserDot).flatMap(LaserDotMode.init(rawValue:)) ?? .always
         pairPulseColors = Self.colors(defaults, Key.pairPulse)
         pairLaserColors = Self.colors(defaults, Key.pairLaser)
@@ -153,9 +158,14 @@ final class PointerHighlight {
         pulseOn && (isLeft || pulsesOnRightClick)
     }
 
-    /// A drag draws a laser trail: the laser and its trail are on and, if it needs ⌥, ⌥ is held.
-    func laserDraws(optionHeld: Bool) -> Bool {
-        laserOn && laserTrail && (optionHeld || !laserNeedsOption)
+    /// A drag draws a laser trail: the laser and its trail are on and, if it needs keys, they're held.
+    func laserDraws(keysHeld: Bool) -> Bool {
+        laserOn && laserTrail && (keysHeld || !laserNeedsKeys)
+    }
+
+    /// The laser's keys are all down in `flags`.
+    func laserKeysHeld(in flags: NSEvent.ModifierFlags) -> Bool {
+        laserKeys.areHeld(in: flags)
     }
 
     /// The laser dot shows for this move: always, or only while a trail is `drawing`.
@@ -211,6 +221,7 @@ final class PointerHighlight {
     private enum Key {
         static let oldMode = "highlightMode"
         static let laserOption = "highlightLaserNeedsOption"
+        static let laserKeys = "highlightLaserKeys"
         static let laserDot = "highlightLaserDot"
         static let pairPulse = "highlightPairPulseColors"
         static let pairLaser = "highlightPairLaserColors"
