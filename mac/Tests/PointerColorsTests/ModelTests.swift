@@ -256,8 +256,8 @@ final class PointerHighlightTests: XCTestCase {
         highlight.pulseOn = true
         highlight.laserOn = true
         let scene = HighlightScene()
-        scene.press(at: CGPoint(x: 10, y: 10), now: 0, isLeft: true, optionHeld: false, settings: highlight)
-        scene.drag(to: CGPoint(x: 40, y: 10), now: 0.1, optionHeld: false, settings: highlight)
+        scene.press(at: CGPoint(x: 10, y: 10), now: 0, isLeft: true, keysHeld: false, settings: highlight)
+        scene.drag(to: CGPoint(x: 40, y: 10), now: 0.1, keysHeld: false, settings: highlight)
         XCTAssertEqual(scene.pulses.count, 1)
         XCTAssertEqual(scene.strokes.count, 1)
         XCTAssertNotNil(scene.laserDot)
@@ -287,17 +287,29 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(reopened.laserColors(for: pair).glow, reopened.laserColor)
     }
 
-    func testLaserNeedingOptionDrawsOnlyWithOption() {
+    func testLaserNeedingKeysDrawsOnlyWithThem() {
         let highlight = PointerHighlight(defaults: makeDefaults())
         highlight.laserOn = true
-        highlight.laserNeedsOption = true
+        highlight.laserNeedsKeys = true
         let scene = HighlightScene()
-        scene.press(at: .zero, now: 0, isLeft: true, optionHeld: false, settings: highlight)
-        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.1, optionHeld: false, settings: highlight)
+        scene.press(at: .zero, now: 0, isLeft: true, keysHeld: false, settings: highlight)
+        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.1, keysHeld: false, settings: highlight)
         XCTAssertTrue(scene.strokes.isEmpty)
-        scene.press(at: .zero, now: 0.2, isLeft: true, optionHeld: true, settings: highlight)
-        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.3, optionHeld: true, settings: highlight)
+        scene.press(at: .zero, now: 0.2, isLeft: true, keysHeld: true, settings: highlight)
+        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.3, keysHeld: true, settings: highlight)
         XCTAssertEqual(scene.strokes.count, 1)
+    }
+
+    func testLaserKeysDefaultToOptionAndAreSaved() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(highlight.laserKeys, .option)
+        XCTAssertEqual(highlight.laserKeys.title, "⌥ Option")
+        highlight.laserKeys = [.control, .option]
+        XCTAssertEqual(highlight.laserKeys.title, "⌃⌥")
+        XCTAssertFalse(highlight.laserKeysHeld(in: .option))
+        XCTAssertTrue(highlight.laserKeysHeld(in: [.control, .option, .shift]))
+        XCTAssertEqual(PointerHighlight(defaults: defaults).laserKeys, [.control, .option])
     }
 
     func testLaserDotCanShowOnlyWhileDrawing() {
@@ -307,8 +319,8 @@ final class PointerHighlightTests: XCTestCase {
         let scene = HighlightScene()
         scene.move(to: .zero, now: 0, settings: highlight)
         XCTAssertNil(scene.laserDot, "a plain move shows no dot")
-        scene.press(at: .zero, now: 0.1, isLeft: true, optionHeld: false, settings: highlight)
-        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.2, optionHeld: false, settings: highlight)
+        scene.press(at: .zero, now: 0.1, isLeft: true, keysHeld: false, settings: highlight)
+        scene.drag(to: CGPoint(x: 30, y: 0), now: 0.2, keysHeld: false, settings: highlight)
         XCTAssertNotNil(scene.laserDot, "drawing shows it")
     }
 
@@ -326,12 +338,12 @@ final class PointerHighlightTests: XCTestCase {
         highlight.pulseOn = true
         highlight.pulseShowsHold = true
         let scene = HighlightScene()
-        scene.press(at: .zero, now: 0, isLeft: true, optionHeld: false, settings: highlight)
+        scene.press(at: .zero, now: 0, isLeft: true, keysHeld: false, settings: highlight)
         scene.release(at: 0.1)
         XCTAssertNil(scene.hold, "a click is just a pulse")
         XCTAssertEqual(scene.pulses.count, 1)
 
-        scene.press(at: .zero, now: 1, isLeft: true, optionHeld: false, settings: highlight)
+        scene.press(at: .zero, now: 1, isLeft: true, keysHeld: false, settings: highlight)
         scene.move(to: CGPoint(x: 20, y: 5), now: 1.3, settings: highlight)
         scene.release(at: 1.6)
         XCTAssertEqual(scene.hold?.releasedAt, 1.6, "the held ring fades on release")
@@ -347,7 +359,7 @@ final class PointerHighlightTests: XCTestCase {
         highlight.pulseOn = true
         XCTAssertFalse(highlight.pulseShowsHold)
         let scene = HighlightScene()
-        scene.press(at: .zero, now: 0, isLeft: true, optionHeld: false, settings: highlight)
+        scene.press(at: .zero, now: 0, isLeft: true, keysHeld: false, settings: highlight)
         XCTAssertNil(scene.hold)
     }
 
@@ -374,12 +386,16 @@ final class SettingsBackupTests: XCTestCase {
         source.set(["display-1": 2.0], forKey: "displaySizes")
         source.set("{0, 0, 10, 10}", forKey: "NSWindow Frame preferences")
         source.set(Date(), forKey: "lastUpdateCheck")
-        let data = try SettingsBackup(defaults: source, domain: sourceName).export()
+        source.set(HoldKeys([.control, .option]).rawValue, forKey: "highlightLaserKeys")
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: true)
 
         let (target, targetName) = makeDefaults()
         target.set("light", forKey: "appTheme")
         target.set(true, forKey: "perAppColors")
-        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        let launchAtLogin = try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+
+        XCTAssertEqual(launchAtLogin, true)
+        XCTAssertEqual(target.integer(forKey: "highlightLaserKeys"), HoldKeys([.control, .option]).rawValue)
 
         XCTAssertEqual(target.string(forKey: "appTheme"), "dark")
         XCTAssertEqual(target.dictionary(forKey: "displaySizes") as? [String: Double], ["display-1": 2.0])
@@ -392,5 +408,12 @@ final class SettingsBackupTests: XCTestCase {
         let (defaults, name) = makeDefaults()
         let data = try! PropertyListSerialization.data(fromPropertyList: ["appTheme": "dark"], format: .xml, options: 0)
         XCTAssertThrowsError(try SettingsBackup(defaults: defaults, domain: name).restore(from: data))
+    }
+
+    func testOlderFilesLeaveOpenAtLoginAlone() throws {
+        let (defaults, name) = makeDefaults()
+        let file: [String: Any] = ["format": "pointer-colors-settings", "version": 1, "settings": ["appTheme": "dark"]]
+        let data = try PropertyListSerialization.data(fromPropertyList: file, format: .xml, options: 0)
+        XCTAssertNil(try SettingsBackup(defaults: defaults, domain: name).restore(from: data))
     }
 }

@@ -323,12 +323,12 @@ final class AppModel {
     // MARK: Settings
 
     func exportAllSettings() throws -> Data {
-        try SettingsBackup().export()
+        try SettingsBackup().export(launchAtLogin: settings.launchAtLogin)
     }
 
     /// Restores every preference from a backup, then relaunches so each part reads it fresh.
     func importAllSettings(from data: Data) throws {
-        try SettingsBackup().restore(from: data)
+        if let launchAtLogin = try SettingsBackup().restore(from: data) { setLaunchAtLogin(launchAtLogin) }
         try AppUpdater.relaunch()
         NSApp.terminate(nil)
     }
