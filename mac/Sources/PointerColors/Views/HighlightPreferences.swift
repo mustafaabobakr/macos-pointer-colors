@@ -76,11 +76,18 @@ private struct LaserSection: View {
             ValueSlider(title: String(localized: "Trail fades after"), value: $highlight.laserTrailFade,
                         range: PointerHighlight.trailFadeRange, format: "%.1f s")
                 .disabled(!highlight.laserTrail)
-            Toggle(isOn: $highlight.laserNeedsOption) {
-                Text("Draw only while holding ⌥ Option")
-                Text("A ⌥-drag draws the laser and doesn't click the app underneath, so no text gets selected. Without ⌥, clicks and drags work as usual.")
+            Toggle(isOn: $highlight.laserNeedsKeys) {
+                Text("Draw only while holding \(highlight.laserKeys.title)")
+                Text("A \(highlight.laserKeys.symbols)-drag draws the laser and doesn't click the app underneath, so no text gets selected. Without \(highlight.laserKeys.symbols), clicks and drags work as usual.")
             }
             .disabled(!highlight.laserTrail)
+            LabeledContent {
+                HoldKeyRecorder(keys: highlight.laserKeys) { highlight.laserKeys = $0 }
+            } label: {
+                Text("Keys to hold")
+                Text("Click, then press ⌘, ⌥, ⌃ or ⇧, alone or together, and let go.")
+            }
+            .disabled(!highlight.laserTrail || !highlight.laserNeedsKeys)
             Picker(selection: $highlight.laserDot) {
                 ForEach(LaserDotMode.allCases) { Text($0.title).tag($0) }
             } label: {

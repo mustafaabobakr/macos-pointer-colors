@@ -33,7 +33,7 @@ struct HighlightDemoPad: View {
 
     private var now: TimeInterval { Date.timeIntervalSinceReferenceDate }
 
-    private var optionHeld: Bool { NSEvent.modifierFlags.contains(.option) }
+    private var keysHeld: Bool { highlight.laserKeysHeld(in: NSEvent.modifierFlags) }
 
     private func hovered(_ phase: HoverPhase) {
         guard case .active(let point) = phase else { return }
@@ -45,10 +45,10 @@ struct HighlightDemoPad: View {
     private func dragged(_ value: DragGesture.Value) {
         scene.style = style
         if isDragging {
-            scene.drag(to: value.location, now: now, optionHeld: optionHeld, settings: highlight)
+            scene.drag(to: value.location, now: now, keysHeld: keysHeld, settings: highlight)
         } else {
             isDragging = true
-            scene.press(at: value.location, now: now, isLeft: true, optionHeld: optionHeld, settings: highlight)
+            scene.press(at: value.location, now: now, isLeft: true, keysHeld: keysHeld, settings: highlight)
         }
         scene.revision += 1
     }
