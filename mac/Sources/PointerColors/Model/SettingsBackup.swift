@@ -2,7 +2,7 @@ import Foundation
 
 /// Every app preference in one file: pairs, automation, highlight, shortcuts and appearance.
 /// Reads and writes the app's own UserDefaults domain, leaving out what macOS keeps there for
-/// windows and panels and what only describes this Mac's update checks. Open at login, which
+/// windows and panels and what only describes this Mac's update checks. Launch at login, which
 /// macOS keeps instead of the app, goes in the file next to them.
 struct SettingsBackup {
     private let defaults: UserDefaults
@@ -33,7 +33,7 @@ struct SettingsBackup {
     }
 
     /// Replaces every backed-up preference with the file's. Takes effect after a relaunch.
-    /// Returns the file's Open at login for the caller to apply; nil in files from before it was saved.
+    /// Returns the file's Launch at login for the caller to apply; nil in files from before it was saved.
     @discardableResult
     func restore(from data: Data) throws -> Bool? {
         let file = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]

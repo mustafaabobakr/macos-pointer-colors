@@ -17,7 +17,8 @@
     "highlightLaser": true,
     "highlightRing": true,
     "highlightPulseStyle": "ripple",
-    "highlightPulseShowsHold": true
+    "highlightPulseShowsHold": true,
+    "highlightLaserNeedsOption": true
   },
   "jsonData": {
     "customPairs": [
