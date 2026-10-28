@@ -128,6 +128,7 @@ struct MenuContentView: View {
                 Image(systemName: "textformat.size.larger").accessibilityHidden(true)
             }
             .labelsHidden()
+            .featureSpot("clip-size-slider")
             Text(String(format: "%.2f×", model.scale))
                 .appFont(.caption, monospacedDigits: true)
                 .frame(width: 40 * scale, alignment: .trailing)
@@ -166,6 +167,7 @@ struct MenuContentView: View {
                             LazyVGrid(columns: columns, spacing: 6) {
                                 ForEach(section.pairs) { pair in
                                     PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
+                                        .featureSpot("clip-pair-\(pair.id)")
                                         .contextMenu { if pair.isCustom { customPairMenu(pair) } }
                                         .overlay(alignment: .top) { if pair.isCustom { customPairButtons(pair) } }
                                 }

@@ -67,7 +67,7 @@ final class PulseLayerView: NSView {
         let base = baseDiameter(style)
         let ring = circleLayer(at: point, color: style.pulseColor, lineWidth: 4)
         animate(ring, duration: style.pulseDuration, timing: .easeOut, changes: [
-            ("path", circle(base * 0.6), circle(base * 1.8)),
+            ("path", circle(Pulse.startSide), circle(base * 1.8)),
             ("opacity", 0.95, 0),
         ])
     }
@@ -79,7 +79,7 @@ final class PulseLayerView: NSView {
         wave.opacity = 0
         let delay = style.pulseDuration * 0.15 * Double(index)
         animate(wave, duration: style.pulseDuration * 0.7, delay: delay, timing: .easeOut, changes: [
-            ("path", circle(base * 0.3), circle(base * 2.2)),
+            ("path", circle(Pulse.startSide), circle(base * 2.2)),
             ("lineWidth", 3, 1),
             ("opacity", 0.9, 0),
         ])

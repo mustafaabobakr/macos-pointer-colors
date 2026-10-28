@@ -44,6 +44,7 @@ private struct DisplayColorRow: View {
             PairMenuButton(selection: selection, pairs: pairs,
                            accessibilityTitle: String(localized: "Colors on \(display.name)"))
         }
+        .featureSpot("clip-display-\(display.id)")
     }
 
     private var selection: Binding<String?> {

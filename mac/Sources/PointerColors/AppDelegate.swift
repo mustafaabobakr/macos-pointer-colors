@@ -8,8 +8,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let path = ScreenshotRenderer.requestedPath {
             ScreenshotRenderer.render(model: model, to: path)
-        } else if let folder = ScreenshotRenderer.requestedFeaturesFolder {
-            ScreenshotRenderer.renderFeatures(model: model, into: folder)
+        } else if let request = FeatureClipRecorder.request {
+            FeatureClipRecorder.record(request, model: model)
         }
     }
 

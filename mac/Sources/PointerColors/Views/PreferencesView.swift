@@ -15,7 +15,7 @@ struct PreferencesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            PreferencesTabBar(selection: $tab)
+            PreferencesTabBar(selection: $tab).featureSpot("clip-tab-bar")
             Divider()
             tabContent.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -42,7 +42,7 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
     case general, pairs, automation, highlight, shortcuts, about
 
     var id: Self { self }
-    /// Names the tab's picture in feature screenshots.
+    /// Names the tab's screen in docs/features/features.json.
     var slug: String { rawValue }
 
     var title: LocalizedStringKey {
@@ -126,6 +126,7 @@ private struct GeneralPreferences: View {
                     ForEach(AppTheme.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                .featureSpot("clip-theme")
                 Picker("Menu glass", selection: $model.menuGlass) {
                     ForEach(MenuGlass.allCases) { Text($0.title).tag($0) }
                 }
@@ -133,6 +134,7 @@ private struct GeneralPreferences: View {
                 Picker("Menu tint", selection: $model.menuTint) {
                     ForEach(MenuTint.allCases) { Text($0.title).tag($0) }
                 }
+                .featureSpot("clip-menu-tint")
                 LabeledContent("Tint strength") {
                     Slider(value: $model.menuTintStrength, in: 0.1...0.8)
                         .frame(width: 180)
@@ -177,7 +179,7 @@ private struct BackupSection: View {
             LabeledContent {
                 HStack {
                     Button("Import…", action: chooseFile)
-                    Button("Export all…", action: exportAll)
+                    Button("Export all…", action: exportAll).featureSpot("clip-export")
                 }
             } label: {
                 Text("All settings")
@@ -282,7 +284,7 @@ private struct PairsPreferences: View {
             .listStyle(.bordered(alternatesRowBackgrounds: true))
             if isAdding || editing != nil { editor }
             HStack {
-                Button("Add custom pair") { isAdding = true; editing = nil }
+                Button("Add custom pair") { isAdding = true; editing = nil }.featureSpot("clip-add-custom")
                 Spacer()
                 Button("Import…", action: importPairs)
                 Button("Export…", action: exportPairs).disabled(model.library.custom.isEmpty)
@@ -363,6 +365,7 @@ private struct PairRow: View {
             .toggleStyle(.switch).controlSize(.mini)
         }
         .padding(.vertical, 2)
+        .featureSpot("clip-row-\(pair.id)")
     }
 }
 
@@ -412,6 +415,7 @@ private struct UpdateSection: View {
             HStack {
                 Button("Check for Updates…") { Task { await model.checkForUpdatesNow() } }
                     .disabled(model.isCheckingForUpdates || model.isInstallingUpdate)
+                    .featureSpot("clip-check-updates")
                 if model.availableUpdateDownload != nil {
                     Button("Install and Relaunch") { Task { await model.installUpdate() } }
                         .disabled(model.isInstallingUpdate)

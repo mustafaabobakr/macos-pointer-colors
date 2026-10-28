@@ -91,12 +91,13 @@ struct UpdatePromptView: View {
 
     private var buttons: some View {
         HStack(spacing: 12) {
-            Button("Skip This Version", action: model.skipAvailableUpdate)
+            Button("Skip This Version", action: model.skipAvailableUpdate).featureSpot("clip-skip")
             Spacer()
             if isBusy { ProgressView().controlSize(.small) }
-            Button("Install on Quit") { Task { await model.installUpdateOnQuit() } }
+            Button("Install on Quit") { Task { await model.installUpdateOnQuit() } }.featureSpot("clip-install-on-quit")
             Button("Install and Relaunch") { Task { await model.installUpdate() } }
                 .keyboardShortcut(.defaultAction)
+                .featureSpot("clip-install")
         }
         .controlSize(.large)
         .disabled(isBusy || model.availableUpdateDownload == nil)
