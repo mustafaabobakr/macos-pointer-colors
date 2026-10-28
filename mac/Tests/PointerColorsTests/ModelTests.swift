@@ -241,6 +241,24 @@ final class PointerHighlightTests: XCTestCase {
         highlight.laserUsesPairColor = false
         XCTAssertEqual(highlight.pulseColor(for: pair), highlight.pulseColor)
         XCTAssertEqual(highlight.laserColors(for: pair).glow, highlight.laserColor)
+        XCTAssertEqual(highlight.laserColors(for: pair).outline, pair.darkColor)
+    }
+
+    func testLaserOutlineIsThePairsDarkColorUnlessChanged() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(highlight.laserOutline, .dark, "the default")
+        let black = RGBA(red: 0, green: 0, blue: 0), yellow = RGBA(red: 1, green: 0.9, blue: 0)
+        let pair = PointerPair.custom(name: "Test", outline: black, fill: yellow)
+        XCTAssertEqual(highlight.laserColors(for: pair).glow, yellow)
+        XCTAssertEqual(highlight.laserColors(for: pair).outline, black)
+        let flipped = PointerPair.custom(name: "Flipped", outline: yellow, fill: black)
+        XCTAssertEqual(highlight.laserColors(for: flipped).outline, black)
+        highlight.laserOutline = .laser
+        XCTAssertEqual(highlight.laserColors(for: pair).outline, yellow)
+        highlight.laserOutline = .none
+        XCTAssertEqual(highlight.laserColors(for: pair).outline, highlight.laserColors(for: pair).middle)
+        XCTAssertEqual(PointerHighlight(defaults: defaults).laserOutline, .none, "saved")
     }
 
     func testEarlierSingleChoiceCarriesOver() {

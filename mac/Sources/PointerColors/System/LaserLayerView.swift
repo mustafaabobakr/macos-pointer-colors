@@ -8,7 +8,7 @@ import QuartzCore
 /// just reached had to start redrawing a full-display picture first, and the dot lagged behind.
 @MainActor
 final class LaserLayerView: NSView {
-    /// The dot's glow, core, middle and center, and the colors and size they were built with.
+    /// The dot's glow, outline, middle and center, and the colors and size they were built with.
     private var dot: CALayer?
     private var dotLook: (colors: LaserColors, size: Double)?
     /// The part of the trail being drawn: its four lines share one path.
@@ -51,7 +51,7 @@ final class LaserLayerView: NSView {
     private func dotLayer(_ style: HighlightStyle) -> CALayer {
         if let dot, dotLook?.colors == style.laser, dotLook?.size == style.laserSize { return dot }
         dot?.removeFromSuperlayer()
-        let parts: [(RGBA, Double, Double)] = [(style.laser.glow, 32, 0.18), (style.laser.glow, 16, 1),
+        let parts: [(RGBA, Double, Double)] = [(style.laser.glow, 32, 0.18), (style.laser.outline, 16, 1),
                                                (style.laser.middle, 13, 1), (style.laser.center, 11, 1)]
         let made = CALayer()
         made.opacity = 0
@@ -87,7 +87,7 @@ final class LaserLayerView: NSView {
     }
 
     private func beginPart(at point: CGPoint, style: HighlightStyle) {
-        let parts: [(RGBA, Double, Double)] = [(style.laser.glow, 14, 0.2), (style.laser.glow, 6, 1),
+        let parts: [(RGBA, Double, Double)] = [(style.laser.glow, 14, 0.2), (style.laser.outline, 6, 1),
                                                (style.laser.middle, 4, 1), (style.laser.center, 2, 1)]
         let made = CALayer()
         made.opacity = 0.95

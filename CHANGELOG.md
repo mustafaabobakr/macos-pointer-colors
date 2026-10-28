@@ -3,6 +3,11 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.5 — 2026-10-28
+
+- **A laser that stands out on light backgrounds.** The thin edge around the laser dot and along its trail now takes the pair's dark color, like the black outline of Highlighter. Choose it in **Preferences › Highlight › Laser › Outline**: **Pair's dark color**, **Laser color** (the look before), or **None**.
+- **Lighter display switches.** Moving to a display with its own pair and size, the app no longer watches the pointer every millisecond to switch both at once. The size changes right away and the new colors follow a moment later, when macOS redraws them.
+
 ## 0.4.4 — 2026-10-26
 
 - **Choose the keys that draw the laser.** **Preferences › Highlight › Laser › Keys to hold** sets which keys **Draw only while holding** waits for: ⌘, ⌥, ⌃ or ⇧, alone or together. Click it, press the keys, and let go. It stays ⌥ Option unless you change it.

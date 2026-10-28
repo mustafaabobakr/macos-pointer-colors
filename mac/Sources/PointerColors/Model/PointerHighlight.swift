@@ -38,6 +38,26 @@ enum LaserDotMode: String, CaseIterable, Identifiable {
     }
 }
 
+/// The color of the thin edge around the laser dot and along its trail.
+enum LaserOutline: String, CaseIterable, Identifiable {
+    /// The darker of the pair's outline and fill, so the laser stands out on light backgrounds.
+    case dark
+    /// The laser color itself.
+    case laser
+    /// No edge: the core's lighter shade goes right out to it.
+    case none
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .dark: return String(localized: "Pair's dark color")
+        case .laser: return String(localized: "Laser color")
+        case .none: return String(localized: "None")
+        }
+    }
+}
+
 /// The two highlight effects. Each has its own switch, so either, both or neither can be on.
 enum HighlightEffect: String, CaseIterable, Identifiable {
     /// A ring that grows and fades where you click.
@@ -100,6 +120,8 @@ final class PointerHighlight {
     var laserKeys: HoldKeys { didSet { save(laserKeys.rawValue, Key.laserKeys) } }
     /// When the dot follows the pointer.
     var laserDot: LaserDotMode { didSet { save(laserDot.rawValue, Key.laserDot) } }
+    /// The color of the edge around the dot and trail.
+    var laserOutline: LaserOutline { didSet { save(laserOutline.rawValue, Key.laserOutline) } }
 
     /// Pulse and laser colors chosen for particular pairs, by pair id.
     private(set) var pairPulseColors: [String: RGBA] { didSet { saveColors(pairPulseColors, Key.pairPulse) } }
@@ -138,6 +160,7 @@ final class PointerHighlight {
         let keys = HoldKeys(rawValue: defaults.integer(forKey: Key.laserKeys))
         laserKeys = keys.isEmpty ? .option : keys
         laserDot = defaults.string(forKey: Key.laserDot).flatMap(LaserDotMode.init(rawValue:)) ?? .always
+        laserOutline = defaults.string(forKey: Key.laserOutline).flatMap(LaserOutline.init(rawValue:)) ?? .dark
         pairPulseColors = Self.colors(defaults, Key.pairPulse)
         pairLaserColors = Self.colors(defaults, Key.pairLaser)
     }
@@ -183,11 +206,14 @@ final class PointerHighlight {
         pulseUsesPairColor ? pulsePairColor(pair) : pulseColor
     }
 
-    /// The laser's glow and core, middle and center: the laser color, a lighter shade, and white.
-    func laserColors(for pair: PointerPair) -> (glow: RGBA, middle: RGBA, center: RGBA) {
+    /// The laser's glow, outline, middle and center: the laser color, the outline chosen in
+    /// `laserOutline`, a lighter shade of the laser color, and white.
+    func laserColors(for pair: PointerPair) -> LaserColors {
         let white = RGBA(red: 1, green: 1, blue: 1)
         let base = laserUsesPairColor ? laserPairColor(pair) : laserColor
-        return (base, base.mixed(with: white, by: 0.45), white)
+        let middle = base.mixed(with: white, by: 0.45)
+        let outlines: [LaserOutline: RGBA] = [.dark: pair.darkColor, .laser: base, .none: middle]
+        return LaserColors(glow: base, outline: outlines[laserOutline] ?? base, middle: middle, center: white)
     }
 
     /// The pulse color for a pair, ignoring the custom color: set for it, or its own.
@@ -223,6 +249,7 @@ final class PointerHighlight {
         static let laserOption = "highlightLaserNeedsOption"
         static let laserKeys = "highlightLaserKeys"
         static let laserDot = "highlightLaserDot"
+        static let laserOutline = "highlightLaserOutline"
         static let pairPulse = "highlightPairPulseColors"
         static let pairLaser = "highlightPairLaserColors"
         static let pulseOn = "highlightPulse"
@@ -251,6 +278,9 @@ extension PointerPair {
         if abs(outlineChroma - fillChroma) > 0.1 { return outlineChroma > fillChroma ? outline : fill }
         return outline.luminance >= fill.luminance ? outline : fill
     }
+
+    /// The darker of outline and fill, like the black outline of Highlighter.
+    var darkColor: RGBA { outline.luminance < fill.luminance ? outline : fill }
 }
 
 extension RGBA {

@@ -121,11 +121,11 @@ struct HighlightSnapshot: Equatable {
         context.stroke(circle, with: .color(style.pulseColor.color.opacity(0.95 * opacity)), lineWidth: 3)
     }
 
-    /// A soft glow, then the core, middle and center, fading once the pointer stops.
+    /// A soft glow, then the outlined core, its middle and center, fading once the pointer stops.
     private func drawDot(_ dot: LaserDot, now: TimeInterval, in context: inout GraphicsContext) {
         let alpha = 1 - fraction(now - dot.updatedAt, of: LaserDot.fade)
         guard alpha > 0 else { return }
-        let layers: [(RGBA, Double, Double)] = [(style.laser.glow, 32, 0.18), (style.laser.glow, 16, 1),
+        let layers: [(RGBA, Double, Double)] = [(style.laser.glow, 32, 0.18), (style.laser.outline, 16, 1),
                                                 (style.laser.middle, 13, 1), (style.laser.center, 11, 1)]
         for (color, side, opacity) in layers {
             let circle = Path(ellipseIn: square(at: dot.point, side: side * style.laserSize))
@@ -139,7 +139,7 @@ struct HighlightSnapshot: Equatable {
         guard alpha > 0, stroke.points.count > 1 else { return }
         var path = Path()
         path.addLines(stroke.points)
-        let layers: [(RGBA, Double, Double)] = [(style.laser.glow, 14, 0.2), (style.laser.glow, 6, 1),
+        let layers: [(RGBA, Double, Double)] = [(style.laser.glow, 14, 0.2), (style.laser.outline, 6, 1),
                                                 (style.laser.middle, 4, 1), (style.laser.center, 2, 1)]
         for (color, width, opacity) in layers {
             context.stroke(path, with: .color(color.color.opacity(opacity * alpha)),
