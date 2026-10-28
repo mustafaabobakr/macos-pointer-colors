@@ -89,8 +89,6 @@ final class AppModel {
     @ObservationIgnored private var highlightOverlay: HighlightOverlay?
     private let pointer = SystemPointer()
     @ObservationIgnored private var automationStore: Automation?
-    /// A display's size waiting for its colors to be drawn.
-    @ObservationIgnored private var pendingScale: RecolorWatch?
 
     /// Appearance and per-display rules. Created on first use so it can call back into the model.
     var automation: Automation {
@@ -182,25 +180,11 @@ final class AppModel {
         }
     }
 
-    /// Puts a display's pair and size on screen, skipping whatever is already showing.
+    /// Puts a display's pair and size on screen, skipping whatever is already showing. The size
+    /// goes first: macOS shows it instantly, while new colors can take up to half a second to draw.
     func showDisplay(pairID: String?, scale newScale: Double?) {
-        pendingScale?.cancel()
-        pendingScale = nil
-        let pair = library.pair(id: pairID).flatMap { $0 == appliedPair ? nil : $0 }
-        // Compared with the live size: a cancelled wait may already have changed it.
-        let size = newScale.flatMap { abs($0 - pointer.currentScale()) < 0.001 ? nil : $0 }
-        guard let pair else {
-            if let size { setScale(size) }
-            return
-        }
-        if let size { pendingScale = scaleAfterRecolor(size) }
-        showPair(id: pair.id)
-    }
-
-    /// The size goes live the moment the new colors are drawn, then is saved like any other change.
-    private func scaleAfterRecolor(_ size: Double) -> RecolorWatch {
-        RecolorWatch(onRecolor: { if !ScreenshotRenderer.isRendering { _ = UniversalAccessCore.shared.setCursorScale(size) } },
-                     then: { [weak self] in self?.scaleIsLive(size) })
+        if let newScale, abs(newScale - pointer.currentScale()) >= 0.001 { setScale(newScale) }
+        if let pairID { showPair(id: pairID) }
     }
 
     /// Applies a pair by id unless it's already on screen. Used by automation.
@@ -228,19 +212,10 @@ final class AppModel {
 
     /// Changes the size live, as the slider moves.
     func setScale(_ value: Double) {
-        updateScale(value) { try pointer.setScale($0) }
-    }
-
-    /// Records a size that RecolorWatch already put on screen, without applying it a second time.
-    private func scaleIsLive(_ value: Double) {
-        updateScale(value) { try pointer.saveScale($0) }
-    }
-
-    private func updateScale(_ value: Double, write: (Double) throws -> Void) {
         scale = value
         highlightOverlay?.refresh()
         do {
-            try write(value)
+            try pointer.setScale(value)
             settings.lastAppliedScale = value
             automation.rememberSizeForCurrentDisplay(value)
         } catch {
