@@ -1,5 +1,5 @@
 {
-  "about": "Settings the feature screenshots are taken with (mac/scripts/feature-screenshots.sh). They go into the bare build's own 'PointerColors' defaults domain, never the installed app's. Keys under jsonData are stored as JSON data, the way the app saves them.",
+  "about": "Settings the feature clips are recorded with (mac/scripts/feature-clips.sh), fresh for each clip. They go into the bare build's own 'PointerColors' defaults domain, never the installed app's. Keys under jsonData are stored as JSON data, the way the app saves them.",
   "settings": {
     "appTheme": "dark",
     "updateSchedule": "off",

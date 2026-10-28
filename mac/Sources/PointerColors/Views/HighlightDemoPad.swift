@@ -17,6 +17,7 @@ struct HighlightDemoPad: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .contentShape(Rectangle())
         .onContinuousHover(coordinateSpace: .local, perform: hovered)
+        .clipHover(perform: hovered)
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local).onChanged(dragged).onEnded(ended))
         .onAppear { scene.style = style }
         .onChange(of: highlight.pulseOn) { scene.clear() }

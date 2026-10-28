@@ -38,6 +38,7 @@ struct HighlightPreviewCards: View {
         .accessibilityLabel(effect.title)
         .accessibilityValue(isOn ? String(localized: "On") : String(localized: "Off"))
         .accessibilityAddTraits(isOn ? .isSelected : [])
+        .featureSpot("clip-card-\(effect.rawValue)")
     }
 
     /// A check when on, an empty circle when off, like a checkbox on the picture.

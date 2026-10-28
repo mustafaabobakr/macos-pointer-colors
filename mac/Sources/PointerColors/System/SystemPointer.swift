@@ -43,12 +43,15 @@ struct SystemPointer {
 
     private let universalAccess = UniversalAccessCore.shared
     /// While rendering feature screenshots the app shows demo settings and must never change the
-    /// real pointer, so every write is skipped.
+    /// real pointer, so every write is skipped. What it would have set is kept in `rendered`
+    /// instead, so a clip shows the pair that was just picked.
     private let isReadOnly = ScreenshotRenderer.isRendering
+    nonisolated(unsafe) private static var rendered: (outline: RGBA, fill: RGBA, scale: Double?)?
 
     // MARK: Colors
 
     func currentColors() -> (outline: RGBA, fill: RGBA) {
+        if isReadOnly, let rendered = Self.rendered { return (rendered.outline, rendered.fill) }
         let outline = RGBA(preferenceValue: copy(Self.outlineKey)) ?? PointerPair.macOSLight.outline
         let fill = RGBA(preferenceValue: copy(Self.fillKey)) ?? PointerPair.macOSLight.fill
         return (outline, fill)
@@ -56,7 +59,7 @@ struct SystemPointer {
 
     /// Writes both colors directly, or through `defaults` when macOS refuses the direct write.
     func apply(_ pair: PointerPair) throws {
-        guard !isReadOnly else { return }
+        guard !isReadOnly else { Self.rendered = (pair.outline, pair.fill, Self.rendered?.scale); return }
         set(Self.outlineKey, pair.outline.preferenceValue as CFDictionary)
         set(Self.fillKey, pair.fill.preferenceValue as CFDictionary)
         if !synchronize() {
@@ -79,6 +82,7 @@ struct SystemPointer {
     // MARK: Size
 
     func currentScale() -> Double {
+        if isReadOnly, let scale = Self.rendered?.scale { return scale }
         if let scale = universalAccess.cursorScale() { return scale }
         return (copy(Self.scaleKey) as? NSNumber)?.doubleValue ?? Self.minimumScale
     }
@@ -86,8 +90,8 @@ struct SystemPointer {
     /// Changes the size live and saves it. `UACursorSetScale` alone only updates this process, so
     /// the size is also saved directly or, when that's refused, through `defaults`.
     func setScale(_ scale: Double) throws {
-        guard !isReadOnly else { return }
         let value = scale.clamped(to: Self.minimumScale...Self.maximumScale)
+        guard !isReadOnly else { return renderScale(value) }
         let previous = currentScale()
         guard universalAccess.setCursorScale(value) else { throw SystemPointerError.sizeAPIUnavailable }
         set(Self.scaleKey, value as CFNumber)
@@ -99,6 +103,12 @@ struct SystemPointer {
         _ = universalAccess.setCursorScale(previous)
         set(Self.scaleKey, previous as CFNumber)
         throw SystemPointerError.permissionDenied
+    }
+
+    /// The size a render would have set, kept with the colors it shows.
+    private func renderScale(_ value: Double) {
+        let colors = currentColors()
+        Self.rendered = (colors.outline, colors.fill, value)
     }
 
     // MARK: Shake to find

@@ -19,8 +19,10 @@ struct AppColorsSection: View {
                 Text("The app is in front").tag(AppRuleTrigger.frontmost)
             }
             .disabled(!automation.perAppColors)
+            .featureSpot("clip-app-trigger")
             ForEach(automation.appRuleIDs, id: \.self) { bundleID in
                 AppColorRow(automation: automation, bundleID: bundleID, pairs: pairs)
+                    .featureSpot("clip-app-\(bundleID)")
             }
             Button("Add App…", action: addApp)
         } header: {

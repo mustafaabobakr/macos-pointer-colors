@@ -9,7 +9,17 @@ struct DisplayInfo: Identifiable, Equatable {
     let isBuiltIn: Bool
 
     static func current() -> [DisplayInfo] {
-        NSScreen.screens.compactMap(DisplayInfo.init(screen:))
+        ScreenshotRenderer.isRendering ? demo : NSScreen.screens.compactMap(DisplayInfo.init(screen:))
+    }
+
+    /// The displays feature screenshots and clips show, the same on every Mac.
+    static let demo = [DisplayInfo(id: "demo-built-in", name: "Built-in Display", isBuiltIn: true),
+                       DisplayInfo(id: "demo-studio", name: "Studio Display", isBuiltIn: false)]
+
+    init(id: String, name: String, isBuiltIn: Bool) {
+        self.id = id
+        self.name = name
+        self.isBuiltIn = isBuiltIn
     }
 
     init?(screen: NSScreen) {
@@ -103,6 +113,9 @@ final class Automation {
     private(set) var lastDisplayID: String?
 
     @ObservationIgnored private let settings: AppSettings
+    /// While rendering feature screenshots and clips, the real pointer and apps never steer the
+    /// rules: the pointer stays on the first demo display and clips play the rest (`simulate…`).
+    @ObservationIgnored private let followsRealPointer = !ScreenshotRenderer.isRendering
     @ObservationIgnored private let applyPair: (String) -> Void
     @ObservationIgnored private let applyScale: (Double) -> Void
     /// Puts a pair on screen without making it the main pair.
@@ -241,6 +254,7 @@ final class Automation {
     private var followsPointerApp: Bool { perAppColors && appRuleTrigger == .pointer }
 
     private func frontmostAppChanged(_ app: NSRunningApplication?) {
+        guard followsRealPointer else { return }
         // A window can come up under a pointer that hasn't moved.
         if followsPointerApp { pointerMoved() }
         guard let id = app?.bundleIdentifier, id != Bundle.main.bundleIdentifier else { return }
@@ -256,6 +270,7 @@ final class Automation {
     private func updatePointerTracking() {
         stopPointerTracking()
         guard tracksPointer else { return }
+        guard followsRealPointer else { lastDisplayID = displays.first?.id; return }
         // Deferred: running it during init would call back into the model before it holds this object.
         DispatchQueue.main.async { [weak self] in self?.pointerMoved() }
         startPointerMonitors()
@@ -355,6 +370,26 @@ final class Automation {
     private func showCurrentDisplay() {
         guard let id = lastDisplayID else { return }
         showDisplay(targetPairID(displayID: id), perDisplaySizes ? displaySizes[id] : nil)
+    }
+
+    // MARK: Feature clips
+
+    /// As if the pointer just moved onto `display`.
+    func simulatePointer(onDisplay display: DisplayInfo) {
+        lastDisplayID = display.id
+        showCurrentDisplay()
+    }
+
+    /// As if the pointer just moved over a window of the app `bundleID`, or the desktop for nil.
+    func simulatePointer(overApp bundleID: String?) {
+        hoveredBundleID = bundleID
+        applyColors(for: lastDisplayID)
+    }
+
+    /// As if macOS just switched to dark or light appearance.
+    func simulateAppearance(dark: Bool) {
+        guard followsAppearance else { return }
+        applyPair(dark ? darkPairID : lightPairID)
     }
 
     // MARK: System notifications

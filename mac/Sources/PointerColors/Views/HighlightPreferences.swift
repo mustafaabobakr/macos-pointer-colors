@@ -20,7 +20,7 @@ struct HighlightPreferences: View {
                         .appFont(.caption).foregroundStyle(.secondary)
                 }
                 HighlightPreviewCards(highlight: highlight, style: style, pair: pair)
-                HighlightDemoPad(highlight: highlight, style: style)
+                HighlightDemoPad(highlight: highlight, style: style).featureSpot("clip-demo-pad")
                 Toggle(isOn: $highlight.showsRing) {
                     Text("Ring around the pointer")
                     Text("Makes the pointer easy to follow. Works with any highlight, or on its own.")
@@ -46,8 +46,10 @@ private struct PulseSection: View {
                 ForEach(PulseStyle.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
+            .featureSpot("clip-pulse-style")
             ValueSlider(title: String(localized: "Size"), value: $highlight.pulseSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
+                .featureSpot("clip-pulse-size")
             ValueSlider(title: String(localized: "Length"), value: $highlight.pulseDuration,
                         range: PointerHighlight.pulseDurationRange, format: "%.2f s")
             Toggle("Pulse on right-clicks too", isOn: $highlight.pulsesOnRightClick)
@@ -69,12 +71,14 @@ private struct LaserSection: View {
                               pairHint: String(localized: "Uses the pair's color, set below for each pair."))
             ValueSlider(title: String(localized: "Size"), value: $highlight.laserSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
+                .featureSpot("clip-laser-size")
             Picker(selection: $highlight.laserOutline) {
                 ForEach(LaserOutline.allCases) { Text($0.title).tag($0) }
             } label: {
                 Text("Outline")
                 Text("The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.")
             }
+            .featureSpot("clip-laser-outline")
             Toggle(isOn: $highlight.laserTrail) {
                 Text("Draw a trail while dragging")
                 Text("Hold the mouse button and move to draw; the trail fades after you let go.")
@@ -123,6 +127,7 @@ private struct PairColorsSection: View {
             PairColorRow(title: String(localized: "Pulse color"),
                          color: highlight.pulsePairColor(pair), isSet: highlight.pairPulseColors[pair.id] != nil,
                          set: { highlight.setPulseColor($0, for: pair) })
+                .featureSpot("clip-pair-pulse-color")
             PairColorRow(title: String(localized: "Laser color"),
                          color: highlight.laserPairColor(pair), isSet: highlight.pairLaserColors[pair.id] != nil,
                          set: { highlight.setLaserColor($0, for: pair) })

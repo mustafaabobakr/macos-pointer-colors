@@ -41,6 +41,7 @@ private struct AppearanceSection: View {
                 Text("Switch pairs with light and dark appearance")
                 Text("Applies a pair whenever macOS changes appearance, including on a schedule.")
             }
+            .featureSpot("clip-follows-appearance")
             pairPicker("Light appearance", selection: $automation.lightPairID)
             pairPicker("Dark appearance", selection: $automation.darkPairID)
         } header: {

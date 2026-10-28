@@ -1,32 +1,27 @@
 import AppKit
 import SwiftUI
 
-/// Developer tool, two modes, each drawing offscreen and then quitting. It uses AppKit's own
-/// drawing (not ImageRenderer) so sliders, toggles and buttons render as they do on screen, and
-/// needs no Screen Recording permission. While it runs the real pointer is never changed.
+/// Developer tool, drawing offscreen and then quitting. It uses AppKit's own drawing (not
+/// ImageRenderer) so sliders, toggles and buttons render as they do on screen, and needs no
+/// Screen Recording permission. While it runs the real pointer is never changed.
 ///
 /// - `PointerColors --render-screenshot out.png` draws the menu for the website and README.
-/// - `PointerColors --render-features dir [--app-icon AppIcon.icns]` draws the menu, every
-///   Preferences tab and the update window into `dir`,
-///   with `spots.json` giving where each `featureSpot` is. mac/scripts/feature-screenshots.sh
-///   runs it with demo settings and frames the spots into docs/features.
+/// - The feature clips (FeatureClipRecorder) draw their screens with the same pieces: `screens`,
+///   `makeHost` and `write`.
 @MainActor
 enum ScreenshotRenderer {
     nonisolated static let flag = "--render-screenshot"
-    nonisolated static let featuresFlag = "--render-features"
 
-    /// True when the app was launched for either mode. Read before the model is created.
+    /// True when the app was launched to draw a screenshot or record a feature clip. Read before
+    /// the model is created.
     nonisolated static var isRendering: Bool {
-        CommandLine.arguments.contains(flag) || CommandLine.arguments.contains(featuresFlag)
+        [flag, FeatureClipRecorder.flag].contains(where: CommandLine.arguments.contains)
     }
 
     /// The output path when the app was launched to render a screenshot.
     static var requestedPath: String? { argument(after: flag) }
 
-    /// The output folder when the app was launched to render feature screenshots.
-    static var requestedFeaturesFolder: String? { argument(after: featuresFlag) }
-
-    private static func argument(after flag: String) -> String? {
+    static func argument(after flag: String) -> String? {
         let args = CommandLine.arguments
         guard let index = args.firstIndex(of: flag), args.indices.contains(index + 1) else { return nil }
         return args[index + 1]
@@ -39,11 +34,12 @@ enum ScreenshotRenderer {
         exit(ok ? 0 : 1)
     }
 
-    // MARK: Feature screenshots
+    // MARK: Feature screens
 
-    /// One picture per screen; features are framed from these by their spots.
-    /// The update window comes last: it needs a demo update, which would change the menu too.
-    private static func screens(_ model: AppModel) -> [(name: String, view: () -> AnyView, height: CGFloat?)] {
+    /// The screens features are recorded on, by name (features.json's `screen`). The update
+    /// window gets a demo update first, which would change the menu too, so each clip is recorded
+    /// in a process of its own.
+    static func screens(_ model: AppModel) -> [(name: String, view: () -> AnyView, height: CGFloat?)] {
         let tabs: [(PreferencesTab, CGFloat)] = [(.general, 860), (.pairs, 520), (.automation, 760),
                                                 (.highlight, 1720), (.shortcuts, 420), (.about, 760)]
         let preferences = tabs.map { tab, height in
@@ -53,10 +49,10 @@ enum ScreenshotRenderer {
         return [("menu", { menu(model) }, nil)] + preferences + [update]
     }
 
-    private static let windowBackground = Color(nsColor: .windowBackgroundColor)
+    static let windowBackground = Color(nsColor: .windowBackgroundColor)
 
     /// A downloaded update with notes in the style of the real ones, never installed.
-    private static func showDemoUpdate(_ model: AppModel) {
+    static func showDemoUpdate(_ model: AppModel) {
         let notes = """
             **Pointer Colors 0.4.2** brings a new way to update.
 
@@ -69,31 +65,10 @@ enum ScreenshotRenderer {
         model.preparedUpdate = ("0.4.2", FileManager.default.temporaryDirectory)
     }
 
-    static func renderFeatures(model: AppModel, into folder: String) {
-        // The bare build has no app icon of its own; the script passes the compiled one.
+    /// The bare build has no app icon of its own; the script passes the compiled one.
+    static func useAppIcon() {
         if let icon = argument(after: "--app-icon").flatMap(NSImage.init(contentsOfFile:)) {
             NSApp.applicationIconImage = icon
-        }
-        Task { @MainActor in
-            let dir = URL(fileURLWithPath: folder)
-            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            var spots: [String: [String: [Double]]] = ["_render": ["pixelsPerPoint": [featurePixelsPerPoint]]]
-            var ok = true
-            for screen in screens(model) {
-                FeatureSpots.reset()
-                let host = makeHost(screen.view(), height: screen.height)
-                // Lets onAppear run and lazy content settle before drawing.
-                try? await Task.sleep(for: .milliseconds(600))
-                host.layoutSubtreeIfNeeded()
-                ok = write(host, to: dir.appendingPathComponent("\(screen.name).png"), scale: featurePixelsPerPoint) && ok
-                spots[screen.name] = FeatureSpots.frames.mapValues { [$0.minX, $0.minY, $0.width, $0.height] }
-                spots[screen.name]?["_screen"] = [0, 0, host.bounds.width, host.bounds.height]
-                host.window?.orderOut(nil)
-            }
-            let json = try? JSONSerialization.data(withJSONObject: spots, options: [.prettyPrinted, .sortedKeys])
-            ok = ((try? json?.write(to: dir.appendingPathComponent("spots.json"))) != nil) && ok
-            print(ok ? "Wrote \(spots.count - 1) screens to \(folder)" : "Couldn't render into \(folder)")
-            exit(ok ? 0 : 1)
         }
     }
 
@@ -104,7 +79,7 @@ enum ScreenshotRenderer {
     }
 
     /// A borderless offscreen window holding `view`, at its fitting size or the given height.
-    private static func makeHost(_ view: AnyView, height: CGFloat?) -> NSHostingView<AnyView> {
+    static func makeHost(_ view: AnyView, height: CGFloat?) -> NSHostingView<AnyView> {
         let host = NSHostingView(rootView: view)
         host.appearance = NSAppearance(named: .darkAqua)
         host.frame.size = host.fittingSize
@@ -124,10 +99,8 @@ enum ScreenshotRenderer {
 
     /// Retina-sharp: 2 pixels per point, whatever screen (if any) the offscreen window is on.
     nonisolated private static let pixelsPerPoint: CGFloat = 2
-    /// Feature screenshots are zoomed in, so they're drawn sharper.
-    private static let featurePixelsPerPoint: CGFloat = 3
 
-    private static func write(_ view: NSView, to url: URL, scale pixelsPerPoint: CGFloat = pixelsPerPoint) -> Bool {
+    static func write(_ view: NSView, to url: URL, scale pixelsPerPoint: CGFloat = pixelsPerPoint) -> Bool {
         let size = view.bounds.size
         guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil,
                                          pixelsWide: Int(size.width * pixelsPerPoint),
