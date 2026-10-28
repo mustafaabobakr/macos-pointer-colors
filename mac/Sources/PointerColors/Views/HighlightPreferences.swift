@@ -69,6 +69,12 @@ private struct LaserSection: View {
                               pairHint: String(localized: "Uses the pair's color, set below for each pair."))
             ValueSlider(title: String(localized: "Size"), value: $highlight.laserSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
+            Picker(selection: $highlight.laserOutline) {
+                ForEach(LaserOutline.allCases) { Text($0.title).tag($0) }
+            } label: {
+                Text("Outline")
+                Text("The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.")
+            }
             Toggle(isOn: $highlight.laserTrail) {
                 Text("Draw a trail while dragging")
                 Text("Hold the mouse button and move to draw; the trail fades after you let go.")

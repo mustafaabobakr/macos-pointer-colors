@@ -263,8 +263,8 @@ struct HighlightStyle: Equatable {
     var showsRing = false
     var ringColor = RGBA(red: 1, green: 1, blue: 1)
     var pulseColor = RGBA(red: 1, green: 1, blue: 1)
-    var laser = LaserColors(glow: RGBA(red: 1, green: 0, blue: 0), middle: RGBA(red: 1, green: 0, blue: 0),
-                            center: RGBA(red: 1, green: 1, blue: 1))
+    var laser = LaserColors(glow: RGBA(red: 1, green: 0, blue: 0), outline: RGBA(red: 0, green: 0, blue: 0),
+                            middle: RGBA(red: 1, green: 0, blue: 0), center: RGBA(red: 1, green: 1, blue: 1))
     var pointerScale = 1.0
     var pulseSize = 1.0
     var pulseDuration = 0.45
@@ -280,8 +280,7 @@ struct HighlightStyle: Equatable {
         showsRing = settings.showsRing
         ringColor = pair.highlightColor
         pulseColor = settings.pulseColor(for: pair)
-        let colors = settings.laserColors(for: pair)
-        laser = LaserColors(glow: colors.glow, middle: colors.middle, center: colors.center)
+        laser = settings.laserColors(for: pair)
         self.pointerScale = pointerScale
         pulseSize = settings.pulseSize
         pulseDuration = settings.pulseDuration
@@ -292,9 +291,10 @@ struct HighlightStyle: Equatable {
     }
 }
 
-/// The laser's glow and core, middle and center.
+/// The laser's soft glow, the outline around its core, and the core's middle and center.
 struct LaserColors: Equatable {
     var glow: RGBA
+    var outline: RGBA
     var middle: RGBA
     var center: RGBA
 }
