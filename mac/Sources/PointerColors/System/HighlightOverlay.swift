@@ -300,6 +300,10 @@ struct LaserColors: Equatable {
 }
 
 struct Pulse: Equatable {
+    /// Every pulse grows out of a dot this wide (1pt radius) under the pointer, so it reads as
+    /// spreading from the click.
+    static let startSide = 2.0
+
     let point: CGPoint
     let start: TimeInterval
 }
@@ -312,7 +316,7 @@ struct Hold: Equatable {
     /// How long the ring takes to grow in, and to fade after release.
     static let grow: TimeInterval = 0.15
     static let release: TimeInterval = 0.12
-    /// Size against a click pulse's starting ring.
+    /// Size against the pulse's base diameter.
     static let size = 0.55
 
     var point: CGPoint

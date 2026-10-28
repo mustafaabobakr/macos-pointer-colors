@@ -73,7 +73,7 @@ struct HighlightSnapshot: Equatable {
         context.stroke(circle, with: .color(style.ringColor.color.opacity(0.9)), lineWidth: 3)
     }
 
-    /// Starts small and bright, then grows and fades.
+    /// Starts as a dot under the pointer, bright, then grows and fades.
     private func drawPulse(_ pulse: Pulse, now: TimeInterval, in context: inout GraphicsContext) {
         let elapsed = now - pulse.start
         guard elapsed < style.pulseDuration else { return }
@@ -86,7 +86,7 @@ struct HighlightSnapshot: Equatable {
     /// One ring that grows and fades.
     private func drawPulseRing(at point: CGPoint, progress: Double, in context: inout GraphicsContext) {
         let eased = 1 - (1 - progress) * (1 - progress)
-        let side = baseDiameter * style.pulseSize * (0.6 + 1.2 * eased)
+        let side = Pulse.startSide + (baseDiameter * style.pulseSize * 1.8 - Pulse.startSide) * eased
         let circle = Path(ellipseIn: square(at: point, side: side))
         context.stroke(circle, with: .color(style.pulseColor.color.opacity(0.95 * (1 - eased))), lineWidth: 4)
     }
@@ -100,7 +100,7 @@ struct HighlightSnapshot: Equatable {
             let progress = fraction(elapsed - Double(index) * gap, of: wave)
             guard progress > 0, progress < 1 else { continue }
             let eased = 1 - (1 - progress) * (1 - progress)
-            let side = baseDiameter * style.pulseSize * (0.3 + 1.9 * eased)
+            let side = Pulse.startSide + (baseDiameter * style.pulseSize * 2.2 - Pulse.startSide) * eased
             let circle = Path(ellipseIn: square(at: point, side: side))
             let opacity = 0.9 * (1 - progress) * (1 - progress)
             context.stroke(circle, with: .color(style.pulseColor.color.opacity(opacity)), lineWidth: 3 - 2 * eased)
