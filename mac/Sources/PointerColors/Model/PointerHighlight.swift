@@ -58,6 +58,36 @@ enum LaserOutline: String, CaseIterable, Identifiable {
     }
 }
 
+/// How the pointer moves between its size and its pressed size.
+enum PressCurve: String, CaseIterable, Identifiable {
+    /// Fast at first, settling at the end.
+    case easeOut
+    /// Goes a little past the size, then settles back, like a spring.
+    case bounce
+    /// The same speed all the way.
+    case linear
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .easeOut: return String(localized: "Ease out")
+        case .bounce: return String(localized: "Bounce")
+        case .linear: return String(localized: "Linear")
+        }
+    }
+
+    /// How far along the change is, 0 to 1 (a bounce goes past 1), at `progress` 0 to 1 of the time.
+    func value(at progress: Double) -> Double {
+        let rest = progress - 1
+        switch self {
+        case .easeOut: return 1 + rest * rest * rest
+        case .bounce: return 1 + 2.70158 * rest * rest * rest + 1.70158 * rest * rest
+        case .linear: return progress
+        }
+    }
+}
+
 /// The two highlight effects. Each has its own switch, so either, both or neither can be on.
 enum HighlightEffect: String, CaseIterable, Identifiable {
     /// A ring that grows and fades where you click.
@@ -90,6 +120,17 @@ final class PointerHighlight {
     var laserOn: Bool { didSet { save(laserOn, Key.laserOn) } }
     /// A ring that stays around the pointer, on its own or together with a mode.
     var showsRing: Bool { didSet { save(showsRing, Key.ring) } }
+    /// The pointer shrinks a little while a button is down, like a pressed button. Works on its
+    /// own, without the overlay.
+    var shrinksOnPress: Bool { didSet { save(shrinksOnPress, Key.pressShrink) } }
+    /// The pressed size, times the pointer's own size.
+    var pressScale: Double { didSet { save(pressScale, Key.pressScale) } }
+    /// Seconds the pointer takes to shrink when the button goes down.
+    var pressDownDuration: Double { didSet { save(pressDownDuration, Key.pressDown) } }
+    /// Seconds it takes to grow back when the button comes up.
+    var pressUpDuration: Double { didSet { save(pressUpDuration, Key.pressUp) } }
+    var pressCurve: PressCurve { didSet { save(pressCurve.rawValue, Key.pressCurve) } }
+    var shrinksOnRightClick: Bool { didSet { save(shrinksOnRightClick, Key.pressRight) } }
 
     /// Off uses `pulseColor` instead of the pair's color.
     var pulseUsesPairColor: Bool { didSet { save(pulseUsesPairColor, Key.pulsePair) } }
@@ -130,6 +171,8 @@ final class PointerHighlight {
     static let sizeRange = 0.5...2.0
     static let pulseDurationRange = 0.2...1.5
     static let trailFadeRange = 0.3...3.0
+    static let pressScaleRange = 0.5...0.95
+    static let pressDurationRange = 0.0...0.5
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -138,12 +181,19 @@ final class PointerHighlight {
         defaults.register(defaults: [Key.pulsePair: true, Key.pulseSize: 1.0, Key.pulseDuration: 0.45,
                                      Key.pulseRight: true, Key.laserPair: true, Key.laserSize: 1.0,
                                      Key.laserTrail: true, Key.laserFade: 0.9,
-                                     Key.laserKeys: HoldKeys.option.rawValue])
+                                     Key.laserKeys: HoldKeys.option.rawValue, Key.pressShrink: false, Key.pressScale: 0.88,
+                                     Key.pressDown: 0.08, Key.pressUp: 0.08, Key.pressRight: true])
         // Builds before the switches stored one choice: off, pulse or laser.
         let earlier = defaults.string(forKey: Key.oldMode)
         pulseOn = defaults.object(forKey: Key.pulseOn) as? Bool ?? (earlier == "pulse")
         laserOn = defaults.object(forKey: Key.laserOn) as? Bool ?? (earlier == "laser")
         showsRing = defaults.bool(forKey: Key.ring)
+        shrinksOnPress = defaults.bool(forKey: Key.pressShrink)
+        pressScale = defaults.double(forKey: Key.pressScale)
+        pressDownDuration = defaults.double(forKey: Key.pressDown)
+        pressUpDuration = defaults.double(forKey: Key.pressUp)
+        pressCurve = defaults.string(forKey: Key.pressCurve).flatMap(PressCurve.init(rawValue:)) ?? .easeOut
+        shrinksOnRightClick = defaults.bool(forKey: Key.pressRight)
         pulseUsesPairColor = defaults.bool(forKey: Key.pulsePair)
         pulseColor = Self.color(defaults, Key.pulseColor) ?? RGBA(hex: "FF9F0A")!
         pulseSize = defaults.double(forKey: Key.pulseSize)
@@ -184,6 +234,11 @@ final class PointerHighlight {
     /// A drag draws a laser trail: the laser and its trail are on and, if it needs keys, they're held.
     func laserDraws(keysHeld: Bool) -> Bool {
         laserOn && laserTrail && (keysHeld || !laserNeedsKeys)
+    }
+
+    /// This press shrinks the pointer: shrinking is on, and it's a left click or right clicks count.
+    func shrinks(isLeft: Bool) -> Bool {
+        shrinksOnPress && (isLeft || shrinksOnRightClick)
     }
 
     /// The laser's keys are all down in `flags`.
@@ -255,6 +310,12 @@ final class PointerHighlight {
         static let pulseOn = "highlightPulse"
         static let laserOn = "highlightLaser"
         static let ring = "highlightRing"
+        static let pressShrink = "highlightPressShrink"
+        static let pressScale = "highlightPressScale"
+        static let pressDown = "highlightPressDownDuration"
+        static let pressUp = "highlightPressUpDuration"
+        static let pressCurve = "highlightPressCurve"
+        static let pressRight = "highlightPressRightClick"
         static let pulsePair = "highlightPulseUsesPair"
         static let pulseColor = "highlightPulseColor"
         static let pulseSize = "highlightPulseSize"

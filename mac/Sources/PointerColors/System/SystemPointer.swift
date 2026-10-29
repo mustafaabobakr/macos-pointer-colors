@@ -47,6 +47,8 @@ struct SystemPointer {
     /// instead, so a clip shows the pair that was just picked.
     private let isReadOnly = ScreenshotRenderer.isRendering
     nonisolated(unsafe) private static var rendered: (outline: RGBA, fill: RGBA, scale: Double?)?
+    /// The size under a press: while a press has the pointer shrunk, it's the size reported and saved.
+    nonisolated(unsafe) private static var pressedFrom: Double?
 
     // MARK: Colors
 
@@ -82,6 +84,7 @@ struct SystemPointer {
     // MARK: Size
 
     func currentScale() -> Double {
+        if let pressedFrom = Self.pressedFrom { return pressedFrom }
         if isReadOnly, let scale = Self.rendered?.scale { return scale }
         if let scale = universalAccess.cursorScale() { return scale }
         return (copy(Self.scaleKey) as? NSNumber)?.doubleValue ?? Self.minimumScale
@@ -94,6 +97,7 @@ struct SystemPointer {
         guard !isReadOnly else { return renderScale(value) }
         let previous = currentScale()
         guard universalAccess.setCursorScale(value) else { throw SystemPointerError.sizeAPIUnavailable }
+        if Self.pressedFrom != nil { Self.pressedFrom = value }
         set(Self.scaleKey, value as CFNumber)
         if synchronize() || DefaultsTool.write(Self.scaleKey as String, number: value) {
             universalAccess.postMouseSettingsChanged()
@@ -109,6 +113,23 @@ struct SystemPointer {
     private func renderScale(_ value: Double) {
         let colors = currentColors()
         Self.rendered = (colors.outline, colors.fill, value)
+    }
+
+    // MARK: Press
+
+    /// Shows `scale` live for a press, without saving it. Until `endPress`, `currentScale` keeps
+    /// reporting the size from before the press.
+    func showPressed(_ scale: Double) {
+        guard !isReadOnly else { return }
+        if Self.pressedFrom == nil { Self.pressedFrom = currentScale() }
+        _ = universalAccess.setCursorScale(scale)
+    }
+
+    /// Puts the size from before the press back on screen.
+    func endPress() {
+        guard let pressedFrom = Self.pressedFrom else { return }
+        Self.pressedFrom = nil
+        _ = universalAccess.setCursorScale(pressedFrom)
     }
 
     // MARK: Shake to find

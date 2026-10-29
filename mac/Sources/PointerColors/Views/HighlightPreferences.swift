@@ -27,11 +27,49 @@ struct HighlightPreferences: View {
                 }
             }
             .featureSpot("highlight")
+            PressSection(highlight: highlight, pointerScale: pointerScale).featureSpot("press-shrink")
             PulseSection(highlight: highlight).featureSpot("pulse")
             LaserSection(highlight: highlight).featureSpot("laser")
             PairColorsSection(highlight: highlight, pairs: pairs, current: pair).featureSpot("highlight-pair-colors")
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct PressSection: View {
+    @Bindable var highlight: PointerHighlight
+    let pointerScale: Double
+
+    var body: some View {
+        Section("Press") {
+            Toggle(isOn: $highlight.shrinksOnPress) {
+                Text("Shrink the pointer on click")
+                if pointerScale > SystemPointer.minimumScale {
+                    Text("The pointer gets smaller while the button is down, so every click feels pressed.")
+                } else {
+                    Text("The pointer gets smaller while the button is down. macOS can't draw it smaller than its smallest size, so make it bigger first.")
+                }
+            }
+            .featureSpot("clip-press-toggle")
+            Group {
+                ValueSlider(title: String(localized: "Pressed size"), value: $highlight.pressScale,
+                            range: PointerHighlight.pressScaleRange, format: "%.2f×")
+                    .featureSpot("clip-press-size")
+                ValueSlider(title: String(localized: "Shrink in"), value: $highlight.pressDownDuration,
+                            range: PointerHighlight.pressDurationRange, format: "%.2f s")
+                ValueSlider(title: String(localized: "Grow back in"), value: $highlight.pressUpDuration,
+                            range: PointerHighlight.pressDurationRange, format: "%.2f s")
+                Picker(selection: $highlight.pressCurve) {
+                    ForEach(PressCurve.allCases) { Text($0.title).tag($0) }
+                } label: {
+                    Text("Animation")
+                    Text("Bounce goes a little past the size, then settles, like a spring. 0 s skips the animation.")
+                }
+                .featureSpot("clip-press-curve")
+                Toggle("Shrink on right-clicks too", isOn: $highlight.shrinksOnRightClick)
+            }
+            .disabled(!highlight.shrinksOnPress)
+        }
     }
 }
 

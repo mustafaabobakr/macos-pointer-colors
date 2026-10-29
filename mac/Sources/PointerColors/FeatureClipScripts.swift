@@ -51,7 +51,7 @@ enum FeatureClipScripts {
         "menu-pairs": menuPairs, "current-pair": currentPair, "pointer-size": pointerSize,
         "previews": previews, "display-colors": displayColors, "menu-highlight": menuHighlight,
         "custom-pairs": customPairs, "appearance-pairs": appearancePairs, "app-colors": appColors,
-        "highlight": highlight, "pulse": pulse, "laser": laser, "highlight-pair-colors": highlightPairColors,
+        "highlight": highlight, "press-shrink": pressShrink, "pulse": pulse, "laser": laser, "highlight-pair-colors": highlightPairColors,
         "shortcuts": shortcuts, "menu-appearance": menuAppearance, "backup": backup,
         "update-window": updateWindow, "updates": updates,
     ]
@@ -207,6 +207,20 @@ enum FeatureClipScripts {
             .move(to: spot("clip-card-laser")), .choose { $0.highlight.setOn(false, .laser) },
             .move(to: spot(pad, x: 0.6, y: 0.5)), .click, .pause(0.6),
             .move(to: spot("clip-card-laser")), .choose { $0.highlight.setOn(true, .laser) }, .pause(0.6),
+        ])
+
+    private static let pressShrink = FeatureClip(
+        cursorStart: spot("press-shrink", x: 0.6, y: 0.9),
+        setUp: { $0.highlight.shrinksOnPress = false },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-press-toggle", x: 0.95)), .choose { $0.highlight.shrinksOnPress = true }, .pause(0.5),
+            .click, .pause(0.4), .hold(0.6), .pause(0.4),
+            .move(to: along("clip-press-size", 0.88, in: PointerHighlight.pressScaleRange, inset: 0.3)),
+            .slide(to: along("clip-press-size", 0.7, in: PointerHighlight.pressScaleRange, inset: 0.3), seconds: 0.8) {
+                $0.highlight.pressScale = lerp(0.88, 0.7, $1)
+            },
+            .move(to: spot("clip-press-curve", x: 0.85)), .choose { $0.highlight.pressCurve = .bounce }, .pause(0.8),
         ])
 
     private static let pulse = FeatureClip(

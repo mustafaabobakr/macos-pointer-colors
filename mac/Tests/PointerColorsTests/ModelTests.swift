@@ -388,6 +388,37 @@ final class PointerHighlightTests: XCTestCase {
         highlight.pulseStyle = .ripple
         XCTAssertEqual(PointerHighlight(defaults: defaults).pulseStyle, .ripple)
     }
+
+    func testPressIsOffByDefaultAndRemembered() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertFalse(highlight.shrinksOnPress)
+        XCTAssertFalse(highlight.shrinks(isLeft: true), "off means no press shrinks")
+        XCTAssertEqual(highlight.pressScale, 0.88)
+        XCTAssertEqual(highlight.pressCurve, .easeOut)
+        highlight.shrinksOnPress = true
+        highlight.pressScale = 0.7
+        highlight.pressDownDuration = 0.2
+        highlight.pressUpDuration = 0
+        highlight.pressCurve = .bounce
+        highlight.shrinksOnRightClick = false
+        let reopened = PointerHighlight(defaults: defaults)
+        XCTAssertTrue(reopened.shrinksOnPress)
+        XCTAssertEqual(reopened.pressScale, 0.7)
+        XCTAssertEqual(reopened.pressDownDuration, 0.2)
+        XCTAssertEqual(reopened.pressUpDuration, 0)
+        XCTAssertEqual(reopened.pressCurve, .bounce)
+        XCTAssertTrue(reopened.shrinks(isLeft: true))
+        XCTAssertFalse(reopened.shrinks(isLeft: false), "right clicks left out")
+    }
+
+    func testPressCurvesStartAtZeroAndLandOnOne() {
+        for curve in PressCurve.allCases {
+            XCTAssertEqual(curve.value(at: 0), 0, accuracy: 1e-9, curve.rawValue)
+            XCTAssertEqual(curve.value(at: 1), 1, accuracy: 1e-9, curve.rawValue)
+        }
+        XCTAssertGreaterThan(PressCurve.bounce.value(at: 0.8), 1, "a bounce goes past the end")
+    }
 }
 
 final class SettingsBackupTests: XCTestCase {
@@ -396,6 +427,29 @@ final class SettingsBackupTests: XCTestCase {
         let defaults = UserDefaults(suiteName: name)!
         addTeardownBlock { defaults.removePersistentDomain(forName: name) }
         return (defaults, name)
+    }
+
+    @MainActor
+    func testRoundTripCarriesPressSettings() throws {
+        let (source, sourceName) = makeDefaults()
+        let highlight = PointerHighlight(defaults: source)
+        highlight.shrinksOnPress = true
+        highlight.pressScale = 0.6
+        highlight.pressDownDuration = 0.15
+        highlight.pressUpDuration = 0.25
+        highlight.pressCurve = .linear
+        highlight.shrinksOnRightClick = false
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        let restored = PointerHighlight(defaults: target)
+        XCTAssertTrue(restored.shrinksOnPress)
+        XCTAssertEqual(restored.pressScale, 0.6)
+        XCTAssertEqual(restored.pressDownDuration, 0.15)
+        XCTAssertEqual(restored.pressUpDuration, 0.25)
+        XCTAssertEqual(restored.pressCurve, .linear)
+        XCTAssertFalse(restored.shrinksOnRightClick)
     }
 
     func testRoundTripReplacesSettingsAndSkipsWindowKeys() throws {

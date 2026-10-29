@@ -221,10 +221,11 @@ def text_block(feature, opacity):
 
 
 def cursor(place, frame):
-    """The pointer at its spot, in the pair's colors and size, a little smaller while pressed."""
+    """The pointer at its spot, in the pair's colors and size, smaller while pressed: by the app's
+    pressed size when shrinking on click is on, otherwise a little."""
     x, y, pressed, scale, outline, fill = frame[:6]
     x, y = on_desktop(place, x, y)
-    size = scale * (0.88 if pressed else 1)
+    size = scale * (frame[9] if pressed else 1)
     shape = f'd="{ARROW}" stroke-width="2" stroke-linejoin="round"'
     return (f'<g transform="translate({x:.2f} {y:.2f}) scale({size:.3f}) translate(-3 -2)">'
             f'<path {shape} transform="translate(1.2 1.6)" fill="#000" fill-opacity=".35"/>'

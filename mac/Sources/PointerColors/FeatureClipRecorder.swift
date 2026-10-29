@@ -210,8 +210,9 @@ final class FeatureClipRecorder {
         let name = String(format: "frames/%05d.png", frames.count)
         writes.append(saveInBackground(image(of: capture), to: request.folder.appendingPathComponent(name)))
         let pair = model.menuBarPair
+        let pressedSize = model.highlight.shrinksOnPress ? model.highlight.pressScale : 0.88
         frames.append([cursor.x, cursor.y, isPressed, model.scale, pair.outline.hex, pair.fill.hex, icon(for: pair),
-                       model.colorScheme == .dark, keys])
+                       model.colorScheme == .dark, keys, pressedSize])
     }
 
     /// The window was made dark for the screenshots; a clip that changes the theme changes it.
