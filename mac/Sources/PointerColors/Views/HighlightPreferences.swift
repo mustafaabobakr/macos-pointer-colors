@@ -27,9 +27,9 @@ struct HighlightPreferences: View {
                 }
             }
             .featureSpot("highlight")
-            PressSection(highlight: highlight, pointerScale: pointerScale).featureSpot("press-shrink")
             PulseSection(highlight: highlight).featureSpot("pulse")
             LaserSection(highlight: highlight).featureSpot("laser")
+            PressSection(highlight: highlight, pointerScale: pointerScale).featureSpot("press-shrink")
             PairColorsSection(highlight: highlight, pairs: pairs, current: pair).featureSpot("highlight-pair-colors")
         }
         .formStyle(.grouped)
@@ -53,8 +53,7 @@ private struct PressSection: View {
             .featureSpot("clip-press-toggle")
             Group {
                 ValueSlider(title: String(localized: "Pressed size"), value: $highlight.pressScale,
-                            range: PointerHighlight.pressScaleRange, format: "%.2f×")
-                    .featureSpot("clip-press-size")
+                            range: PointerHighlight.pressScaleRange, format: "%.2f×", spot: "clip-press-size")
                 ValueSlider(title: String(localized: "Shrink in"), value: $highlight.pressDownDuration,
                             range: PointerHighlight.pressDurationRange, format: "%.2f s")
                 ValueSlider(title: String(localized: "Grow back in"), value: $highlight.pressUpDuration,
@@ -86,8 +85,7 @@ private struct PulseSection: View {
             .pickerStyle(.segmented)
             .featureSpot("clip-pulse-style")
             ValueSlider(title: String(localized: "Size"), value: $highlight.pulseSize,
-                        range: PointerHighlight.sizeRange, format: "%.1f×")
-                .featureSpot("clip-pulse-size")
+                        range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size")
             ValueSlider(title: String(localized: "Length"), value: $highlight.pulseDuration,
                         range: PointerHighlight.pulseDurationRange, format: "%.2f s")
             Toggle("Pulse on right-clicks too", isOn: $highlight.pulsesOnRightClick)
@@ -221,11 +219,13 @@ private struct ValueSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     let format: String
+    /// Marks the slider itself, not its row, for a clip that drags it.
+    var spot: String?
 
     var body: some View {
         LabeledContent(title) {
             HStack {
-                Slider(value: $value, in: range).accessibilityLabel(title)
+                Slider(value: $value, in: range).accessibilityLabel(title).featureSpot(spot ?? "")
                 Text(String(format: format, value)).monospacedDigit().foregroundStyle(.secondary)
                     .frame(minWidth: 52, alignment: .trailing)
             }

@@ -216,11 +216,11 @@ enum FeatureClipScripts {
             .pause(0.4),
             .move(to: spot("clip-press-toggle", x: 0.95)), .choose { $0.highlight.shrinksOnPress = true }, .pause(0.5),
             .click, .pause(0.4), .hold(0.6), .pause(0.4),
-            .move(to: along("clip-press-size", 0.88, in: PointerHighlight.pressScaleRange, inset: 0.3)),
-            .slide(to: along("clip-press-size", 0.7, in: PointerHighlight.pressScaleRange, inset: 0.3), seconds: 0.8) {
+            .move(to: along("clip-press-size", 0.88, in: PointerHighlight.pressScaleRange, inset: 0.03)),
+            .slide(to: along("clip-press-size", 0.7, in: PointerHighlight.pressScaleRange, inset: 0.03), seconds: 0.8) {
                 $0.highlight.pressScale = lerp(0.88, 0.7, $1)
             },
-            .move(to: spot("clip-press-curve", x: 0.85)), .choose { $0.highlight.pressCurve = .bounce }, .pause(0.8),
+            .move(to: spot("clip-press-curve", x: 0.93, y: 0.25)), .choose { $0.highlight.pressCurve = .bounce }, .pause(0.8),
         ])
 
     private static let pulse = FeatureClip(
@@ -233,8 +233,8 @@ enum FeatureClipScripts {
             .move(to: spot(pad, x: 0.65, y: 0.4), seconds: 0.5), .click, .pause(0.6),
             .move(to: spot("clip-pulse-style", x: 0.75)), .choose { $0.highlight.pulseStyle = .ripple },
             .move(to: spot(pad, x: 0.45, y: 0.55)), .click, .pause(0.9),
-            .move(to: along("clip-pulse-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.3)),
-            .slide(to: along("clip-pulse-size", 1.8, in: PointerHighlight.sizeRange, inset: 0.3), seconds: 0.8) {
+            .move(to: along("clip-pulse-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.03)),
+            .slide(to: along("clip-pulse-size", 1.8, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.8) {
                 $0.highlight.pulseSize = lerp(1.0, 1.8, $1)
             },
             .move(to: spot(pad, x: 0.5)), .hold(1.0), .pause(1.0),
