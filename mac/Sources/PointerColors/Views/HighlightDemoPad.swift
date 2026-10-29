@@ -27,7 +27,7 @@ struct HighlightDemoPad: View {
     }
 
     private var hint: String {
-        !highlight.isActive
+        !highlight.isActive && !highlight.shrinksOnPress
             ? String(localized: "Turn on Pulse or Laser above, then try it here.")
             : String(localized: "Move, click and drag here to try it.")
     }

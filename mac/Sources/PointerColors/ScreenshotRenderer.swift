@@ -41,7 +41,7 @@ enum ScreenshotRenderer {
     /// in a process of its own.
     static func screens(_ model: AppModel) -> [(name: String, view: () -> AnyView, height: CGFloat?)] {
         let tabs: [(PreferencesTab, CGFloat)] = [(.general, 860), (.pairs, 520), (.automation, 760),
-                                                (.highlight, 1720), (.shortcuts, 420), (.about, 760)]
+                                                (.highlight, 2040), (.shortcuts, 420), (.about, 760)]
         let preferences = tabs.map { tab, height in
             ("preferences-\(tab.slug)", { AnyView(PreferencesView(model: model, tab: tab).background(windowBackground)) }, Optional(height))
         }

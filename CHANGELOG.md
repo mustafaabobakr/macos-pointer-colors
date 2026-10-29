@@ -3,6 +3,11 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.6 — 2026-10-29
+
+- **Clicks you can feel.** Turn on **Preferences › Highlight › Press › Shrink the pointer on click** and the pointer gets smaller while the button is down, then grows back when you let go. Choose the **Pressed size**, how fast it shrinks and grows back, the **Animation** (**Ease out**, **Bounce** or **Linear**), and whether right-clicks count. It's off unless you turn it on, and it needs a pointer bigger than the smallest size. **Export all…** saves these settings too.
+- **Pulses grow out of the click.** Every pulse now starts as a dot right under the pointer and spreads from there, so it reads as coming from the click.
+
 ## 0.4.5 — 2026-10-28
 
 - **A laser that stands out on light backgrounds.** The thin edge around the laser dot and along its trail now takes the pair's dark color, like the black outline of Highlighter. Choose it in **Preferences › Highlight › Laser › Outline**: **Pair's dark color**, **Laser color** (the look before), or **None**.

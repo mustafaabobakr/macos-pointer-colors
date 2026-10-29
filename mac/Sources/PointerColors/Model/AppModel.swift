@@ -87,6 +87,7 @@ final class AppModel {
     let hotKeys = HotKeyCenter()
     let highlight = PointerHighlight()
     @ObservationIgnored private var highlightOverlay: HighlightOverlay?
+    @ObservationIgnored private var pressShrink: PressShrink?
     private let pointer = SystemPointer()
     @ObservationIgnored private var automationStore: Automation?
 
@@ -119,6 +120,7 @@ final class AppModel {
         highlightOverlay = HighlightOverlay(settings: highlight,
                                             pair: { [weak self] in self?.menuBarPair ?? .featured },
                                             pointerScale: { [weak self] in self?.scale ?? 1 })
+        pressShrink = PressShrink(settings: highlight, pointer: pointer)
         startUpdateSchedule()
     }
 
@@ -208,6 +210,11 @@ final class AppModel {
         } catch {
             fail(error)
         }
+    }
+
+    /// Puts back a size a press shrank, so quitting mid-press doesn't leave the pointer small.
+    func endPointerPress() {
+        pressShrink?.restore()
     }
 
     /// Changes the size live, as the slider moves.
