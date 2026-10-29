@@ -3,7 +3,8 @@
 
     python3 -I docs/art/make_readme_art.py
 
-Writes docs/readme-hero.png, docs/readme-pairs.png and docs/readme-download.png.
+Writes docs/readme-hero.png, docs/readme-pairs.png, docs/readme-download.png and docs/og-image.png
+(the 1200 x 630 link preview the website names in its og:image and twitter:image tags).
 Needs rsvg-convert (brew install librsvg). Re-run it after changing pairs.json or docs/mac-app.png.
 """
 import base64
@@ -26,7 +27,7 @@ def pointer(x, y, scale, outline, fill, stroke=2.0):
             f'stroke-linejoin="round"/></g>')
 
 
-def backdrop(width, height, glow_a="#00FFDA", glow_b="#008A59"):
+def backdrop(width, height, glow_a="#00FFDA", glow_b="#008A59", rx=40):
     """Dark ground, two soft glows and a faint grid, like the website's Mac section."""
     return f'''
   <defs>
@@ -36,21 +37,24 @@ def backdrop(width, height, glow_a="#00FFDA", glow_b="#008A59"):
     <radialGradient id="gridfade" cx="0.3" cy="0.45" r="0.65"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
     <mask id="gridmask"><rect width="{width}" height="{height}" fill="url(#gridfade)"/></mask>
   </defs>
-  <rect width="{width}" height="{height}" rx="40" fill="{BG}"/>
-  <rect width="{width}" height="{height}" rx="40" fill="url(#ga)"/>
-  <rect width="{width}" height="{height}" rx="40" fill="url(#gb)"/>
-  <rect width="{width}" height="{height}" rx="40" fill="url(#grid)" mask="url(#gridmask)"/>
-  <rect x="1" y="1" width="{width - 2}" height="{height - 2}" rx="39" fill="none" stroke="#ffffff" stroke-opacity=".08" stroke-width="2"/>'''
+  <rect width="{width}" height="{height}" rx="{rx}" fill="{BG}"/>
+  <rect width="{width}" height="{height}" rx="{rx}" fill="url(#ga)"/>
+  <rect width="{width}" height="{height}" rx="{rx}" fill="url(#gb)"/>
+  <rect width="{width}" height="{height}" rx="{rx}" fill="url(#grid)" mask="url(#gridmask)"/>
+  <rect x="1" y="1" width="{width - 2}" height="{height - 2}" rx="{max(rx - 1, 0)}" fill="none" stroke="#ffffff" stroke-opacity=".08" stroke-width="2"/>'''
 
 
-def hero(pairs):
-    w, h = 1600, 820
+def hero(pairs, h=820, rx=40, out_w=None):
+    """The README hero; the link preview draws it square-cornered at 1600 x 840 (1.91:1), shown at 1200 x 630."""
+    w = 1600
+    out_w = out_w or w
+    out_h = round(h * out_w / w)
     # Embedded as data: rsvg-convert refuses file links outside the SVG's own folder.
     shot = "data:image/png;base64," + base64.b64encode((DOCS / "mac-app.png").read_bytes()).decode()
     strip = [p for p in pairs if p.get("group") == "neon"][:9]
     strip_svg = "".join(pointer(130 + i * 58, 600, 1.55, p["outline"], p["fill"]) for i, p in enumerate(strip))
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" viewBox="0 0 {w} {h}">
-  {backdrop(w, h)}
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{out_w}" height="{out_h}" viewBox="0 0 {w} {h}">
+  {backdrop(w, h, rx=rx)}
   <defs>
     <linearGradient id="hl" x1="0" x2="1"><stop offset=".05" stop-color="#00FFDA"/><stop offset=".95" stop-color="#ffffff"/></linearGradient>
     <clipPath id="shotclip"><rect x="0" y="0" width="560" height="760" rx="28"/></clipPath>
@@ -134,6 +138,7 @@ def main():
     render("readme-hero", hero(pairs))
     render("readme-pairs", pairs_grid(pairs))
     render("readme-download", download_button())
+    render("og-image", hero(pairs, h=840, rx=0, out_w=1200), scale=1)
 
 
 if __name__ == "__main__":
