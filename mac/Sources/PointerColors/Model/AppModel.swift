@@ -359,11 +359,19 @@ final class AppModel {
         do {
             try pointer.apply(pair)
             settings.lastAppliedPairID = pair.id
-            if settings.playSoundOnApply { NSSound(named: "Pop")?.play() }
+            if settings.playSoundOnApply { playApplySound() }
             refreshFromSystem()
         } catch {
             fail(error)
         }
+    }
+
+    /// `NSSound(named:)` hands back one shared sound, and `play()` does nothing while it's still
+    /// playing, so a quick second change was silent. Stopping it first restarts it every time.
+    private func playApplySound() {
+        guard let sound = NSSound(named: "Pop") else { return }
+        sound.stop()
+        sound.play()
     }
 
     private func reapplyIfNeeded() {
