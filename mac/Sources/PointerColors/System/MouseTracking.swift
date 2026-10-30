@@ -29,8 +29,12 @@ final class MouseTracking {
     /// 1 turns acceleration off: the pointer moves in step with the mouse, scaled by the acceleration value.
     private static let linearScalingKey = "HIDUseLinearScalingMouseAcceleration" as CFString
 
+    /// Properties macOS writes back after a wake, a login or a change in System Settings.
+    private static let watchedKeys = [mouseAccelerationKey, "HIDPointerResolution", "HIDUseLinearScalingMouseAcceleration"]
+
     private let client: IOHIDEventSystemClient?
     private let isReadOnly = ScreenshotRenderer.isRendering
+    private var onChange: (() -> Void)?
 
     init() {
         typealias Create = @convention(c) (CFAllocator?) -> Unmanaged<IOHIDEventSystemClient>?
@@ -39,6 +43,45 @@ final class MouseTracking {
     }
 
     var isAvailable: Bool { client != nil }
+
+    /// Calls `handler` on the main queue whenever something else changes the acceleration or
+    /// speed, as LinearMouse does, so the app's own values can go straight back on. Both functions
+    /// are private API, looked up at runtime; without them nothing is watched.
+    func observeChanges(_ handler: @escaping () -> Void) {
+        typealias Callback = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, CFString?, CFTypeRef?) -> Void
+        typealias Register = @convention(c) (IOHIDEventSystemClient, CFString, Callback, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Void
+        typealias Schedule = @convention(c) (IOHIDEventSystemClient, UnsafeMutableRawPointer) -> Void
+        let library = dlopen(nil, RTLD_NOW)
+        guard let client, onChange == nil,
+              let register = dlsym(library, "IOHIDEventSystemClientRegisterPropertyChangedCallback").map({ unsafeBitCast($0, to: Register.self) }),
+              let schedule = dlsym(library, "IOHIDEventSystemClientScheduleWithDispatchQueue").map({ unsafeBitCast($0, to: Schedule.self) })
+        else { return }
+        onChange = handler
+        let callback: Callback = { target, _, _, _ in
+            guard let target else { return }
+            Unmanaged<MouseTracking>.fromOpaque(target).takeUnretainedValue().onChange?()
+        }
+        let target = Unmanaged.passUnretained(self).toOpaque()
+        for key in Self.watchedKeys { register(client, key as CFString, callback, target, nil) }
+        schedule(client, Unmanaged.passUnretained(DispatchQueue.main).toOpaque())
+    }
+
+    /// True when every mouse already has these values, so writing them again would change nothing.
+    func matches(acceleration: Double, speed: Double, accelerationOff: Bool) -> Bool {
+        let resolution = Self.resolution(fromSpeed: speed)
+        return mice.allSatisfy { mouse in
+            let hasLinearScaling = IOHIDServiceClientCopyProperty(mouse, Self.linearScalingKey) != nil
+            let expected = accelerationOff && !hasLinearScaling ? -1 : acceleration.clamped(to: Self.accelerationRange)
+            guard let read = property(mouse, accelerationKey(of: mouse)) as? NSNumber,
+                  abs(read.doubleValue / 65_536 - expected) < 0.001 else { return false }
+            if hasLinearScaling, (property(mouse, Self.linearScalingKey as String) as? NSNumber)?.intValue != (accelerationOff ? 1 : 0) {
+                return false
+            }
+            // Mice off the speed scale, like the Magic Mouse, keep their own resolution anyway.
+            guard !accelerationOff, let current = self.resolution(of: mouse), Self.isOnSpeedScale(current) else { return true }
+            return abs(current - resolution) <= 1
+        }
+    }
 
     /// The acceleration System Settings › Mouse › Tracking speed has set, which every mouse
     /// starts with.

@@ -48,9 +48,14 @@ final class PointerTracking {
         isLoading = false
         if isCustom { apply() } else { readSystem() }
         watchForMice()
-        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil,
-                                                          queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.miceChanged() }
+        mice.observeChanges { [weak self] in
+            MainActor.assumeIsolated { self?.systemChanged() }
+        }
+        // Waking, and logging back in once the lid opens, both put macOS's values back.
+        for name in [NSWorkspace.didWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification] {
+            NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.miceChanged() }
+            }
         }
         refreshBattery()
         batteryTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
@@ -98,6 +103,14 @@ final class PointerTracking {
     private func miceChanged() {
         if isCustom { apply() } else { readSystem() }
         refreshBattery()
+    }
+
+    /// macOS (or System Settings) changed acceleration or speed: put the app's own back, unless the
+    /// mice already have them, which is also what stops the app's own writes from looping.
+    private func systemChanged() {
+        guard isCustom else { readSystem(); return }
+        guard !mice.matches(acceleration: acceleration, speed: speed, accelerationOff: accelerationOff) else { return }
+        apply()
     }
 
     /// Calls `miceChanged` a moment after any HID service appears, once macOS has set it up.
