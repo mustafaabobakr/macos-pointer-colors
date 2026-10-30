@@ -3,6 +3,18 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.7 — 2026-10-30
+
+- **Mouse acceleration and speed.** A new **Speed** tab in Preferences sets the mouse's **Acceleration** anywhere from 0 to 40 and its **Pointer speed**, beyond what System Settings offers, each with a ↺ button that puts back the default. Turn on **Disable pointer acceleration** and the pointer moves exactly as far as the mouse, however fast you move it. The app keeps these on every mouse, including one that connects later or after the Mac wakes.
+- **Press twice to find the pointer.** Press Control twice and a ring in your pair's colors closes in on the pointer. Choose another key, or turn it off, in **Preferences › Automation › Finding the pointer**.
+- **Menu bar, battery and Dock.** **Preferences › General** can show your mouse's battery next to the menu bar icon (always, or only when it's low), hide the icon, or keep the app in the Dock. With the icon hidden, open the app again to get to Preferences.
+- **Side buttons go back and forward.** Turn on **Preferences › Buttons › Side buttons** and your mouse's back and forward buttons work in Safari, Finder and Apple's other apps, not just in browsers.
+- **No more accidental double-clicks.** **Preferences › Buttons › Clicks** ignores a click that comes a few milliseconds after the last one, so a worn button clicks once. Choose how close together counts as a bounce.
+- **Focus follows the pointer.** Turn on **Preferences › Automation › Windows › Focus the window under the pointer** and the window under the pointer takes your typing after a moment, without coming to the front. Hold a modifier key to pass over windows without changing focus.
+- **Lighter clicks with Shrink the pointer on click.** A press now only redraws the pointer, instead of making every app reload its mouse settings many times a second.
+
+The side buttons, double-click fix and focus need Accessibility: the app asks for it when you turn one on. **Export all…** saves all the new settings.
+
 ## 0.4.6 — 2026-10-29
 
 - **Clicks you can feel.** Turn on **Preferences › Highlight › Press › Shrink the pointer on click** and the pointer gets smaller while the button is down, then grows back when you let go. Choose the **Pressed size**, how fast it shrinks and grows back, the **Animation** (**Ease out**, **Bounce** or **Linear**), and whether right-clicks count. It's off unless you turn it on, and it needs a pointer bigger than the smallest size. **Export all…** saves these settings too.
