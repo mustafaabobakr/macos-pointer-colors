@@ -3,6 +3,10 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.8 — 2026-10-30
+
+- **The app no longer quits when you close its menu.** In 0.4.7, clicking the menu bar icon a second time to close the menu quit Pointer Colors. It now just closes the menu. **Show in menu bar** still hides and shows the icon.
+
 ## 0.4.7 — 2026-10-30
 
 - **Mouse acceleration and speed.** A new **Speed** tab in Preferences sets the mouse's **Acceleration** anywhere from 0 to 40 and its **Pointer speed**, beyond what System Settings offers, each with a ↺ button that puts back the default. Turn on **Disable pointer acceleration** and the pointer moves exactly as far as the mouse, however fast you move it. The app keeps these on every mouse, including one that connects later or after the Mac wakes.
