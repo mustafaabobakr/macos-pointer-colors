@@ -39,7 +39,7 @@ final class AppModel {
         didSet { settings.showsInDock = showsInDock; applyDockVisibility() }
     }
     var menuBarVisibility: MenuBarVisibility {
-        didSet { settings.menuBarVisibility = menuBarVisibility }
+        didSet { settings.menuBarVisibility = menuBarVisibility; MenuBarItem.setVisible(menuBarVisibility == .always) }
     }
     var batteryDisplay: BatteryDisplay {
         didSet { settings.batteryDisplay = batteryDisplay; tracking.refreshBattery() }

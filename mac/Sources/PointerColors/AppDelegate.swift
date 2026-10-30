@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         model.applyDockVisibility()
+        MenuBarItem.setVisible(model.menuBarVisibility == .always)
         if let path = ScreenshotRenderer.requestedPath {
             ScreenshotRenderer.render(model: model, to: path)
         } else if let request = FeatureClipRecorder.request {
