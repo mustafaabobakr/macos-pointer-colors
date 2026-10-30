@@ -1,4 +1,7 @@
-# Local notes and editor settings, not part of the repo.
+# Local notes, agent and editor settings, not part of the repo.
+CLAUDE.md
+.agents/
+.claude/
 .idea/
 *.mp4
 # ...except the promo film the website serves.
