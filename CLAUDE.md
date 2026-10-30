@@ -23,7 +23,8 @@ releases page show them; `CHANGELOG.md` does not.
   its title, caption, `use` and `sources` if they no longer fit. A removed feature loses its entry,
   its script and its clip, and its clip comes out of every release that shows it (otherwise those
   images break).
-- **When releasing** (not before): run `mac/scripts/feature-clips.sh` to record every clip (or
+- **When releasing** (not before): ask first whether to record clips at all, and which ones; a
+  fix-only release usually has none. Only on a yes, run `mac/scripts/feature-clips.sh` (or
   `… <id> …` for some), watch each new or changed one, and commit them with the version bump. The
   app records offscreen with demo settings in the bare build's own defaults domain, so it never
   touches the installed app's settings, the real pointer or the mouse.
@@ -35,6 +36,12 @@ releases page show them; `CHANGELOG.md` does not.
   drops these lines when it shows release notes (`UpdateChecker.whatsNew`).
 
 ## Releasing
+
+When asked to release, first ask which version, with these choices and one marked recommended
+from the changes since the last release: a patch (`0.4.x`, fixes only), a minor (`0.5.0`, new
+features) or a major (`1.0.0`). Also ask before recording any clips or screenshots (above). Then:
+bump the version and `CHANGELOG.md` on `feat/macos-app`, merge it into `main`, push, build and
+sign the DMG, and publish the GitHub release from `main`.
 
 Releases are signed with the "Pointer Colors Dev" certificate; see the README's build section and
 `mac/scripts/signing.sh`. Quit any copy running from `mac/build/` before building (the build script

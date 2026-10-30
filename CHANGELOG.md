@@ -3,6 +3,11 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.4.9 — 2026-10-30
+
+- **Your mouse speed stays after the Mac sleeps.** Closing and reopening the lid, or logging back in, put macOS's own acceleration and speed back. The app now notices whenever macOS resets them and puts yours straight back, as LinearMouse does.
+- **A sound on every pair change.** With **Play a sound when a pair is applied** on, changing pairs quickly one after another now plays the sound each time, instead of staying silent until the last one finished.
+
 ## 0.4.8 — 2026-10-30
 
 - **The app no longer quits when you close its menu.** In 0.4.7, clicking the menu bar icon a second time to close the menu quit Pointer Colors. It now just closes the menu. **Show in menu bar** still hides and shows the icon.
