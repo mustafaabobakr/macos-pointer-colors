@@ -10,6 +10,8 @@ final class UniversalAccessCore {
     private typealias SetScale = @convention(c) (Double) -> Void
     private typealias GetBool = @convention(c) () -> Bool
     private typealias SetBool = @convention(c) (Bool) -> Void
+    private typealias MainConnection = @convention(c) () -> Int32
+    private typealias ShowScale = @convention(c) (Int32, Float) -> Int32
 
     private static let libraryPath = "/System/Library/PrivateFrameworks/UniversalAccess.framework/Versions/A/Frameworks/UniversalAccessCore.framework/Versions/A/UniversalAccessCore"
     private static let fallbackNotification = "UniversalAccessDomainMouseSettingsDidChangeNotification"
@@ -18,10 +20,15 @@ final class UniversalAccessCore {
     private let setScale: SetScale?
     private let getShakeToFind: GetBool?
     private let setShakeToFind: SetBool?
+    private let mainConnection: MainConnection?
+    private let showScale: ShowScale?
     private let mouseSettingsNotification: CFString
 
     private init() {
         let handle = dlopen(Self.libraryPath, RTLD_NOW)
+        let graphics = dlopen(nil, RTLD_NOW)
+        mainConnection = Self.symbol(graphics, "CGSMainConnectionID").map { unsafeBitCast($0, to: MainConnection.self) }
+        showScale = Self.symbol(graphics, "CGSSetCursorScale").map { unsafeBitCast($0, to: ShowScale.self) }
         getScale = Self.symbol(handle, "UACursorGetScale").map { unsafeBitCast($0, to: GetScale.self) }
         setScale = Self.symbol(handle, "UACursorSetScale").map { unsafeBitCast($0, to: SetScale.self) }
         getShakeToFind = Self.symbol(handle, "UAFindMyCursorIsEnabled").map { unsafeBitCast($0, to: GetBool.self) }
@@ -45,6 +52,14 @@ final class UniversalAccessCore {
         guard let setScale else { return false }
         setScale(scale)
         return true
+    }
+
+    /// Redraws the pointer at `scale` and nothing else. `UACursorSetScale` also saves the size and
+    /// tells every app the mouse settings changed, which, once a frame, cuts off drags in progress.
+    /// Returns false when the private WindowServer call is unavailable.
+    func showCursorScale(_ scale: Double) -> Bool {
+        guard let mainConnection, let showScale else { return false }
+        return showScale(mainConnection(), Float(scale)) == 0
     }
 
     func postMouseSettingsChanged() {

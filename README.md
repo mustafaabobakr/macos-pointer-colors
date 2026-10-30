@@ -29,7 +29,7 @@
   <br><sub><a href="https://macos-pointer-colors.pages.dev/docs/promo/pointer-colors-promo.mp4"><b>▶ Watch the 30-second film</b></a></sub>
 </p>
 
-**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 47 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
+**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 47 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. The app also highlights your clicks for screen recordings, draws with a laser pointer, sets or turns off mouse acceleration, makes the mouse's side buttons go back and forward in Safari and Finder, stops accidental double-clicks, focuses the window under the pointer, and finds a lost cursor with a double press of Control. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
 
 ## Two ways to use it
 
@@ -55,12 +55,64 @@
         <li><b>Per display</b>: a different color and size on each screen</li>
         <li><b>Per app</b>: a pair that follows the app under the pointer, or the app in front</li>
         <li><b>Light and dark</b>: switches pairs with the system appearance</li>
-        <li><b>Shortcuts</b>, contrast warnings, shake to find</li>
-        <li><b>Your own pairs</b>, import and export</li>
+        <li><b>Click highlight</b>: pulses, a laser pointer and a ring</li>
+        <li><b>Mouse acceleration and speed</b>, or acceleration off</li>
+        <li><b>Side buttons</b> back and forward, <b>double-click fix</b></li>
+        <li><b>Find the pointer</b>: press Control twice</li>
+        <li><b>Shortcuts</b>, contrast warnings, your own pairs</li>
       </ul>
     </td>
   </tr>
 </table>
+
+## Every feature of the Mac app
+
+Every feature has its own setting in Preferences, so you turn on only what you need.
+
+**Pointer color and size**
+- **Every pair, one click away**: pick one of 47 pairs in the menu bar and the pointer changes right away.
+- **Any pointer size**: drag to make the cursor bigger, or give each display its own size.
+- **Preview before you pick**: see the pointer on light pages, dark apps, photos and spreadsheets.
+- **Contrast warnings**: the menu tells you when a pair is hard to see, and copies its hex codes.
+- **Make your own pairs**: add, edit, hide, import and export custom outline and fill colors.
+
+**Automatic pairs**
+- **A pair for each display**: colors switch as the pointer crosses to another screen.
+- **A pair for each app**: each app gets its own pair while the pointer is over it, or while it's in front.
+- **Follows light and dark**: one pair for light appearance, another for dark, switched for you.
+
+**Highlight clicks for presentations and screen recordings**
+- **Click pulses**: a ring or ripple on every click, with its own size, length and color.
+- **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose.
+- **Ring around the pointer**: keeps the cursor easy to follow on a shared screen.
+- **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.
+- **Highlight colors per pair**: a pulse and laser color for any pair.
+
+**Mouse speed and acceleration**
+- **Disable pointer acceleration**: the pointer moves the same distance however fast you move the mouse, with its own tracking speed.
+- **Pointer acceleration** from 0 to 40, and **pointer speed** from 0 to 1, past what System Settings › Mouse allows.
+- Kept on every mouse as it connects and after sleep; trackpads keep their own settings. A reset button next to each one puts the macOS default back.
+
+**Mouse buttons**
+- **Back and forward in every app**: the mouse's side buttons go back and forward in Safari, Finder, Music and Apple's other apps, not just in browsers.
+- **Fix accidental double-clicks**: a worn button that clicks twice clicks once; you choose how close together clicks are ignored.
+
+**Find the pointer**
+- **Press Control twice** and a ring in your pair's colors closes in on the cursor. Pick Option, Shift or Command instead.
+- **Shake to find**: turn macOS's shake-to-locate on or off.
+
+**Windows**
+- **Focus the window under the pointer**: type into any window just by pointing at it, without bringing it to the front. Hold a modifier key to pass over windows.
+
+**Menu bar and Dock**
+- **Mouse battery** next to the menu-bar icon, always or only when it's low.
+- **Hide the menu-bar icon** or **show the app in the Dock**.
+- **Keyboard shortcuts** from any app to switch pairs and resize the pointer.
+- **Make the menu yours**: theme, glass, tint and text size.
+
+**Settings and updates**
+- **Back up every setting** to one file and import it on another Mac.
+- **Updates in one click**: read what's new, then install on quit or right away.
 
 ## Every pair, one file
 
@@ -122,6 +174,27 @@ It's not notarized yet. Right-click it and choose **Open**, then click **Open An
 **Why does the app ask for Full Disk Access?**<br>
 macOS keeps the pointer color and size settings in a protected Accessibility preferences file (`com.apple.universalaccess`). Apps from outside the App Store can only change that file with Full Disk Access. Pointer Colors first tries Apple's own `defaults` tool, which usually works without it, and only asks when macOS blocks both. It only touches the pointer color, size and shake-to-find settings, reads no other files, and sends nothing anywhere.
 
+**How do I change mouse acceleration or turn it off on a Mac?**<br>
+Open **Preferences › Speed** in the app and turn on **Disable pointer acceleration** for a linear mouse, or drag **Pointer acceleration** up to 40 to make fast movements go further. **Pointer speed** sets how far the pointer moves. Some mice, like Apple's Magic Mouse, keep their own speed on recent macOS; acceleration still works on them.
+
+**How do I highlight mouse clicks for a screen recording or presentation?**<br>
+Turn on **Pulse** in **Preferences › Highlight** for a ring on every click, or **Laser** to draw a fading trail while you drag. Both use your pair's colors and show up in screen recordings and when you share your screen.
+
+**Why doesn't my mouse's back button work in Safari or Finder?**<br>
+macOS only passes side buttons to apps that read them, like Chrome. Turn on **Back and forward in every app** in **Preferences › Buttons**, and the buttons go back and forward in Safari, Finder and Apple's other apps too.
+
+**How do I stop my mouse from double-clicking on its own?**<br>
+A worn switch can send two clicks for one press. Turn on **Fix accidental double-clicks** in **Preferences › Buttons**: a click that comes within a few milliseconds of the last one is ignored.
+
+**Can a Mac focus the window under the mouse, like Linux?**<br>
+Yes. Turn on **Focus the window under the pointer** in **Preferences › Automation**. The window takes your typing without coming to the front.
+
+**Why does the app ask for Accessibility?**<br>
+Side buttons, the double-click fix and focus-follows-pointer have to see clicks before apps do, which macOS only allows with Accessibility. The app asks only when you turn one of them on.
+
+**How do I find a lost cursor on a big screen?**<br>
+Turn on **Show pointer location** in **Preferences › Automation** and press **Control** twice: a ring closes in on the pointer. Shake to find, a bigger pointer and a high-contrast pair help too.
+
 **Is it free?**<br>
 Yes. The website and the app are free and open source under the [MIT License](LICENSE). To report a security issue, see [SECURITY.md](SECURITY.md).
 
@@ -158,6 +231,8 @@ python3 -I docs/art/make_readme_art.py   # needs: brew install librsvg
 The site deploys to Cloudflare Pages from `main`: no framework preset, no build command, output directory `/`.
 
 <br>
+
+Mouse speed and acceleration, side buttons, the double-click fix and focus-follows-pointer work the way [LinearMouse](https://github.com/linearmouse/linearmouse) (MIT) does them, and window focusing comes from [yabai](https://github.com/asmvik/yabai) (MIT) through it. The double press to find the pointer follows LinearMouse's idea.
 
 <p align="center">
   Created by <a href="https://github.com/mustafaabobakr">Mostafa Abobakr</a> · If it helps, a <a href="https://github.com/mustafaabobakr/macos-pointer-colors">star on GitHub</a> is appreciated

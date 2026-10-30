@@ -27,6 +27,22 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: Key.playSoundOnApply) }
     }
 
+    /// Shows the app in the Dock and the app switcher, like a regular app.
+    var showsInDock: Bool {
+        get { defaults.bool(forKey: "showsInDock") }
+        nonmutating set { defaults.set(newValue, forKey: "showsInDock") }
+    }
+
+    var menuBarVisibility: MenuBarVisibility {
+        get { defaults.string(forKey: "menuBarVisibility").flatMap(MenuBarVisibility.init(rawValue:)) ?? .always }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: "menuBarVisibility") }
+    }
+
+    var batteryDisplay: BatteryDisplay {
+        get { defaults.string(forKey: "batteryDisplay").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: "batteryDisplay") }
+    }
+
     var textSize: TextSize {
         get { defaults.string(forKey: Key.textSize).flatMap(TextSize.init(rawValue:)) ?? .automatic }
         nonmutating set { defaults.set(newValue.rawValue, forKey: Key.textSize) }

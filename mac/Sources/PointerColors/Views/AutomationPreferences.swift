@@ -17,7 +17,10 @@ struct AutomationPreferences: View {
                     Text("Move the pointer back and forth quickly to make it bigger for a moment.")
                 }
                 .disabled(model.shakeToFind == nil)
+                PointerLocationRows(locator: model.locator)
             }
+            .featureSpot("pointer-location")
+            HoverFocusSection(hoverFocus: model.hoverFocus)
         }
         .formStyle(.grouped)
         .disabled(model.needsFullDiskAccess)
@@ -28,6 +31,51 @@ struct AutomationPreferences: View {
             }
         }
         .onAppear { shakeToFind = model.shakeToFind ?? false }
+    }
+}
+
+/// Press a modifier key twice to see a ring close in on the pointer.
+private struct PointerLocationRows: View {
+    @Bindable var locator: PointerLocator
+
+    var body: some View {
+        Toggle(isOn: $locator.isOn) {
+            Text("Show pointer location")
+            Text("Press \(locator.key.title) twice to reveal the pointer.")
+        }
+        .featureSpot("clip-pointer-location")
+        if locator.isOn {
+            LabeledContent("Key") {
+                HStack {
+                    Picker("Key", selection: $locator.key) {
+                        ForEach(PointerLocator.keys, id: \.rawValue) { Text($0.title).tag($0) }
+                    }
+                    .labelsHidden()
+                    .fixedSize()
+                    .featureSpot("clip-pointer-location-key")
+                    Button("Show Now") { locator.reveal() }
+                }
+            }
+            .padding(.leading, 20)
+        }
+    }
+}
+
+/// The window under the pointer takes keyboard focus, without coming to the front.
+private struct HoverFocusSection: View {
+    @Bindable var hoverFocus: HoverFocus
+
+    var body: some View {
+        AccessibilityNotice(isNeeded: hoverFocus.isOn)
+        Section("Windows") {
+            Toggle(isOn: $hoverFocus.isOn) {
+                Text("Focus the window under the pointer")
+                Text("Type into a window just by pointing at it; it stays where it is. Hold a modifier key to move across windows without changing focus.")
+            }
+            .disabled(!hoverFocus.isAvailable)
+            .featureSpot("clip-hover-focus")
+        }
+        .featureSpot("hover-focus")
     }
 }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Every app preference in one file: pairs, automation, highlight, shortcuts and appearance.
+/// Every app preference in one file: pairs, automation, highlight, speed, shortcuts and appearance.
 /// Reads and writes the app's own UserDefaults domain, leaving out what macOS keeps there for
 /// windows and panels and what only describes this Mac's update checks. Launch at login, which
 /// macOS keeps instead of the app, goes in the file next to them.

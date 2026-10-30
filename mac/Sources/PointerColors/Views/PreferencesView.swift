@@ -32,6 +32,8 @@ struct PreferencesView: View {
         case .pairs: PairsPreferences(model: model)
         case .automation: AutomationPreferences(model: model)
         case .highlight: HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pairs: model.library.visible, pointerScale: model.scale)
+        case .speed: TrackingPreferences(tracking: model.tracking)
+        case .buttons: ButtonsPreferences(buttons: model.buttons)
         case .shortcuts: ShortcutsPreferences(model: model)
         case .about: AboutPreferences(model: model)
         }
@@ -39,7 +41,7 @@ struct PreferencesView: View {
 }
 
 enum PreferencesTab: String, CaseIterable, Identifiable {
-    case general, pairs, automation, highlight, shortcuts, about
+    case general, pairs, automation, highlight, speed, buttons, shortcuts, about
 
     var id: Self { self }
     /// Names the tab's screen in docs/features/features.json.
@@ -51,6 +53,8 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .pairs: "Pairs"
         case .automation: "Automation"
         case .highlight: "Highlight"
+        case .speed: "Speed"
+        case .buttons: "Buttons"
         case .shortcuts: "Shortcuts"
         case .about: "About"
         }
@@ -62,6 +66,8 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .pairs: "cursorarrow"
         case .automation: "wand.and.stars"
         case .highlight: "cursorarrow.rays"
+        case .speed: "hare"
+        case .buttons: "computermouse"
         case .shortcuts: "command"
         case .about: "info.circle"
         }
@@ -121,6 +127,7 @@ private struct GeneralPreferences: View {
                 Toggle("Play a sound when a pair is applied", isOn: $sound)
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
             }
+            MenuBarSection(model: model)
             Section("Appearance") {
                 Picker("Theme", selection: $model.theme) {
                     ForEach(AppTheme.allCases) { Text($0.title).tag($0) }
@@ -168,6 +175,46 @@ private struct GeneralPreferences: View {
     }
 }
 
+/// Where the app shows itself: the menu bar, with the mouse's battery, and the Dock.
+private struct MenuBarSection: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        Section("Menu bar and Dock") {
+            Picker(selection: $model.menuBarVisibility) {
+                ForEach(MenuBarVisibility.allCases) { Text($0.title).tag($0) }
+            } label: {
+                Text("Show in menu bar")
+                if model.menuBarVisibility == .never {
+                    Text("Open Pointer Colors again to show Preferences.")
+                }
+            }
+            .featureSpot("clip-menu-bar-visibility")
+            if model.menuBarVisibility == .always {
+                Picker(selection: $model.batteryDisplay) {
+                    ForEach(BatteryDisplay.allCases) { Text($0.title).tag($0) }
+                } label: {
+                    Text("Show mouse battery")
+                    Text(batteryCaption)
+                }
+                .padding(.leading, 20)
+                .featureSpot("clip-battery")
+            }
+            Toggle(isOn: $model.showsInDock) {
+                Text("Show in Dock")
+                Text("Also lists Pointer Colors in the app switcher.")
+            }
+        }
+        .featureSpot("menu-bar-dock")
+        .onAppear { model.tracking.refreshBattery() }
+    }
+
+    private var batteryCaption: String {
+        guard let level = model.tracking.batteryLevel else { return String(localized: "No connected mouse reports its battery.") }
+        return String(localized: "Next to the icon. Your mouse is at \(level)%.")
+    }
+}
+
 /// Export and import of every preference, for moving to another Mac or keeping a copy.
 private struct BackupSection: View {
     let model: AppModel
@@ -183,7 +230,7 @@ private struct BackupSection: View {
                 }
             } label: {
                 Text("All settings")
-                Text("Pairs, automation, highlight, shortcuts and appearance in one file.")
+                Text("Pairs, automation, highlight, speed, shortcuts and appearance in one file.")
             }
             if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
         } header: {

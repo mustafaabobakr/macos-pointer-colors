@@ -1,7 +1,7 @@
 import AppKit
 
 /// Modifier keys held down during a drag, e.g. ⌥ Option to draw with the laser.
-struct HoldKeys: OptionSet, Equatable {
+struct HoldKeys: OptionSet, Hashable {
     let rawValue: Int
 
     static let control = HoldKeys(rawValue: 1 << 0)

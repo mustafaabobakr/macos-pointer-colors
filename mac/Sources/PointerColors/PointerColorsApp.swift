@@ -7,10 +7,12 @@ struct PointerColorsApp: App {
     private var model: AppModel { delegate.model }
 
     var body: some Scene {
-        MenuBarExtra {
+        MenuBarExtra(isInserted: Binding(get: { model.menuBarVisibility == .always },
+                                         set: { model.menuBarVisibility = $0 ? .always : .never })) {
             MenuContentView(model: model)
         } label: {
             Image(nsImage: MenuBarIcon.image(for: model.menuBarPair, colored: model.iconInPairColors))
+            if let battery = model.menuBarBattery { Text("\(battery)%") }
         }
         .menuBarExtraStyle(.window)
 

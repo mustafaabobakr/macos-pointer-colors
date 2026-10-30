@@ -54,6 +54,8 @@ enum FeatureClipScripts {
         "highlight": highlight, "press-shrink": pressShrink, "pulse": pulse, "laser": laser, "highlight-pair-colors": highlightPairColors,
         "shortcuts": shortcuts, "menu-appearance": menuAppearance, "backup": backup,
         "update-window": updateWindow, "updates": updates,
+        "tracking": tracking, "pointer-location": pointerLocation, "menu-bar-dock": menuBarDock,
+        "side-buttons": sideButtons, "double-clicks": doubleClicks, "hover-focus": hoverFocus,
     ]
 
     // MARK: Helpers
@@ -287,6 +289,73 @@ enum FeatureClipScripts {
             .pause(0.4),
             .move(to: spot("clip-theme", x: 0.73)), .choose { $0.theme = .light }, .pause(1.4),
             .move(to: spot("clip-theme", x: 0.92)), .choose { $0.theme = .dark }, .pause(1.2),
+        ])
+
+    private static let tracking = FeatureClip(
+        cursorStart: spot("tracking", x: 0.3, y: 0.8),
+        setUp: { $0.tracking.accelerationOff = false; $0.tracking.acceleration = 8; $0.tracking.speed = 0.4 },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-acceleration-off", x: 0.95)), .choose { $0.tracking.accelerationOff = true }, .pause(0.8),
+            .choose { $0.tracking.accelerationOff = false }, .pause(0.4),
+            .move(to: along("clip-acceleration", 8, in: MouseTracking.accelerationRange)),
+            .slide(to: along("clip-acceleration", 2, in: MouseTracking.accelerationRange), seconds: 0.9) {
+                $0.tracking.acceleration = lerp(8, 2, $1)
+            },
+            .pause(0.4),
+            .move(to: along("clip-speed", 0.4, in: MouseTracking.speedRange)),
+            .slide(to: along("clip-speed", 0.7, in: MouseTracking.speedRange), seconds: 0.9) {
+                $0.tracking.speed = lerp(0.4, 0.7, $1)
+            },
+            .pause(0.8),
+        ])
+
+    private static let pointerLocation = FeatureClip(
+        cursorStart: spot("pointer-location", x: 0.4, y: 0.3),
+        setUp: { $0.locator.isOn = false },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-pointer-location", x: 0.95)), .choose { $0.locator.isOn = true }, .pause(0.6),
+            .keys("⌃ ⌃") { _ in }, .pause(0.4),
+            .move(to: spot("clip-pointer-location-key", x: 0.7)), .choose { $0.locator.key = .option }, .pause(0.6),
+            .keys("⌥ ⌥") { _ in }, .pause(0.6),
+        ])
+
+    private static let sideButtons = FeatureClip(
+        cursorStart: spot("side-buttons", x: 0.4, y: 0.3),
+        setUp: { $0.buttons.sideButtonsNavigate = false },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-side-buttons", x: 0.95)), .choose { $0.buttons.sideButtonsNavigate = true }, .pause(1.0),
+        ])
+
+    private static let doubleClicks = FeatureClip(
+        cursorStart: spot("double-clicks", x: 0.4, y: 0.2),
+        setUp: { $0.buttons.fixesDoubleClicks = false; $0.buttons.doubleClickWindow = 0.05 },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-double-clicks", x: 0.95)), .choose { $0.buttons.fixesDoubleClicks = true }, .pause(0.6),
+            .move(to: along("clip-double-click-window", 0.05, in: MouseButtons.doubleClickWindowRange)),
+            .slide(to: along("clip-double-click-window", 0.08, in: MouseButtons.doubleClickWindowRange), seconds: 0.8) {
+                $0.buttons.doubleClickWindow = lerp(0.05, 0.08, $1)
+            },
+            .pause(0.8),
+        ])
+
+    private static let hoverFocus = FeatureClip(
+        cursorStart: spot("hover-focus", x: 0.4, y: 0.3),
+        setUp: { $0.hoverFocus.isOn = false },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-hover-focus", x: 0.95)), .choose { $0.hoverFocus.isOn = true }, .pause(1.0),
+        ])
+
+    private static let menuBarDock = FeatureClip(
+        cursorStart: spot("menu-bar-dock", x: 0.3, y: 0.2),
+        setUp: { $0.batteryDisplay = .off },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-battery", x: 0.9)), .choose { $0.batteryDisplay = .always }, .pause(1.0),
         ])
 
     private static let backup = FeatureClip(

@@ -35,6 +35,15 @@ final class AppModel {
     var textSize: TextSize {
         didSet { settings.textSize = textSize }
     }
+    var showsInDock: Bool {
+        didSet { settings.showsInDock = showsInDock; applyDockVisibility() }
+    }
+    var menuBarVisibility: MenuBarVisibility {
+        didSet { settings.menuBarVisibility = menuBarVisibility }
+    }
+    var batteryDisplay: BatteryDisplay {
+        didSet { settings.batteryDisplay = batteryDisplay; tracking.refreshBattery() }
+    }
     var theme: AppTheme = .saved {
         didSet { theme.save(); theme.apply() }
     }
@@ -86,6 +95,11 @@ final class AppModel {
     let settings = AppSettings()
     let hotKeys = HotKeyCenter()
     let highlight = PointerHighlight()
+    let tracking = PointerTracking()
+    let buttons = MouseButtons()
+    let hoverFocus = HoverFocus()
+    /// Double press of a modifier key shows where the pointer is. Set at the end of `init`.
+    @ObservationIgnored private(set) var locator: PointerLocator!
     @ObservationIgnored private var highlightOverlay: HighlightOverlay?
     @ObservationIgnored private var pressShrink: PressShrink?
     private let pointer = SystemPointer()
@@ -109,6 +123,9 @@ final class AppModel {
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
         textSize = settings.textSize
+        showsInDock = settings.showsInDock
+        menuBarVisibility = settings.menuBarVisibility
+        batteryDisplay = settings.batteryDisplay
         installsUpdatesAutomatically = settings.installsUpdatesAutomatically
         DispatchQueue.main.async { [theme] in theme.apply() }
         observeSystemAppearance()
@@ -121,6 +138,8 @@ final class AppModel {
                                             pair: { [weak self] in self?.menuBarPair ?? .featured },
                                             pointerScale: { [weak self] in self?.scale ?? 1 })
         pressShrink = PressShrink(settings: highlight, pointer: pointer)
+        locator = PointerLocator(pair: { [weak self] in self?.menuBarPair ?? .featured },
+                                 pointerScale: { [weak self] in self?.scale ?? 1 })
         startUpdateSchedule()
     }
 
@@ -229,6 +248,16 @@ final class AppModel {
             scale = pointer.currentScale()
             fail(error)
         }
+    }
+
+    /// A Dock icon makes the app show in the app switcher too. Off, it lives in the menu bar only.
+    func applyDockVisibility() {
+        NSApp.setActivationPolicy(showsInDock ? .regular : .accessory)
+    }
+
+    /// The mouse battery shown next to the menu-bar icon, when it's set to show now.
+    var menuBarBattery: Int? {
+        batteryDisplay.shows(tracking.batteryLevel) ? tracking.batteryLevel : nil
     }
 
     /// Nil when this macOS doesn't expose the setting.

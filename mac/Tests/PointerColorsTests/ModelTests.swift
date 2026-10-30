@@ -476,6 +476,65 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertNil(target.object(forKey: "lastUpdateCheck"))
     }
 
+    /// Speed, pointer location, menu bar, battery and Dock. Speed is checked through its keys:
+    /// building a PointerTracking with them would set this Mac's real mice.
+    @MainActor
+    func testRoundTripCarriesSpeedLocationAndMenuBarSettings() throws {
+        let (source, sourceName) = makeDefaults()
+        source.set(true, forKey: "trackingCustom")
+        source.set(12.5, forKey: "trackingAcceleration")
+        source.set(0.42, forKey: "trackingSpeed")
+        let locator = PointerLocator(defaults: source, pair: { .featured }, pointerScale: { 1 })
+        locator.key = .option
+        let settings = AppSettings(defaults: source)
+        settings.menuBarVisibility = .never
+        settings.batteryDisplay = .below20
+        settings.showsInDock = true
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertEqual(target.object(forKey: "trackingCustom") as? Bool, true)
+        XCTAssertEqual(target.double(forKey: "trackingAcceleration"), 12.5)
+        XCTAssertEqual(target.double(forKey: "trackingSpeed"), 0.42)
+        XCTAssertEqual(PointerLocator(defaults: target, pair: { .featured }, pointerScale: { 1 }).key, .option)
+        let restored = AppSettings(defaults: target)
+        XCTAssertEqual(restored.menuBarVisibility, .never)
+        XCTAssertEqual(restored.batteryDisplay, .below20)
+        XCTAssertTrue(restored.showsInDock)
+    }
+
+    /// Buttons and focus are checked through their keys: building them would start the event tap.
+    func testRoundTripCarriesButtonsFocusAndAccelerationOff() throws {
+        let (source, sourceName) = makeDefaults()
+        source.set(true, forKey: "trackingAccelerationOff")
+        source.set(true, forKey: "sideButtonsNavigate")
+        source.set(true, forKey: "fixesDoubleClicks")
+        source.set(0.08, forKey: "doubleClickWindow")
+        source.set(true, forKey: "hoverFocusOn")
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertTrue(target.bool(forKey: "trackingAccelerationOff"))
+        XCTAssertTrue(target.bool(forKey: "sideButtonsNavigate"))
+        XCTAssertTrue(target.bool(forKey: "fixesDoubleClicks"))
+        XCTAssertEqual(target.double(forKey: "doubleClickWindow"), 0.08)
+        XCTAssertTrue(target.bool(forKey: "hoverFocusOn"))
+    }
+
+    @MainActor
+    func testPointerLocationSwitchRoundTrips() throws {
+        let (source, sourceName) = makeDefaults()
+        let locator = PointerLocator(defaults: source, pair: { .featured }, pointerScale: { 1 })
+        locator.isOn = true
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertTrue(PointerLocator(defaults: target, pair: { .featured }, pointerScale: { 1 }).isOn)
+    }
+
     func testRejectsOtherFiles() {
         let (defaults, name) = makeDefaults()
         let data = try! PropertyListSerialization.data(fromPropertyList: ["appTheme": "dark"], format: .xml, options: 0)

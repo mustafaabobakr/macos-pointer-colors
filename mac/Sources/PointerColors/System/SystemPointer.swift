@@ -117,19 +117,19 @@ struct SystemPointer {
 
     // MARK: Press
 
-    /// Shows `scale` live for a press, without saving it. Until `endPress`, `currentScale` keeps
+    /// Shows `scale` live for a press, without saving it or announcing it. Until `endPress`, `currentScale` keeps
     /// reporting the size from before the press.
     func showPressed(_ scale: Double) {
         guard !isReadOnly else { return }
         if Self.pressedFrom == nil { Self.pressedFrom = currentScale() }
-        _ = universalAccess.setCursorScale(scale)
+        _ = universalAccess.showCursorScale(scale)
     }
 
     /// Puts the size from before the press back on screen.
     func endPress() {
         guard let pressedFrom = Self.pressedFrom else { return }
         Self.pressedFrom = nil
-        _ = universalAccess.setCursorScale(pressedFrom)
+        _ = universalAccess.showCursorScale(pressedFrom)
     }
 
     // MARK: Shake to find
