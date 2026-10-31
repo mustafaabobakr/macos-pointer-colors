@@ -3,9 +3,9 @@ import Foundation
 /// Every charge of every mouse since tracking began: how long each lasted and how fast it drained,
 /// to see a mouse's battery wearing out.
 ///
-/// A charge runs from the last reading at its top level to its latest reading. When the level
-/// climbs again by `chargeStep`, the mouse was charged: a charge that had drained is kept, and a
-/// new one starts.
+/// A charge runs from the last reading at its top level to its latest reading. While the mouse
+/// is charging, or when the level climbs again by `chargeStep`, a charge that had drained is kept,
+/// and a new one starts.
 struct BatteryHistory: Codable, Equatable {
     var mice: [MouseHistory] = []
 
@@ -23,7 +23,7 @@ struct BatteryHistory: Codable, Equatable {
             return
         }
         mice[index].name = reading.name
-        mice[index].record(point)
+        mice[index].record(point, charging: reading.isCharging)
     }
 }
 
@@ -34,8 +34,8 @@ struct MouseHistory: Codable, Equatable, Identifiable {
     var current: Charge
     var past: [Charge] = []
 
-    mutating func record(_ point: BatteryPoint) {
-        if point.level >= current.last.level + BatteryHistory.chargeStep {
+    mutating func record(_ point: BatteryPoint, charging: Bool = false) {
+        if charging || point.level >= current.last.level + BatteryHistory.chargeStep {
             if current.used >= BatteryHistory.chargeStep { past.append(current) }
             current = Charge(start: point, last: point)
         } else if point.level >= current.start.level {

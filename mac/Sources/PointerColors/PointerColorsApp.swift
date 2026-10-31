@@ -13,7 +13,7 @@ struct PointerColorsApp: App {
             MenuContentView(model: model)
         } label: {
             Image(nsImage: MenuBarIcon.image(for: model.menuBarPair, colored: model.iconInPairColors))
-            if let battery = model.menuBarBattery { Text("\(battery)%") }
+            if let battery = model.menuBarBattery { Text(model.batteryText(battery)) }
         }
         .menuBarExtraStyle(.window)
         // Preferences isn't a scene: PreferencesWindow keeps one window for every way in. A

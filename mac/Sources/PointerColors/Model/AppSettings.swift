@@ -61,26 +61,11 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: "tracksBatteryHistory") }
     }
 
+    /// Kept in its own file rather than the defaults, so it survives every update.
     var batteryHistory: BatteryHistory {
-        get {
-            guard let data = defaults.data(forKey: "batteryHistory") else { return BatteryHistory() }
-            return (try? Self.historyDecoder.decode(BatteryHistory.self, from: data)) ?? BatteryHistory()
-        }
-        nonmutating set { defaults.set(try? Self.historyEncoder.encode(newValue), forKey: "batteryHistory") }
+        get { BatteryHistoryStore(defaults: defaults).load() }
+        nonmutating set { BatteryHistoryStore(defaults: defaults).save(newValue) }
     }
-
-    /// Dates as ISO 8601, so the saved history reads plainly in an export.
-    private static let historyEncoder: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }()
-
-    private static let historyDecoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }()
 
     var batteryAlert: BatteryAlert {
         get { defaults.string(forKey: "batteryAlert").flatMap(BatteryAlert.init(rawValue:)) ?? .off }

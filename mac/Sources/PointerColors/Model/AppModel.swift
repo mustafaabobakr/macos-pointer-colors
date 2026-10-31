@@ -299,10 +299,15 @@ final class AppModel {
         showsInDock && dockBattery.shows(tracking.batteryLevel) ? tracking.batteryLevel : nil
     }
 
+    /// The battery as text, with a bolt in front while it's charging.
+    func batteryText(_ level: Int) -> String {
+        tracking.batteryCharging ? "⚡︎\(level)%" : "\(level)%"
+    }
+
     private func batteryRead(_ level: Int?) {
         updateDockBadge()
-        batteryLabel?.show(pointerBattery.shows(level) ? level : nil)
-        batteryNotifier.check(level: level, alert: batteryAlert)
+        batteryLabel?.show(pointerBattery.shows(level) ? level : nil, charging: tracking.batteryCharging)
+        batteryNotifier.check(level: level, charging: tracking.batteryCharging, alert: batteryAlert)
         recordBattery()
     }
 
@@ -318,7 +323,7 @@ final class AppModel {
     }
 
     private func updateDockBadge() {
-        NSApp?.dockTile.badgeLabel = dockBadgeBattery.map { "\($0)%" }
+        NSApp?.dockTile.badgeLabel = dockBadgeBattery.map(batteryText)
     }
 
     /// Nil when this macOS doesn't expose the setting.

@@ -315,6 +315,7 @@
 "Your mouse" = "الماوس الخاص بك";
 "Show the level" = "إظهار المستوى";
 "Low battery" = "البطارية منخفضة";
+"%lld%%, charging" = "%lld%%، قيد الشحن";
 "Test notification" = "إشعار تجريبي";
 "Send Test" = "إرسال تجربة";
 "The changelog isn't in this build." = "سجل التغييرات غير موجود في هذه النسخة.";

@@ -3,10 +3,12 @@ import Foundation
 /// Every app preference in one file: pairs, automation, highlight, speed, shortcuts and appearance.
 /// Reads and writes the app's own UserDefaults domain, leaving out what macOS keeps there for
 /// windows and panels and what only describes this Mac's update checks or the cached GitHub star
-/// count. Launch at login, which macOS keeps instead of the app, goes in the file next to them.
+/// count. Launch at login, which macOS keeps instead of the app, goes in the file next to them, and
+/// so does the battery history, which has a file of its own.
 struct SettingsBackup {
     private let defaults: UserDefaults
     private let domain: String
+    private let history: BatteryHistoryStore
 
     private static let format = "pointer-colors-settings"
     private static let version = 1
@@ -21,13 +23,19 @@ struct SettingsBackup {
         }
     }
 
-    init(defaults: UserDefaults = .standard, domain: String = Bundle.main.bundleIdentifier ?? "PointerColors") {
+    init(defaults: UserDefaults = .standard, domain: String = Bundle.main.bundleIdentifier ?? "PointerColors",
+         historyFolder: URL = BatteryHistoryStore.defaultFolder) {
         self.defaults = defaults
         self.domain = domain
+        history = BatteryHistoryStore(defaults: defaults, folder: historyFolder)
     }
 
     func export(launchAtLogin: Bool) throws -> Data {
-        let file: [String: Any] = ["format": Self.format, "version": Self.version, "settings": storedSettings(),
+        // Under its old defaults key, so files from older versions and this one import the same way:
+        // the key goes into the defaults, and the app moves it into its file at the next launch.
+        var settings = storedSettings()
+        if let history = history.data { settings[BatteryHistoryStore.defaultsKey] = history }
+        let file: [String: Any] = ["format": Self.format, "version": Self.version, "settings": settings,
                                    "launchAtLogin": launchAtLogin]
         return try PropertyListSerialization.data(fromPropertyList: file, format: .xml, options: 0)
     }

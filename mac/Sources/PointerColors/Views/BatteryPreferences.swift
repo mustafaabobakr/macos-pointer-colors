@@ -10,7 +10,13 @@ struct BatteryPreferences: View {
         SettingsPage("Battery") {
             SettingsCard(anchor: "battery.level") {
                 SettingsRow("Your mouse", symbol: "computermouse") {
-                    Text(levelText).monospacedDigit()
+                    Label {
+                        Text(levelText).monospacedDigit()
+                    } icon: {
+                        if model.tracking.batteryCharging {
+                            Image(systemName: "bolt.fill").foregroundStyle(.green)
+                        }
+                    }
                 }
             }
             SettingsCard("Show the level", anchor: "battery.show") {
@@ -82,7 +88,7 @@ struct BatteryPreferences: View {
 
     private var levelText: String {
         guard let level = model.tracking.batteryLevel else { return String(localized: "No battery reported") }
-        return String(localized: "\(level)%")
+        return model.tracking.batteryCharging ? String(localized: "\(level)%, charging") : String(localized: "\(level)%")
     }
 
     private let alertCaption = String(localized: "Once each time it drops below the level, again after it's charged.")

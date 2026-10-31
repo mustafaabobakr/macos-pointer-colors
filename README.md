@@ -110,9 +110,9 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Focus the window under the pointer**: type into any window just by pointing at it, without bringing it to the front. Hold a modifier key to pass over windows.
 
 **Mouse battery**
-- **See the battery** next to the menu-bar icon, on the Dock icon or in a small label under the pointer, always or only when it's low.
+- **See the battery** next to the menu-bar icon, on the Dock icon or in a small label under the pointer, always or only when it's low. A bolt shows while the mouse is charging.
 - **Low-battery notification** once your mouse drops below 5%, 10% or 20%.
-- **Battery health:** how many days each charge lasts and how much it drains a day, for every mouse, and whether charges are getting shorter.
+- **Battery health:** how many days each charge lasts and how much it drains a day, for every mouse, and whether charges are getting shorter. The history is kept in its own file on your Mac, so it stays through every update.
 
 **Menu bar and Dock**
 - **Hide the menu-bar icon** or **show the app in the Dock**.

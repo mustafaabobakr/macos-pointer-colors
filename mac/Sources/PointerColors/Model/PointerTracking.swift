@@ -30,6 +30,8 @@ final class PointerTracking {
     private(set) var hasMouse = false
     /// Battery of the connected mouse that's lowest, 0 to 100; nil when none reports it.
     private(set) var batteryLevel: Int?
+    /// Whether that mouse is charging.
+    private(set) var batteryCharging = false
     /// Each connected mouse that reports its battery, as last read.
     private(set) var batteryReadings: [MouseBatteryReading] = []
 
@@ -68,7 +70,8 @@ final class PointerTracking {
             MainActor.assumeIsolated { self?.woke() }
         }
         refreshBattery()
-        batteryTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+        // Every minute, so plugging the cable in shows within a minute; reading it costs next to nothing.
+        batteryTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.refreshBattery() }
         }
     }
@@ -93,9 +96,23 @@ final class PointerTracking {
     }
 
     func refreshBattery() {
-        batteryReadings = mice.batteryReadings()
-        batteryLevel = batteryReadings.map(\.level).min()
+        batteryReadings = Self.markRising(mice.batteryReadings(), since: batteryReadings)
+        let lowest = batteryReadings.min { $0.level < $1.level }
+        batteryLevel = lowest?.level
+        batteryCharging = lowest?.isCharging ?? false
         onBatteryRead?(batteryLevel)
+    }
+
+    /// A mouse whose level went up by 2 or more since the last reading, a minute ago, is charging
+    /// too, for mice that don't say so themselves. A rise of 1 can be a reading wobbling.
+    static func markRising(_ readings: [MouseBatteryReading], since previous: [MouseBatteryReading]) -> [MouseBatteryReading] {
+        readings.map { reading in
+            guard !reading.isCharging, let before = previous.first(where: { $0.id == reading.id }),
+                  reading.level >= before.level + 2 else { return reading }
+            var rising = reading
+            rising.isCharging = true
+            return rising
+        }
     }
 
     // MARK: Applying
