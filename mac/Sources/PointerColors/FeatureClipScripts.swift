@@ -55,7 +55,7 @@ enum FeatureClipScripts {
         "shortcuts": shortcuts, "menu-appearance": menuAppearance, "backup": backup,
         "update-window": updateWindow, "updates": updates,
         "tracking": tracking, "pointer-location": pointerLocation, "menu-bar-dock": menuBarDock,
-        "side-buttons": sideButtons, "double-clicks": doubleClicks, "hover-focus": hoverFocus,
+        "side-buttons": sideButtons, "side-button-apps": sideButtonApps, "double-clicks": doubleClicks, "hover-focus": hoverFocus,
     ]
 
     // MARK: Helpers
@@ -327,6 +327,14 @@ enum FeatureClipScripts {
         steps: [
             .pause(0.4),
             .move(to: spot("clip-side-buttons", x: 0.95)), .choose { $0.buttons.sideButtonsNavigate = true }, .pause(1.0),
+        ])
+
+    private static let sideButtonApps = FeatureClip(
+        cursorStart: spot("side-button-apps", x: 0.4, y: 0.2),
+        setUp: { $0.buttons.sideButtonsNavigate = true; $0.buttons.navigationApps = NavigationApp.defaults },
+        steps: [
+            .pause(0.6),
+            .move(to: spot("clip-side-button-apps", x: 0.5)), .pause(1.0),
         ])
 
     private static let doubleClicks = FeatureClip(
