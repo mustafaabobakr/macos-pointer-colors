@@ -6,9 +6,6 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
 
-    /// Preferences opened from here, when the menu-bar icon is hidden and the app is opened again.
-    private var preferencesWindow: NSWindow?
-
     func applicationDidFinishLaunching(_ notification: Notification) {
         model.applyDockVisibility()
         MenuBarItem.setVisible(model.menuBarVisibility == .always)
@@ -23,20 +20,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// in while the menu-bar icon is hidden.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
         guard !hasVisibleWindows else { return true }
-        showPreferences()
+        PreferencesWindow.shared.show(model: model)
         return false
-    }
-
-    private func showPreferences() {
-        let window = preferencesWindow ?? {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: PreferencesView(model: model)))
-            window.title = String(localized: "Preferences")
-            window.isReleasedWhenClosed = false
-            preferencesWindow = window
-            return window
-        }()
-        NSApp.activate()
-        window.makeKeyAndOrderFront(nil)
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -5,20 +5,24 @@ struct MenuContentView: View {
     @Bindable var model: AppModel
     @State private var isAddingCustom = false
     @State private var editingPair: PointerPair?
-    @Environment(\.openWindow) private var openWindow
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if model.needsFullDiskAccess { PermissionBanner(model: model) }
-            header.featureSpot("current-pair")
-            sizeRow.featureSpot("pointer-size")
-            VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
-                .featureSpot("previews")
-            pairGrid
+            if model.menuShowsCurrentPair {
+                MenuCard { header }.featureSpot("current-pair")
+            }
+            MenuCard("POINTER SIZE") { sizeRow }.featureSpot("pointer-size")
+            MenuCard("PREVIEW") {
+                VisibilityPreviews(pair: model.selectedPair, pointerScale: model.scale)
+                // The header shows it when it's on.
+                if !model.menuShowsCurrentPair { ContrastWarning(pair: model.selectedPair) }
+            }
+            .featureSpot("previews")
+            MenuCard("PAIRS") { addCustomButton } content: { pairGrid }
                 .featureSpot("menu-pairs")
-                .padding(.vertical, 8 * scale)
             if isAddingCustom {
                 CustomPairEditor(title: String(localized: "New custom pair"), initial: nil) { name, outline, fill in
                     model.addCustom(name: name, outline: outline, fill: fill)
@@ -42,13 +46,19 @@ struct MenuContentView: View {
                 }
                 .id(editingPair.id)
             }
-            DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
-                .disabled(model.needsFullDiskAccess)
-                .featureSpot("display-colors")
-            AppColorsIndicator(automation: model.automation)
-                .disabled(model.needsFullDiskAccess)
-            HighlightMenuSection(highlight: model.highlight, pair: model.selectedPair, pointerScale: model.scale,
-                                 scale: scale).featureSpot("menu-highlight")
+            MenuCard("DISPLAYS AND APPS") {
+                DisplayColorsSection(automation: model.automation, pairs: model.library.visible)
+                    .featureSpot("display-colors")
+                AppColorsIndicator(automation: model.automation) { PreferencesWindow.shared.show(model: model) }
+            }
+            .disabled(model.needsFullDiskAccess)
+            MenuCard("HIGHLIGHT") {
+                HighlightPreviewCards(highlight: model.highlight,
+                                      style: HighlightStyle(settings: model.highlight, pair: model.selectedPair,
+                                                            pointerScale: model.scale),
+                                      pair: model.selectedPair, imageHeight: 64 * scale)
+            }
+            .featureSpot("menu-highlight")
             Divider()
             footer
         }
@@ -118,7 +128,6 @@ struct MenuContentView: View {
 
     private var sizeControls: some View {
         HStack(spacing: 10) {
-            Text("Pointer size").appFont(.caption).frame(width: 74 * scale, alignment: .leading)
             Slider(value: Binding(get: { model.scale }, set: { model.setScale($0) }),
                    in: SystemPointer.minimumScale...SystemPointer.maximumScale) {
                 Text("Pointer size")
@@ -145,41 +154,38 @@ struct MenuContentView: View {
     /// Three rows of tiles; more pairs scroll inside, so custom pairs never stretch the menu.
     private var pairGridHeight: CGFloat { (3 * 62 + 2 * 6) * scale }
 
+    /// In the card's heading, outside the scroll area, so it's always reachable.
+    private var addCustomButton: some View {
+        Button { isAddingCustom = true } label: {
+            Label("Add custom", systemImage: "plus.circle.fill").appFont(.caption, weight: .semibold)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.small)
+        .help("Add a custom pair")
+        .accessibilityLabel("Add a custom pair")
+    }
+
     private var pairGrid: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("PAIRS").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
-                Spacer()
-                // Kept outside the scroll area so it's always reachable.
-                Button { isAddingCustom = true } label: {
-                    Label("Add custom", systemImage: "plus.circle.fill").appFont(.caption, weight: .semibold)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-                .help("Add a custom pair")
-                .accessibilityLabel("Add a custom pair")
-            }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(PairSection.sections(for: model.library.visible)) { section in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(section.title).appFont(.caption, weight: .semibold).foregroundStyle(.secondary)
-                            LazyVGrid(columns: columns, spacing: 6) {
-                                ForEach(section.pairs) { pair in
-                                    PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
-                                        .featureSpot("clip-pair-\(pair.id)")
-                                        .contextMenu { if pair.isCustom { customPairMenu(pair) } }
-                                        .overlay(alignment: .top) { if pair.isCustom { customPairButtons(pair) } }
-                                }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(PairSection.sections(for: model.library.visible)) { section in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(section.title).appFont(.caption, weight: .semibold).foregroundStyle(.secondary)
+                        LazyVGrid(columns: columns, spacing: 6) {
+                            ForEach(section.pairs) { pair in
+                                PairTile(pair: pair, isSelected: pair.id == model.selectedID, scale: scale) { model.choose(pair) }
+                                    .featureSpot("clip-pair-\(pair.id)")
+                                    .contextMenu { if pair.isCustom { customPairMenu(pair) } }
+                                    .overlay(alignment: .top) { if pair.isCustom { customPairButtons(pair) } }
                             }
                         }
                     }
                 }
-                .padding(.trailing, 2)
             }
-            .frame(height: pairGridHeight)
-            .scrollIndicators(.automatic)
+            .padding(.trailing, 2)
         }
+        .frame(height: pairGridHeight)
+        .scrollIndicators(.automatic)
     }
 
     /// Small edit and delete buttons on a custom tile's top corners.
@@ -210,8 +216,7 @@ struct MenuContentView: View {
     private var footer: some View {
         VStack(alignment: .leading, spacing: 2) {
             MenuRow(title: String(localized: "Preferences…"), shortcut: "⌘,") {
-                NSApp.activate()
-                openWindow(id: PreferencesView.windowID)
+                PreferencesWindow.shared.show(model: model)
             }
             .keyboardShortcut(",")
             MenuRow(title: model.updateActionTitle, subtitle: model.menuUpdateLine, shortcut: nil) {
@@ -294,24 +299,6 @@ private struct PairTile: View {
         .buttonStyle(.plain)
         .accessibilityLabel(pair.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-/// Pictures of the pulse and the laser side by side, each its own switch; both can be on. The
-/// details are in Preferences › Highlight.
-private struct HighlightMenuSection: View {
-    let highlight: PointerHighlight
-    let pair: PointerPair
-    let pointerScale: Double
-    let scale: CGFloat
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("HIGHLIGHT").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
-            HighlightPreviewCards(highlight: highlight,
-                                  style: HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale),
-                                  pair: pair, imageHeight: 64 * scale)
-        }
     }
 }
 

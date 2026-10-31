@@ -57,6 +57,12 @@ final class AppModel {
         didSet { UserDefaults.standard.set(menuTintStrength, forKey: "menuTintStrength") }
     }
 
+    /// The pair's big picture, hex codes and status at the top of the menu; off by default, since
+    /// the previews already show the pair.
+    var menuShowsCurrentPair: Bool = UserDefaults.standard.bool(forKey: "menuShowsCurrentPair") {
+        didSet { UserDefaults.standard.set(menuShowsCurrentPair, forKey: "menuShowsCurrentPair") }
+    }
+
     var menuBackgroundStyle: MenuBackgroundStyle {
         MenuBackgroundStyle(glass: menuGlass, tint: menuTint.color(pointer: selectedPair), tintStrength: menuTintStrength)
     }

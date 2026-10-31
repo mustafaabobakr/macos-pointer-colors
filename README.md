@@ -77,7 +77,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Every pair, one click away**: pick one of 47 pairs in the menu bar and the pointer changes right away.
 - **Any pointer size**: drag to make the cursor bigger, or give each display its own size.
 - **Preview before you pick**: see the pointer on light pages, dark apps, photos and spreadsheets.
-- **Contrast warnings**: the menu tells you when a pair is hard to see, and copies its hex codes.
+- **Contrast warnings**: the menu tells you when a pair is hard to see. Turn on the current pair at the top of the menu to copy its hex codes.
 - **Make your own pairs**: add, edit, hide, import and export custom outline and fill colors.
 
 **Automatic pairs**
@@ -112,9 +112,13 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Mouse battery** next to the menu-bar icon, always or only when it's low.
 - **Hide the menu-bar icon** or **show the app in the Dock**.
 - **Keyboard shortcuts** from any app to switch pairs and resize the pointer.
-- **Make the menu yours**: theme, glass, tint and text size.
+- **Make the menu yours**: theme, glass, tint and text size. Each part of the menu sits in its own glass card.
+- **Pick the app icon**: a light Default and a black Dark design that follow your Mac's icon style, or keep either one in the Dock.
+- **Liquid Glass Preferences** on macOS 26 and later: the Preferences window and its cards are see-through glass, in light and dark.
 
 **Settings and updates**
+- **Find any setting**: search in the Preferences sidebar lists matching settings and jumps straight to the one you pick. Back and forward work from the toolbar, ⌘[ and ⌘], or your mouse's side buttons.
+- **Send feedback** from Preferences › General, straight to a new GitHub issue.
 - **Back up every setting** to one file and import it on another Mac.
 - **Updates in one click**: read what's new, then install on quit or right away.
 

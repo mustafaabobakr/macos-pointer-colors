@@ -105,6 +105,8 @@ enum FeatureClipScripts {
 
     private static let currentPair = FeatureClip(
         cursorStart: spot("current-pair", x: 0.85, y: 0.85),
+        // Off by default; the menu shows it only with Preferences › Appearance › Menu's switch on.
+        setUp: { $0.menuShowsCurrentPair = true },
         steps: [
             .pause(0.6), show("neon-pink"), .pause(1.0),
             show("sakura"), .pause(1.8),
@@ -287,8 +289,8 @@ enum FeatureClipScripts {
         recordsWholeScreen: true,
         steps: [
             .pause(0.4),
-            .move(to: spot("clip-theme", x: 0.73)), .choose { $0.theme = .light }, .pause(1.4),
-            .move(to: spot("clip-theme", x: 0.92)), .choose { $0.theme = .dark }, .pause(1.2),
+            .move(to: spot("clip-theme", x: 0.5, y: 0.4)), .choose { $0.theme = .light }, .pause(1.4),
+            .move(to: spot("clip-theme", x: 0.83, y: 0.4)), .choose { $0.theme = .dark }, .pause(1.2),
         ])
 
     private static let tracking = FeatureClip(

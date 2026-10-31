@@ -76,4 +76,14 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable {
         case .resetPointer: return String(localized: "Reset to the macOS default, normal size")
         }
     }
+
+    var symbol: String {
+        switch self {
+        case .nextPair: "forward"
+        case .previousPair: "backward"
+        case .biggerPointer: "plus.magnifyingglass"
+        case .smallerPointer: "minus.magnifyingglass"
+        case .resetPointer: "arrow.uturn.backward"
+        }
+    }
 }

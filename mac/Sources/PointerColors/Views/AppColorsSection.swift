@@ -9,12 +9,10 @@ struct AppColorsSection: View {
     let pairs: [PointerPair]
 
     var body: some View {
-        Section {
-            Toggle(isOn: $automation.perAppColors) {
-                Text("Different pair for each app")
-                Text("App pairs win over display pairs.")
-            }
-            Picker("Applies when", selection: $automation.appRuleTrigger) {
+        SettingsCard("Apps", anchor: "automation.apps") {
+            SettingsToggle("Different pair for each app", symbol: "square.grid.2x2",
+                           caption: "App pairs win over display pairs.", isOn: $automation.perAppColors)
+            SettingsMenu("Applies when", symbol: "cursorarrow.motionlines", selection: $automation.appRuleTrigger) {
                 Text("The pointer is over the app").tag(AppRuleTrigger.pointer)
                 Text("The app is in front").tag(AppRuleTrigger.frontmost)
             }
@@ -25,8 +23,6 @@ struct AppColorsSection: View {
                     .featureSpot("clip-app-\(bundleID)")
             }
             Button("Add App…", action: addApp)
-        } header: {
-            Text("Apps")
         }
     }
 
@@ -57,10 +53,10 @@ private struct AppColorRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12 * scale) {
             if let appURL {
                 Image(nsImage: NSWorkspace.shared.icon(forFile: appURL.path))
-                    .resizable().frame(width: 32 * scale, height: 32 * scale).accessibilityHidden(true)
+                    .resizable().frame(width: 26 * scale, height: 26 * scale).accessibilityHidden(true)
             }
             Text(appName).lineLimit(1)
             Spacer()

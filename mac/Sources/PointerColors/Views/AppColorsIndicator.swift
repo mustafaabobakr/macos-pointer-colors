@@ -5,8 +5,9 @@ import SwiftUI
 /// and up to three overlapping app icons plus "+N" for the rest.
 struct AppColorsIndicator: View {
     @Bindable var automation: Automation
+    /// Opens Preferences, where the apps and their pairs are set.
+    let showPreferences: () -> Void
     @Environment(\.appTextScale) private var scale
-    @Environment(\.openWindow) private var openWindow
 
     private static let visibleIcons = 3
 
@@ -44,11 +45,6 @@ struct AppColorsIndicator: View {
         }
         // Icons and the "+N" badge fade together while per-app pairs are off.
         .opacity(automation.perAppColors ? 1 : 0.45)
-    }
-
-    private func showPreferences() {
-        NSApp.activate()
-        openWindow(id: PreferencesView.windowID)
     }
 }
 
