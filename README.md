@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://macos-pointer-colors.pages.dev"><img src="docs/readme-hero.png" alt="Pointer Colors: your pointer, one click away. The menu-bar app beside a glowing mint pointer." width="100%"></a>
+  <img src="docs/app-icon.png" alt="Pointer Colors app icon" width="220">
 </p>
 
 <p align="center">
@@ -20,6 +20,10 @@
   <a href="https://macos-pointer-colors.pages.dev/?outline=00FFDA&fill=008A59&name=Aqua%20mint"><b>Open a shared pair</b></a> ·
   <a href="https://macos-pointer-colors.pages.dev/?lang=ar"><b>العربية</b></a> ·
   <a href="#build-it-yourself"><b>Build it</b></a>
+</p>
+
+<p align="center">
+  <a href="https://macos-pointer-colors.pages.dev"><img src="docs/readme-hero.png" alt="Pointer Colors: your pointer, one click away. The menu-bar app beside a glowing mint pointer." width="100%"></a>
 </p>
 
 <br>
