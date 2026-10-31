@@ -54,8 +54,9 @@ enum FeatureClipScripts {
         "highlight": highlight, "press-shrink": pressShrink, "pulse": pulse, "laser": laser, "highlight-pair-colors": highlightPairColors,
         "shortcuts": shortcuts, "menu-appearance": menuAppearance, "backup": backup,
         "update-window": updateWindow, "updates": updates,
-        "tracking": tracking, "pointer-location": pointerLocation, "menu-bar-dock": menuBarDock,
+        "tracking": tracking, "pointer-location": pointerLocation, "menu-bar-dock": menuBarDock, "battery": battery, "battery-health": batteryHealth,
         "side-buttons": sideButtons, "side-button-apps": sideButtonApps, "double-clicks": doubleClicks, "hover-focus": hoverFocus,
+        "whats-new": whatsNew, "app-icon": appIcon,
     ]
 
     // MARK: Helpers
@@ -362,10 +363,46 @@ enum FeatureClipScripts {
 
     private static let menuBarDock = FeatureClip(
         cursorStart: spot("menu-bar-dock", x: 0.3, y: 0.2),
-        setUp: { $0.batteryDisplay = .off },
+        setUp: { $0.showsInDock = false },
         steps: [
             .pause(0.4),
-            .move(to: spot("clip-battery", x: 0.9)), .choose { $0.batteryDisplay = .always }, .pause(1.0),
+            .move(to: spot("clip-menu-bar-visibility", x: 0.9)), .pause(0.6),
+            .move(to: spot("menu-bar-dock", x: 0.9, y: 0.85)), .choose { $0.showsInDock = true }, .pause(1.0),
+        ])
+
+    private static let batteryHealth = FeatureClip(
+        cursorStart: spot("battery-health", x: 0.3, y: 0.1),
+        steps: [
+            .pause(0.4),
+            .move(to: spot("battery-health", x: 0.5, y: 0.35)), .pause(1.0),
+            .move(to: spot("battery-health", x: 0.5, y: 0.7)), .pause(1.2),
+        ])
+
+    private static let battery = FeatureClip(
+        cursorStart: spot("battery", x: 0.3, y: 0.15),
+        setUp: { $0.batteryDisplay = .off; $0.dockBattery = .off; $0.pointerBattery = .off; $0.batteryAlert = .off },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-battery", x: 0.9)), .choose { $0.batteryDisplay = .always }, .pause(0.6),
+            .move(to: spot("clip-dock-battery", x: 0.9)), .choose { $0.dockBattery = .below20 }, .pause(0.6),
+            .move(to: spot("clip-pointer-battery", x: 0.9)), .choose { $0.pointerBattery = .below20 }, .pause(0.6),
+            .move(to: spot("clip-battery-alert", x: 0.9)), .choose { $0.batteryAlert = .below10 }, .pause(1.0),
+        ])
+
+    private static let appIcon = FeatureClip(
+        cursorStart: spot("app-icon", x: 0.2, y: 0.3),
+        setUp: { $0.appIconStyle = .system },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-app-icon", x: 0.5, y: 0.4)), .choose { $0.appIconStyle = .light }, .pause(1.0),
+            .move(to: spot("clip-app-icon", x: 0.83, y: 0.4)), .choose { $0.appIconStyle = .dark }, .pause(1.2),
+        ])
+
+    private static let whatsNew = FeatureClip(
+        cursorStart: spot("whats-new", x: 0.2, y: 0.1),
+        steps: [
+            .pause(0.4),
+            .move(to: spot("whats-new", x: 0.5, y: 0.2)), .pause(1.2),
         ])
 
     private static let backup = FeatureClip(

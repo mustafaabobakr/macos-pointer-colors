@@ -50,6 +50,10 @@ final class AppModel {
     var pointerBattery: BatteryDisplay {
         didSet { settings.pointerBattery = pointerBattery; tracking.refreshBattery() }
     }
+    var tracksBatteryHistory: Bool {
+        didSet { settings.tracksBatteryHistory = tracksBatteryHistory; tracking.refreshBattery() }
+    }
+    private(set) var batteryHistory: BatteryHistory
     var batteryAlert: BatteryAlert {
         didSet { settings.batteryAlert = batteryAlert; tracking.refreshBattery() }
     }
@@ -150,6 +154,8 @@ final class AppModel {
         dockBattery = settings.dockBattery
         pointerBattery = settings.pointerBattery
         batteryAlert = settings.batteryAlert
+        tracksBatteryHistory = settings.tracksBatteryHistory
+        batteryHistory = settings.batteryHistory
         installsUpdatesAutomatically = settings.installsUpdatesAutomatically
         tracking.onBatteryRead = { [weak self] level in self?.batteryRead(level) }
         // Once the app has finished launching, so the Dock tile is there for the first badge.
@@ -298,6 +304,17 @@ final class AppModel {
         batteryLabel?.show(pointerBattery.shows(level) ? level : nil)
         batteryNotifier.check(level: level, alert: batteryAlert)
         recordBattery()
+    }
+
+    private func recordBattery() {
+        guard tracksBatteryHistory, !tracking.batteryReadings.isEmpty, !ScreenshotRenderer.isRendering else { return }
+        batteryHistory.record(tracking.batteryReadings, at: .now)
+        settings.batteryHistory = batteryHistory
+    }
+
+    func clearBatteryHistory() {
+        batteryHistory = BatteryHistory()
+        settings.batteryHistory = batteryHistory
     }
 
     private func updateDockBadge() {

@@ -40,9 +40,9 @@ enum ScreenshotRenderer {
     /// window gets a demo update first, which would change the menu too, so each clip is recorded
     /// in a process of its own.
     static func screens(_ model: AppModel) -> [(name: String, view: () -> AnyView, height: CGFloat?)] {
-        let tabs: [(PreferencesTab, CGFloat)] = [(.general, 1040), (.pairs, 520), (.automation, 1180),
-                                                (.highlight, 2040), (.speed, 620), (.buttons, 640),
-                                                (.shortcuts, 420), (.about, 760)]
+        let tabs: [(PreferencesTab, CGFloat)] = [(.general, 1040), (.appearance, 760), (.pairs, 520), (.automation, 1180),
+                                                (.highlight, 2040), (.speed, 620), (.buttons, 640), (.battery, 1240),
+                                                (.shortcuts, 420), (.about, 760), (.whatsNew, 900)]
         let preferences = tabs.map { tab, height in
             ("preferences-\(tab.slug)", { AnyView(PreferencesView(model: model, tab: tab).background(windowBackground)) }, Optional(height))
         }

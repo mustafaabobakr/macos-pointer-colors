@@ -80,9 +80,14 @@ private struct NavigationAppRow: View {
     @Environment(\.appTextScale) private var scale
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Toggle(isOn: Binding(get: { app.isOn }, set: { isOn in change { $0.isOn = isOn } })) {
-                Label { Text(app.name) } icon: { AppIcon(bundleID: app.bundleID) }
+        VStack(alignment: .leading, spacing: 10 * scale) {
+            HStack(spacing: 12 * scale) {
+                AppIcon(bundleID: app.bundleID)
+                Text(app.name)
+                Spacer()
+                Toggle(app.name, isOn: Binding(get: { app.isOn }, set: { isOn in change { $0.isOn = isOn } }))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
             }
             HStack(spacing: 16 * scale) {
                 LabeledContent("Back") {

@@ -7,7 +7,7 @@ struct AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        defaults.register(defaults: [Key.reapplyAtLaunch: true, Key.iconInPairColors: true])
+        defaults.register(defaults: [Key.reapplyAtLaunch: true, Key.iconInPairColors: true, "tracksBatteryHistory": true])
     }
 
     /// Puts the last applied pair and size back when the app starts.
@@ -54,6 +54,33 @@ struct AppSettings {
         get { defaults.string(forKey: "pointerBattery").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "pointerBattery") }
     }
+
+    /// Records each mouse's charges, to see how long they last.
+    var tracksBatteryHistory: Bool {
+        get { defaults.bool(forKey: "tracksBatteryHistory") }
+        nonmutating set { defaults.set(newValue, forKey: "tracksBatteryHistory") }
+    }
+
+    var batteryHistory: BatteryHistory {
+        get {
+            guard let data = defaults.data(forKey: "batteryHistory") else { return BatteryHistory() }
+            return (try? Self.historyDecoder.decode(BatteryHistory.self, from: data)) ?? BatteryHistory()
+        }
+        nonmutating set { defaults.set(try? Self.historyEncoder.encode(newValue), forKey: "batteryHistory") }
+    }
+
+    /// Dates as ISO 8601, so the saved history reads plainly in an export.
+    private static let historyEncoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }()
+
+    private static let historyDecoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
 
     var batteryAlert: BatteryAlert {
         get { defaults.string(forKey: "batteryAlert").flatMap(BatteryAlert.init(rawValue:)) ?? .off }

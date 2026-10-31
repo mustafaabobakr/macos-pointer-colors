@@ -30,12 +30,16 @@ final class PointerTracking {
     private(set) var hasMouse = false
     /// Battery of the connected mouse that's lowest, 0 to 100; nil when none reports it.
     private(set) var batteryLevel: Int?
+    /// Each connected mouse that reports its battery, as last read.
+    private(set) var batteryReadings: [MouseBatteryReading] = []
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let mice = MouseTracking()
     @ObservationIgnored private var notifyPort: IONotificationPortRef?
     @ObservationIgnored private var batteryTimer: Timer?
     @ObservationIgnored private var isLoading = true
+    /// Called after every battery reading, changed or not.
+    @ObservationIgnored var onBatteryRead: ((Int?) -> Void)?
 
     var isAvailable: Bool { mice.isAvailable }
 

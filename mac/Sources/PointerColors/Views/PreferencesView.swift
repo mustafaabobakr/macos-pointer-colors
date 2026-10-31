@@ -94,8 +94,13 @@ struct PreferencesView: View {
         case .highlight: HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pairs: model.library.visible, pointerScale: model.scale)
         case .speed: TrackingPreferences(tracking: model.tracking)
         case .buttons: ButtonsPreferences(buttons: model.buttons)
+        case .battery: BatteryPreferences(model: model)
         case .shortcuts: ShortcutsPreferences(model: model)
         case .about: AboutPreferences(model: model)
+        case .whatsNew: WhatsNewPreferences()
+        }
+    }
+
     @ToolbarContentBuilder private var navigationButtons: some ToolbarContent {
         ToolbarItem(placement: .navigation) {
             let title = columns == .detailOnly ? String(localized: "Show Sidebar") : String(localized: "Hide Sidebar")
@@ -194,6 +199,7 @@ private struct GeneralPreferences: View {
                         Label("Allowed", systemImage: "checkmark.circle").foregroundStyle(.green)
                     }
                 }
+                NotificationPermissionRow()
             }
             FeedbackCard()
         }
@@ -205,7 +211,74 @@ private struct GeneralPreferences: View {
     }
 }
 
-/// Where the app shows itself: the menu bar, with the mouse's battery, and the Dock.
+/// Preferences › Appearance: the app's theme, the menu's glass and tint, and the text size.
+private struct AppearancePreferences: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        SettingsPage("Appearance") {
+            SettingsCard("Theme", anchor: "appearance.theme") {
+                ThemePicker(selection: $model.theme)
+                    .featureSpot("clip-theme")
+                Text("Applies to Pointer Colors' own windows and menu, not to the whole Mac.")
+                    .appFont(.caption).foregroundStyle(.secondary)
+            }
+            .featureSpot("menu-appearance")
+            SettingsCard(anchor: "appearance.text") {
+                SettingsMenu("Text size", symbol: "textformat.size",
+                             caption: "Size of the menu and this window. Automatic uses Large on big screens.",
+                             selection: $model.textSize) {
+                    ForEach(TextSize.allCases) { Text($0.title).tag($0) }
+                }
+            }
+            .featureSpot("menu-appearance")
+            SettingsCard("App icon", anchor: "appearance.icon") {
+                AppIconPicker(selection: $model.appIconStyle)
+                    .featureSpot("clip-app-icon")
+                    .frame(maxWidth: .infinity)
+                Text("Follow System uses Icon & widget style in System Settings › Appearance. Default and Dark keep that design in the Dock while Pointer Colors runs; Finder always follows the system.")
+                    .appFont(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .featureSpot("app-icon")
+            MenuLookCard(model: model)
+                .featureSpot("menu-appearance")
+        }
+    }
+}
+
+/// The menu's glass and tint.
+private struct MenuLookCard: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        SettingsCard("Menu", anchor: "appearance.menu") {
+            SettingsToggle("Show current pair at the top", symbol: "rectangle.topthird.inset.filled",
+                           caption: "Its colors, buttons to copy their hex codes, and whether it's applied.",
+                           isOn: $model.menuShowsCurrentPair)
+            SettingsRow("Menu glass", symbol: "square.on.square") {
+                Picker("Menu glass", selection: $model.menuGlass) {
+                    ForEach(MenuGlass.allCases) { Text($0.title).tag($0) }
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .fixedSize()
+            }
+            SettingsMenu("Menu tint", symbol: "drop", selection: $model.menuTint) {
+                ForEach(MenuTint.allCases) { Text($0.title).tag($0) }
+            }
+            .featureSpot("clip-menu-tint")
+            SettingsRow("Tint strength", symbol: "slider.horizontal.3") {
+                Slider(value: $model.menuTintStrength, in: 0.1...0.8)
+                    .accessibilityLabel("Tint strength")
+                    .frame(width: 180)
+            }
+            .disabled(model.menuTint == .none)
+        }
+    }
+}
+
+/// Where the app shows itself: the menu bar and the Dock. The battery shown there is on the Battery page.
 private struct MenuBarSection: View {
     @Bindable var model: AppModel
 
@@ -217,28 +290,25 @@ private struct MenuBarSection: View {
                 ForEach(MenuBarVisibility.allCases) { Text($0.title).tag($0) }
             }
             .featureSpot("clip-menu-bar-visibility")
-            if model.menuBarVisibility == .always {
-                Picker(selection: $model.batteryDisplay) {
-                    ForEach(BatteryDisplay.allCases) { Text($0.title).tag($0) }
-                } label: {
-                    Text("Show mouse battery")
-                    Text(batteryCaption)
-                }
-                .padding(.leading, 20)
-                .featureSpot("clip-battery")
-            }
-            Toggle(isOn: $model.showsInDock) {
-                Text("Show in Dock")
-                Text("Also lists Pointer Colors in the app switcher.")
-            }
+            SettingsToggle("Show in Dock", symbol: "dock.rectangle",
+                           caption: "Also lists Pointer Colors in the app switcher.", isOn: $model.showsInDock)
         }
         .featureSpot("menu-bar-dock")
-        .onAppear { model.tracking.refreshBattery() }
     }
+}
 
-    private var batteryCaption: String {
-        guard let level = model.tracking.batteryLevel else { return String(localized: "No connected mouse reports its battery.") }
-        return String(localized: "Next to the icon. Your mouse is at \(level)%.")
+/// Opens a new GitHub issue, for a bug report or an idea.
+private struct FeedbackCard: View {
+    private static let newIssue = URL(string: "https://github.com/mustafaabobakr/macos-pointer-colors/issues/new")!
+
+    var body: some View {
+        SettingsCard(anchor: "general.feedback") {
+            SettingsRow("Feedback", symbol: "bubble.left.and.text.bubble.right",
+                        caption: "Send a bug report or feature idea straight to the person who makes Pointer Colors.") {
+                Link("Send Feedback", destination: Self.newIssue)
+                    .buttonStyle(.bordered)
+            }
+        }
     }
 }
 
@@ -249,8 +319,9 @@ private struct BackupSection: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        Section {
-            LabeledContent {
+        SettingsCard("Backup", anchor: "general.backup") {
+            SettingsRow("All settings", symbol: "externaldrive",
+                        caption: "Pairs, automation, highlight, speed, buttons, battery, shortcuts and appearance in one file.") {
                 HStack {
                     Button("Import…", action: chooseFile)
                     Button("Export all…", action: exportAll).featureSpot("clip-export")
@@ -445,12 +516,42 @@ private struct AboutPreferences: View {
     }
 
     var body: some View {
-        VStack(spacing: 10) {
-            PointerGlyph(pair: PointerPair.featured, lineWidth: 2).frame(height: 48)
-            Text("Pointer Colors").appFont(.title2, weight: .bold)
-            Text("Version \(version)").foregroundStyle(.secondary)
-            if let local = BuildInfo.current.localLabel {
-                Text(local).appFont(.caption).foregroundStyle(.orange)
+        SettingsPage("About") {
+            SettingsCard(anchor: "about.app") {
+                VStack(spacing: 10 * scale) {
+                    // The same icon as in the Dock.
+                    Image(nsImage: model.appIconStyle.image ?? NSApp.applicationIconImage)
+                        .resizable()
+                        .frame(width: 96 * scale, height: 96 * scale)
+                        .accessibilityHidden(true)
+                    Text("Pointer Colors").appFont(.title2, weight: .bold)
+                    Text("Version \(version)").appFont(.callout).foregroundStyle(.secondary)
+                    if let local = BuildInfo.current.localLabel {
+                        Text(local).appFont(.caption).foregroundStyle(.orange)
+                    }
+                    Text("Changes the same pointer outline, fill and size settings as System Settings › Accessibility › Display.")
+                        .appFont(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    HStack(spacing: 10 * scale) {
+                        GitHubStarButton()
+                        WebsiteButton()
+                    }
+                    .padding(.top, 4 * scale)
+                    Text("Like Pointer Colors? A star on GitHub helps more people discover it and makes a real difference to its development.")
+                        .appFont(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 4) {
+                        Text("Created by")
+                        Link("Mostafa Abobakr", destination: URL(string: "https://github.com/mustafaabobakr")!)
+                    }
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8 * scale)
             }
             SettingsCard("Updates", anchor: "about.updates") {
                 UpdateSection(model: model)

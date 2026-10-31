@@ -504,6 +504,39 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertTrue(restored.showsInDock)
     }
 
+    /// Preferences › Appearance (theme, text size, app icon, the menu's glass and tint) and the
+    /// battery's Dock badge, pointer badge and low-battery alert. The GitHub star count is a cache
+    /// of this Mac's last look, so it stays out.
+    func testRoundTripCarriesAppearanceIconAndBattery() throws {
+        let (source, sourceName) = makeDefaults()
+        source.set("dark", forKey: "appTheme")
+        source.set(AppIconStyle.dark.rawValue, forKey: "appIconStyle")
+        source.set(MenuGlass.clear.rawValue, forKey: "menuGlass")
+        source.set(0.6, forKey: "menuTintStrength")
+        source.set(true, forKey: "menuShowsCurrentPair")
+        let settings = AppSettings(defaults: source)
+        settings.textSize = .huge
+        settings.dockBattery = .below10
+        settings.pointerBattery = .always
+        settings.batteryAlert = .below5
+        source.set(["count": 2, "date": Date()], forKey: GitHubStars.defaultsKey)
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertEqual(target.string(forKey: "appTheme"), "dark")
+        XCTAssertEqual(target.string(forKey: "appIconStyle").flatMap(AppIconStyle.init(rawValue:)), .dark)
+        XCTAssertEqual(target.string(forKey: "menuGlass").flatMap(MenuGlass.init(rawValue:)), .clear)
+        XCTAssertEqual(target.double(forKey: "menuTintStrength"), 0.6)
+        XCTAssertTrue(target.bool(forKey: "menuShowsCurrentPair"))
+        let restored = AppSettings(defaults: target)
+        XCTAssertEqual(restored.textSize, .huge)
+        XCTAssertEqual(restored.dockBattery, .below10)
+        XCTAssertEqual(restored.pointerBattery, .always)
+        XCTAssertEqual(restored.batteryAlert, .below5)
+        XCTAssertNil(target.object(forKey: GitHubStars.defaultsKey))
+    }
+
     /// Buttons and focus are checked through their keys: building them would start the event tap.
     func testRoundTripCarriesButtonsFocusAndAccelerationOff() throws {
         let (source, sourceName) = makeDefaults()
