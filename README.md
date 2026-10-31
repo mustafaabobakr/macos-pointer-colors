@@ -118,6 +118,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 
 **Settings and updates**
 - **Find any setting**: search in the Preferences sidebar lists matching settings and jumps straight to the one you pick. Back and forward work from the toolbar, ⌘[ and ⌘], or your mouse's side buttons.
+- **What's New** in Preferences lists every release and what it changed.
 - **Send feedback** from Preferences › General, straight to a new GitHub issue.
 - **Back up every setting** to one file and import it on another Mac.
 - **Updates in one click**: read what's new, then install on quit or right away.

@@ -47,6 +47,8 @@ done
 cp -R "$MAC_DIR/Resources/en.lproj" "$MAC_DIR/Resources/ar.lproj" "$APP/Contents/Resources/"
 # The pair list shared with the website lives at the repo root.
 cp "$MAC_DIR/../pairs.json" "$APP/Contents/Resources/pairs.json"
+# Preferences › What's New reads the changelog.
+cp "$MAC_DIR/../CHANGELOG.md" "$APP/Contents/Resources/CHANGELOG.md"
 
 # Compile the Icon Composer icon: Assets.car carries the Liquid Glass version,
 # AppIcon.icns is the flat fallback for older macOS. Needs Xcode 26 or later.
