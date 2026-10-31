@@ -77,7 +77,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Every pair, one click away**: pick one of 47 pairs in the menu bar and the pointer changes right away.
 - **Any pointer size**: drag to make the cursor bigger, or give each display its own size.
 - **Preview before you pick**: see the pointer on light pages, dark apps, photos and spreadsheets.
-- **Contrast warnings**: the menu tells you when a pair is hard to see. Turn on the current pair at the top of the menu to copy its hex codes.
+- **Contrast warnings**: the menu tells you when a pair is hard to see. Turn on the current pair at the top of the menu, in Preferences › Appearance, to copy its hex codes.
 - **Make your own pairs**: add, edit, hide, import and export custom outline and fill colors.
 
 **Automatic pairs**
@@ -86,7 +86,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Follows light and dark**: one pair for light appearance, another for dark, switched for you.
 
 **Highlight clicks for presentations and screen recordings**
-- **Click pulses**: a ring or ripple on every click, with its own size, length and color.
+- **Click pulses**: a ring or ripple on every click, with its own size, length and color, outlined in the pair's dark color so it shows on any background.
 - **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose.
 - **Ring around the pointer**: keeps the cursor easy to follow on a shared screen.
 - **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.
@@ -99,6 +99,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 
 **Mouse buttons**
 - **Back and forward in every app**: the mouse's side buttons go back and forward in Safari, Finder, Music and Apple's other apps, not just in browsers.
+- **Side buttons in Slack and other apps**: in apps that go back with their own keys, like Slack's ⌘[ and ⌘], the side buttons and the Magic Mouse's sideways swipe press those keys.
 - **Fix accidental double-clicks**: a worn button that clicks twice clicks once; you choose how close together clicks are ignored.
 
 **Find the pointer**
@@ -116,7 +117,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 **Menu bar and Dock**
 - **Hide the menu-bar icon** or **show the app in the Dock**.
 - **Keyboard shortcuts** from any app to switch pairs and resize the pointer.
-- **Make the menu yours**: theme, glass, tint and text size. Each part of the menu sits in its own glass card.
+- **Make the menu yours**: theme, glass, tint and text size. Each part of the menu sits in its own card, and the current pair at the top is a switch, off unless you want it.
 - **Pick the app icon**: a light Default and a black Dark design that follow your Mac's icon style, or keep either one in the Dock.
 - **Liquid Glass Preferences** on macOS 26 and later: the Preferences window and its cards are see-through glass, in light and dark.
 
