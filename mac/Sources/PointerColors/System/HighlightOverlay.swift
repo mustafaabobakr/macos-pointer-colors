@@ -263,6 +263,11 @@ struct HighlightStyle: Equatable {
     var showsRing = false
     var ringColor = RGBA(red: 1, green: 1, blue: 1)
     var pulseColor = RGBA(red: 1, green: 1, blue: 1)
+    /// The pair's dark color, drawn just wider behind each pulse line, as the laser's outline is;
+    /// nil with the outline turned off.
+    var pulseOutline: RGBA?
+    /// How much wider the outline is than the colored line it sits behind: both sides together.
+    var pulseOutlineExtra = 2.0
     var laser = LaserColors(glow: RGBA(red: 1, green: 0, blue: 0), outline: RGBA(red: 0, green: 0, blue: 0),
                             middle: RGBA(red: 1, green: 0, blue: 0), center: RGBA(red: 1, green: 1, blue: 1))
     var pointerScale = 1.0
@@ -280,6 +285,8 @@ struct HighlightStyle: Equatable {
         showsRing = settings.showsRing
         ringColor = pair.highlightColor
         pulseColor = settings.pulseColor(for: pair)
+        pulseOutline = settings.pulseOutlined ? pair.darkColor : nil
+        pulseOutlineExtra = settings.pulseOutlineWidth * 2
         laser = settings.laserColors(for: pair)
         self.pointerScale = pointerScale
         pulseSize = settings.pulseSize

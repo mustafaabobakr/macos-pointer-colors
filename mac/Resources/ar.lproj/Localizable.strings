@@ -6,6 +6,8 @@
 "Reset pointer size to default" = "إعادة حجم المؤشر إلى الوضع الافتراضي";
 "PAIRS" = "الأزواج";
 "PREVIEW" = "معاينة";
+"POINTER SIZE" = "حجم المؤشر";
+"DISPLAYS AND APPS" = "الشاشات والتطبيقات";
 "Custom" = "مخصص";
 "Add a custom pair" = "إضافة زوج مخصص";
 "Apply to pointer" = "تطبيق على المؤشر";
@@ -242,6 +244,8 @@
 "Light" = "فاتح";
 "Dark" = "داكن";
 "Menu tint" = "تلوين القائمة";
+"Show current pair at the top" = "إظهار الزوج الحالي في الأعلى";
+"Its colors, buttons to copy their hex codes, and whether it's applied." = "ألوانه، وأزرار لنسخ رموزها السداسية، وهل هو مطبَّق.";
 "None" = "بلا";
 "Pointer color" = "لون المؤشر";
 "Blue" = "أزرق";
@@ -274,3 +278,57 @@
 "Install on Quit" = "التثبيت عند الإنهاء";
 "Install updates automatically" = "تثبيت التحديثات تلقائيًا";
 "Version %@ installs when you quit." = "يُثبَّت الإصدار %@ عند الإنهاء.";
+
+/* Preferences sidebar, toolbar and search */
+"Pointer" = "المؤشر";
+"Mouse" = "الماوس";
+"App" = "التطبيق";
+"Speed" = "السرعة";
+"Buttons" = "الأزرار";
+"Battery" = "البطارية";
+"What's New" = "ما الجديد";
+"Search settings" = "البحث في الإعدادات";
+"No matches" = "لا توجد نتائج";
+"Collapsed" = "مطوي";
+"Expanded" = "مفتوح";
+"Show Sidebar" = "إظهار الشريط الجانبي";
+"Hide Sidebar" = "إخفاء الشريط الجانبي";
+"Back" = "رجوع";
+"Forward" = "تقدّم";
+"Back up all settings" = "نسخ كل الإعدادات احتياطيًا";
+"Full Disk Access" = "الوصول الكامل إلى القرص";
+"Send feedback" = "إرسال ملاحظات";
+"Hide pairs from the menu" = "إخفاء أزواج من القائمة";
+
+/* Preferences pages */
+"Startup" = "بدء التشغيل";
+"Menu bar and Dock" = "شريط القوائم والـDock";
+"Applies to Pointer Colors' own windows and menu, not to the whole Mac." = "ينطبق على نوافذ Pointer Colors وقائمته فقط، لا على الـMac كله.";
+"Feedback" = "الملاحظات";
+"Send a bug report or feature idea straight to the person who makes Pointer Colors." = "أرسل بلاغًا عن خطأ أو فكرة ميزة مباشرةً إلى صانع Pointer Colors.";
+"Send Feedback" = "إرسال ملاحظات";
+"Show %@" = "إظهار %@";
+"Updates" = "التحديثات";
+"Check for updates" = "البحث عن تحديثات";
+"Key" = "المفتاح";
+"Show Now" = "الإظهار الآن";
+"Your mouse" = "الماوس الخاص بك";
+"Show the level" = "إظهار المستوى";
+"Low battery" = "البطارية منخفضة";
+"Test notification" = "إشعار تجريبي";
+"Send Test" = "إرسال تجربة";
+"The changelog isn't in this build." = "سجل التغييرات غير موجود في هذه النسخة.";
+"Releases Page" = "صفحة الإصدارات";
+"This version" = "هذا الإصدار";
+
+/* About: GitHub star */
+"Like Pointer Colors? A star on GitHub helps more people discover it and makes a real difference to its development." = "هل أعجبك Pointer Colors؟ نجمة على GitHub تساعد مزيدًا من الناس على اكتشافه وتُحدث فرقًا حقيقيًا في تطويره.";
+"Star on GitHub" = "نجمة على GitHub";
+"Star on GitHub, %lld stars" = "نجمة على GitHub، %lld نجمة";
+
+/* Preferences › Appearance */
+"Menu" = "القائمة";
+"App icon" = "أيقونة التطبيق";
+"Follow System" = "حسب النظام";
+"Follow System uses Icon & widget style in System Settings › Appearance. Default and Dark keep that design in the Dock while Pointer Colors runs; Finder always follows the system." = "«حسب النظام» يتبع نمط الأيقونات والأدوات في إعدادات النظام › المظهر. «الافتراضي» و«داكن» يُبقيان ذلك التصميم في الـDock طالما Pointer Colors يعمل؛ أما Finder فيتبع النظام دائمًا.";
+"Pairs, automation, highlight, speed, buttons, battery, shortcuts and appearance in one file." = "الأزواج والأتمتة والإبراز والسرعة والأزرار والبطارية والاختصارات والمظهر في ملف واحد.";

@@ -9,12 +9,9 @@ struct VisibilityPreviews: View {
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 4)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("PREVIEW").appFont(.caption2, weight: .semibold).foregroundStyle(.secondary)
-            LazyVGrid(columns: columns, spacing: 6) {
-                ForEach(PreviewBackground.allCases) { background in
-                    tile(background)
-                }
+        LazyVGrid(columns: columns, spacing: 6) {
+            ForEach(PreviewBackground.allCases) { background in
+                tile(background)
             }
         }
     }

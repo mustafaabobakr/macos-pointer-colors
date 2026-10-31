@@ -3,6 +3,21 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.5.0 — 2026-10-31
+
+- **A new Preferences window.** Its pages sit in a sidebar grouped by Pointer, Mouse and App, each a column of cards, Liquid Glass on macOS 26 and later. **Search** in the sidebar finds any setting and jumps straight to it, and back and forward work from the toolbar, ⌘[ and ⌘], or your mouse's side buttons. The menu's theme, glass, tint and text size move to a new **Appearance** page.
+- **A tidier menu.** Each part of the menu sits in its own card under a small heading. The big picture of the current pair at the top is now off, since the previews already show it; turn on **Preferences › Appearance › Menu › Show current pair at the top** to bring it back with its hex code buttons. Contrast warnings still show under the previews.
+- **Your mouse's battery.** A new **Battery** page shows the level next to the menu bar icon, on the Dock icon or in a small label under the pointer, each off, below 10%, below 20% or always. A notification comes once each time the mouse drops below 5%, 10% or 20%.
+- **Battery health.** The Battery page records every charge of every mouse: how many days a full charge lasts, how fast it drains, a chart of each charge against the average, and whether charges are getting shorter.
+- **Side buttons in Slack and other apps.** **Preferences › Buttons** lists apps that go back and forward with their own keys, Slack's ⌘[ and ⌘] to start with. Over one of them, the side buttons and the Magic Mouse's sideways swipe press those keys. Add your own apps and shortcuts, or turn one off.
+- **Pulses in both of the pair's colors.** Every pulse line, ripple and long-press ring now has an outline in the pair's dark color, so it shows on light backgrounds. Turn it off or set its width in **Preferences › Highlight › Pulse**.
+- **Pick the app icon.** **Preferences › Appearance › App icon** keeps the Dock icon in its light Default or black Dark design, or lets it follow your Mac's icon style.
+- **What's New.** A new Preferences page lists every release and what it changed, newest first.
+- **Star on GitHub.** **Preferences › About** has a button to star the project, with its star count.
+- **Mouse speed after the lid opens.** macOS sometimes put its own acceleration and speed back several seconds after a wake. The app now puts yours back again a few times over the first 20 seconds.
+
+**Export all…** saves every new setting, and **Import…** puts them back. The low-battery notification needs permission to notify, which **Preferences › General › Permission** asks for.
+
 ## 0.4.9 — 2026-10-30
 
 - **Your mouse speed stays after the Mac sleeps.** Closing and reopening the lid, or logging back in, put macOS's own acceleration and speed back. The app now notices whenever macOS resets them and puts yours straight back, as LinearMouse does.

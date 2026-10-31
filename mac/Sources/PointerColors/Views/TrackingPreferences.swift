@@ -6,33 +6,29 @@ struct TrackingPreferences: View {
     @State private var showsSpeedNote = false
 
     var body: some View {
-        Form {
-            Section {
-                Toggle(isOn: $tracking.accelerationOff) {
-                    Text("Disable pointer acceleration")
-                    Text("The pointer moves the same distance however fast you move the mouse.")
-                }
-                .featureSpot("clip-acceleration-off")
+        SettingsPage("Speed") {
+            SettingsCard("Mouse", anchor: "speed.mouse") {
+                SettingsToggle("Disable pointer acceleration", symbol: "equal.circle",
+                               caption: "The pointer moves the same distance however fast you move the mouse.",
+                               isOn: $tracking.accelerationOff)
+                    .featureSpot("clip-acceleration-off")
                 NumberSlider(title: tracking.accelerationOff ? "Tracking speed" : "Pointer acceleration",
+                             symbol: "gauge.with.dots.needle.67percent",
                              range: MouseTracking.accelerationRange, fractionDigits: 1,
                              value: $tracking.acceleration, defaultValue: tracking.defaultAcceleration,
                              reset: tracking.resetAcceleration, spot: "clip-acceleration")
                 if !tracking.accelerationOff {
-                    NumberSlider(title: "Pointer speed", range: MouseTracking.speedRange, fractionDigits: 3,
+                    NumberSlider(title: "Pointer speed", symbol: "hare", range: MouseTracking.speedRange, fractionDigits: 3,
                                  value: $tracking.speed, defaultValue: MouseTracking.defaultSpeed,
                                  reset: tracking.resetSpeed, spot: "clip-speed") {
                         if !tracking.miceIgnoringSpeed.isEmpty { speedWarning }
                     }
                 }
-            } header: {
-                Text("Mouse")
-            } footer: {
                 Text(footer).appFont(.caption).foregroundStyle(.secondary)
             }
             .featureSpot("tracking")
             .disabled(!tracking.isAvailable)
         }
-        .formStyle(.grouped)
         .onAppear { tracking.readSystem() }
     }
 
@@ -60,6 +56,7 @@ struct TrackingPreferences: View {
 /// A slider with its range under the title, a field to type an exact value, and a button back to the default.
 private struct NumberSlider<Accessory: View>: View {
     let title: LocalizedStringKey
+    let symbol: String
     let range: ClosedRange<Double>
     let fractionDigits: Int
     @Binding var value: Double
@@ -68,10 +65,11 @@ private struct NumberSlider<Accessory: View>: View {
     var spot: String?
     @ViewBuilder var accessory: () -> Accessory
 
-    init(title: LocalizedStringKey, range: ClosedRange<Double>, fractionDigits: Int, value: Binding<Double>,
+    init(title: LocalizedStringKey, symbol: String, range: ClosedRange<Double>, fractionDigits: Int, value: Binding<Double>,
          defaultValue: Double, reset: @escaping () -> Void, spot: String? = nil,
          @ViewBuilder accessory: @escaping () -> Accessory = { EmptyView() }) {
         self.title = title
+        self.symbol = symbol
         self.range = range
         self.fractionDigits = fractionDigits
         _value = value
@@ -82,9 +80,13 @@ private struct NumberSlider<Accessory: View>: View {
     }
 
     var body: some View {
-        LabeledContent {
+        SettingsRow(symbol: symbol, title: Text(title),
+                    caption: Text(verbatim: "(\(range.lowerBound.formatted())–\(range.upperBound.formatted()))")) {
             HStack {
-                Slider(value: $value, in: range).featureSpot(spot ?? "")
+                accessory()
+                Slider(value: $value, in: range)
+                    .accessibilityLabel(title)
+                    .featureSpot(spot ?? "")
                 TextField("", value: Binding(get: { value }, set: { value = $0.clamped(to: range) }),
                           format: .number.precision(.fractionLength(0...fractionDigits)))
                     .labelsHidden()
@@ -98,12 +100,6 @@ private struct NumberSlider<Accessory: View>: View {
                     .disabled(abs(value - defaultValue) < 0.0005)
             }
             .frame(width: 310)
-        } label: {
-            HStack(spacing: 4) {
-                Text(title)
-                accessory()
-            }
-            Text(verbatim: "(\(range.lowerBound.formatted())–\(range.upperBound.formatted()))")
         }
     }
 }

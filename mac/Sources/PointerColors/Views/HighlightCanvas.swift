@@ -88,7 +88,7 @@ struct HighlightSnapshot: Equatable {
         let eased = 1 - (1 - progress) * (1 - progress)
         let side = Pulse.startSide + (baseDiameter * style.pulseSize * 1.8 - Pulse.startSide) * eased
         let circle = Path(ellipseIn: square(at: point, side: side))
-        context.stroke(circle, with: .color(style.pulseColor.color.opacity(0.95 * (1 - eased))), lineWidth: 4)
+        strokePulse(circle, opacity: 0.95 * (1 - eased), lineWidth: 4, in: &context)
     }
 
     /// Three waves, each leaving a little after the one before, spreading wider and thinner than
@@ -103,7 +103,7 @@ struct HighlightSnapshot: Equatable {
             let side = Pulse.startSide + (baseDiameter * style.pulseSize * 2.2 - Pulse.startSide) * eased
             let circle = Path(ellipseIn: square(at: point, side: side))
             let opacity = 0.9 * (1 - progress) * (1 - progress)
-            context.stroke(circle, with: .color(style.pulseColor.color.opacity(opacity)), lineWidth: 3 - 2 * eased)
+            strokePulse(circle, opacity: opacity, lineWidth: 3 - 2 * eased, in: &context)
         }
     }
 
@@ -118,7 +118,16 @@ struct HighlightSnapshot: Equatable {
         let opacity = shown * (1 - gone)
         let circle = Path(ellipseIn: square(at: hold.point, side: baseDiameter * style.pulseSize * scale))
         context.fill(circle, with: .color(style.pulseColor.color.opacity(0.35 * opacity)))
-        context.stroke(circle, with: .color(style.pulseColor.color.opacity(0.95 * opacity)), lineWidth: 3)
+        strokePulse(circle, opacity: 0.95 * opacity, lineWidth: 3, in: &context)
+    }
+
+    /// A pulse line in both of the pair's colors, as the laser has: the dark outline a little wider
+    /// behind, when it's on, then the pulse color.
+    private func strokePulse(_ path: Path, opacity: Double, lineWidth: Double, in context: inout GraphicsContext) {
+        if let outline = style.pulseOutline {
+            context.stroke(path, with: .color(outline.color.opacity(opacity)), lineWidth: lineWidth + style.pulseOutlineExtra)
+        }
+        context.stroke(path, with: .color(style.pulseColor.color.opacity(opacity)), lineWidth: lineWidth)
     }
 
     /// A soft glow, then the outlined core, its middle and center, fading once the pointer stops.

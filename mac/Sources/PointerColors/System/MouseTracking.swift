@@ -141,13 +141,13 @@ final class MouseTracking {
         return ignoredSpeed
     }
 
-    /// Battery left in the connected mice that report it, 0 to 100, lowest first.
-    func batteryLevels() -> [Int] {
+    /// Each connected mouse that reports its battery, with its name and level.
+    func batteryReadings() -> [MouseBatteryReading] {
         let ids = Set(mice.compactMap { mouse -> String? in
             guard let vendor = property(mouse, kIOHIDVendorIDKey), let product = property(mouse, kIOHIDProductIDKey) else { return nil }
             return "\(vendor):\(product)"
         })
-        return MouseBattery.levels(vendorProductIDs: ids).sorted()
+        return MouseBattery.readings(vendorProductIDs: ids)
     }
 
     // MARK: Conversions
@@ -195,27 +195,38 @@ final class MouseTracking {
     }
 }
 
+/// One mouse's battery: who it is, so each keeps its own history, and how full it is.
+struct MouseBatteryReading: Equatable {
+    /// Its serial number or Bluetooth address, or its vendor and product when it reports neither.
+    let id: String
+    let name: String
+    let level: Int
+}
+
 /// Battery levels Bluetooth devices report through Apple's device-management HID services.
 enum MouseBattery {
-    static func levels(vendorProductIDs: Set<String>) -> [Int] {
+    static func readings(vendorProductIDs: Set<String>) -> [MouseBatteryReading] {
         var iterator: io_iterator_t = 0
         guard IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("AppleDeviceManagementHIDEventService"),
                                            &iterator) == KERN_SUCCESS else { return [] }
         defer { IOObjectRelease(iterator) }
-        var levels: [Int] = []
+        var readings: [MouseBatteryReading] = []
         while case let service = IOIteratorNext(iterator), service != 0 {
             defer { IOObjectRelease(service) }
-            if let level = level(of: service, matching: vendorProductIDs) { levels.append(level) }
+            if let reading = reading(of: service, matching: vendorProductIDs) { readings.append(reading) }
         }
-        return levels
+        return readings
     }
 
-    private static func level(of service: io_service_t, matching ids: Set<String>) -> Int? {
+    private static func reading(of service: io_service_t, matching ids: Set<String>) -> MouseBatteryReading? {
         func value(_ key: String) -> Any? {
             IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
         }
         guard let vendor = value(kIOHIDVendorIDKey), let product = value(kIOHIDProductIDKey),
-              ids.contains("\(vendor):\(product)") else { return nil }
-        return (value("BatteryPercent") as? NSNumber)?.intValue
+              ids.contains("\(vendor):\(product)"),
+              let level = (value("BatteryPercent") as? NSNumber)?.intValue else { return nil }
+        let id = value(kIOHIDSerialNumberKey) as? String ?? value("DeviceAddress") as? String ?? "\(vendor):\(product)"
+        let name = value(kIOHIDProductKey) as? String ?? String(localized: "A mouse")
+        return MouseBatteryReading(id: id, name: name, level: level)
     }
 }

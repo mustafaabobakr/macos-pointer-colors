@@ -6,7 +6,7 @@ import Observation
 ///
 /// Off (the default), the app leaves mice alone and the sliders show what macOS uses. Moving a
 /// slider makes them the app's: they're saved, written to every mouse, and written again whenever a
-/// mouse connects or the Mac wakes, since macOS puts its own values back then.
+/// mouse connects or the Mac wakes or unlocks, since macOS puts its own values back then.
 @MainActor
 @Observable
 final class PointerTracking {
@@ -30,12 +30,16 @@ final class PointerTracking {
     private(set) var hasMouse = false
     /// Battery of the connected mouse that's lowest, 0 to 100; nil when none reports it.
     private(set) var batteryLevel: Int?
+    /// Each connected mouse that reports its battery, as last read.
+    private(set) var batteryReadings: [MouseBatteryReading] = []
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let mice = MouseTracking()
     @ObservationIgnored private var notifyPort: IONotificationPortRef?
     @ObservationIgnored private var batteryTimer: Timer?
     @ObservationIgnored private var isLoading = true
+    /// Called after every battery reading, changed or not.
+    @ObservationIgnored var onBatteryRead: ((Int?) -> Void)?
 
     var isAvailable: Bool { mice.isAvailable }
 
@@ -51,11 +55,17 @@ final class PointerTracking {
         mice.observeChanges { [weak self] in
             MainActor.assumeIsolated { self?.systemChanged() }
         }
-        // Waking, and logging back in once the lid opens, both put macOS's values back.
-        for name in [NSWorkspace.didWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification] {
-            NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.miceChanged() }
+        // Waking, the screens waking and unlocking once the lid opens all put macOS's values back.
+        let workspace = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification,
+                     NSWorkspace.sessionDidBecomeActiveNotification] {
+            workspace.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.woke() }
             }
+        }
+        DistributedNotificationCenter.default().addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil,
+                                                            queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.woke() }
         }
         refreshBattery()
         batteryTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
@@ -83,7 +93,9 @@ final class PointerTracking {
     }
 
     func refreshBattery() {
-        batteryLevel = mice.batteryLevels().first
+        batteryReadings = mice.batteryReadings()
+        batteryLevel = batteryReadings.map(\.level).min()
+        onBatteryRead?(batteryLevel)
     }
 
     // MARK: Applying
@@ -103,6 +115,17 @@ final class PointerTracking {
     private func miceChanged() {
         if isCustom { apply() } else { readSystem() }
         refreshBattery()
+    }
+
+    /// The Mac woke or unlocked. macOS puts its own values back some seconds later, once the mouse
+    /// reconnects, without always saying so (the Magic Mouse's driver stays, and its acceleration
+    /// can't be read back), so the app's go on again a few times over the next while.
+    private func woke() {
+        for delay in [0.0, 2, 5, 10, 20] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                MainActor.assumeIsolated { self?.miceChanged() }
+            }
+        }
     }
 
     /// macOS (or System Settings) changed acceleration or speed: put the app's own back, unless the

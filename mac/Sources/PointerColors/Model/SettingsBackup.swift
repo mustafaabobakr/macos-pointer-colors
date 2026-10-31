@@ -2,8 +2,8 @@ import Foundation
 
 /// Every app preference in one file: pairs, automation, highlight, speed, shortcuts and appearance.
 /// Reads and writes the app's own UserDefaults domain, leaving out what macOS keeps there for
-/// windows and panels and what only describes this Mac's update checks. Launch at login, which
-/// macOS keeps instead of the app, goes in the file next to them.
+/// windows and panels and what only describes this Mac's update checks or the cached GitHub star
+/// count. Launch at login, which macOS keeps instead of the app, goes in the file next to them.
 struct SettingsBackup {
     private let defaults: UserDefaults
     private let domain: String
@@ -11,7 +11,7 @@ struct SettingsBackup {
     private static let format = "pointer-colors-settings"
     private static let version = 1
     private static let skippedPrefixes = ["NS", "com_apple_", "Apple"]
-    private static let skippedKeys: Set<String> = ["lastUpdateCheck", "updateFeedURL"]
+    private static let skippedKeys: Set<String> = ["lastUpdateCheck", "updateFeedURL", "githubStars"]
 
     enum Failure: LocalizedError {
         case notABackup

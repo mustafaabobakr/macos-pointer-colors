@@ -16,12 +16,7 @@ struct PointerColorsApp: App {
             if let battery = model.menuBarBattery { Text("\(battery)%") }
         }
         .menuBarExtraStyle(.window)
-
-        // A plain window rather than a Settings scene: SwiftUI keeps a Settings window at a fixed
-        // size, and this one should be resizable in height.
-        Window(String(localized: "Preferences"), id: PreferencesView.windowID) {
-            PreferencesView(model: model)
-        }
-        .windowResizability(.contentMinSize)
+        // Preferences isn't a scene: PreferencesWindow keeps one window for every way in. A
+        // Settings scene would also stay at one size, and this window resizes.
     }
 }

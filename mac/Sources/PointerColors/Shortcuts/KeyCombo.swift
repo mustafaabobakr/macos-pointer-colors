@@ -8,6 +8,12 @@ struct KeyCombo: Codable, Equatable {
     /// What the key itself showed when recorded, e.g. "P" or "→".
     var keyLabel: String
 
+    init(keyCode: Int, carbonModifiers: Int, keyLabel: String) {
+        self.keyCode = UInt32(keyCode)
+        self.carbonModifiers = UInt32(carbonModifiers)
+        self.keyLabel = keyLabel
+    }
+
     /// Builds a combo from a recorded key press. Needs ⌘, ⌥ or ⌃, so plain typing never triggers it.
     init?(event: NSEvent) {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
@@ -22,6 +28,15 @@ struct KeyCombo: Codable, Equatable {
                                           (UInt32(shiftKey), "⇧"), (UInt32(cmdKey), "⌘")]
         let prefix = symbols.filter { carbonModifiers & $0.0 != 0 }.map(\.1).joined()
         return prefix + keyLabel
+    }
+
+    /// The modifiers as event flags, for posting the combo as a key press.
+    var eventFlags: CGEventFlags {
+        let flags: [(Int, CGEventFlags)] = [(cmdKey, .maskCommand), (optionKey, .maskAlternate),
+                                            (controlKey, .maskControl), (shiftKey, .maskShift)]
+        return flags.reduce(into: CGEventFlags()) { result, pair in
+            if carbonModifiers & UInt32(pair.0) != 0 { result.insert(pair.1) }
+        }
     }
 
     private static func carbon(_ flags: NSEvent.ModifierFlags) -> UInt32 {
@@ -59,6 +74,16 @@ enum ShortcutAction: String, CaseIterable, Identifiable, Codable {
         case .biggerPointer: return String(localized: "Make the pointer bigger")
         case .smallerPointer: return String(localized: "Make the pointer smaller")
         case .resetPointer: return String(localized: "Reset to the macOS default, normal size")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .nextPair: "forward"
+        case .previousPair: "backward"
+        case .biggerPointer: "plus.magnifyingglass"
+        case .smallerPointer: "minus.magnifyingglass"
+        case .resetPointer: "arrow.uturn.backward"
         }
     }
 }

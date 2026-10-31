@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://macos-pointer-colors.pages.dev"><img src="docs/readme-hero.png" alt="Pointer Colors: your pointer, one click away. The menu-bar app beside a glowing mint pointer." width="100%"></a>
+  <img src="docs/app-icon.png" alt="Pointer Colors app icon" width="220">
 </p>
 
 <p align="center">
@@ -20,6 +20,10 @@
   <a href="https://macos-pointer-colors.pages.dev/?outline=00FFDA&fill=008A59&name=Aqua%20mint"><b>Open a shared pair</b></a> ·
   <a href="https://macos-pointer-colors.pages.dev/?lang=ar"><b>العربية</b></a> ·
   <a href="#build-it-yourself"><b>Build it</b></a>
+</p>
+
+<p align="center">
+  <a href="https://macos-pointer-colors.pages.dev"><img src="docs/readme-hero.png" alt="Pointer Colors: your pointer, one click away. The menu-bar app beside a glowing mint pointer." width="100%"></a>
 </p>
 
 <br>
@@ -73,7 +77,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Every pair, one click away**: pick one of 47 pairs in the menu bar and the pointer changes right away.
 - **Any pointer size**: drag to make the cursor bigger, or give each display its own size.
 - **Preview before you pick**: see the pointer on light pages, dark apps, photos and spreadsheets.
-- **Contrast warnings**: the menu tells you when a pair is hard to see, and copies its hex codes.
+- **Contrast warnings**: the menu tells you when a pair is hard to see. Turn on the current pair at the top of the menu, in Preferences › Appearance, to copy its hex codes.
 - **Make your own pairs**: add, edit, hide, import and export custom outline and fill colors.
 
 **Automatic pairs**
@@ -82,7 +86,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Follows light and dark**: one pair for light appearance, another for dark, switched for you.
 
 **Highlight clicks for presentations and screen recordings**
-- **Click pulses**: a ring or ripple on every click, with its own size, length and color.
+- **Click pulses**: a ring or ripple on every click, with its own size, length and color, outlined in the pair's dark color so it shows on any background.
 - **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose.
 - **Ring around the pointer**: keeps the cursor easy to follow on a shared screen.
 - **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.
@@ -95,6 +99,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 
 **Mouse buttons**
 - **Back and forward in every app**: the mouse's side buttons go back and forward in Safari, Finder, Music and Apple's other apps, not just in browsers.
+- **Side buttons in Slack and other apps**: in apps that go back with their own keys, like Slack's ⌘[ and ⌘], the side buttons and the Magic Mouse's sideways swipe press those keys.
 - **Fix accidental double-clicks**: a worn button that clicks twice clicks once; you choose how close together clicks are ignored.
 
 **Find the pointer**
@@ -104,13 +109,22 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 **Windows**
 - **Focus the window under the pointer**: type into any window just by pointing at it, without bringing it to the front. Hold a modifier key to pass over windows.
 
+**Mouse battery**
+- **See the battery** next to the menu-bar icon, on the Dock icon or in a small label under the pointer, always or only when it's low.
+- **Low-battery notification** once your mouse drops below 5%, 10% or 20%.
+- **Battery health:** how many days each charge lasts and how much it drains a day, for every mouse, and whether charges are getting shorter.
+
 **Menu bar and Dock**
-- **Mouse battery** next to the menu-bar icon, always or only when it's low.
 - **Hide the menu-bar icon** or **show the app in the Dock**.
 - **Keyboard shortcuts** from any app to switch pairs and resize the pointer.
-- **Make the menu yours**: theme, glass, tint and text size.
+- **Make the menu yours**: theme, glass, tint and text size. Each part of the menu sits in its own card, and the current pair at the top is a switch, off unless you want it.
+- **Pick the app icon**: a light Default and a black Dark design that follow your Mac's icon style, or keep either one in the Dock.
+- **Liquid Glass Preferences** on macOS 26 and later: the Preferences window and its cards are see-through glass, in light and dark.
 
 **Settings and updates**
+- **Find any setting**: search in the Preferences sidebar lists matching settings and jumps straight to the one you pick. Back and forward work from the toolbar, ⌘[ and ⌘], or your mouse's side buttons.
+- **What's New** in Preferences lists every release and what it changed.
+- **Send feedback** from Preferences › General, straight to a new GitHub issue.
 - **Back up every setting** to one file and import it on another Mac.
 - **Updates in one click**: read what's new, then install on quit or right away.
 

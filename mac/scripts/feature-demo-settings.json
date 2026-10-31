@@ -21,6 +21,7 @@
     "highlightLaserNeedsOption": true
   },
   "jsonData": {
+    "batteryHistory": {"mice": [{"id": "demo-magic-mouse", "name": "Magic Mouse", "current": {"start": {"date": "2026-09-08T16:33:36Z", "level": 100}, "last": {"date": "2026-09-17T16:33:36Z", "level": 62}}, "past": [{"start": {"date": "2026-03-01T09:00:00Z", "level": 100}, "last": {"date": "2026-04-01T15:43:12Z", "level": 8}}, {"start": {"date": "2026-04-01T18:43:12Z", "level": 100}, "last": {"date": "2026-05-02T03:21:36Z", "level": 8}}, {"start": {"date": "2026-05-02T06:21:36Z", "level": 100}, "last": {"date": "2026-05-30T18:50:24Z", "level": 8}}, {"start": {"date": "2026-05-30T21:50:24Z", "level": 100}, "last": {"date": "2026-06-27T12:14:24Z", "level": 8}}, {"start": {"date": "2026-06-27T15:14:24Z", "level": 100}, "last": {"date": "2026-07-23T09:28:48Z", "level": 8}}, {"start": {"date": "2026-07-23T12:28:48Z", "level": 100}, "last": {"date": "2026-08-16T10:33:36Z", "level": 8}}, {"start": {"date": "2026-08-16T13:33:36Z", "level": 100}, "last": {"date": "2026-09-08T13:33:36Z", "level": 8}}]}]},
     "customPairs": [
       {"id": "custom-demo-sunset", "name": "Sunset", "isCustom": true,
        "outline": {"red": 1.0, "green": 0.42, "blue": 0.21, "alpha": 1}, "fill": {"red": 0.55, "green": 0.1, "blue": 0.36, "alpha": 1}},

@@ -270,8 +270,8 @@ final class FeatureClipRecorder {
             "screen": [host.bounds.width, host.bounds.height],
             "focus": [focus.minX, focus.minY, focus.width, focus.height],
             "capture": [capture.minX, capture.minY, capture.width, capture.height],
-            // A Preferences tab's tab bar stays put while the tab scrolls.
-            "header": FeatureSpots.frames["clip-tab-bar"].map { $0.maxY + 1 } ?? 0,
+            // Nothing stays put while a Preferences page scrolls: its title scrolls with it.
+            "header": 0,
             "frames": frames,
         ]
         guard let data = try? JSONSerialization.data(withJSONObject: info, options: [.prettyPrinted]) else { return false }
