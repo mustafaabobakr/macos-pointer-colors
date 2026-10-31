@@ -57,8 +57,18 @@ xcrun actool "$MAC_DIR/Resources/AppIcon.icon" \
   --output-partial-info-plist "$MAC_DIR/build/icon-partial.plist" \
   --output-format human-readable-text >/dev/null
 
+# The Dark design as a flat icon too, for Preferences › Appearance › App icon › Dark.
+python3 -I "$MAC_DIR/scripts/dark-icon.py" "$MAC_DIR/Resources/AppIcon.icon" "$MAC_DIR/build/AppIconDark.icon"
+mkdir -p "$MAC_DIR/build/icon-dark"
+xcrun actool "$MAC_DIR/build/AppIconDark.icon" \
+  --compile "$MAC_DIR/build/icon-dark" \
+  --platform macosx --minimum-deployment-target 14.0 \
+  --app-icon AppIconDark \
+  --output-partial-info-plist "$MAC_DIR/build/icon-dark-partial.plist" >/dev/null
+cp "$MAC_DIR/build/icon-dark/AppIconDark.icns" "$APP/Contents/Resources/AppIconDark.icns"
+
 # Fail loudly if the icon didn't make it into the bundle, so a build never ships without it.
-for f in Assets.car AppIcon.icns; do
+for f in Assets.car AppIcon.icns AppIconDark.icns; do
   [ -s "$APP/Contents/Resources/$f" ] || { echo "error: app icon missing ($f); actool failed" >&2; exit 1; }
 done
 

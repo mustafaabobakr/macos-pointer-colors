@@ -47,6 +47,10 @@ final class AppModel {
     var theme: AppTheme = .saved {
         didSet { theme.save(); theme.apply() }
     }
+    /// The Dock icon's design: the system's choice, or Default or Dark pinned.
+    var appIconStyle: AppIconStyle = .saved {
+        didSet { appIconStyle.save(); appIconStyle.apply() }
+    }
     var menuTint: MenuTint = .saved {
         didSet { menuTint.save() }
     }
