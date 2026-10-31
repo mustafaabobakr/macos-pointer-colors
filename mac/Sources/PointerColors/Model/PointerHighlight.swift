@@ -135,6 +135,10 @@ final class PointerHighlight {
     /// Off uses `pulseColor` instead of the pair's color.
     var pulseUsesPairColor: Bool { didSet { save(pulseUsesPairColor, Key.pulsePair) } }
     var pulseColor: RGBA { didSet { saveColor(pulseColor, Key.pulseColor) } }
+    /// Draws each pulse line over a wider one in the pair's dark color, as the laser's outline.
+    var pulseOutlined: Bool { didSet { save(pulseOutlined, Key.pulseOutline) } }
+    /// Points of outline showing on each side of a pulse line.
+    var pulseOutlineWidth: Double { didSet { save(pulseOutlineWidth, Key.pulseOutlineWidth) } }
     /// 0.5...2, times the pointer size.
     var pulseSize: Double { didSet { save(pulseSize, Key.pulseSize) } }
     /// Seconds from click to fully faded.
@@ -170,6 +174,7 @@ final class PointerHighlight {
 
     static let sizeRange = 0.5...2.0
     static let pulseDurationRange = 0.2...1.5
+    static let pulseOutlineWidthRange = 0.5...4.0
     static let trailFadeRange = 0.3...3.0
     static let pressScaleRange = 0.5...0.95
     static let pressDurationRange = 0.0...0.5
@@ -196,6 +201,8 @@ final class PointerHighlight {
         shrinksOnRightClick = defaults.bool(forKey: Key.pressRight)
         pulseUsesPairColor = defaults.bool(forKey: Key.pulsePair)
         pulseColor = Self.color(defaults, Key.pulseColor) ?? RGBA(hex: "FF9F0A")!
+        pulseOutlined = defaults.object(forKey: Key.pulseOutline) as? Bool ?? true
+        pulseOutlineWidth = defaults.object(forKey: Key.pulseOutlineWidth) as? Double ?? 1
         pulseSize = defaults.double(forKey: Key.pulseSize)
         pulseDuration = defaults.double(forKey: Key.pulseDuration)
         pulsesOnRightClick = defaults.bool(forKey: Key.pulseRight)
@@ -318,6 +325,8 @@ final class PointerHighlight {
         static let pressRight = "highlightPressRightClick"
         static let pulsePair = "highlightPulseUsesPair"
         static let pulseColor = "highlightPulseColor"
+        static let pulseOutline = "highlightPulseOutline"
+        static let pulseOutlineWidth = "highlightPulseOutlineWidth"
         static let pulseSize = "highlightPulseSize"
         static let pulseDuration = "highlightPulseDuration"
         static let pulseRight = "highlightPulseRightClick"

@@ -84,6 +84,13 @@ private struct PulseSection: View {
             }
             .pickerStyle(.segmented)
             .featureSpot("clip-pulse-style")
+            Toggle(isOn: $highlight.pulseOutlined) {
+                Text("Dark outline")
+                Text("Draws each pulse over the pair's dark color, as the laser's outline, so it stays clear on light backgrounds.")
+            }
+            ValueSlider(title: String(localized: "Outline width"), value: $highlight.pulseOutlineWidth,
+                        range: PointerHighlight.pulseOutlineWidthRange, format: "%.1f pt")
+                .disabled(!highlight.pulseOutlined)
             ValueSlider(title: String(localized: "Size"), value: $highlight.pulseSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size")
             ValueSlider(title: String(localized: "Length"), value: $highlight.pulseDuration,

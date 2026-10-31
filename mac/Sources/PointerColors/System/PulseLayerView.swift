@@ -9,8 +9,9 @@ import QuartzCore
 /// thread, holding up the mouse events behind it.
 @MainActor
 final class PulseLayerView: NSView {
-    /// The long-press ring while it's shown, and whether it is waiting to appear.
-    private var holdLayer: CAShapeLayer?
+    /// The long-press ring (its outline and its color) while it's shown, and whether it is
+    /// waiting to appear.
+    private var holdLayers: [CAShapeLayer] = []
     private var pendingHold: DispatchWorkItem?
 
     override init(frame: NSRect) {
@@ -39,10 +40,10 @@ final class PulseLayerView: NSView {
 
     /// Keeps the ring under the pointer while the button is held.
     func moveHold(to point: CGPoint) {
-        guard let holdLayer else { return }
+        guard !holdLayers.isEmpty else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        holdLayer.position = point
+        holdLayers.forEach { $0.position = point }
         CATransaction.commit()
     }
 
@@ -52,46 +53,51 @@ final class PulseLayerView: NSView {
     func endHold(fadeOut: Bool = true) -> Bool {
         pendingHold?.cancel()
         pendingHold = nil
-        guard let ring = holdLayer else { return false }
-        holdLayer = nil
-        guard fadeOut else { ring.removeFromSuperlayer(); return false }
-        animate(ring, key: "opacity", from: ring.presentation()?.opacity ?? 1, to: 0, duration: Hold.release) {
-            ring.removeFromSuperlayer()
+        let rings = holdLayers
+        guard !rings.isEmpty else { return false }
+        holdLayers = []
+        for ring in rings {
+            guard fadeOut else { ring.removeFromSuperlayer(); continue }
+            animate(ring, key: "opacity", from: ring.presentation()?.opacity ?? 1, to: 0, duration: Hold.release) {
+                ring.removeFromSuperlayer()
+            }
         }
-        return true
+        return fadeOut
     }
 
     // MARK: Layers
 
     private func addRing(at point: CGPoint, style: HighlightStyle) {
         let base = baseDiameter(style)
-        let ring = circleLayer(at: point, color: style.pulseColor, lineWidth: 4)
-        animate(ring, duration: style.pulseDuration, timing: .easeOut, changes: [
-            ("path", circle(Pulse.startSide), circle(base * 1.8)),
-            ("opacity", 0.95, 0),
-        ])
+        for (ring, _) in outlinedCircles(at: point, style: style, lineWidth: 4) {
+            animate(ring, duration: style.pulseDuration, timing: .easeOut, changes: [
+                ("path", circle(Pulse.startSide), circle(base * 1.8)),
+                ("opacity", 0.95, 0),
+            ])
+        }
     }
 
     /// One of three waves, each leaving a little after the one before.
     private func addRippleWave(_ index: Int, at point: CGPoint, style: HighlightStyle) {
         let base = baseDiameter(style)
-        let wave = circleLayer(at: point, color: style.pulseColor, lineWidth: 3)
-        wave.opacity = 0
         let delay = style.pulseDuration * 0.15 * Double(index)
-        animate(wave, duration: style.pulseDuration * 0.7, delay: delay, timing: .easeOut, changes: [
-            ("path", circle(Pulse.startSide), circle(base * 2.2)),
-            ("lineWidth", 3, 1),
-            ("opacity", 0.9, 0),
-        ])
+        for (wave, extra) in outlinedCircles(at: point, style: style, lineWidth: 3) {
+            wave.opacity = 0
+            animate(wave, duration: style.pulseDuration * 0.7, delay: delay, timing: .easeOut, changes: [
+                ("path", circle(Pulse.startSide), circle(base * 2.2)),
+                ("lineWidth", 3 + extra, 1 + extra),
+                ("opacity", 0.9, 0),
+            ])
+        }
     }
 
     private func showHold(at point: CGPoint, style: HighlightStyle) {
         pendingHold = nil
         let side = baseDiameter(style) * Hold.size
-        let ring = circleLayer(at: point, color: style.pulseColor, lineWidth: 3)
-        ring.path = circle(side)
-        ring.fillColor = style.pulseColor.cgColor(alpha: 0.35)
-        holdLayer = ring
+        let rings = outlinedCircles(at: point, style: style, lineWidth: 3).map(\.shape)
+        rings.forEach { $0.path = circle(side) }
+        rings.last?.fillColor = style.pulseColor.cgColor(alpha: 0.35)
+        holdLayers = rings
         let grow = CABasicAnimation(keyPath: "transform.scale")
         grow.fromValue = 0.6
         grow.toValue = 1
@@ -103,8 +109,20 @@ final class PulseLayerView: NSView {
         breathe.beginTime = CACurrentMediaTime() + Hold.grow
         breathe.autoreverses = true
         breathe.repeatCount = .infinity
-        ring.add(grow, forKey: "grow")
-        ring.add(breathe, forKey: "breathe")
+        for ring in rings {
+            ring.add(grow, forKey: "grow")
+            ring.add(breathe, forKey: "breathe")
+        }
+    }
+
+    /// A pulse line in both of the pair's colors, as the laser has: the dark outline a little wider
+    /// behind, when it's on, then the pulse color. Each comes with how much wider than `lineWidth` it is.
+    private func outlinedCircles(at point: CGPoint, style: HighlightStyle,
+                                 lineWidth: CGFloat) -> [(shape: CAShapeLayer, extra: Double)] {
+        let outline = style.pulseOutline.map { [($0, style.pulseOutlineExtra)] } ?? []
+        return (outline + [(style.pulseColor, 0)]).map { color, extra in
+            (circleLayer(at: point, color: color, lineWidth: lineWidth + extra), extra)
+        }
     }
 
     /// A circle layer centred on `point`; its path is drawn around the layer's own origin.
