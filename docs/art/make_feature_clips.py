@@ -42,7 +42,7 @@ ICON_X = 1262                    # the app's menu bar icon, left edge
 FPS = 25
 INTRO, ZOOM_IN, ZOOM_OUT, OUTRO = 3.6, 0.9, 0.8, 0.6   # seconds
 TEXT_IN, TEXT_OUT = 0.35, 0.45   # the text fades in, then out before the zoom
-QUALITY = 72
+QUALITY = 90
 FONT = "SF Pro, SF Pro Text, Helvetica Neue, Arial, sans-serif"
 ACCENT = "#00FFDA"
 WINDOW_BG = "#1e1e1e"
@@ -364,9 +364,11 @@ def make_clip(feature, folder):
     shots = merged(timeline(feature, clip, place))
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as pool:
         pngs = list(pool.map(lambda job: render(folder, *job), [(i, svg) for i, (svg, _) in enumerate(shots)]))
-    args = ["img2webp", "-loop", "0", "-mixed"]
+    # Every frame whole (-kmax 1): lossy frames that only patch part of the last one leave dark
+    # bars and smudged text where the patches meet.
+    args = ["img2webp", "-loop", "0", "-kmax", "1"]
     for png, (_, ms) in zip(pngs, shots):
-        args += ["-d", str(ms), "-lossy", "-q", str(QUALITY), "-m", "4", str(png)]
+        args += ["-d", str(ms), "-lossy", "-q", str(QUALITY), "-m", "6", str(png)]
     out = FEATURES / f"{feature['id']}.webp"
     subprocess.run(args + ["-o", str(out)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print(f"Wrote {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB, {len(clip['frames'])} demo frames)")
