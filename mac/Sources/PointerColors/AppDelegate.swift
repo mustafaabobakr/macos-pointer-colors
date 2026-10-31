@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UserNotifications
 
 /// Owns the model so links opened from the website reach the same state the menu shows.
 @MainActor
@@ -7,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NotificationAccess.center?.delegate = self
         model.applyDockVisibility()
         MenuBarItem.setVisible(model.menuBarVisibility == .always)
         if let path = ScreenshotRenderer.requestedPath {
@@ -47,5 +49,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .alertSecondButtonReturn: model.add(link, apply: false)
         default: break
         }
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    /// macOS hides an app's notifications while it's in front, as it is whenever Preferences is
+    /// open, which would swallow the battery test.
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification)
+        async -> UNNotificationPresentationOptions {
+        [.banner, .list, .sound]
     }
 }

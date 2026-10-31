@@ -36,13 +36,22 @@ final class AppModel {
         didSet { settings.textSize = textSize }
     }
     var showsInDock: Bool {
-        didSet { settings.showsInDock = showsInDock; applyDockVisibility() }
+        didSet { settings.showsInDock = showsInDock; applyDockVisibility(); updateDockBadge() }
     }
     var menuBarVisibility: MenuBarVisibility {
         didSet { settings.menuBarVisibility = menuBarVisibility; MenuBarItem.setVisible(menuBarVisibility == .always) }
     }
     var batteryDisplay: BatteryDisplay {
         didSet { settings.batteryDisplay = batteryDisplay; tracking.refreshBattery() }
+    }
+    var dockBattery: BatteryDisplay {
+        didSet { settings.dockBattery = dockBattery; tracking.refreshBattery() }
+    }
+    var pointerBattery: BatteryDisplay {
+        didSet { settings.pointerBattery = pointerBattery; tracking.refreshBattery() }
+    }
+    var batteryAlert: BatteryAlert {
+        didSet { settings.batteryAlert = batteryAlert; tracking.refreshBattery() }
     }
     var theme: AppTheme = .saved {
         didSet { theme.save(); theme.apply() }
@@ -113,6 +122,8 @@ final class AppModel {
     @ObservationIgnored private var highlightOverlay: HighlightOverlay?
     @ObservationIgnored private var pressShrink: PressShrink?
     private let pointer = SystemPointer()
+    @ObservationIgnored private let batteryNotifier = BatteryNotifier()
+    @ObservationIgnored private var batteryLabel: PointerBatteryLabel?
     @ObservationIgnored private var automationStore: Automation?
 
     /// Appearance and per-display rules. Created on first use so it can call back into the model.
@@ -136,8 +147,14 @@ final class AppModel {
         showsInDock = settings.showsInDock
         menuBarVisibility = settings.menuBarVisibility
         batteryDisplay = settings.batteryDisplay
+        dockBattery = settings.dockBattery
+        pointerBattery = settings.pointerBattery
+        batteryAlert = settings.batteryAlert
         installsUpdatesAutomatically = settings.installsUpdatesAutomatically
-        DispatchQueue.main.async { [theme] in theme.apply() }
+        tracking.onBatteryRead = { [weak self] level in self?.batteryRead(level) }
+        // Once the app has finished launching, so the Dock tile is there for the first badge.
+        DispatchQueue.main.async { [tracking] in tracking.refreshBattery() }
+        DispatchQueue.main.async { [theme, appIconStyle] in theme.apply(); appIconStyle.apply() }
         observeSystemAppearance()
         shortcuts = settings.shortcuts
         refreshFromSystem()
@@ -150,6 +167,7 @@ final class AppModel {
         pressShrink = PressShrink(settings: highlight, pointer: pointer)
         locator = PointerLocator(pair: { [weak self] in self?.menuBarPair ?? .featured },
                                  pointerScale: { [weak self] in self?.scale ?? 1 })
+        if !ScreenshotRenderer.isRendering { batteryLabel = PointerBatteryLabel() }
         startUpdateSchedule()
     }
 
@@ -268,6 +286,22 @@ final class AppModel {
     /// The mouse battery shown next to the menu-bar icon, when it's set to show now.
     var menuBarBattery: Int? {
         batteryDisplay.shows(tracking.batteryLevel) ? tracking.batteryLevel : nil
+    }
+
+    /// The mouse battery on the Dock icon, when the app is in the Dock and it's set to show now.
+    var dockBadgeBattery: Int? {
+        showsInDock && dockBattery.shows(tracking.batteryLevel) ? tracking.batteryLevel : nil
+    }
+
+    private func batteryRead(_ level: Int?) {
+        updateDockBadge()
+        batteryLabel?.show(pointerBattery.shows(level) ? level : nil)
+        batteryNotifier.check(level: level, alert: batteryAlert)
+        recordBattery()
+    }
+
+    private func updateDockBadge() {
+        NSApp?.dockTile.badgeLabel = dockBadgeBattery.map { "\($0)%" }
     }
 
     /// Nil when this macOS doesn't expose the setting.

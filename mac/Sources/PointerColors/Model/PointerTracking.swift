@@ -89,7 +89,9 @@ final class PointerTracking {
     }
 
     func refreshBattery() {
-        batteryLevel = mice.batteryLevels().first
+        batteryReadings = mice.batteryReadings()
+        batteryLevel = batteryReadings.map(\.level).min()
+        onBatteryRead?(batteryLevel)
     }
 
     // MARK: Applying

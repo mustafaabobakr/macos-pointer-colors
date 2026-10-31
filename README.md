@@ -108,8 +108,10 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 **Windows**
 - **Focus the window under the pointer**: type into any window just by pointing at it, without bringing it to the front. Hold a modifier key to pass over windows.
 
+**Mouse battery**
+- **See the battery** next to the menu-bar icon, on the Dock icon or in a small label under the pointer, always or only when it's low.
+- **Low-battery notification** once your mouse drops below 5%, 10% or 20%.
 **Menu bar and Dock**
-- **Mouse battery** next to the menu-bar icon, always or only when it's low.
 - **Hide the menu-bar icon** or **show the app in the Dock**.
 - **Keyboard shortcuts** from any app to switch pairs and resize the pointer.
 - **Make the menu yours**: theme, glass, tint and text size. Each part of the menu sits in its own glass card.
