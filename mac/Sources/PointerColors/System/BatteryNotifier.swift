@@ -6,10 +6,10 @@ import UserNotifications
 final class BatteryNotifier {
     private var hasAlerted = false
 
-    func check(level: Int?, alert: BatteryAlert) {
+    func check(level: Int?, charging: Bool, alert: BatteryAlert) {
         guard let threshold = alert.threshold else { hasAlerted = false; return }
-        // No mouse reporting right now: wait for it rather than starting over.
-        guard let level else { return }
+        // No mouse reporting right now, or it's on its cable: wait rather than starting over.
+        guard let level, !charging else { return }
         guard level < threshold else { hasAlerted = false; return }
         guard !hasAlerted else { return }
         hasAlerted = true

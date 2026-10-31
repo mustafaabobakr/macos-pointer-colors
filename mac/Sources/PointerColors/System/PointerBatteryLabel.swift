@@ -15,11 +15,11 @@ final class PointerBatteryLabel {
     /// From the pointer's tip to the label's top left corner, clear of a large pointer.
     private static let offset = CGSize(width: 14, height: 30)
 
-    /// Shows `level`, or hides the label when it's nil.
-    func show(_ level: Int?) {
+    /// Shows `level`, with a bolt while it's charging, or hides the label when it's nil.
+    func show(_ level: Int?, charging: Bool = false) {
         guard let level else { return hide() }
         let panel = panel ?? makePanel()
-        let host = NSHostingView(rootView: LabelView(level: level))
+        let host = NSHostingView(rootView: LabelView(level: level, charging: charging))
         panel.contentView = host
         panel.setContentSize(host.fittingSize)
         self.panel = panel
@@ -75,11 +75,12 @@ final class PointerBatteryLabel {
 
 private struct LabelView: View {
     let level: Int
+    let charging: Bool
 
     var body: some View {
         Label("\(level)%", systemImage: symbol)
             .font(.caption.weight(.semibold).monospacedDigit())
-            .foregroundStyle(level < 20 ? .red : .primary)
+            .foregroundStyle(level < 20 && !charging ? .red : .primary)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(.regularMaterial, in: Capsule())
@@ -87,12 +88,13 @@ private struct LabelView: View {
     }
 
     private var symbol: String {
-        switch level {
-        case ..<13: return "battery.0percent"
-        case ..<38: return "battery.25percent"
-        case ..<63: return "battery.50percent"
-        case ..<88: return "battery.75percent"
-        default: return "battery.100percent"
+        if charging { return "battery.100percent.bolt" }
+        return switch level {
+        case ..<13: "battery.0percent"
+        case ..<38: "battery.25percent"
+        case ..<63: "battery.50percent"
+        case ..<88: "battery.75percent"
+        default: "battery.100percent"
         }
     }
 }

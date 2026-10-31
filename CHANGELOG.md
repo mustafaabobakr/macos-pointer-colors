@@ -3,6 +3,12 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.5.1 — 2026-10-31
+
+- **See when your mouse is charging.** Plug the cable in and a bolt shows next to the level, by the menu bar icon, on the Dock icon and under the pointer, and the Battery page says it's charging. The low-battery notification waits while it charges. The level is checked every minute, so the bolt shows within a minute of plugging in.
+- **Battery health counts only real use.** Time on the cable no longer counts as a charge draining: the charge before it is kept, and the next one starts counting once you unplug.
+- **Your battery history stays through updates.** It's now kept in its own file on your Mac, in `~/Library/Application Support/com.mustafaabobakr.PointerColors/battery-history.json`, instead of with the app's preferences. Your history so far moves there by itself. **Export all…** still saves it, and **Import…** puts it back.
+
 ## 0.5.0 — 2026-10-31
 
 - **A new Preferences window.** Its pages sit in a sidebar grouped by Pointer, Mouse and App, each a column of cards, Liquid Glass on macOS 26 and later. **Search** in the sidebar finds any setting and jumps straight to it, and back and forward work from the toolbar, ⌘[ and ⌘], or your mouse's side buttons. The menu's theme, glass, tint and text size move to a new **Appearance** page.

@@ -195,12 +195,14 @@ final class MouseTracking {
     }
 }
 
-/// One mouse's battery: who it is, so each keeps its own history, and how full it is.
+/// One mouse's battery: who it is, so each keeps its own history, how full it is, and whether
+/// it's charging.
 struct MouseBatteryReading: Equatable {
     /// Its serial number or Bluetooth address, or its vendor and product when it reports neither.
     let id: String
     let name: String
     let level: Int
+    var isCharging = false
 }
 
 /// Battery levels Bluetooth devices report through Apple's device-management HID services.
@@ -227,6 +229,8 @@ enum MouseBattery {
               let level = (value("BatteryPercent") as? NSNumber)?.intValue else { return nil }
         let id = value(kIOHIDSerialNumberKey) as? String ?? value("DeviceAddress") as? String ?? "\(vendor):\(product)"
         let name = value(kIOHIDProductKey) as? String ?? String(localized: "A mouse")
-        return MouseBatteryReading(id: id, name: name, level: level)
+        // 0 while it runs on its battery; set while a cable powers it.
+        let flags = (value("BatteryStatusFlags") as? NSNumber)?.intValue ?? 0
+        return MouseBatteryReading(id: id, name: name, level: level, isCharging: flags != 0)
     }
 }
