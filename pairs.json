@@ -60,6 +60,13 @@
       "group": "neon"
     },
     {
+      "id": "neon-flame",
+      "name": "Neon flame",
+      "outline": "FF6127",
+      "fill": "7A1A00",
+      "group": "neon"
+    },
+    {
       "id": "neon-violet",
       "name": "Neon violet",
       "outline": "C77DFF",
