@@ -305,6 +305,83 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(reopened.laserColors(for: pair).glow, reopened.laserColor)
     }
 
+    func testLaserLookIsClassicUnlessChangedAndSaved() {
+        let defaults = makeDefaults()
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(highlight.laserLook, .classic, "the default")
+        highlight.laserLook = .goodNotes
+        XCTAssertEqual(PointerHighlight(defaults: defaults).laserLook, .goodNotes, "saved")
+    }
+
+    func testGoodNotesLaserIsAGlowingWhiteCoreWithNoOutline() {
+        var style = HighlightStyle()
+        style.laser = LaserColors(glow: RGBA(hex: "FF0000")!, outline: RGBA(hex: "000000")!,
+                                  middle: RGBA(hex: "FF8080")!, center: RGBA(hex: "FFFFFF")!)
+        XCTAssertEqual(style.laserTrailParts.count, 4, "classic: glow, outline, middle, center")
+        XCTAssertTrue(style.laserTrailParts.allSatisfy { $0.blur == 0 })
+
+        style.laserLook = .goodNotes
+        style.laserSize = 2
+        let trail = style.laserTrailParts
+        XCTAssertEqual(trail.map(\.color.hex), ["FF0000", "FFFFFF"], "a glowing line around a white core")
+        XCTAssertGreaterThan(trail[0].blur, 0)
+        XCTAssertEqual(trail[0].size, 28, "14pt at its widest, scaled by the laser size")
+        XCTAssertTrue(style.trailVariesWithSpeed)
+        XCTAssertEqual(style.laserDotParts.map(\.color.hex), ["FF0000"], "a solid dot with no white center")
+    }
+
+    func testGoodNotesTrailThinsAsThePointerSpeedsUp() {
+        XCTAssertEqual(LaserPace.width(speed: 0), 15.4, accuracy: 0.01)
+        XCTAssertEqual(LaserPace.width(speed: 750), 7.8, accuracy: 0.2, "about 8pt, as measured")
+        XCTAssertEqual(LaserPace.width(speed: 20_000), 3.3, "never thinner than this")
+
+        var pace = LaserPace()
+        XCTAssertEqual(pace.share(at: .zero, time: 0), 1, "a press starts at the widest")
+        var slow = 0.0, fast = 0.0
+        for step in 1...10 { slow = pace.share(at: CGPoint(x: Double(step), y: 0), time: Double(step) / 100) }
+        for step in 1...10 { fast = pace.share(at: CGPoint(x: 10 + Double(step) * 80, y: 0), time: 0.1 + Double(step) / 100) }
+        XCTAssertEqual(slow, 0.84, accuracy: 0.01, "100 pt/s is nearly the widest")
+        XCTAssertLessThan(fast, 0.35, "8000 pt/s is thin")
+    }
+
+    func testRibbonIsAsWideAsEachPointAsks() {
+        let ribbon = LaserRibbon(points: [CGPoint(x: 0, y: 0), CGPoint(x: 100, y: 0)], widths: [20, 4])
+        let box = ribbon.path.boundingBoxOfPath
+        XCTAssertEqual(box.minX, -10, accuracy: 0.01)
+        XCTAssertEqual(box.maxX, 102, accuracy: 0.01)
+        XCTAssertEqual(box.height, 20, accuracy: 0.01)
+        XCTAssertTrue(ribbon.path.contains(CGPoint(x: 50, y: 0)), "filled between the points")
+        XCTAssertFalse(ribbon.path.contains(CGPoint(x: 90, y: 5)), "narrow where it's narrow")
+    }
+
+    func testTrailShapeBlendsASuddenChangeInWidth() {
+        // Thick for 60pt, then suddenly thin, one point every 2pt.
+        let points = (0...60).map { CGPoint(x: Double($0) * 2, y: 0) }
+        let shares = points.map { $0.x < 60 ? 1.0 : 0.25 }
+        let trail = LaserTrailShape(sizes: [20], points: points, shares: shares)
+        let path = trail.paths[0]
+        func halfWidth(at x: Double) -> Double {
+            stride(from: 10.5, through: 0, by: -0.25).first { path.contains(CGPoint(x: x, y: $0)) } ?? 0
+        }
+        XCTAssertEqual(halfWidth(at: 20), 10, accuracy: 0.3, "full width well before the change")
+        XCTAssertEqual(halfWidth(at: 100), 2.5, accuracy: 0.3, "thin well after it")
+        let across = [50.0, 56, 60, 64, 70].map(halfWidth)
+        XCTAssertEqual(across, across.sorted(by: >), "narrows steadily through the change")
+        XCTAssertTrue(across.dropFirst().dropLast().allSatisfy { $0 < 9.9 && $0 > 2.6 }, "no step: \(across)")
+    }
+
+    func testGoodNotesTrailHoldsThenFades() {
+        var style = HighlightStyle()
+        style.trailFade = 0.8
+        XCTAssertEqual(style.trailOpacity(after: 0.4), 0.95 * 0.5, accuracy: 0.001, "classic fades from the release")
+
+        style.laserLook = .goodNotes
+        XCTAssertEqual(style.trailOpacity(after: 0), 1, "drawn solid")
+        XCTAssertEqual(style.trailOpacity(after: 0.44), 1, accuracy: 0.001, "held whole first")
+        XCTAssertEqual(style.trailOpacity(after: 0.625), 0.5, accuracy: 0.001)
+        XCTAssertEqual(style.trailOpacity(after: 0.8), 0, "gone by the fade time")
+    }
+
     func testLaserNeedingKeysDrawsOnlyWithThem() {
         let highlight = PointerHighlight(defaults: makeDefaults())
         highlight.laserOn = true
@@ -465,6 +542,17 @@ final class SettingsBackupTests: XCTestCase {
         let restored = PointerHighlight(defaults: target)
         XCTAssertTrue(restored.showsRing)
         XCTAssertEqual(restored.ringSize, 1.6)
+    }
+
+    @MainActor
+    func testRoundTripCarriesTheLaserLook() throws {
+        let (source, sourceName) = makeDefaults()
+        PointerHighlight(defaults: source).laserLook = .goodNotes
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertEqual(PointerHighlight(defaults: target).laserLook, .goodNotes)
     }
 
     func testRoundTripReplacesSettingsAndSkipsWindowKeys() throws {

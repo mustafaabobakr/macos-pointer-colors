@@ -135,11 +135,23 @@ private struct HighlightPreviewImage: View {
         if style.showsHold { scene.hold = Hold(point: scene.pointer, start: Self.now - Hold.threshold - 1) }
     }
 
+    /// Widths as if the pointer started slowly, sped up through the middle and slowed to stop,
+    /// so the GoodNotes look shows its thick and thin parts.
+    private static func shares(along points: [CGPoint]) -> [Double] {
+        var pace = LaserPace()
+        var time = 0.0
+        return points.indices.map { index in
+            let progress = Double(index) / Double(max(points.count - 1, 1))
+            time += 0.004 + 0.05 * pow(1 - sin(progress * .pi), 2)
+            return pace.share(at: points[index], time: time)
+        }
+    }
+
     private func addLaser(to scene: HighlightScene, in size: CGSize) {
         let points = stride(from: 0.12, through: 0.8, by: 0.02).map { t in
             CGPoint(x: size.width * t, y: size.height * (0.5 + 0.28 * sin(t * 2 * .pi * 1.3)))
         }
-        scene.strokes = [LaserStroke(points: points)]
+        scene.strokes = [LaserStroke(points: points, shares: Self.shares(along: points))]
         let end = points.last ?? .zero
         scene.laserDot = LaserDot(point: end, updatedAt: Self.now)
         scene.pointer = end

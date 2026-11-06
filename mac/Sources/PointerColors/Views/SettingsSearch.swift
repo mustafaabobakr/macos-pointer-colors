@@ -68,6 +68,7 @@ enum SettingsSearch {
         item(.highlight, "highlight.highlight", String(localized: "Ring around the pointer"), "circle.dashed"),
         item(.highlight, "highlight.pulse", String(localized: "Pulse"), "circle.circle"),
         item(.highlight, "highlight.laser", String(localized: "Laser"), "scribble"),
+        item(.highlight, "highlight.laser", String(localized: "Laser look: Classic or GoodNotes glow"), "wand.and.rays"),
         item(.highlight, "highlight.press", String(localized: "Shrink the pointer on click"), "arrow.down.right.and.arrow.up.left"),
         item(.highlight, "highlight.pairColors", String(localized: "Colors for each pair"), "paintpalette"),
         item(.speed, "speed.mouse", String(localized: "Disable pointer acceleration"), "equal.circle"),

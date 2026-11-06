@@ -115,11 +115,17 @@ private struct LaserSection: View {
             ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
                 .featureSpot("clip-laser-size")
+            SettingsMenu("Look", symbol: "wand.and.rays",
+                         caption: "Classic draws a white center with an outline. GoodNotes draws a glowing line around a white core that's thick when you move slowly and thin when you move fast, and a solid dot, and keeps the trail whole before fading it out.",
+                         selection: $highlight.laserLook) {
+                ForEach(LaserLook.allCases) { Text($0.title).tag($0) }
+            }
             SettingsMenu("Outline", symbol: "circle.dashed",
                          caption: "The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.",
                          selection: $highlight.laserOutline) {
                 ForEach(LaserOutline.allCases) { Text($0.title).tag($0) }
             }
+            .disabled(highlight.laserLook == .goodNotes)
             .featureSpot("clip-laser-outline")
             SettingsToggle("Draw a trail while dragging", symbol: "scribble",
                            caption: "Hold the mouse button and move to draw; the trail fades after you let go.",

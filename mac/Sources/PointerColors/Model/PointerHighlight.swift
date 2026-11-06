@@ -58,6 +58,23 @@ enum LaserOutline: String, CaseIterable, Identifiable {
     }
 }
 
+/// How the laser dot and trail are drawn.
+enum LaserLook: String, CaseIterable, Identifiable {
+    /// A white center in a lighter shade of the laser color, with an outline and a faint glow.
+    case classic
+    /// A white core in a soft, bright glow of the laser color, with no outline, as GoodNotes draws its laser.
+    case goodNotes
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .classic: return String(localized: "Classic")
+        case .goodNotes: return String(localized: "GoodNotes")
+        }
+    }
+}
+
 /// How the pointer moves between its size and its pressed size.
 enum PressCurve: String, CaseIterable, Identifiable {
     /// Fast at first, settling at the end.
@@ -173,6 +190,8 @@ final class PointerHighlight {
     var laserDot: LaserDotMode { didSet { save(laserDot.rawValue, Key.laserDot) } }
     /// The color of the edge around the dot and trail.
     var laserOutline: LaserOutline { didSet { save(laserOutline.rawValue, Key.laserOutline) } }
+    /// Classic unless changed.
+    var laserLook: LaserLook { didSet { save(laserLook.rawValue, Key.laserLook) } }
 
     /// Pulse and laser colors chosen for particular pairs, by pair id.
     private(set) var pairPulseColors: [String: RGBA] { didSet { saveColors(pairPulseColors, Key.pairPulse) } }
@@ -225,6 +244,7 @@ final class PointerHighlight {
         laserKeys = keys.isEmpty ? .option : keys
         laserDot = defaults.string(forKey: Key.laserDot).flatMap(LaserDotMode.init(rawValue:)) ?? .always
         laserOutline = defaults.string(forKey: Key.laserOutline).flatMap(LaserOutline.init(rawValue:)) ?? .dark
+        laserLook = defaults.string(forKey: Key.laserLook).flatMap(LaserLook.init(rawValue:)) ?? .classic
         pairPulseColors = Self.colors(defaults, Key.pairPulse)
         pairLaserColors = Self.colors(defaults, Key.pairLaser)
     }
@@ -327,6 +347,7 @@ final class PointerHighlight {
         static let laserKeys = "highlightLaserKeys"
         static let laserDot = "highlightLaserDot"
         static let laserOutline = "highlightLaserOutline"
+        static let laserLook = "highlightLaserLook"
         static let pairPulse = "highlightPairPulseColors"
         static let pairLaser = "highlightPairLaserColors"
         static let pulseOn = "highlightPulse"
