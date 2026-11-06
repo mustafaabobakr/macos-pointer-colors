@@ -338,6 +338,10 @@ struct HighlightStyle: Equatable {
     var pulseStyle = PulseStyle.ring
     var laserSize = 1.0
     var laserLook = LaserLook.classic
+    /// Whether the laser has an edge: off when the Outline setting is None.
+    var laserOutlined = false
+    /// How solid the laser's edge is, from 0.05 to 1.
+    var laserOutlineOpacity = 1.0
     var ringSize = 1.0
     var trailFade = 0.9
 
@@ -358,6 +362,8 @@ struct HighlightStyle: Equatable {
         pulseStyle = settings.pulseStyle
         laserSize = settings.laserSize
         laserLook = settings.laserLook
+        laserOutlined = settings.laserOutline != .none
+        laserOutlineOpacity = settings.laserOutlineOpacity
         ringSize = settings.ringSize
         trailFade = settings.laserTrailFade
     }
@@ -368,11 +374,15 @@ extension HighlightStyle {
     var laserDotParts: [LaserPart] {
         switch laserLook {
         case .classic:
-            return scaled([LaserPart(laser.glow, 32, opacity: 0.18), LaserPart(laser.outline, 16),
+            return scaled([LaserPart(laser.glow, 32, opacity: 0.18), LaserPart(laser.outline, 16, opacity: laserOutlineOpacity),
                            LaserPart(laser.middle, 13), LaserPart(laser.center, 11)])
         case .goodNotes:
             // Measured from GoodNotes on a 1:1 display: a solid disc about 7pt wide, barely glowing.
-            return scaled([LaserPart(laser.glow, 7, blur: 1.5)])
+            guard laserOutlined else { return scaled([LaserPart(laser.glow, 7, blur: 1.5)]) }
+            // With an edge: the glow alone underneath, so it spreads beyond the edge without
+            // tinting it, then the edge, then the disc.
+            return scaled([LaserPart(laser.glow, 7, blur: 1.5), LaserPart(laser.outline, 7, opacity: laserOutlineOpacity, rim: Self.goodNotesRim),
+                           LaserPart(laser.glow, 7)])
         }
     }
 
@@ -380,15 +390,24 @@ extension HighlightStyle {
     var laserTrailParts: [LaserPart] {
         switch laserLook {
         case .classic:
-            return scaled([LaserPart(laser.glow, 14, opacity: 0.2), LaserPart(laser.outline, 6),
+            return scaled([LaserPart(laser.glow, 14, opacity: 0.2), LaserPart(laser.outline, 6, opacity: laserOutlineOpacity),
                            LaserPart(laser.middle, 4), LaserPart(laser.center, 2)])
         case .goodNotes:
             // Measured from GoodNotes: a line up to 14pt wide around a white core about a third of
             // it, glowing about half as bright as the line at its edge and fading out some 9pt
             // beyond. These are the widest; `LaserPace` thins them as the pointer speeds up.
-            return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.center, 4.4)])
+            guard laserOutlined else {
+                return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.center, 4.4)])
+            }
+            // With an edge, built like the dot: glow, edge, line, then the core.
+            return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.outline, 14, opacity: laserOutlineOpacity, rim: Self.goodNotesRim),
+                           LaserPart(laser.glow, 14), LaserPart(laser.center, 4.4)])
         }
     }
+
+    /// How much wider the GoodNotes edge is than the line it sits behind, both sides together.
+    /// It stays this wide however fast the pointer moves, so a thin flick keeps its edge.
+    static let goodNotesRim = 2.4
 
     /// GoodNotes thins its trail as the pointer speeds up; Classic keeps one width.
     var trailVariesWithSpeed: Bool { laserLook == .goodNotes }
@@ -410,7 +429,10 @@ extension HighlightStyle {
     }
 
     private func scaled(_ parts: [LaserPart]) -> [LaserPart] {
-        parts.map { LaserPart($0.color, $0.size * laserSize, opacity: $0.opacity, blur: $0.blur * laserSize) }
+        parts.map {
+            LaserPart($0.color, $0.size * laserSize, opacity: $0.opacity, blur: $0.blur * laserSize,
+                      rim: $0.rim * laserSize)
+        }
     }
 }
 
@@ -421,10 +443,15 @@ struct LaserPart: Equatable {
     var opacity: Double
     /// The radius of a glow in `color` around the layer; 0 for none.
     var blur: Double
+    /// Width added to `size` that doesn't thin with speed, as for an edge; 0 for none.
+    var rim: Double
 
-    init(_ color: RGBA, _ size: Double, opacity: Double = 1, blur: Double = 0) {
-        (self.color, self.size, self.opacity, self.blur) = (color, size, opacity, blur)
+    init(_ color: RGBA, _ size: Double, opacity: Double = 1, blur: Double = 0, rim: Double = 0) {
+        (self.color, self.size, self.opacity, self.blur, self.rim) = (color, size, opacity, blur, rim)
     }
+
+    /// The full width at its widest, rim included.
+    var width: Double { size + rim }
 }
 
 /// The laser's soft glow, the outline around its core, and the core's middle and center.

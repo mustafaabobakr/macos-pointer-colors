@@ -135,7 +135,7 @@ struct HighlightSnapshot: Equatable {
         let alpha = 1 - fraction(now - dot.updatedAt, of: LaserDot.fade)
         guard alpha > 0 else { return }
         for part in style.laserDotParts {
-            let circle = Path(ellipseIn: square(at: dot.point, side: part.size))
+            let circle = Path(ellipseIn: square(at: dot.point, side: part.width))
             draw(part, alpha: alpha, in: &context) { $0.fill(circle, with: $1) }
         }
     }
@@ -150,7 +150,7 @@ struct HighlightSnapshot: Equatable {
         var path = Path()
         path.addLines(stroke.points)
         for part in style.laserTrailParts {
-            let line = StrokeStyle(lineWidth: part.size, lineCap: .round, lineJoin: .round)
+            let line = StrokeStyle(lineWidth: part.width, lineCap: .round, lineJoin: .round)
             draw(part, alpha: alpha, in: &context) { $0.stroke(path, with: $1, style: line) }
         }
     }
@@ -158,7 +158,7 @@ struct HighlightSnapshot: Equatable {
     /// The GoodNotes trail: each layer as a filled ribbon, thinner where the pointer moved fast.
     private func drawRibbons(_ stroke: LaserStroke, alpha: Double, in context: inout GraphicsContext) {
         let parts = style.laserTrailParts
-        let trail = LaserTrailShape(sizes: parts.map(\.size), points: stroke.points, shares: stroke.shares)
+        let trail = LaserTrailShape(parts: parts, points: stroke.points, shares: stroke.shares)
         for (part, path) in zip(parts, trail.paths) {
             let shape = Path(path)
             draw(part, alpha: alpha, in: &context) { $0.fill(shape, with: $1) }

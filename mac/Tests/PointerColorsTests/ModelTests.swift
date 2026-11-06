@@ -330,6 +330,37 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(style.laserDotParts.map(\.color.hex), ["FF0000"], "a solid dot with no white center")
     }
 
+    func testGoodNotesLaserCanHaveAnEdgeThatKeepsItsWidthWhenThin() {
+        var style = HighlightStyle()
+        style.laser = LaserColors(glow: RGBA(hex: "FF0000")!, outline: RGBA(hex: "000000")!,
+                                  middle: RGBA(hex: "FF8080")!, center: RGBA(hex: "FFFFFF")!)
+        style.laserLook = .goodNotes
+        style.laserOutlined = true
+        let trail = style.laserTrailParts
+        XCTAssertEqual(trail.map(\.color.hex), ["FF0000", "000000", "FF0000", "FFFFFF"],
+                       "glow, edge, line, core")
+        XCTAssertEqual(trail.filter { $0.blur > 0 }.count, 1, "only the bottom layer glows, so the edge stays dark")
+        XCTAssertEqual(trail[1].width - trail[2].width, HighlightStyle.goodNotesRim, accuracy: 0.001)
+        XCTAssertEqual(style.laserDotParts.map(\.color.hex), ["FF0000", "000000", "FF0000"])
+
+        // At the thinnest share the edge still shows the full rim around the line.
+        let point = [CGPoint(x: 0, y: 0)]
+        let shape = LaserTrailShape(parts: [trail[1], trail[2]], points: point, shares: [0.2])
+        let edge = shape.paths[0].boundingBox.width, line = shape.paths[1].boundingBox.width
+        XCTAssertEqual(edge - line, HighlightStyle.goodNotesRim, accuracy: 0.01)
+    }
+
+    @MainActor
+    func testGoodNotesEdgeFollowsTheOutlineSetting() {
+        let defaults = UserDefaults(suiteName: "edge-\(UUID())")!
+        let highlight = PointerHighlight(defaults: defaults)
+        highlight.laserLook = .goodNotes
+        let pair = PointerPair.macOSLight
+        XCTAssertTrue(HighlightStyle(settings: highlight, pair: pair, pointerScale: 1).laserOutlined, "dark by default")
+        highlight.laserOutline = .none
+        XCTAssertFalse(HighlightStyle(settings: highlight, pair: pair, pointerScale: 1).laserOutlined)
+    }
+
     func testGoodNotesTrailThinsAsThePointerSpeedsUp() {
         XCTAssertEqual(LaserPace.width(speed: 0), 15.4, accuracy: 0.01)
         XCTAssertEqual(LaserPace.width(speed: 750), 7.8, accuracy: 0.2, "about 8pt, as measured")
@@ -527,6 +558,36 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertEqual(restored.pressUpDuration, 0.25)
         XCTAssertEqual(restored.pressCurve, .linear)
         XCTAssertFalse(restored.shrinksOnRightClick)
+    }
+
+    @MainActor
+    func testRoundTripCarriesLaserOutlineOpacity() throws {
+        let (source, sourceName) = makeDefaults()
+        let highlight = PointerHighlight(defaults: source)
+        XCTAssertEqual(highlight.laserOutlineOpacity, 1, "solid by default")
+        highlight.laserOutlineOpacity = 0.4
+        XCTAssertEqual(PointerHighlight(defaults: source).laserOutlineOpacity, 0.4, "saved")
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertEqual(PointerHighlight(defaults: target).laserOutlineOpacity, 0.4)
+    }
+
+    func testOutlineOpacityAppliesOnlyToTheEdge() {
+        var style = HighlightStyle()
+        style.laser = LaserColors(glow: RGBA(hex: "FF0000")!, outline: RGBA(hex: "000000")!,
+                                  middle: RGBA(hex: "FF8080")!, center: RGBA(hex: "FFFFFF")!)
+        style.laserOutlineOpacity = 0.3
+        style.laserOutlined = true
+        for look in LaserLook.allCases {
+            style.laserLook = look
+            for parts in [style.laserTrailParts, style.laserDotParts] {
+                let edge = parts.filter { $0.color.hex == "000000" }
+                XCTAssertEqual(edge.map(\.opacity), [0.3], "\(look): the edge")
+                XCTAssertTrue(parts.filter { $0.color.hex != "000000" }.allSatisfy { $0.opacity != 0.3 }, "\(look)")
+            }
+        }
     }
 
     @MainActor
