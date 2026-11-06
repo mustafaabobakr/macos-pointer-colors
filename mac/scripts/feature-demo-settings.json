@@ -12,7 +12,11 @@
     "perDisplayColors": true,
     "perAppColors": true,
     "appRuleTrigger": "pointer",
-    "appPairs": {"com.apple.Safari": "neon-pink", "com.apple.Terminal": "neon-lime", "com.apple.finder": "electric-blue"},
+    "appPairs": {
+      "com.apple.Safari": "neon-pink",
+      "com.apple.Terminal": "neon-lime",
+      "com.apple.finder": "electric-blue"
+    },
     "highlightPulse": true,
     "highlightLaser": true,
     "highlightRing": true,
@@ -21,18 +25,464 @@
     "highlightLaserNeedsOption": true
   },
   "jsonData": {
-    "batteryHistory": {"mice": [{"id": "demo-magic-mouse", "name": "Magic Mouse", "current": {"start": {"date": "2026-09-08T16:33:36Z", "level": 100}, "last": {"date": "2026-09-17T16:33:36Z", "level": 62}}, "past": [{"start": {"date": "2026-03-01T09:00:00Z", "level": 100}, "last": {"date": "2026-04-01T15:43:12Z", "level": 8}}, {"start": {"date": "2026-04-01T18:43:12Z", "level": 100}, "last": {"date": "2026-05-02T03:21:36Z", "level": 8}}, {"start": {"date": "2026-05-02T06:21:36Z", "level": 100}, "last": {"date": "2026-05-30T18:50:24Z", "level": 8}}, {"start": {"date": "2026-05-30T21:50:24Z", "level": 100}, "last": {"date": "2026-06-27T12:14:24Z", "level": 8}}, {"start": {"date": "2026-06-27T15:14:24Z", "level": 100}, "last": {"date": "2026-07-23T09:28:48Z", "level": 8}}, {"start": {"date": "2026-07-23T12:28:48Z", "level": 100}, "last": {"date": "2026-08-16T10:33:36Z", "level": 8}}, {"start": {"date": "2026-08-16T13:33:36Z", "level": 100}, "last": {"date": "2026-09-08T13:33:36Z", "level": 8}}]}]},
+    "batteryHistory": {
+      "mice": [
+        {
+          "id": "demo-magic-mouse",
+          "name": "Magic Mouse",
+          "readings": [
+            {
+              "date": "2026-03-01T09:00:00Z",
+              "until": "2026-03-01T09:00:00Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-04-01T15:43:12Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-04-01T18:43:12Z",
+              "until": "2026-04-01T18:43:12Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-05-02T03:21:36Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-05-02T06:21:36Z",
+              "until": "2026-05-02T06:21:36Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-05-30T18:50:24Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-05-30T21:50:24Z",
+              "until": "2026-05-30T21:50:24Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-06-27T12:14:24Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-06-27T15:14:24Z",
+              "until": "2026-06-27T15:14:24Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-07-23T09:28:48Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-07-23T12:28:48Z",
+              "until": "2026-07-23T12:28:48Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-08-16T10:33:36Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-08-16T13:33:36Z",
+              "until": "2026-08-16T13:33:36Z",
+              "level": 100,
+              "isCharging": true
+            },
+            {
+              "date": "2026-09-08T13:33:36Z",
+              "level": 8,
+              "isCharging": false
+            },
+            {
+              "date": "2026-09-08T16:33:36Z",
+              "until": "2026-09-08T16:33:36Z",
+              "level": 100,
+              "isCharging": true,
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 18000.0,
+              "state": "idle"
+            },
+            {
+              "date": "2026-09-08T22:33:36Z",
+              "level": 99,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-09T06:33:36Z",
+              "level": 98,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 10800.0
+            },
+            {
+              "date": "2026-09-09T11:33:36Z",
+              "level": 97,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-09T14:33:36Z",
+              "level": 96,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-09T16:33:36Z",
+              "level": 95,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 14400.0
+            },
+            {
+              "date": "2026-09-09T21:33:36Z",
+              "level": 94,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-10T05:33:36Z",
+              "level": 93,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 14400.0
+            },
+            {
+              "date": "2026-09-10T10:33:36Z",
+              "level": 92,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-10T13:33:36Z",
+              "level": 91,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 10800.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-10T16:33:36Z",
+              "level": 90,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 7200.0
+            },
+            {
+              "date": "2026-09-10T19:33:36Z",
+              "level": 89,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-11T03:33:36Z",
+              "level": 88,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 21600.0
+            },
+            {
+              "date": "2026-09-11T10:33:36Z",
+              "level": 87,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-11T12:33:36Z",
+              "level": 86,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-11T15:33:36Z",
+              "level": 85,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-11T17:33:36Z",
+              "level": 84,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 32400.0
+            },
+            {
+              "date": "2026-09-12T02:33:36Z",
+              "level": 83,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-12T10:33:36Z",
+              "level": 82,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-12T18:33:36Z",
+              "level": 81,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-12T21:33:36Z",
+              "level": 80,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 32400.0
+            },
+            {
+              "date": "2026-09-13T06:33:36Z",
+              "level": 79,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-13T14:33:36Z",
+              "level": 78,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 18000.0
+            },
+            {
+              "date": "2026-09-13T20:33:36Z",
+              "level": 77,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 14400.0
+            },
+            {
+              "date": "2026-09-14T01:33:36Z",
+              "level": 76,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-14T09:33:36Z",
+              "level": 75,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 10800.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-14T12:33:36Z",
+              "level": 74,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-14T15:33:36Z",
+              "level": 73,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-14T17:33:36Z",
+              "level": 72,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 21600.0
+            },
+            {
+              "date": "2026-09-14T23:33:36Z",
+              "level": 71,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 32400.0
+            },
+            {
+              "date": "2026-09-15T08:33:36Z",
+              "level": 70,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-15T11:33:36Z",
+              "level": 69,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-15T14:33:36Z",
+              "level": 68,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-15T16:33:36Z",
+              "level": 67,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 3600.0,
+              "idleSeconds": 18000.0
+            },
+            {
+              "date": "2026-09-15T22:33:36Z",
+              "level": 66,
+              "isCharging": false,
+              "state": "idle",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 28800.0
+            },
+            {
+              "date": "2026-09-16T06:33:36Z",
+              "level": 65,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 10800.0
+            },
+            {
+              "date": "2026-09-16T11:33:36Z",
+              "level": 64,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 3600.0
+            },
+            {
+              "date": "2026-09-16T14:33:36Z",
+              "level": 63,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 7200.0,
+              "idleSeconds": 0.0
+            },
+            {
+              "date": "2026-09-16T16:33:36Z",
+              "level": 62,
+              "isCharging": false,
+              "state": "in-use",
+              "inUseSeconds": 0.0,
+              "idleSeconds": 0.0
+            }
+          ],
+          "checkedAt": "2026-09-16T16:33:36Z"
+        }
+      ]
+    },
     "customPairs": [
-      {"id": "custom-demo-sunset", "name": "Sunset", "isCustom": true,
-       "outline": {"red": 1.0, "green": 0.42, "blue": 0.21, "alpha": 1}, "fill": {"red": 0.55, "green": 0.1, "blue": 0.36, "alpha": 1}},
-      {"id": "custom-demo-ice", "name": "Ice", "isCustom": true,
-       "outline": {"red": 0.75, "green": 0.95, "blue": 1.0, "alpha": 1}, "fill": {"red": 0.1, "green": 0.35, "blue": 0.6, "alpha": 1}}
+      {
+        "id": "custom-demo-sunset",
+        "name": "Sunset",
+        "isCustom": true,
+        "outline": {
+          "red": 1.0,
+          "green": 0.42,
+          "blue": 0.21,
+          "alpha": 1
+        },
+        "fill": {
+          "red": 0.55,
+          "green": 0.1,
+          "blue": 0.36,
+          "alpha": 1
+        }
+      },
+      {
+        "id": "custom-demo-ice",
+        "name": "Ice",
+        "isCustom": true,
+        "outline": {
+          "red": 0.75,
+          "green": 0.95,
+          "blue": 1.0,
+          "alpha": 1
+        },
+        "fill": {
+          "red": 0.1,
+          "green": 0.35,
+          "blue": 0.6,
+          "alpha": 1
+        }
+      }
     ],
     "shortcuts": {
-      "nextPair": {"keyCode": 124, "carbonModifiers": 6144, "keyLabel": "→"},
-      "previousPair": {"keyCode": 123, "carbonModifiers": 6144, "keyLabel": "←"},
-      "biggerPointer": {"keyCode": 24, "carbonModifiers": 6144, "keyLabel": "="},
-      "smallerPointer": {"keyCode": 27, "carbonModifiers": 6144, "keyLabel": "-"}
+      "nextPair": {
+        "keyCode": 124,
+        "carbonModifiers": 6144,
+        "keyLabel": "→"
+      },
+      "previousPair": {
+        "keyCode": 123,
+        "carbonModifiers": 6144,
+        "keyLabel": "←"
+      },
+      "biggerPointer": {
+        "keyCode": 24,
+        "carbonModifiers": 6144,
+        "keyLabel": "="
+      },
+      "smallerPointer": {
+        "keyCode": 27,
+        "carbonModifiers": 6144,
+        "keyLabel": "-"
+      }
     }
   }
 }

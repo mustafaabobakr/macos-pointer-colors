@@ -36,9 +36,9 @@ struct MouseHealthView: View {
             }
             if let current, current.used > 0 {
                 DrainSteps(charge: current, showsPace: report == nil)
-                DailyDrain(charge: current)
+                DailyDrain(charge: current).featureSpot("clip-daily-drain")
             }
-            if let report { DrainReportView(mouse: mouse, idleTip: report) }
+            if let report { DrainReportView(mouse: mouse, idleTip: report).featureSpot("clip-drain-report") }
             let measured = mouse.measured
             if measured.count >= 2 {
                 ChargeChart(charges: measured, average: mouse.averageFullDays)
