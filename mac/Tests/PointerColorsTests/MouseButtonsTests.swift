@@ -72,3 +72,51 @@ final class HoverEntriesTests: XCTestCase {
         XCTAssertFalse(entries.enter(a))
     }
 }
+
+@MainActor
+final class NavigationAppsTests: XCTestCase {
+    private var defaults: UserDefaults!
+
+    override func setUp() {
+        defaults = UserDefaults(suiteName: "NavigationAppsTests")
+        defaults.removePersistentDomain(forName: "NavigationAppsTests")
+    }
+
+    private func buttons() -> MouseButtons { MouseButtons(defaults: defaults) }
+
+    override func tearDown() {
+        defaults.removePersistentDomain(forName: "NavigationAppsTests")
+    }
+
+    func testFreshInstallListsFinderWithItsGoKeys() {
+        let finder = buttons().navigationApps.first { $0.bundleID == "com.apple.finder" }
+        XCTAssertEqual(finder?.back?.keyLabel, "[")
+        XCTAssertEqual(finder?.forward?.keyLabel, "]")
+        XCTAssertEqual(finder?.isOn, true)
+    }
+
+    func testSavedListFromBeforeFinderGetsFinderAddedOnce() throws {
+        let slack = NavigationApp.defaults.first { $0.name == "Slack" }!
+        defaults.set(try JSONEncoder().encode([slack]), forKey: "sideButtonApps")
+        let model = buttons()
+        XCTAssertEqual(model.navigationApps.map(\.name), ["Finder", "Slack", "Claude"])
+        model.removeNavigationApp("com.apple.finder")
+        XCTAssertEqual(buttons().navigationApps.map(\.name), ["Slack", "Claude"])
+    }
+
+    func testFreshInstallListsClaudeWithItsBackAndForwardKeys() {
+        let claude = buttons().navigationApps.first { $0.bundleID == "com.anthropic.claudefordesktop" }
+        XCTAssertEqual(claude?.back?.keyLabel, "[")
+        XCTAssertEqual(claude?.forward?.keyLabel, "]")
+    }
+
+    func testFreshInstallListsEveryBuiltInApp() {
+        XCTAssertEqual(buttons().navigationApps.map(\.name), ["Finder", "Claude", "Slack"])
+    }
+
+    func testFinderTurnedOffStaysOff() {
+        buttons().changeNavigationApp("com.apple.finder") { $0.isOn = false }
+        let finder = buttons().navigationApps.first { $0.bundleID == "com.apple.finder" }
+        XCTAssertEqual(finder?.isOn, false)
+    }
+}
