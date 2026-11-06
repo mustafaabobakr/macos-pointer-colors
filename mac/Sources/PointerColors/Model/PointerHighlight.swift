@@ -190,6 +190,8 @@ final class PointerHighlight {
     var laserDot: LaserDotMode { didSet { save(laserDot.rawValue, Key.laserDot) } }
     /// The color of the edge around the dot and trail.
     var laserOutline: LaserOutline { didSet { save(laserOutline.rawValue, Key.laserOutline) } }
+    /// 0.05...1: how solid that edge is, 1 unless changed.
+    var laserOutlineOpacity: Double { didSet { save(laserOutlineOpacity, Key.laserOutlineOpacity) } }
     /// Classic unless changed.
     var laserLook: LaserLook { didSet { save(laserLook.rawValue, Key.laserLook) } }
 
@@ -201,6 +203,7 @@ final class PointerHighlight {
     static let pulseDurationRange = 0.2...1.5
     static let pulseOutlineWidthRange = 0.5...4.0
     static let trailFadeRange = 0.3...3.0
+    static let outlineOpacityRange = 0.05...1.0
     static let pressScaleRange = 0.5...0.95
     static let pressDurationRange = 0.0...0.5
 
@@ -210,7 +213,7 @@ final class PointerHighlight {
         self.defaults = defaults
         defaults.register(defaults: [Key.pulsePair: true, Key.pulseSize: 1.0, Key.ringSize: 1.0, Key.pulseDuration: 0.45,
                                      Key.pulseRight: true, Key.laserPair: true, Key.laserSize: 1.0,
-                                     Key.laserTrail: true, Key.laserFade: 0.9,
+                                     Key.laserTrail: true, Key.laserFade: 0.9, Key.laserOutlineOpacity: 1.0,
                                      Key.laserKeys: HoldKeys.option.rawValue, Key.pressShrink: false, Key.pressScale: 0.88,
                                      Key.pressDown: 0.08, Key.pressUp: 0.08, Key.pressRight: true])
         // Builds before the switches stored one choice: off, pulse or laser.
@@ -244,6 +247,7 @@ final class PointerHighlight {
         laserKeys = keys.isEmpty ? .option : keys
         laserDot = defaults.string(forKey: Key.laserDot).flatMap(LaserDotMode.init(rawValue:)) ?? .always
         laserOutline = defaults.string(forKey: Key.laserOutline).flatMap(LaserOutline.init(rawValue:)) ?? .dark
+        laserOutlineOpacity = defaults.double(forKey: Key.laserOutlineOpacity)
         laserLook = defaults.string(forKey: Key.laserLook).flatMap(LaserLook.init(rawValue:)) ?? .classic
         pairPulseColors = Self.colors(defaults, Key.pairPulse)
         pairLaserColors = Self.colors(defaults, Key.pairLaser)
@@ -347,6 +351,7 @@ final class PointerHighlight {
         static let laserKeys = "highlightLaserKeys"
         static let laserDot = "highlightLaserDot"
         static let laserOutline = "highlightLaserOutline"
+        static let laserOutlineOpacity = "highlightLaserOutlineOpacity"
         static let laserLook = "highlightLaserLook"
         static let pairPulse = "highlightPairPulseColors"
         static let pairLaser = "highlightPairLaserColors"

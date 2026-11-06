@@ -61,7 +61,7 @@ final class LaserLayerView: NSView {
         made.opacity = 0
         for part in parts {
             let disc = CAShapeLayer()
-            let width = part.size
+            let width = part.width
             disc.path = CGPath(ellipseIn: CGRect(x: -width / 2, y: -width / 2, width: width, height: width),
                                transform: nil)
             disc.fillColor = part.color.cgColor(alpha: part.opacity)
@@ -118,14 +118,14 @@ final class LaserLayerView: NSView {
         strokePath = CGMutablePath()
         strokePath.move(to: point)
         lastPoint = point
-        shape = byPace ? LaserTrailShape(sizes: parts.map(\.size), points: [point], shares: [lastShare]) : nil
+        shape = byPace ? LaserTrailShape(parts: parts, points: [point], shares: [lastShare]) : nil
     }
 
     private func lineLayer(_ part: LaserPart) -> CAShapeLayer {
         let line = CAShapeLayer()
         line.fillColor = nil
         line.strokeColor = part.color.cgColor(alpha: part.opacity)
-        line.lineWidth = part.size
+        line.lineWidth = part.width
         line.lineCap = .round
         line.lineJoin = .round
         return line

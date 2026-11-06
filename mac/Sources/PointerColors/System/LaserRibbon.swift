@@ -46,6 +46,7 @@ final class LaserTrailShape {
     static let reach = 20.0
 
     private let sizes: [Double]
+    private let rims: [Double]
     private var points: [CGPoint] = []
     private var shares: [Double] = []
     /// Distance along the trail to each point.
@@ -54,15 +55,22 @@ final class LaserTrailShape {
     private var settledCount = 0
     private(set) var paths: [CGPath]
 
-    init(sizes: [Double]) {
+    /// `rims` add width to each size that doesn't thin with speed; none when left out.
+    init(sizes: [Double], rims: [Double] = []) {
         self.sizes = sizes
+        self.rims = sizes.indices.map { rims.indices.contains($0) ? rims[$0] : 0 }
         settled = sizes.map { _ in LaserRibbon() }
         paths = sizes.map { _ in CGMutablePath() }
     }
 
+    /// A shape for laser parts: each part's size thins with speed, its rim doesn't.
+    convenience init(parts: [LaserPart], points: [CGPoint] = [], shares: [Double] = []) {
+        self.init(sizes: parts.map(\.size), rims: parts.map(\.rim), points: points, shares: shares)
+    }
+
     /// A shape through all of `points` at once, as for a picture of a finished trail.
-    convenience init(sizes: [Double], points: [CGPoint], shares: [Double]) {
-        self.init(sizes: sizes)
+    convenience init(sizes: [Double], rims: [Double] = [], points: [CGPoint], shares: [Double]) {
+        self.init(sizes: sizes, rims: rims)
         for (point, share) in zip(points, shares) { add(point, share: share) }
     }
 
@@ -97,7 +105,9 @@ final class LaserTrailShape {
 
     private func addPoint(_ index: Int, to ribbons: [LaserRibbon]) {
         let share = blended(index)
-        for (ribbon, size) in zip(ribbons, sizes) { ribbon.add(points[index], width: share * size) }
+        for (offset, ribbon) in ribbons.enumerated() {
+            ribbon.add(points[index], width: share * sizes[offset] + rims[offset])
+        }
     }
 
     /// The average of the shares within `reach` on either side, nearer ones counting more.

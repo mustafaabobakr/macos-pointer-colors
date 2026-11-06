@@ -3,6 +3,13 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.5.3 — 2026-11-06
+
+- **An outline for the GoodNotes laser.** **Preferences › Highlight › Laser › Outline** now works with the GoodNotes look too, so the laser shows on light backgrounds: a thin edge in the pair's dark color (or the laser color) around the glowing line and the dot. It keeps its width on a fast, thin stroke, and the glow spreads beyond it without tinting it. Choose **None** for the plain GoodNotes look. As **Outline** defaults to the pair's dark color, the GoodNotes look now has the edge unless you turn it off.
+- **Outline opacity.** A new **Outline opacity** slider under **Outline** sets how solid the edge is, in both looks, from 5% to 100% in 5% steps.
+
+**Export all…** saves the outline opacity, and **Import…** puts it back.
+
 ## 0.5.2 — 2026-11-06
 
 - **A GoodNotes laser.** **Preferences › Highlight › Laser › Look** now offers **GoodNotes** next to **Classic**: a glowing line around a white core and a solid dot, with no outline. The line is thick while you move slowly and thins on a fast stroke, tapering smoothly between the two, and the trail stays whole for a moment before it fades. Its widths, glow and timing were measured from the GoodNotes laser itself.

@@ -87,7 +87,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 
 **Highlight clicks for presentations and screen recordings**
 - **Click pulses**: a ring or ripple on every click, with its own size, length and color, outlined in the pair's dark color so it shows on any background.
-- **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose. Pick the Classic look or a GoodNotes-style glow that thins as you move faster.
+- **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose. Pick the Classic look or a GoodNotes-style glow that thins as you move faster, each with an outline as solid as you like.
 - **Ring around the pointer**: keeps the cursor easy to follow on a shared screen, in the size you choose.
 - **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.
 - **Highlight colors per pair**: a pulse and laser color for any pair.
