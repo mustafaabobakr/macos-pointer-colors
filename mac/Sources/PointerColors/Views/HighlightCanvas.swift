@@ -68,7 +68,7 @@ struct HighlightSnapshot: Equatable {
     private var baseDiameter: Double { 44 * style.pointerScale }
 
     private func drawRing(in context: inout GraphicsContext) {
-        let circle = Path(ellipseIn: square(at: pointer, side: baseDiameter))
+        let circle = Path(ellipseIn: square(at: pointer, side: baseDiameter * style.ringSize))
         context.fill(circle, with: .color(style.ringColor.color.opacity(0.18)))
         context.stroke(circle, with: .color(style.ringColor.color.opacity(0.9)), lineWidth: 3)
     }

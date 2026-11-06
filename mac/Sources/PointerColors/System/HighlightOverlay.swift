@@ -178,7 +178,7 @@ final class HighlightOverlay {
 
     /// The ring shows only on the displays the pointer is on or near.
     private func placeRing(at point: CGPoint) {
-        let reach = 22 * style.pointerScale + 2
+        let reach = 22 * style.pointerScale * style.ringSize + 2
         for display in displays {
             let spot = isNear(point, display.frame, reach: reach) ? local(point, in: display.frame) : nil
             display.ring.place(at: spot, style: style)
@@ -276,6 +276,7 @@ struct HighlightStyle: Equatable {
     var showsHold = true
     var pulseStyle = PulseStyle.ring
     var laserSize = 1.0
+    var ringSize = 1.0
     var trailFade = 0.9
 
     init() {}
@@ -294,6 +295,7 @@ struct HighlightStyle: Equatable {
         showsHold = settings.pulseShowsHold
         pulseStyle = settings.pulseStyle
         laserSize = settings.laserSize
+        ringSize = settings.ringSize
         trailFade = settings.laserTrailFade
     }
 }

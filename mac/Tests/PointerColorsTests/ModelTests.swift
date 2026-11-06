@@ -452,6 +452,21 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertFalse(restored.shrinksOnRightClick)
     }
 
+    @MainActor
+    func testRoundTripCarriesRingSettings() throws {
+        let (source, sourceName) = makeDefaults()
+        let highlight = PointerHighlight(defaults: source)
+        highlight.showsRing = true
+        highlight.ringSize = 1.6
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        let restored = PointerHighlight(defaults: target)
+        XCTAssertTrue(restored.showsRing)
+        XCTAssertEqual(restored.ringSize, 1.6)
+    }
+
     func testRoundTripReplacesSettingsAndSkipsWindowKeys() throws {
         let (source, sourceName) = makeDefaults()
         source.set("dark", forKey: "appTheme")

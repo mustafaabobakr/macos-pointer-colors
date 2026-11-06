@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Preferences › Highlight: the ring, and the pulse and laser for demos and recordings.
+/// Preferences › Highlight: the ring, and the pulse, laser and press for demos and recordings.
 struct HighlightPreferences: View {
     @Bindable var highlight: PointerHighlight
     /// The pair on screen and the pointer size, so the demo looks like the real thing.
@@ -14,13 +14,16 @@ struct HighlightPreferences: View {
     var body: some View {
         SettingsPage("Highlight") {
             SettingsCard("Highlight", anchor: "highlight.highlight") {
-                Text("Click a picture to turn it on or off. Use one, both, or neither.")
+                Text("Click a picture to turn it on or off. Use any of them together, or none.")
                     .appFont(.caption).foregroundStyle(.secondary)
                 HighlightPreviewCards(highlight: highlight, style: style, pair: pair)
                 HighlightDemoPad(highlight: highlight, style: style).featureSpot("clip-demo-pad")
                 SettingsToggle("Ring around the pointer", symbol: "circle.dashed",
                                caption: "Makes the pointer easy to follow. Works with any highlight, or on its own.",
                                isOn: $highlight.showsRing)
+                ValueSlider(title: String(localized: "Ring size"), symbol: "arrow.up.left.and.arrow.down.right",
+                            value: $highlight.ringSize, range: PointerHighlight.sizeRange, format: "%.1f×")
+                    .disabled(!highlight.showsRing)
             }
             .featureSpot("highlight")
             PulseSection(highlight: highlight).featureSpot("pulse")
