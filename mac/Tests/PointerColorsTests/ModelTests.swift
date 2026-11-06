@@ -519,6 +519,8 @@ final class SettingsBackupTests: XCTestCase {
         settings.dockBattery = .below10
         settings.pointerBattery = .always
         settings.batteryAlert = .below5
+        settings.showsDrainReport = false
+        settings.idleTipThreshold = .above40
         source.set(["count": 2, "date": Date()], forKey: GitHubStars.defaultsKey)
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
 
@@ -534,6 +536,8 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertEqual(restored.dockBattery, .below10)
         XCTAssertEqual(restored.pointerBattery, .always)
         XCTAssertEqual(restored.batteryAlert, .below5)
+        XCTAssertFalse(restored.showsDrainReport)
+        XCTAssertEqual(restored.idleTipThreshold, .above40)
         XCTAssertNil(target.object(forKey: GitHubStars.defaultsKey))
     }
 

@@ -53,6 +53,12 @@ final class AppModel {
     var tracksBatteryHistory: Bool {
         didSet { settings.tracksBatteryHistory = tracksBatteryHistory; tracking.refreshBattery() }
     }
+    var showsDrainReport: Bool {
+        didSet { settings.showsDrainReport = showsDrainReport }
+    }
+    var idleTipThreshold: IdleTipThreshold {
+        didSet { settings.idleTipThreshold = idleTipThreshold }
+    }
     private(set) var batteryHistory: BatteryHistory
     var batteryAlert: BatteryAlert {
         didSet { settings.batteryAlert = batteryAlert; tracking.refreshBattery() }
@@ -155,6 +161,8 @@ final class AppModel {
         pointerBattery = settings.pointerBattery
         batteryAlert = settings.batteryAlert
         tracksBatteryHistory = settings.tracksBatteryHistory
+        showsDrainReport = settings.showsDrainReport
+        idleTipThreshold = settings.idleTipThreshold
         batteryHistory = settings.batteryHistory
         installsUpdatesAutomatically = settings.installsUpdatesAutomatically
         tracking.onBatteryRead = { [weak self] level in self?.batteryRead(level) }
@@ -313,8 +321,15 @@ final class AppModel {
 
     private func recordBattery() {
         guard tracksBatteryHistory, !tracking.batteryReadings.isEmpty, !ScreenshotRenderer.isRendering else { return }
-        batteryHistory.record(tracking.batteryReadings, at: .now)
+        batteryHistory.record(tracking.batteryReadings, at: .now, state: Self.usageState())
         settings.batteryHistory = batteryHistory
+    }
+
+    /// In use when the pointer moved, a button was pressed or it scrolled within the last check.
+    private static func usageState() -> UsageState {
+        let types: [CGEventType] = [.mouseMoved, .leftMouseDown, .rightMouseDown, .scrollWheel, .leftMouseDragged]
+        let quiet = types.map { CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: $0) }.min() ?? .infinity
+        return quiet < BatteryReading.checkInterval ? .inUse : .idle
     }
 
     func clearBatteryHistory() {
