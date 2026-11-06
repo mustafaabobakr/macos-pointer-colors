@@ -33,7 +33,7 @@
   <br><sub><a href="https://macos-pointer-colors.pages.dev/docs/promo/pointer-colors-promo.mp4"><b>▶ Watch the 30-second film</b></a></sub>
 </p>
 
-**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 47 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. The app also highlights your clicks for screen recordings, draws with a laser pointer, sets or turns off mouse acceleration, makes the mouse's side buttons go back and forward in Safari and Finder, stops accidental double-clicks, focuses the window under the pointer, and finds a lost cursor with a double press of Control. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
+**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 48 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. The app also highlights your clicks for screen recordings, draws with a laser pointer, sets or turns off mouse acceleration, makes the mouse's side buttons go back and forward in Safari and Finder, stops accidental double-clicks, focuses the window under the pointer, and finds a lost cursor with a double press of Control. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
 
 ## Two ways to use it
 
@@ -74,7 +74,7 @@
 Every feature has its own setting in Preferences, so you turn on only what you need.
 
 **Pointer color and size**
-- **Every pair, one click away**: pick one of 47 pairs in the menu bar and the pointer changes right away.
+- **Every pair, one click away**: pick one of 48 pairs in the menu bar and the pointer changes right away.
 - **Any pointer size**: drag to make the cursor bigger, or give each display its own size.
 - **Preview before you pick**: see the pointer on light pages, dark apps, photos and spreadsheets.
 - **Contrast warnings**: the menu tells you when a pair is hard to see. Turn on the current pair at the top of the menu, in Preferences › Appearance, to copy its hex codes.
