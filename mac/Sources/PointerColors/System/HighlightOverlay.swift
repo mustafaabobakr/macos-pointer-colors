@@ -7,11 +7,16 @@ import Observation
 /// pass straight through, and show on every Space and over full-screen apps. They exist only while
 /// something is switched on, and the mouse is only watched then. Everything in them is a Core
 /// Animation layer that the app moves or hands an animation to, so nothing is redrawn per frame.
+///
+/// A laser drag with its keys held goes through the session event tap when Accessibility allows it:
+/// the tap sees the press before any app and drops it, so even a game that reads the mouse on its own
+/// can't take the drag. Without the tap, the windows catch the mouse instead.
 @MainActor
 final class HighlightOverlay {
     private let settings: PointerHighlight
     private let pair: () -> PointerPair
     private let pointerScale: () -> Double
+    private let tap: MouseEventTap
     private var style = HighlightStyle()
     private var windows: [NSPanel] = []
     /// Each display's layers, with the display's frame in global coordinates.
@@ -20,6 +25,9 @@ final class HighlightOverlay {
     private var lostReleaseTimer: Timer?
     /// The windows are catching the mouse so a drag with the laser's keys held draws instead of reaching the app below.
     private var isCapturing = false
+    /// The tap took the press that started this laser drag, so it also takes the drag and the release.
+    private var tapOwnsDrag = false
+    private var isWatchingTap = false
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged, .leftMouseDown, .rightMouseDown,
@@ -30,6 +38,7 @@ final class HighlightOverlay {
         self.settings = settings
         self.pair = pair
         self.pointerScale = pointerScale
+        tap = .shared
         observeSettings()
         NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification,
                                                object: nil, queue: .main) { [weak self] _ in
@@ -52,6 +61,7 @@ final class HighlightOverlay {
         withObservationTracking {
             _ = HighlightStyle(settings: settings, pair: .featured, pointerScale: 1)
             _ = settings.isActive
+            _ = drawsWithKeys
         } onChange: { [weak self] in
             DispatchQueue.main.async {
                 self?.update()
@@ -63,7 +73,22 @@ final class HighlightOverlay {
     private func update() {
         refresh()
         if settings.isActive { start() } else { stop() }
+        watchTap()
     }
+
+    /// Hooks into the tap while the laser draws with keys. Setting a handler rebuilds the tap, so only on a change.
+    private func watchTap() {
+        guard drawsWithKeys != isWatchingTap else { return }
+        isWatchingTap = drawsWithKeys
+        tapOwnsDrag = false
+        tap.set(Self.tapID, types: [.leftMouseDown, .leftMouseDragged, .leftMouseUp],
+                handler: isWatchingTap ? { [weak self] in self?.tapEvent($0, $1) ?? .pass } : nil)
+    }
+
+    /// The laser draws only while its keys are held, the one case where a drag must not reach the app.
+    private var drawsWithKeys: Bool { settings.laserOn && settings.laserTrail && settings.laserNeedsKeys }
+
+    private static let tapID = "highlightLaser"
 
     private func start() {
         if windows.isEmpty { rebuildWindows() }
@@ -126,6 +151,7 @@ final class HighlightOverlay {
     // MARK: Events
 
     private func handle(_ type: NSEvent.EventType) {
+        if tapOwnsDrag, Self.leftButtonTypes.contains(type) { return }
         let point = NSEvent.mouseLocation
         let keysHeld = settings.laserKeysHeld(in: NSEvent.modifierFlags)
         updateCapture(keysHeld: keysHeld)
@@ -142,6 +168,8 @@ final class HighlightOverlay {
             follow(point, drawing: false)
         }
     }
+
+    private static let leftButtonTypes: Set<NSEvent.EventType> = [.leftMouseDown, .leftMouseDragged, .leftMouseUp]
 
     /// A click sends out a pulse, and starts a laser trail with the left button; both when both are on.
     private func press(at point: CGPoint, isLeft: Bool, keysHeld: Bool) {
@@ -235,7 +263,7 @@ final class HighlightOverlay {
     /// While the laser needs keys and they're held, the windows take the mouse: the drag draws, and the
     /// app underneath gets no click to select text with. A drag already under way keeps its owner.
     private func updateCapture(keysHeld: Bool) {
-        let capture = settings.laserOn && settings.laserNeedsKeys && keysHeld
+        let capture = !tap.isRunning && drawsWithKeys && keysHeld
         guard capture != isCapturing, NSEvent.pressedMouseButtons == 0 else { return }
         isCapturing = capture
         windows.forEach { $0.ignoresMouseEvents = !capture }
@@ -243,8 +271,41 @@ final class HighlightOverlay {
 
     /// A release that never reached us, e.g. over a window that kept it, still ends the press.
     private func endLostPress() {
+        if tapOwnsDrag {
+            // A dropped press never reaches the session's button state, so ask the hardware.
+            guard !CGEventSource.buttonState(.hidSystemState, button: .left) else { return }
+            tapOwnsDrag = false
+        }
         guard NSEvent.pressedMouseButtons == 0 else { return }
         release(at: NSEvent.mouseLocation)
+    }
+
+    // MARK: Event tap
+
+    /// A press with the laser's keys held starts a trail, and it and everything up to its release are
+    /// dropped, so the app underneath never sees the drag. Other presses pass untouched.
+    private func tapEvent(_ type: CGEventType, _ event: CGEvent) -> MouseEventTap.Verdict {
+        let point = NSEvent(cgEvent: event)?.locationInWindow ?? NSEvent.mouseLocation
+        switch type {
+        case .leftMouseDown: return tapPress(event, at: point)
+        case .leftMouseDragged where tapOwnsDrag:
+            follow(point, drawing: true)
+            extendTrail(to: point)
+            return .drop
+        case .leftMouseUp where tapOwnsDrag:
+            tapOwnsDrag = false
+            release(at: point)
+            return .drop
+        default: return .pass
+        }
+    }
+
+    private func tapPress(_ event: CGEvent, at point: CGPoint) -> MouseEventTap.Verdict {
+        let flags = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
+        tapOwnsDrag = settings.laserKeysHeld(in: flags) && settings.laserDraws(keysHeld: true)
+        guard tapOwnsDrag else { return .pass }
+        press(at: point, isLeft: true, keysHeld: true)
+        return .drop
     }
 }
 
