@@ -3,6 +3,19 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.5.2 — 2026-11-06
+
+- **A GoodNotes laser.** **Preferences › Highlight › Laser › Look** now offers **GoodNotes** next to **Classic**: a glowing line around a white core and a solid dot, with no outline. The line is thick while you move slowly and thins on a fast stroke, tapering smoothly between the two, and the trail stays whole for a moment before it fades. Its widths, glow and timing were measured from the GoodNotes laser itself.
+- **A laser drag no app can take.** With **Draw only while holding** on and Accessibility allowed, the drag now goes through the app's event tap, so even a game that reads the mouse on its own doesn't see it or select anything.
+- **Where your battery goes.** **Preferences › Battery › Battery health** has a new **Drain report** for each mouse: how fast it drains in use and while idle, how long a full charge lasts the way you use it, your hours in use and idle, and each day of the charge as a bar of the two. Tips suggest switching the mouse off when you're away once idle drain passes a share you choose in **Suggest switching it off**, and warn when charges get shorter. The history now records whether the mouse was in use at each check; history from 0.5.1 and before still reads.
+- **Ring size.** **Preferences › Highlight › Ring size** makes the ring around the pointer smaller or bigger, from 0.5× to 2×.
+- **Press in Highlight.** **Shrink the pointer on click** is now a third picture next to Pulse and Laser, and clicking it turns it on or off.
+- **Side buttons in Finder and Claude.** **Preferences › Buttons** now lists Finder and the Claude app with ⌘[ and ⌘], next to Slack. They're added once, so if you remove one it stays removed.
+- **One copy at a time.** Opening Pointer Colors quits any other copy that's running, so an update replaces the one in the menu bar instead of adding a second icon.
+- **A new pair: Neon flame**, a bright orange-red outline on a deep ember fill, for 48 pairs in all.
+
+**Export all…** saves the laser look, the ring size and the drain report settings, and **Import…** puts them back.
+
 ## 0.5.1 — 2026-10-31
 
 - **See when your mouse is charging.** Plug the cable in and a bolt shows next to the level, by the menu bar icon, on the Dock icon and under the pointer, and the Battery page says it's charging. The low-battery notification waits while it charges. The level is checked every minute, so the bolt shows within a minute of plugging in.
