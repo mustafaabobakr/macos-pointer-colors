@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Preferences › Highlight: the ring, and the pulse and laser for demos and recordings.
+/// Preferences › Highlight: the ring, and the pulse, laser and press for demos and recordings.
 struct HighlightPreferences: View {
     @Bindable var highlight: PointerHighlight
     /// The pair on screen and the pointer size, so the demo looks like the real thing.
@@ -14,13 +14,16 @@ struct HighlightPreferences: View {
     var body: some View {
         SettingsPage("Highlight") {
             SettingsCard("Highlight", anchor: "highlight.highlight") {
-                Text("Click a picture to turn it on or off. Use one, both, or neither.")
+                Text("Click a picture to turn it on or off. Use any of them together, or none.")
                     .appFont(.caption).foregroundStyle(.secondary)
                 HighlightPreviewCards(highlight: highlight, style: style, pair: pair)
                 HighlightDemoPad(highlight: highlight, style: style).featureSpot("clip-demo-pad")
                 SettingsToggle("Ring around the pointer", symbol: "circle.dashed",
                                caption: "Makes the pointer easy to follow. Works with any highlight, or on its own.",
                                isOn: $highlight.showsRing)
+                ValueSlider(title: String(localized: "Ring size"), symbol: "arrow.up.left.and.arrow.down.right",
+                            value: $highlight.ringSize, range: PointerHighlight.sizeRange, format: "%.1f×")
+                    .disabled(!highlight.showsRing)
             }
             .featureSpot("highlight")
             PulseSection(highlight: highlight).featureSpot("pulse")
@@ -112,11 +115,17 @@ private struct LaserSection: View {
             ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
                 .featureSpot("clip-laser-size")
+            SettingsMenu("Look", symbol: "wand.and.rays",
+                         caption: "Classic draws a white center with an outline. GoodNotes draws a glowing line around a white core that's thick when you move slowly and thin when you move fast, and a solid dot, and keeps the trail whole before fading it out.",
+                         selection: $highlight.laserLook) {
+                ForEach(LaserLook.allCases) { Text($0.title).tag($0) }
+            }
             SettingsMenu("Outline", symbol: "circle.dashed",
                          caption: "The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.",
                          selection: $highlight.laserOutline) {
                 ForEach(LaserOutline.allCases) { Text($0.title).tag($0) }
             }
+            .disabled(highlight.laserLook == .goodNotes)
             .featureSpot("clip-laser-outline")
             SettingsToggle("Draw a trail while dragging", symbol: "scribble",
                            caption: "Hold the mouse button and move to draw; the trail fades after you let go.",

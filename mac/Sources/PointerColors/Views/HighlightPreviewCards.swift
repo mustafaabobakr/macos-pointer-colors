@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Still pictures of the pulse and the laser with the current colors and settings, drawn by the
+/// Still pictures of the pulse, the laser and the press with the current colors and settings, drawn by the
 /// same code as the real overlay. Each is also its switch: click to turn it on or off.
 struct HighlightPreviewCards: View {
     let highlight: PointerHighlight
@@ -19,7 +19,7 @@ struct HighlightPreviewCards: View {
         let isOn = highlight.isOn(effect)
         return Button { highlight.setOn(!isOn, effect) } label: {
             VStack(spacing: 4) {
-                HighlightPreviewImage(kind: effect, style: style, pair: pair)
+                HighlightPreviewImage(kind: effect, style: style, pair: pair, pressScale: highlight.pressScale)
                     .frame(height: imageHeight)
                     .opacity(isOn ? 1 : 0.45)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -51,16 +51,57 @@ struct HighlightPreviewCards: View {
     }
 }
 
-/// One frozen frame: three pulses fading at different stages, or a laser trail with its dot.
+/// One frozen frame: three pulses fading at different stages, a laser trail with its dot, or a
+/// pointer shrunk inside the outline of its own size.
 private struct HighlightPreviewImage: View {
     let kind: HighlightEffect
     let style: HighlightStyle
     let pair: PointerPair
+    let pressScale: Double
 
     /// A fixed moment the sample scene is drawn at.
     private static let now: TimeInterval = 1_000
 
     var body: some View {
+        if kind == .press { pressImage } else { sceneImage }
+    }
+
+    /// Before and after: the pointer at full size, an arrow, then the pointer pressed, with click
+    /// marks at its tip and a dashed outline of the size it shrank from. The shrink is drawn at
+    /// least 0.7× so it reads in a small picture, even when the setting is closer to 1×.
+    private var pressImage: some View {
+        GeometryReader { proxy in
+            let width = min(proxy.size.height * 0.42, 28)
+            HStack(alignment: .top, spacing: width * 0.45) {
+                PointerGlyph(pair: pair).frame(width: width)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: width * 0.4, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .padding(.top, width * 0.45)
+                pressedPointer(width: width)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .background(Color(white: 0.12))
+        }
+    }
+
+    private func pressedPointer(width: CGFloat) -> some View {
+        ZStack(alignment: .topLeading) {
+            PointerShape()
+                .stroke(pair.outline.color.opacity(0.6), style: .init(lineWidth: 1, lineJoin: .round, dash: [2.5, 2]))
+                .aspectRatio(24.0 / 30.0, contentMode: .fit)
+                .frame(width: width)
+            PointerGlyph(pair: pair).frame(width: width * min(pressScale, 0.7))
+        }
+        .overlay(alignment: .topLeading) {
+            ClickMarks()
+                .stroke(.white.opacity(0.75), style: .init(lineWidth: 1.5, lineCap: .round))
+                .frame(width: width * 0.4, height: width * 0.4)
+                .offset(x: -width * 0.42, y: -width * 0.42)
+        }
+    }
+
+    private var sceneImage: some View {
         GeometryReader { proxy in
             let scene = sampleScene(in: proxy.size)
             ZStack(alignment: .topLeading) {
@@ -94,13 +135,41 @@ private struct HighlightPreviewImage: View {
         if style.showsHold { scene.hold = Hold(point: scene.pointer, start: Self.now - Hold.threshold - 1) }
     }
 
+    /// Widths as if the pointer started slowly, sped up through the middle and slowed to stop,
+    /// so the GoodNotes look shows its thick and thin parts.
+    private static func shares(along points: [CGPoint]) -> [Double] {
+        var pace = LaserPace()
+        var time = 0.0
+        return points.indices.map { index in
+            let progress = Double(index) / Double(max(points.count - 1, 1))
+            time += 0.004 + 0.05 * pow(1 - sin(progress * .pi), 2)
+            return pace.share(at: points[index], time: time)
+        }
+    }
+
     private func addLaser(to scene: HighlightScene, in size: CGSize) {
         let points = stride(from: 0.12, through: 0.8, by: 0.02).map { t in
             CGPoint(x: size.width * t, y: size.height * (0.5 + 0.28 * sin(t * 2 * .pi * 1.3)))
         }
-        scene.strokes = [LaserStroke(points: points)]
+        scene.strokes = [LaserStroke(points: points, shares: Self.shares(along: points))]
         let end = points.last ?? .zero
         scene.laserDot = LaserDot(point: end, updatedAt: Self.now)
         scene.pointer = end
+    }
+}
+
+/// Three short lines fanning out up and to the left of the bottom-right corner, where the tip is:
+/// the mark of a click.
+private struct ClickMarks: Shape {
+    func path(in rect: CGRect) -> Path {
+        let tip = CGPoint(x: rect.maxX, y: rect.maxY)
+        let reach = min(rect.width, rect.height)
+        var path = Path()
+        for degrees in [180.0, 225.0, 270.0] {
+            let angle = degrees * .pi / 180
+            path.move(to: CGPoint(x: tip.x + cos(angle) * reach * 0.35, y: tip.y + sin(angle) * reach * 0.35))
+            path.addLine(to: CGPoint(x: tip.x + cos(angle) * reach, y: tip.y + sin(angle) * reach))
+        }
+        return path
     }
 }

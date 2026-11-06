@@ -246,21 +246,35 @@ enum FeatureClipScripts {
         ])
 
     /// The laser section is too tall to frame with the pad, so this one stays on the pad.
+    /// A Classic trail, then the GoodNotes look (Look sits below the pad, out of the picture, so it
+    /// changes without the pointer): slow, fast, then slow again, so the line goes
+    /// from thick to thin and back. Each point of a drag gets the same time, so close points are
+    /// slow and far ones fast.
     private static let laser = FeatureClip(
         cursorStart: spot(pad, x: 0.2, y: 0.5),
         focusesOn: pad,
-        setUp: { $0.highlight.laserNeedsKeys = false },
+        setUp: { $0.highlight.laserNeedsKeys = false; $0.highlight.laserLook = .classic },
         steps: [
             .pause(0.4),
             .drag(through: [spot(pad, x: 0.35, y: 0.2), spot(pad, x: 0.5, y: 0.75), spot(pad, x: 0.65, y: 0.25),
                             spot(pad, x: 0.8, y: 0.6)], seconds: 1.6),
             .pause(0.8),
-            .act { $0.highlight.laserOutline = .laser },
-            .move(to: spot(pad, x: 0.2, y: 0.7)),
-            .drag(through: [spot(pad, x: 0.45, y: 0.3), spot(pad, x: 0.7, y: 0.7), spot(pad, x: 0.85, y: 0.3)],
-                  seconds: 1.3),
-            .pause(1.2),
+            .act { $0.highlight.laserLook = .goodNotes },
+            .move(to: spot(pad, x: 0.06, y: 0.5)),
+            .drag(through: slowFastSlow, seconds: 1.76),
+            .pause(1.4),
         ])
+
+    /// A wave across the demo pad: small steps at both ends, big ones through the middle.
+    private static let slowFastSlow: [ClipPoint] = {
+        let crawl = Array(repeating: 0.01, count: 8)
+        let steps = crawl + [0.04, 0.1, 0.22, 0.22, 0.1, 0.04] + crawl
+        var x = 0.06
+        return steps.map { step in
+            x += step
+            return spot(pad, x: x, y: 0.5 + 0.22 * sin(x * 2 * .pi * 1.5))
+        }
+    }()
 
     private static let highlightPairColors = FeatureClip(
         cursorStart: spot("highlight-pair-colors", x: 0.5, y: 0.2),
@@ -370,12 +384,18 @@ enum FeatureClipScripts {
             .move(to: spot("menu-bar-dock", x: 0.9, y: 0.85)), .choose { $0.showsInDock = true }, .pause(1.0),
         ])
 
+    /// The current charge day by day, then the drain report and its tip, from the demo mouse's
+    /// readings in feature-demo-settings.json.
     private static let batteryHealth = FeatureClip(
-        cursorStart: spot("battery-health", x: 0.3, y: 0.1),
+        cursorStart: spot("clip-daily-drain", x: 0.1, y: 0.2),
+        focusesOn: "clip-drain-report",
+        alsoShows: ["clip-daily-drain"],
         steps: [
             .pause(0.4),
-            .move(to: spot("battery-health", x: 0.5, y: 0.35)), .pause(1.0),
-            .move(to: spot("battery-health", x: 0.5, y: 0.7)), .pause(1.2),
+            .move(to: spot("clip-daily-drain", x: 0.35, y: 0.6)), .pause(1.0),
+            .move(to: spot("clip-daily-drain", x: 0.75, y: 0.6)), .pause(1.0),
+            .move(to: spot("clip-drain-report", x: 0.5, y: 0.5)), .pause(1.2),
+            .move(to: spot("clip-drain-report", x: 0.5, y: 0.85)), .pause(1.4),
         ])
 
     private static let battery = FeatureClip(

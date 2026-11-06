@@ -7,7 +7,7 @@ struct AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        defaults.register(defaults: [Key.reapplyAtLaunch: true, Key.iconInPairColors: true, "tracksBatteryHistory": true])
+        defaults.register(defaults: [Key.reapplyAtLaunch: true, Key.iconInPairColors: true, "tracksBatteryHistory": true, "showsDrainReport": true])
     }
 
     /// Puts the last applied pair and size back when the app starts.
@@ -59,6 +59,18 @@ struct AppSettings {
     var tracksBatteryHistory: Bool {
         get { defaults.bool(forKey: "tracksBatteryHistory") }
         nonmutating set { defaults.set(newValue, forKey: "tracksBatteryHistory") }
+    }
+
+    /// Shows what the measured drops say about where the battery goes, with tips.
+    var showsDrainReport: Bool {
+        get { defaults.bool(forKey: "showsDrainReport") }
+        nonmutating set { defaults.set(newValue, forKey: "showsDrainReport") }
+    }
+
+    /// When the drain report suggests switching the mouse off while away.
+    var idleTipThreshold: IdleTipThreshold {
+        get { defaults.string(forKey: "idleTipThreshold").flatMap(IdleTipThreshold.init(rawValue:)) ?? .above25 }
+        nonmutating set { defaults.set(newValue.rawValue, forKey: "idleTipThreshold") }
     }
 
     /// Kept in its own file rather than the defaults, so it survives every update.

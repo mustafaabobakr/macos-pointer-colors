@@ -33,7 +33,7 @@
   <br><sub><a href="https://macos-pointer-colors.pages.dev/docs/promo/pointer-colors-promo.mp4"><b>▶ Watch the 30-second film</b></a></sub>
 </p>
 
-**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 47 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. The app also highlights your clicks for screen recordings, draws with a laser pointer, sets or turns off mouse acceleration, makes the mouse's side buttons go back and forward in Safari and Finder, stops accidental double-clicks, focuses the window under the pointer, and finds a lost cursor with a double press of Control. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
+**Change the mouse pointer color and size on your Mac.** macOS lets you recolor the cursor, but only through two hex fields buried in System Settings. **Pointer Colors** gives you 48 outline and fill color pairs to try on a live preview, and a free menu-bar app that applies one in a single click. The app also highlights your clicks for screen recordings, draws with a laser pointer, sets or turns off mouse acceleration, makes the mouse's side buttons go back and forward in Safari and Finder, stops accidental double-clicks, focuses the window under the pointer, and finds a lost cursor with a double press of Control. It works on macOS Sonoma, Sequoia and Tahoe, and helps with low vision, big screens, presentations and screen recordings.
 
 ## Two ways to use it
 
@@ -74,7 +74,7 @@
 Every feature has its own setting in Preferences, so you turn on only what you need.
 
 **Pointer color and size**
-- **Every pair, one click away**: pick one of 47 pairs in the menu bar and the pointer changes right away.
+- **Every pair, one click away**: pick one of 48 pairs in the menu bar and the pointer changes right away.
 - **Any pointer size**: drag to make the cursor bigger, or give each display its own size.
 - **Preview before you pick**: see the pointer on light pages, dark apps, photos and spreadsheets.
 - **Contrast warnings**: the menu tells you when a pair is hard to see. Turn on the current pair at the top of the menu, in Preferences › Appearance, to copy its hex codes.
@@ -87,8 +87,8 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 
 **Highlight clicks for presentations and screen recordings**
 - **Click pulses**: a ring or ripple on every click, with its own size, length and color, outlined in the pair's dark color so it shows on any background.
-- **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose.
-- **Ring around the pointer**: keeps the cursor easy to follow on a shared screen.
+- **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose. Pick the Classic look or a GoodNotes-style glow that thins as you move faster.
+- **Ring around the pointer**: keeps the cursor easy to follow on a shared screen, in the size you choose.
 - **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.
 - **Highlight colors per pair**: a pulse and laser color for any pair.
 
@@ -99,7 +99,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 
 **Mouse buttons**
 - **Back and forward in every app**: the mouse's side buttons go back and forward in Safari, Finder, Music and Apple's other apps, not just in browsers.
-- **Side buttons in Slack and other apps**: in apps that go back with their own keys, like Slack's ⌘[ and ⌘], the side buttons and the Magic Mouse's sideways swipe press those keys.
+- **Side buttons in Slack and other apps**: in apps that go back with their own keys, like Slack's ⌘[ and ⌘], the side buttons and the Magic Mouse's sideways swipe press those keys. Finder and Claude are on the list too.
 - **Fix accidental double-clicks**: a worn button that clicks twice clicks once; you choose how close together clicks are ignored.
 
 **Find the pointer**
@@ -112,7 +112,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 **Mouse battery**
 - **See the battery** next to the menu-bar icon, on the Dock icon or in a small label under the pointer, always or only when it's low. A bolt shows while the mouse is charging.
 - **Low-battery notification** once your mouse drops below 5%, 10% or 20%.
-- **Battery health:** how many days each charge lasts and how much it drains a day, for every mouse, and whether charges are getting shorter. The history is kept in its own file on your Mac, so it stays through every update.
+- **Battery health:** how many days each charge lasts and how much it drains a day, for every mouse, and whether charges are getting shorter. A drain report shows how fast it drains in use and idle, each day's hours of both, and tips to make a charge last longer. The history is kept in its own file on your Mac, so it stays through every update.
 
 **Menu bar and Dock**
 - **Hide the menu-bar icon** or **show the app in the Dock**.

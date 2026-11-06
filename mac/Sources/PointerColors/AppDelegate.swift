@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        SingleInstance.quitOtherCopies()
         NotificationAccess.center?.delegate = self
         model.applyDockVisibility()
         MenuBarItem.setVisible(model.menuBarVisibility == .always)

@@ -36,7 +36,7 @@ final class RingLayerView: NSView {
     }
 
     private func restyle(_ style: HighlightStyle) {
-        let side = 44 * style.pointerScale
+        let side = 44 * style.pointerScale * style.ringSize
         if look?.color == style.ringColor, look?.side == side { return }
         look = (style.ringColor, side)
         ring.path = CGPath(ellipseIn: CGRect(x: -side / 2, y: -side / 2, width: side, height: side), transform: nil)

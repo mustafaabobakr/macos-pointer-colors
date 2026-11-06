@@ -36,8 +36,7 @@ final class MouseButtons {
         self.defaults = defaults
         self.tap = tap
         sideButtonsNavigate = defaults.bool(forKey: Key.sideButtons)
-        navigationApps = defaults.data(forKey: Key.navigationApps)
-            .flatMap { try? JSONDecoder().decode([NavigationApp].self, from: $0) } ?? NavigationApp.defaults
+        navigationApps = Self.storedNavigationApps(in: defaults)
         fixesDoubleClicks = defaults.bool(forKey: Key.debounce)
         doubleClickWindow = defaults.object(forKey: Key.debounceWindow) as? Double ?? 0.05
         sideButtons.apps = navigationApps
@@ -59,6 +58,25 @@ final class MouseButtons {
 
     func removeNavigationApp(_ id: NavigationApp.ID) {
         navigationApps.removeAll { $0.id == id }
+    }
+
+    /// The saved list, with any built-in app it hasn't had before put at the end, and Finder first.
+    /// Each is added once, so one that was removed stays removed. An app that isn't installed is
+    /// listed anyway: nothing has its bundle ID, so its keys are never pressed.
+    private static func storedNavigationApps(in defaults: UserDefaults) -> [NavigationApp] {
+        var apps = defaults.data(forKey: Key.navigationApps)
+            .flatMap { try? JSONDecoder().decode([NavigationApp].self, from: $0) } ?? []
+        var offered = Set(defaults.stringArray(forKey: Key.offeredApps) ?? [])
+        let added = NavigationApp.defaults.filter { app in
+            !offered.contains(app.bundleID) && !apps.contains { $0.id == app.id }
+        }
+        let saved = apps
+        apps += added
+        apps = apps.filter(\.isFinder) + apps.filter { !$0.isFinder }
+        offered.formUnion(apps.map(\.bundleID).filter { id in NavigationApp.defaults.contains { $0.bundleID == id } })
+        defaults.set(offered.sorted(), forKey: Key.offeredApps)
+        if apps != saved { defaults.set(try? JSONEncoder().encode(apps), forKey: Key.navigationApps) }
+        return apps
     }
 
     private func update() {
@@ -83,6 +101,8 @@ final class MouseButtons {
     private enum Key {
         static let sideButtons = "sideButtonsNavigate"
         static let navigationApps = "sideButtonApps"
+        /// Built-in apps the list has had the chance to include, so a removed one isn't added back.
+        static let offeredApps = "sideButtonAppsOffered"
         static let swipes = "swipeNavigate"
         static let debounce = "fixesDoubleClicks"
         static let debounceWindow = "doubleClickWindow"
@@ -124,9 +144,17 @@ struct NavigationApp: Codable, Identifiable, Equatable {
     var isOn = true
 
     var id: String { bundleID }
+    var isFinder: Bool { bundleID == "com.apple.finder" }
 
-    /// Slack goes back with ⌘[ and ignores both the buttons and the swipe.
+    /// Slack goes back with ⌘[ and ignores both the buttons and the swipe. Finder's Go menu
+    /// has the same keys, which work wherever the swipe doesn't, and so does the Claude app.
     static let defaults = [
+        NavigationApp(bundleID: "com.apple.finder", name: "Finder",
+                      back: KeyCombo(keyCode: kVK_ANSI_LeftBracket, carbonModifiers: cmdKey, keyLabel: "["),
+                      forward: KeyCombo(keyCode: kVK_ANSI_RightBracket, carbonModifiers: cmdKey, keyLabel: "]")),
+        NavigationApp(bundleID: "com.anthropic.claudefordesktop", name: "Claude",
+                      back: KeyCombo(keyCode: kVK_ANSI_LeftBracket, carbonModifiers: cmdKey, keyLabel: "["),
+                      forward: KeyCombo(keyCode: kVK_ANSI_RightBracket, carbonModifiers: cmdKey, keyLabel: "]")),
         NavigationApp(bundleID: "com.tinyspeck.slackmacgap", name: "Slack",
                       back: KeyCombo(keyCode: kVK_ANSI_LeftBracket, carbonModifiers: cmdKey, keyLabel: "["),
                       forward: KeyCombo(keyCode: kVK_ANSI_RightBracket, carbonModifiers: cmdKey, keyLabel: "]")),

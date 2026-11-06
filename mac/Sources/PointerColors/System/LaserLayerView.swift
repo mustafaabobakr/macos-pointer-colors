@@ -8,17 +8,22 @@ import QuartzCore
 /// just reached had to start redrawing a full-display picture first, and the dot lagged behind.
 @MainActor
 final class LaserLayerView: NSView {
-    /// The dot's glow, outline, middle and center, and the colors and size they were built with.
+    /// The dot's layers, and the parts they were built from.
     private var dot: CALayer?
-    private var dotLook: (colors: LaserColors, size: Double)?
-    /// The part of the trail being drawn: its four lines share one path.
+    private var dotLook: [LaserPart]?
+    /// The part of the trail being drawn: its lines share one path.
     private var stroke: CALayer?
     private var strokePath = CGMutablePath()
     private var lastPoint: CGPoint?
     /// Earlier parts of the same trail, drawn in another pair's colors before the pointer reached
     /// a display with its own pair. They fade together with the rest.
     private var earlierParts: [CALayer] = []
-    private var strokeLook: (colors: LaserColors, size: Double)?
+    private var strokeLook: [LaserPart]?
+    /// The GoodNotes look's trail, one path per part, widths following the pointer's speed;
+    /// nil for Classic, whose lines share `strokePath`.
+    private var shape: LaserTrailShape?
+    private var pace = LaserPace()
+    private var lastShare = 1.0
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -46,90 +51,129 @@ final class LaserLayerView: NSView {
         dot?.removeAnimation(forKey: "fade")
     }
 
-    /// The dot, rebuilt when the laser's colors or size changed. It rests invisible; only its fade
-    /// shows it.
+    /// The dot, rebuilt when the laser's look, colors or size changed. It rests invisible; only its
+    /// fade shows it.
     private func dotLayer(_ style: HighlightStyle) -> CALayer {
-        if let dot, dotLook?.colors == style.laser, dotLook?.size == style.laserSize { return dot }
+        let parts = style.laserDotParts
+        if let dot, dotLook == parts { return dot }
         dot?.removeFromSuperlayer()
-        let parts: [(RGBA, Double, Double)] = [(style.laser.glow, 32, 0.18), (style.laser.outline, 16, 1),
-                                               (style.laser.middle, 13, 1), (style.laser.center, 11, 1)]
         let made = CALayer()
         made.opacity = 0
-        for (color, side, opacity) in parts {
+        for part in parts {
             let disc = CAShapeLayer()
-            let width = side * style.laserSize
+            let width = part.size
             disc.path = CGPath(ellipseIn: CGRect(x: -width / 2, y: -width / 2, width: width, height: width),
                                transform: nil)
-            disc.fillColor = color.cgColor(alpha: opacity)
+            disc.fillColor = part.color.cgColor(alpha: part.opacity)
+            glow(disc, part)
             made.addSublayer(disc)
         }
         withoutAnimation { layer?.addSublayer(made) }
-        (dot, dotLook) = (made, (style.laser, style.laserSize))
+        (dot, dotLook) = (made, parts)
         return made
+    }
+
+    /// Gives a layer the part's glow: a shadow in its own color, centered under it.
+    private func glow(_ shape: CAShapeLayer, _ part: LaserPart) {
+        guard part.blur > 0 else { return }
+        shape.shadowColor = part.color.cgColor(alpha: 1)
+        shape.shadowRadius = part.blur
+        shape.shadowOpacity = 1
+        shape.shadowOffset = .zero
     }
 
     // MARK: Trail
 
-    /// Starts a trail at `point`.
-    func startStroke(at point: CGPoint, style: HighlightStyle) {
-        finishStroke(fade: style.trailFade)
+    /// Starts a trail at `point`, reached at `time`.
+    func startStroke(at point: CGPoint, style: HighlightStyle, time: TimeInterval = CACurrentMediaTime()) {
+        finishStroke(style: style)
+        pace = LaserPace()
+        lastShare = pace.share(at: point, time: time)
         beginPart(at: point, style: style)
-        extendStroke(to: point, style: style, minimum: 0)
+        extendStroke(to: point, style: style, minimum: 0, time: time)
     }
 
     /// The pair changed mid-trail, as when the pointer reaches another display: the trail goes
     /// on from its last point in the new colors, and what's drawn so far keeps its own.
     func restyleStroke(_ style: HighlightStyle) {
         guard let stroke, let lastPoint else { return }
-        guard strokeLook?.colors != style.laser || strokeLook?.size != style.laserSize else { return }
+        guard strokeLook != style.laserTrailParts else { return }
         earlierParts.append(stroke)
         beginPart(at: lastPoint, style: style)
     }
 
     private func beginPart(at point: CGPoint, style: HighlightStyle) {
-        let parts: [(RGBA, Double, Double)] = [(style.laser.glow, 14, 0.2), (style.laser.outline, 6, 1),
-                                               (style.laser.middle, 4, 1), (style.laser.center, 2, 1)]
+        let parts = style.laserTrailParts
         let made = CALayer()
-        made.opacity = 0.95
-        for (color, width, opacity) in parts {
-            let line = CAShapeLayer()
-            line.fillColor = nil
-            line.strokeColor = color.cgColor(alpha: opacity)
-            line.lineWidth = width * style.laserSize
-            line.lineCap = .round
-            line.lineJoin = .round
+        made.opacity = Float(style.trailOpacity)
+        let byPace = style.trailVariesWithSpeed
+        for part in parts {
+            let line = byPace ? ribbonLayer(part) : lineLayer(part)
+            glow(line, part)
             made.addSublayer(line)
         }
         withoutAnimation { layer?.addSublayer(made) }
         stroke = made
-        strokeLook = (style.laser, style.laserSize)
+        strokeLook = parts
         strokePath = CGMutablePath()
         strokePath.move(to: point)
         lastPoint = point
+        shape = byPace ? LaserTrailShape(sizes: parts.map(\.size), points: [point], shares: [lastShare]) : nil
+    }
+
+    private func lineLayer(_ part: LaserPart) -> CAShapeLayer {
+        let line = CAShapeLayer()
+        line.fillColor = nil
+        line.strokeColor = part.color.cgColor(alpha: part.opacity)
+        line.lineWidth = part.size
+        line.lineCap = .round
+        line.lineJoin = .round
+        return line
+    }
+
+    private func ribbonLayer(_ part: LaserPart) -> CAShapeLayer {
+        let ribbon = CAShapeLayer()
+        ribbon.fillColor = part.color.cgColor(alpha: part.opacity)
+        ribbon.strokeColor = nil
+        return ribbon
     }
 
     /// Adds a point to the trail, skipping ones too close to the last. Starts one if none is open.
-    func extendStroke(to point: CGPoint, style: HighlightStyle, minimum: Double = 2.5) {
-        guard let stroke, let lastPoint else { return startStroke(at: point, style: style) }
+    func extendStroke(to point: CGPoint, style: HighlightStyle, minimum: Double = 2.5,
+                      time: TimeInterval = CACurrentMediaTime()) {
+        guard let stroke, let lastPoint else { return startStroke(at: point, style: style, time: time) }
         guard minimum == 0 || hypot(lastPoint.x - point.x, lastPoint.y - point.y) >= minimum else { return }
-        strokePath.addLine(to: point)
         self.lastPoint = point
+        lastShare = pace.share(at: point, time: time)
+        if let shape { return extend(shape, to: point, in: stroke) }
+        strokePath.addLine(to: point)
         let path = strokePath.copy()
         withoutAnimation { stroke.sublayers?.forEach { ($0 as? CAShapeLayer)?.path = path } }
     }
 
-    /// The button came up: the trail fades over `fade` seconds, then goes.
-    func finishStroke(fade: Double) {
-        guard let stroke else { return }
-        let parts = earlierParts + [stroke]
-        (self.stroke, lastPoint, earlierParts) = (nil, nil, [])
-        parts.forEach { fadeOut($0, over: fade) }
+    /// Adds the point at the current pace's width and redraws each part.
+    private func extend(_ shape: LaserTrailShape, to point: CGPoint, in stroke: CALayer) {
+        shape.add(point, share: lastShare)
+        let layers = stroke.sublayers ?? []
+        withoutAnimation {
+            for (layer, path) in zip(layers, shape.paths) { (layer as? CAShapeLayer)?.path = path }
+        }
     }
 
-    private func fadeOut(_ done: CALayer, over fade: Double) {
-        let out = CABasicAnimation(keyPath: "opacity")
-        out.fromValue = 0.95
-        out.toValue = 0
+    /// The button came up: the trail stays for the style's hold, fades by the end of its
+    /// `trailFade`, then goes.
+    func finishStroke(style: HighlightStyle) {
+        guard let stroke else { return }
+        let parts = earlierParts + [stroke]
+        (self.stroke, lastPoint, earlierParts, shape) = (nil, nil, [], nil)
+        parts.forEach { fadeOut($0, style: style) }
+    }
+
+    private func fadeOut(_ done: CALayer, style: HighlightStyle) {
+        let fade = max(style.trailFade, 0.01)
+        let out = CAKeyframeAnimation(keyPath: "opacity")
+        out.values = [done.opacity, done.opacity, 0]
+        out.keyTimes = [0, NSNumber(value: style.trailHold / fade), 1]
         out.duration = fade
         CATransaction.begin()
         CATransaction.setDisableActions(true)

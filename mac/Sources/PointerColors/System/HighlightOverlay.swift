@@ -7,11 +7,16 @@ import Observation
 /// pass straight through, and show on every Space and over full-screen apps. They exist only while
 /// something is switched on, and the mouse is only watched then. Everything in them is a Core
 /// Animation layer that the app moves or hands an animation to, so nothing is redrawn per frame.
+///
+/// A laser drag with its keys held goes through the session event tap when Accessibility allows it:
+/// the tap sees the press before any app and drops it, so even a game that reads the mouse on its own
+/// can't take the drag. Without the tap, the windows catch the mouse instead.
 @MainActor
 final class HighlightOverlay {
     private let settings: PointerHighlight
     private let pair: () -> PointerPair
     private let pointerScale: () -> Double
+    private let tap: MouseEventTap
     private var style = HighlightStyle()
     private var windows: [NSPanel] = []
     /// Each display's layers, with the display's frame in global coordinates.
@@ -20,6 +25,9 @@ final class HighlightOverlay {
     private var lostReleaseTimer: Timer?
     /// The windows are catching the mouse so a drag with the laser's keys held draws instead of reaching the app below.
     private var isCapturing = false
+    /// The tap took the press that started this laser drag, so it also takes the drag and the release.
+    private var tapOwnsDrag = false
+    private var isWatchingTap = false
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged, .leftMouseDown, .rightMouseDown,
@@ -30,6 +38,7 @@ final class HighlightOverlay {
         self.settings = settings
         self.pair = pair
         self.pointerScale = pointerScale
+        tap = .shared
         observeSettings()
         NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification,
                                                object: nil, queue: .main) { [weak self] _ in
@@ -52,6 +61,7 @@ final class HighlightOverlay {
         withObservationTracking {
             _ = HighlightStyle(settings: settings, pair: .featured, pointerScale: 1)
             _ = settings.isActive
+            _ = drawsWithKeys
         } onChange: { [weak self] in
             DispatchQueue.main.async {
                 self?.update()
@@ -63,7 +73,22 @@ final class HighlightOverlay {
     private func update() {
         refresh()
         if settings.isActive { start() } else { stop() }
+        watchTap()
     }
+
+    /// Hooks into the tap while the laser draws with keys. Setting a handler rebuilds the tap, so only on a change.
+    private func watchTap() {
+        guard drawsWithKeys != isWatchingTap else { return }
+        isWatchingTap = drawsWithKeys
+        tapOwnsDrag = false
+        tap.set(Self.tapID, types: [.leftMouseDown, .leftMouseDragged, .leftMouseUp],
+                handler: isWatchingTap ? { [weak self] in self?.tapEvent($0, $1) ?? .pass } : nil)
+    }
+
+    /// The laser draws only while its keys are held, the one case where a drag must not reach the app.
+    private var drawsWithKeys: Bool { settings.laserOn && settings.laserTrail && settings.laserNeedsKeys }
+
+    private static let tapID = "highlightLaser"
 
     private func start() {
         if windows.isEmpty { rebuildWindows() }
@@ -126,6 +151,7 @@ final class HighlightOverlay {
     // MARK: Events
 
     private func handle(_ type: NSEvent.EventType) {
+        if tapOwnsDrag, Self.leftButtonTypes.contains(type) { return }
         let point = NSEvent.mouseLocation
         let keysHeld = settings.laserKeysHeld(in: NSEvent.modifierFlags)
         updateCapture(keysHeld: keysHeld)
@@ -143,6 +169,8 @@ final class HighlightOverlay {
         }
     }
 
+    private static let leftButtonTypes: Set<NSEvent.EventType> = [.leftMouseDown, .leftMouseDragged, .leftMouseUp]
+
     /// A click sends out a pulse, and starts a laser trail with the left button; both when both are on.
     private func press(at point: CGPoint, isLeft: Bool, keysHeld: Bool) {
         pressPulse(at: point, isLeft: isLeft)
@@ -152,7 +180,7 @@ final class HighlightOverlay {
     /// The button came up: the trail fades and, after a long press, a pulse goes out.
     private func release(at point: CGPoint) {
         releasePulse(at: point)
-        displays.forEach { $0.laser.finishStroke(fade: style.trailFade) }
+        displays.forEach { $0.laser.finishStroke(style: style) }
     }
 
     /// The ring, the long-press ring and the laser dot follow the pointer.
@@ -178,7 +206,7 @@ final class HighlightOverlay {
 
     /// The ring shows only on the displays the pointer is on or near.
     private func placeRing(at point: CGPoint) {
-        let reach = 22 * style.pointerScale + 2
+        let reach = 22 * style.pointerScale * style.ringSize + 2
         for display in displays {
             let spot = isNear(point, display.frame, reach: reach) ? local(point, in: display.frame) : nil
             display.ring.place(at: spot, style: style)
@@ -235,7 +263,7 @@ final class HighlightOverlay {
     /// While the laser needs keys and they're held, the windows take the mouse: the drag draws, and the
     /// app underneath gets no click to select text with. A drag already under way keeps its owner.
     private func updateCapture(keysHeld: Bool) {
-        let capture = settings.laserOn && settings.laserNeedsKeys && keysHeld
+        let capture = !tap.isRunning && drawsWithKeys && keysHeld
         guard capture != isCapturing, NSEvent.pressedMouseButtons == 0 else { return }
         isCapturing = capture
         windows.forEach { $0.ignoresMouseEvents = !capture }
@@ -243,8 +271,41 @@ final class HighlightOverlay {
 
     /// A release that never reached us, e.g. over a window that kept it, still ends the press.
     private func endLostPress() {
+        if tapOwnsDrag {
+            // A dropped press never reaches the session's button state, so ask the hardware.
+            guard !CGEventSource.buttonState(.hidSystemState, button: .left) else { return }
+            tapOwnsDrag = false
+        }
         guard NSEvent.pressedMouseButtons == 0 else { return }
         release(at: NSEvent.mouseLocation)
+    }
+
+    // MARK: Event tap
+
+    /// A press with the laser's keys held starts a trail, and it and everything up to its release are
+    /// dropped, so the app underneath never sees the drag. Other presses pass untouched.
+    private func tapEvent(_ type: CGEventType, _ event: CGEvent) -> MouseEventTap.Verdict {
+        let point = NSEvent(cgEvent: event)?.locationInWindow ?? NSEvent.mouseLocation
+        switch type {
+        case .leftMouseDown: return tapPress(event, at: point)
+        case .leftMouseDragged where tapOwnsDrag:
+            follow(point, drawing: true)
+            extendTrail(to: point)
+            return .drop
+        case .leftMouseUp where tapOwnsDrag:
+            tapOwnsDrag = false
+            release(at: point)
+            return .drop
+        default: return .pass
+        }
+    }
+
+    private func tapPress(_ event: CGEvent, at point: CGPoint) -> MouseEventTap.Verdict {
+        let flags = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
+        tapOwnsDrag = settings.laserKeysHeld(in: flags) && settings.laserDraws(keysHeld: true)
+        guard tapOwnsDrag else { return .pass }
+        press(at: point, isLeft: true, keysHeld: true)
+        return .drop
     }
 }
 
@@ -276,6 +337,8 @@ struct HighlightStyle: Equatable {
     var showsHold = true
     var pulseStyle = PulseStyle.ring
     var laserSize = 1.0
+    var laserLook = LaserLook.classic
+    var ringSize = 1.0
     var trailFade = 0.9
 
     init() {}
@@ -294,7 +357,73 @@ struct HighlightStyle: Equatable {
         showsHold = settings.pulseShowsHold
         pulseStyle = settings.pulseStyle
         laserSize = settings.laserSize
+        laserLook = settings.laserLook
+        ringSize = settings.ringSize
         trailFade = settings.laserTrailFade
+    }
+}
+
+extension HighlightStyle {
+    /// The dot's layers, bottom first, each a disc `size` wide, already scaled by `laserSize`.
+    var laserDotParts: [LaserPart] {
+        switch laserLook {
+        case .classic:
+            return scaled([LaserPart(laser.glow, 32, opacity: 0.18), LaserPart(laser.outline, 16),
+                           LaserPart(laser.middle, 13), LaserPart(laser.center, 11)])
+        case .goodNotes:
+            // Measured from GoodNotes on a 1:1 display: a solid disc about 7pt wide, barely glowing.
+            return scaled([LaserPart(laser.glow, 7, blur: 1.5)])
+        }
+    }
+
+    /// The trail's layers, bottom first, each a line `size` wide, already scaled by `laserSize`.
+    var laserTrailParts: [LaserPart] {
+        switch laserLook {
+        case .classic:
+            return scaled([LaserPart(laser.glow, 14, opacity: 0.2), LaserPart(laser.outline, 6),
+                           LaserPart(laser.middle, 4), LaserPart(laser.center, 2)])
+        case .goodNotes:
+            // Measured from GoodNotes: a line up to 14pt wide around a white core about a third of
+            // it, glowing about half as bright as the line at its edge and fading out some 9pt
+            // beyond. These are the widest; `LaserPace` thins them as the pointer speeds up.
+            return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.center, 4.4)])
+        }
+    }
+
+    /// GoodNotes thins its trail as the pointer speeds up; Classic keeps one width.
+    var trailVariesWithSpeed: Bool { laserLook == .goodNotes }
+
+    /// GoodNotes keeps a finished trail whole, then fades it over this long.
+    static let goodNotesFade = 0.35
+
+    /// A trail's opacity while it's drawn: GoodNotes draws it solid.
+    var trailOpacity: Double { laserLook == .goodNotes ? 1 : 0.95 }
+
+    /// How long a finished trail stays at full opacity, out of `trailFade`, before fading. Classic
+    /// fades from the release; GoodNotes holds it and fades over the last `goodNotesFade` seconds.
+    var trailHold: Double { laserLook == .goodNotes ? max(trailFade - Self.goodNotesFade, 0) : 0 }
+
+    /// A finished trail's opacity `elapsed` seconds after the release.
+    func trailOpacity(after elapsed: Double) -> Double {
+        let fading = max(trailFade - trailHold, 0.01)
+        return trailOpacity * (1 - min(max((elapsed - trailHold) / fading, 0), 1))
+    }
+
+    private func scaled(_ parts: [LaserPart]) -> [LaserPart] {
+        parts.map { LaserPart($0.color, $0.size * laserSize, opacity: $0.opacity, blur: $0.blur * laserSize) }
+    }
+}
+
+/// One layer of the laser: a color, how wide it is, and how far its glow spreads, if it has one.
+struct LaserPart: Equatable {
+    var color: RGBA
+    var size: Double
+    var opacity: Double
+    /// The radius of a glow in `color` around the layer; 0 for none.
+    var blur: Double
+
+    init(_ color: RGBA, _ size: Double, opacity: Double = 1, blur: Double = 0) {
+        (self.color, self.size, self.opacity, self.blur) = (color, size, opacity, blur)
     }
 }
 
@@ -339,6 +468,8 @@ struct LaserDot: Equatable {
 
 struct LaserStroke: Equatable {
     var points: [CGPoint]
+    /// Each point's share of the widest line, from how fast the pointer was moving there.
+    var shares: [Double] = []
     var finishedAt: TimeInterval?
 }
 
@@ -352,6 +483,7 @@ final class HighlightScene {
     var hold: Hold?
     var laserDot: LaserDot?
     var strokes: [LaserStroke] = []
+    private var pace = LaserPace()
     /// Bumped on every change, so the canvases redraw.
     var revision = 0
 
@@ -371,27 +503,30 @@ final class HighlightScene {
         move(to: point, now: now, settings: settings)
         guard settings.laserDraws(keysHeld: keysHeld) else { return }
         if settings.laserDotShows(drawing: true) { laserDot = LaserDot(point: point, updatedAt: now) }
-        extendStroke(to: point)
+        extendStroke(to: point, now: now)
     }
 
     /// A click starts a pulse, and a laser trail with the left button; both when both are on.
     func press(at point: CGPoint, now: TimeInterval, isLeft: Bool, keysHeld: Bool, settings: PointerHighlight) {
         pointer = point
-        if isLeft, settings.laserDraws(keysHeld: keysHeld) { startStroke(at: point) }
+        if isLeft, settings.laserDraws(keysHeld: keysHeld) { startStroke(at: point, now: now) }
         guard settings.pulses(isLeft: isLeft) else { return }
         pulses.append(Pulse(point: point, start: now))
         if settings.pulseShowsHold { hold = Hold(point: point, start: now) }
     }
 
-    func startStroke(at point: CGPoint) {
-        strokes.append(LaserStroke(points: [point, point]))
+    func startStroke(at point: CGPoint, now: TimeInterval) {
+        pace = LaserPace()
+        let share = pace.share(at: point, time: now)
+        strokes.append(LaserStroke(points: [point, point], shares: [share, share]))
     }
 
     /// Adds a point to the stroke being drawn, skipping ones too close to the last.
-    func extendStroke(to point: CGPoint) {
-        guard let index = strokes.lastIndex(where: { $0.finishedAt == nil }) else { return startStroke(at: point) }
+    func extendStroke(to point: CGPoint, now: TimeInterval) {
+        guard let index = strokes.lastIndex(where: { $0.finishedAt == nil }) else { return startStroke(at: point, now: now) }
         guard let last = strokes[index].points.last, hypot(last.x - point.x, last.y - point.y) >= 2.5 else { return }
         strokes[index].points.append(point)
+        strokes[index].shares.append(pace.share(at: point, time: now))
     }
 
     /// The button came up: ends the trail and, after a long press, fades the held ring and sends

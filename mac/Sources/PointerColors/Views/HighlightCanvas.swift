@@ -50,7 +50,7 @@ struct HighlightSnapshot: Equatable {
         pulses = scene.pulses.map { Pulse(point: local($0.point), start: $0.start) }
         hold = scene.hold.map { Hold(point: local($0.point), start: $0.start, releasedAt: $0.releasedAt) }
         laserDot = scene.laserDot.map { LaserDot(point: local($0.point), updatedAt: $0.updatedAt) }
-        strokes = scene.strokes.map { LaserStroke(points: $0.points.map(local), finishedAt: $0.finishedAt) }
+        strokes = scene.strokes.map { LaserStroke(points: $0.points.map(local), shares: $0.shares, finishedAt: $0.finishedAt) }
     }
 
     /// Something here is fading, so it needs frames; otherwise one still picture is enough.
@@ -68,7 +68,7 @@ struct HighlightSnapshot: Equatable {
     private var baseDiameter: Double { 44 * style.pointerScale }
 
     private func drawRing(in context: inout GraphicsContext) {
-        let circle = Path(ellipseIn: square(at: pointer, side: baseDiameter))
+        let circle = Path(ellipseIn: square(at: pointer, side: baseDiameter * style.ringSize))
         context.fill(circle, with: .color(style.ringColor.color.opacity(0.18)))
         context.stroke(circle, with: .color(style.ringColor.color.opacity(0.9)), lineWidth: 3)
     }
@@ -134,25 +134,45 @@ struct HighlightSnapshot: Equatable {
     private func drawDot(_ dot: LaserDot, now: TimeInterval, in context: inout GraphicsContext) {
         let alpha = 1 - fraction(now - dot.updatedAt, of: LaserDot.fade)
         guard alpha > 0 else { return }
-        let layers: [(RGBA, Double, Double)] = [(style.laser.glow, 32, 0.18), (style.laser.outline, 16, 1),
-                                                (style.laser.middle, 13, 1), (style.laser.center, 11, 1)]
-        for (color, side, opacity) in layers {
-            let circle = Path(ellipseIn: square(at: dot.point, side: side * style.laserSize))
-            context.fill(circle, with: .color(color.color.opacity(opacity * alpha)))
+        for part in style.laserDotParts {
+            let circle = Path(ellipseIn: square(at: dot.point, side: part.size))
+            draw(part, alpha: alpha, in: &context) { $0.fill(circle, with: $1) }
         }
     }
 
     /// The same layers as the dot, as a line along the drag.
     private func drawStroke(_ stroke: LaserStroke, now: TimeInterval, in context: inout GraphicsContext) {
-        let alpha = stroke.finishedAt.map { 1 - fraction(now - $0, of: style.trailFade) } ?? 0.95
+        let alpha = stroke.finishedAt.map { style.trailOpacity(after: now - $0) } ?? style.trailOpacity
         guard alpha > 0, stroke.points.count > 1 else { return }
+        if style.trailVariesWithSpeed, stroke.shares.count == stroke.points.count {
+            return drawRibbons(stroke, alpha: alpha, in: &context)
+        }
         var path = Path()
         path.addLines(stroke.points)
-        let layers: [(RGBA, Double, Double)] = [(style.laser.glow, 14, 0.2), (style.laser.outline, 6, 1),
-                                                (style.laser.middle, 4, 1), (style.laser.center, 2, 1)]
-        for (color, width, opacity) in layers {
-            context.stroke(path, with: .color(color.color.opacity(opacity * alpha)),
-                           style: StrokeStyle(lineWidth: width * style.laserSize, lineCap: .round, lineJoin: .round))
+        for part in style.laserTrailParts {
+            let line = StrokeStyle(lineWidth: part.size, lineCap: .round, lineJoin: .round)
+            draw(part, alpha: alpha, in: &context) { $0.stroke(path, with: $1, style: line) }
+        }
+    }
+
+    /// The GoodNotes trail: each layer as a filled ribbon, thinner where the pointer moved fast.
+    private func drawRibbons(_ stroke: LaserStroke, alpha: Double, in context: inout GraphicsContext) {
+        let parts = style.laserTrailParts
+        let trail = LaserTrailShape(sizes: parts.map(\.size), points: stroke.points, shares: stroke.shares)
+        for (part, path) in zip(parts, trail.paths) {
+            let shape = Path(path)
+            draw(part, alpha: alpha, in: &context) { $0.fill(shape, with: $1) }
+        }
+    }
+
+    /// Draws one laser layer through `paint`, in its color, with its glow when it has one.
+    private func draw(_ part: LaserPart, alpha: Double, in context: inout GraphicsContext,
+                      paint: (inout GraphicsContext, GraphicsContext.Shading) -> Void) {
+        let shading = GraphicsContext.Shading.color(part.color.color.opacity(part.opacity * alpha))
+        guard part.blur > 0 else { return paint(&context, shading) }
+        context.drawLayer { layer in
+            layer.addFilter(.shadow(color: part.color.color.opacity(alpha), radius: part.blur))
+            paint(&layer, shading)
         }
     }
 
