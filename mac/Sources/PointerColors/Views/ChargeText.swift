@@ -11,24 +11,42 @@ enum ChargeText {
         date.formatted(.dateTime.month(.abbreviated).day().hour().minute())
     }
 
-    /// Hours under a day, days under a month, then months and days, like "1 month, 25 days".
+    /// A number of days in its two largest units, like "18d 19h" or "1mo 5d".
     static func days(_ days: Double) -> String {
-        guard days < 30 else { return months(Int(days.rounded())) }
-        let unit: Duration.UnitsFormatStyle.Unit = days < 1 ? .hours : .days
-        return Duration.seconds(days * 86_400).formatted(.units(allowed: [unit], width: .wide, maximumUnitCount: 1))
+        duration(days * 86_400, units: 2)
     }
 
-    /// A month counts as 30 days.
-    private static func months(_ days: Int) -> String {
+    /// A length of time in its largest `units` units, from months down to minutes, like
+    /// "1d 21h 12m" or "3d 18h 3m". It's rounded to the smallest unit shown, and a month counts
+    /// as 30 days.
+    static func duration(_ seconds: TimeInterval, units count: Int = 3) -> String {
+        let minutes = max(0, Int((seconds / 60).rounded()))
+        let step = units[min(largestUnit(minutes) + count, units.count) - 1].minutes
+        var left = Int((Double(minutes) / Double(step)).rounded()) * step
+        let shown = units[largestUnit(left)...].prefix(count)
+        var parts = DateComponents()
+        for unit in shown {
+            parts.setValue(left / unit.minutes, for: unit.component)
+            left %= unit.minutes
+        }
+        return formatter().string(from: parts) ?? ""
+    }
+
+    /// Months (of 30 days), days, hours and minutes, each in minutes.
+    private static let units: [(component: Calendar.Component, minutes: Int)] =
+        [(.month, 43_200), (.day, 1_440), (.hour, 60), (.minute, 1)]
+
+    /// Where in `units` the first one that `minutes` fills is; minutes when none is.
+    private static func largestUnit(_ minutes: Int) -> Int {
+        units.firstIndex { minutes >= $0.minutes } ?? units.count - 1
+    }
+
+    private static func formatter() -> DateComponentsFormatter {
         let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.month, .day]
-        formatter.unitsStyle = .full
+        formatter.allowedUnits = [.month, .day, .hour, .minute]
+        formatter.unitsStyle = .abbreviated
         formatter.zeroFormattingBehavior = .dropAll
-        return formatter.string(from: DateComponents(month: days / 30, day: days % 30)) ?? "\(days)"
-    }
-
-    static func duration(_ seconds: TimeInterval) -> String {
-        Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes], width: .narrow, maximumUnitCount: 2))
+        return formatter
     }
 
     static func rate(_ perDay: Double) -> String {

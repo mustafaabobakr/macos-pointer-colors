@@ -105,13 +105,21 @@ final class BatteryHistoryTests: XCTestCase {
         XCTAssertNil(mouse.current?.chargingTime)
     }
 
-    func testDaysTextIsSingularForOne() {
-        XCTAssertEqual(ChargeText.days(1.0 / 24), "1 hour")
-        XCTAssertEqual(ChargeText.days(1), "1 day")
-        XCTAssertEqual(ChargeText.days(3.4), "3 days")
-        XCTAssertEqual(ChargeText.days(55), "1 month, 25 days")
-        XCTAssertEqual(ChargeText.days(60.2), "2 months")
-        XCTAssertEqual(ChargeText.days(102), "3 months, 12 days")
+    func testDaysTextShowsItsTwoLargestUnits() {
+        XCTAssertEqual(ChargeText.days(1.0 / 24), "1h")
+        XCTAssertEqual(ChargeText.days(1), "1d")
+        XCTAssertEqual(ChargeText.days(3.4), "3d 10h")
+        XCTAssertEqual(ChargeText.days(55), "1mo 25d")
+        XCTAssertEqual(ChargeText.days(60.2), "2mo")
+        XCTAssertEqual(ChargeText.days(102), "3mo 12d")
+    }
+
+    func testDurationRollsHoursIntoDaysAndMonths() {
+        XCTAssertEqual(ChargeText.duration(99 * 60), "1h 39m")
+        XCTAssertEqual(ChargeText.duration((45 * 60 + 12) * 60), "1d 21h 12m")
+        XCTAssertEqual(ChargeText.duration((90 * 60 + 3) * 60), "3d 18h 3m")
+        XCTAssertEqual(ChargeText.duration(59.6 * 60), "1h")
+        XCTAssertEqual(ChargeText.duration(((29 * 24 + 23) * 60 + 50) * 60, units: 2), "1mo")
     }
 
     func testEachDropIsAStepAndIdleOnesAreLeftOutOfInUse() throws {

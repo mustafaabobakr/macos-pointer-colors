@@ -31,15 +31,29 @@ struct DrainReportView: View {
             let tips = report.tips(idleShare: idleTip.share, trend: mouse.trend)
             ForEach(Array(tips.enumerated()), id: \.offset) { tip($0.element, report: report) }
             if tips.isEmpty { tipRow(String(localized: "Most of the drain is from use, so there's nothing to change."), symbol: "checkmark.circle") }
-            Text("Worked out from \(report.steps) measured drops of 1%. It settles as more come in.")
+            Text("Worked out each midnight from \(report.steps) measured drops of 1%, with your use over the last \(DrainReport.useDays) days. It settles as more come in.")
+                .appFont(.caption)
+                .foregroundStyle(.secondary)
+            history
+        }
+    }
+
+    @ViewBuilder
+    private var history: some View {
+        let estimates = mouse.drainEstimates()
+        if estimates.count > 1 {
+            EstimateHistory(estimates: estimates).padding(.top, 6 * scale)
+        } else {
+            Text("A chart of how the estimate moves shows here after its second midnight.")
                 .appFont(.caption)
                 .foregroundStyle(.secondary)
         }
     }
 
     private var waiting: some View {
-        let measured = DrainReport.measured(mouse.allSteps).count
-        return Text("Shows once \(DrainReport.minimumSteps) drops of 1% are measured: \(measured) so far.")
+        let midnight = Calendar.current.startOfDay(for: .now)
+        let measured = DrainReport.measured(mouse.allSteps.filter { $0.end <= midnight }).count
+        return Text("Shows once \(DrainReport.minimumSteps) drops of 1% are measured by a midnight: \(measured) so far.")
             .appFont(.caption)
             .foregroundStyle(.secondary)
     }

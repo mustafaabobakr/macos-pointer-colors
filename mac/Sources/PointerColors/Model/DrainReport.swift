@@ -12,6 +12,8 @@ struct DrainReport: Equatable {
     static let minimumSteps = 10
     /// Charges lasting this much less than they used to suggest the battery is wearing.
     static let wearTrend = -0.15
+    /// Whole days the use in an average day is taken over.
+    static let useDays = 7
 
     /// Measured drops it's worked out from.
     let steps: Int
@@ -33,7 +35,9 @@ struct DrainReport: Equatable {
     var idleShare: Double { perDay > 0 ? idlePerHour * (24 - useHoursPerDay) / perDay : 0 }
 
     /// Nil until there are enough measured drops, and while they can't tell the two rates apart.
-    init?(steps all: [DrainStep]) {
+    /// `useHoursPerDay` is the hours in use in an average day; without it, it's taken from the
+    /// time the drops cover.
+    init?(steps all: [DrainStep], useHoursPerDay hours: Double? = nil) {
         let steps = Self.measured(all)
         guard steps.count >= Self.minimumSteps else { return nil }
         let use = steps.map { $0.inUse / 3_600 }, idle = steps.map { $0.idle / 3_600 }
@@ -44,7 +48,7 @@ struct DrainReport: Equatable {
         self.steps = steps.count
         inUsePerHour = rates.use * scale
         idlePerHour = rates.idle * scale
-        useHoursPerDay = 24 * use.reduce(0, +) / (use.reduce(0, +) + idle.reduce(0, +))
+        useHoursPerDay = hours ?? 24 * use.reduce(0, +) / (use.reduce(0, +) + idle.reduce(0, +))
         totalInUse = use.reduce(0, +) * 3_600
         totalIdle = idle.reduce(0, +) * 3_600
     }
@@ -98,5 +102,22 @@ enum IdleTipThreshold: String, CaseIterable, Identifiable {
 extension MouseHistory {
     /// Every charge's drops, oldest first.
     var allSteps: [DrainStep] { charges.flatMap(\.steps) }
-    var drainReport: DrainReport? { DrainReport(steps: allSteps) }
+    /// The report as of last midnight, so it changes once a day rather than with every drop.
+    var drainReport: DrainReport? { drainReport(asOf: Calendar.current.startOfDay(for: .now)) }
+
+    /// The report from the drops finished by `midnight`, with the use a day from the whole days
+    /// before it.
+    func drainReport(asOf midnight: Date, calendar: Calendar = .current) -> DrainReport? {
+        DrainReport(steps: allSteps.filter { $0.end <= midnight },
+                    useHoursPerDay: useHoursPerDay(before: midnight, calendar: calendar))
+    }
+
+    /// Hours in use in an average day, over the `DrainReport.useDays` whole days before
+    /// `midnight`; nil when none of them has time recorded.
+    func useHoursPerDay(before midnight: Date, calendar: Calendar = .current) -> Double? {
+        guard let first = calendar.date(byAdding: .day, value: -DrainReport.useDays, to: midnight) else { return nil }
+        let days = charges.flatMap { $0.daily(calendar: calendar) }.filter { $0.day >= first && $0.day < midnight }
+        let inUse = days.reduce(0) { $0 + $1.inUse }, recorded = days.reduce(0) { $0 + $1.inUse + $1.idle }
+        return recorded > 0 ? 24 * inUse / recorded : nil
+    }
 }

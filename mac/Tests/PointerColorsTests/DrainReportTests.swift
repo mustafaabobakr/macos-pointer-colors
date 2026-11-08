@@ -57,6 +57,40 @@ final class DrainReportTests: XCTestCase {
         XCTAssertEqual(report.tips(idleShare: 0.99, trend: -0.1), [], "A 10% shorter charge is within noise")
     }
 
+    func testTakesTheUseADayItIsGiven() throws {
+        let drops = steps([0.5, 1, 1.5, 2, 2.5, 2.8, 0.8, 1.2, 1.8, 2.2])
+        let report = try XCTUnwrap(DrainReport(steps: drops, useHoursPerDay: 6))
+        XCTAssertEqual(report.useHoursPerDay, 6)
+        XCTAssertEqual(report.inUsePerHour, try XCTUnwrap(DrainReport(steps: drops)).inUsePerHour)
+    }
+
+    /// Three days, checked each minute, that drain 1% every 2 hours, in use from 8:00 to 16:00.
+    private func threeDays() -> MouseHistory {
+        let start = Date(timeIntervalSince1970: 0)
+        var mouse = MouseHistory(id: "mouse", name: "Mouse", checkedAt: start)
+        mouse.record(level: 100, charging: true, at: start)
+        for minute in 1...(72 * 60) {
+            let state: UsageState = (8..<16).contains((minute - 1) / 60 % 24) ? .inUse : .idle
+            mouse.record(level: 100 - minute / 120, charging: false, at: start + Double(minute) * 60, state: state)
+        }
+        return mouse
+    }
+
+    func testWorksTheReportOutAtMidnightFromTheLastWeeksUse() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let mouse = threeDays()
+        let midnight = Date(timeIntervalSince1970: 2 * 86_400)
+        let report = try XCTUnwrap(mouse.drainReport(asOf: midnight, calendar: calendar))
+        XCTAssertEqual(report.steps, DrainReport.measured(mouse.allSteps.filter { $0.end <= midnight }).count)
+        XCTAssertLessThan(report.steps, DrainReport.measured(mouse.allSteps).count, "Drops after midnight wait for the next one")
+        XCTAssertEqual(report.useHoursPerDay, 8, accuracy: 0.5)
+
+        let estimates = mouse.drainEstimates(calendar: calendar, now: midnight + 3_600)
+        XCTAssertEqual(estimates.map(\.day), [midnight - 86_400, midnight])
+        XCTAssertEqual(estimates.last?.report, report)
+    }
+
     func testIdleThresholdsReadPlainly() {
         XCTAssertEqual(IdleTipThreshold.allCases.map(\.share), [0.15, 0.25, 0.40])
         XCTAssertEqual(IdleTipThreshold.above25.title, "Over 25% of the drain")
