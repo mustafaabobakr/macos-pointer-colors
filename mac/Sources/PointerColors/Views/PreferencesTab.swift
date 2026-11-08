@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A page of Preferences, listed in the sidebar under its group.
 enum PreferencesTab: String, CaseIterable, Identifiable {
-    case general, appearance, pairs, automation, highlight, speed, buttons, battery, shortcuts, about, whatsNew
+    case general, pairs, highlight, automation, appearance, speed, buttons, battery, shortcuts, about, whatsNew
 
     var id: Self { self }
     /// Names the page's screen in docs/features/features.json.
@@ -75,7 +75,7 @@ enum PreferencesGroup: String, CaseIterable, Identifiable {
 
     var tabs: [PreferencesTab] {
         switch self {
-        case .pointer: [.general, .appearance, .pairs, .automation, .highlight]
+        case .pointer: [.general, .pairs, .highlight, .automation, .appearance]
         case .mouse: [.speed, .buttons, .battery]
         case .app: [.shortcuts, .about, .whatsNew]
         }
