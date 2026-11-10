@@ -109,7 +109,7 @@ final class PressShrink {
     }
 
     /// Runs `tick` in every run loop mode: while the button is down in this app's own windows,
-    /// like the demo pad in Preferences, the run loop is tracking the mouse and skips plain timers.
+    /// like Preferences, the run loop is tracking the mouse and skips plain timers.
     private func schedule(every interval: TimeInterval, _ tick: @escaping @Sendable () -> Void) {
         timer?.invalidate()
         let timer = Timer(timeInterval: interval, repeats: true) { _ in tick() }

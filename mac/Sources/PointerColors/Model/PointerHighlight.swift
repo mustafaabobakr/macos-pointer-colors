@@ -196,8 +196,6 @@ final class PointerHighlight {
     var laserOutlineOpacity: Double { didSet { save(laserOutlineOpacity, Key.laserOutlineOpacity) } }
     /// Classic unless changed.
     var laserLook: LaserLook { didSet { save(laserLook.rawValue, Key.laserLook) } }
-    /// Hovering a setting on the Highlight page shows a picture of each of its choices. On unless changed.
-    var showsHoverPreviews: Bool { didSet { save(showsHoverPreviews, Key.hoverPreviews) } }
 
     /// Pulse and laser colors chosen for particular pairs, by pair id.
     private(set) var pairPulseColors: [String: RGBA] { didSet { saveColors(pairPulseColors, Key.pairPulse) } }
@@ -219,8 +217,7 @@ final class PointerHighlight {
                                      Key.pulseRight: true, Key.laserPair: true, Key.laserSize: 1.0,
                                      Key.laserTrail: true, Key.laserFade: 0.9, Key.laserOutlineOpacity: 1.0,
                                      Key.laserKeys: HoldKeys.option.rawValue, Key.pressShrink: false, Key.pressScale: 0.88,
-                                     Key.pressDown: 0.08, Key.pressUp: 0.08, Key.pressRight: true,
-                                     Key.hoverPreviews: true])
+                                     Key.pressDown: 0.08, Key.pressUp: 0.08, Key.pressRight: true])
         // Builds before the switches stored one choice: off, pulse or laser.
         let earlier = defaults.string(forKey: Key.oldMode)
         pulseOn = defaults.object(forKey: Key.pulseOn) as? Bool ?? (earlier == "pulse")
@@ -255,7 +252,6 @@ final class PointerHighlight {
         laserOutline = defaults.string(forKey: Key.laserOutline).flatMap(LaserOutline.init(rawValue:)) ?? .dark
         laserOutlineOpacity = defaults.double(forKey: Key.laserOutlineOpacity)
         laserLook = defaults.string(forKey: Key.laserLook).flatMap(LaserLook.init(rawValue:)) ?? .classic
-        showsHoverPreviews = defaults.bool(forKey: Key.hoverPreviews)
         pairPulseColors = Self.colors(defaults, Key.pairPulse)
         pairLaserColors = Self.colors(defaults, Key.pairLaser)
     }
@@ -316,13 +312,12 @@ final class PointerHighlight {
 
     /// The laser's glow, outline, middle and center: the laser color, the outline chosen in
     /// `laserOutline`, a lighter shade of the laser color, and white.
-    /// `usesPair` and `outline` stand in for the saved choices, to picture another one.
-    func laserColors(for pair: PointerPair, usesPair: Bool? = nil, outline: LaserOutline? = nil) -> LaserColors {
+    func laserColors(for pair: PointerPair) -> LaserColors {
         let white = RGBA(red: 1, green: 1, blue: 1)
-        let base = (usesPair ?? laserUsesPairColor) ? laserPairColor(pair) : laserColor
+        let base = laserUsesPairColor ? laserPairColor(pair) : laserColor
         let middle = base.mixed(with: white, by: 0.45)
         let outlines: [LaserOutline: RGBA] = [.dark: pair.darkColor, .laser: base, .none: middle]
-        return LaserColors(glow: base, outline: outlines[outline ?? laserOutline] ?? base, middle: middle, center: white)
+        return LaserColors(glow: base, outline: outlines[laserOutline] ?? base, middle: middle, center: white)
     }
 
     /// The pulse color for a pair, ignoring the custom color: set for it, or its own.
@@ -362,7 +357,6 @@ final class PointerHighlight {
         static let laserOutline = "highlightLaserOutline"
         static let laserOutlineOpacity = "highlightLaserOutlineOpacity"
         static let laserLook = "highlightLaserLook"
-        static let hoverPreviews = "highlightHoverPreviews"
         static let pairPulse = "highlightPairPulseColors"
         static let pairLaser = "highlightPairLaserColors"
         static let pulseOn = "highlightPulse"

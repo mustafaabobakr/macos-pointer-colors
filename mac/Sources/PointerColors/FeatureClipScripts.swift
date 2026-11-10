@@ -13,7 +13,7 @@ enum ClipStep {
     case pause(Double)
     /// The pointer glides to a point.
     case move(to: ClipPoint, seconds: Double = 0.7)
-    /// A real click: SwiftUI views like the highlight demo pad follow it, and so do plain buttons.
+    /// A real click: SwiftUI views and plain buttons follow it.
     case click
     /// A real press held down, then let go.
     case hold(Double)
@@ -88,7 +88,6 @@ enum FeatureClipScripts {
         from + (to - from) * progress
     }
 
-    private static let pad = "clip-demo-pad"
     private static let sizes = SystemPointer.minimumScale...SystemPointer.maximumScale
     private static let demoScale = 2.21
 
@@ -200,18 +199,22 @@ enum FeatureClipScripts {
             .act { $0.automation.simulatePointer(overApp: nil) }, .pause(0.8),
         ])
 
+    /// The ring turns on, then grows and settles, and the preview above follows.
     private static let highlight = FeatureClip(
-        cursorStart: spot(pad, x: 0.8, y: 0.7),
-        setUp: { $0.highlight.laserNeedsKeys = false },
+        cursorStart: spot("highlight", x: 0.6, y: 0.3),
+        setUp: { $0.highlight.showsRing = false; $0.highlight.ringSize = 1 },
         steps: [
             .pause(0.4),
-            .move(to: spot(pad, x: 0.25, y: 0.5)), .click, .pause(0.6),
-            .drag(through: [spot(pad, x: 0.4, y: 0.25), spot(pad, x: 0.55, y: 0.7), spot(pad, x: 0.75, y: 0.35)],
-                  seconds: 1.2),
-            .pause(0.6),
-            .move(to: spot("clip-card-laser")), .choose { $0.highlight.setOn(false, .laser) },
-            .move(to: spot(pad, x: 0.6, y: 0.5)), .click, .pause(0.6),
-            .move(to: spot("clip-card-laser")), .choose { $0.highlight.setOn(true, .laser) }, .pause(0.6),
+            .move(to: spot("clip-ring-toggle", x: 0.95)), .choose { $0.highlight.showsRing = true }, .pause(0.6),
+            .move(to: along("clip-ring-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.03)),
+            .slide(to: along("clip-ring-size", 1.8, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.9) {
+                $0.highlight.ringSize = lerp(1.0, 1.8, $1)
+            },
+            .pause(0.3),
+            .slide(to: along("clip-ring-size", 1.2, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.6) {
+                $0.highlight.ringSize = lerp(1.8, 1.2, $1)
+            },
+            .pause(0.8),
         ])
 
     private static let pressShrink = FeatureClip(
@@ -228,53 +231,36 @@ enum FeatureClipScripts {
             .move(to: spot("clip-press-curve", x: 0.93, y: 0.25)), .choose { $0.highlight.pressCurve = .bounce }, .pause(0.8),
         ])
 
+    /// Ring to ripple, bigger pulses, then long presses, each drawn in the preview above.
     private static let pulse = FeatureClip(
-        cursorStart: spot(pad, x: 0.8, y: 0.7),
-        alsoShows: [pad],
-        setUp: { $0.highlight.pulseStyle = .ring },
+        cursorStart: spot("pulse", x: 0.6, y: 0.2),
+        setUp: { $0.highlight.pulseOn = true; $0.highlight.pulseStyle = .ring; $0.highlight.pulseShowsHold = false },
         steps: [
             .pause(0.4),
-            .move(to: spot(pad, x: 0.3)), .click, .pause(0.5),
-            .move(to: spot(pad, x: 0.65, y: 0.4), seconds: 0.5), .click, .pause(0.6),
-            .move(to: spot("clip-pulse-style", x: 0.75)), .choose { $0.highlight.pulseStyle = .ripple },
-            .move(to: spot(pad, x: 0.45, y: 0.55)), .click, .pause(0.9),
+            .move(to: spot("clip-pulse-style", x: 0.95)), .choose { $0.highlight.pulseStyle = .ripple }, .pause(0.8),
             .move(to: along("clip-pulse-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.03)),
             .slide(to: along("clip-pulse-size", 1.8, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.8) {
                 $0.highlight.pulseSize = lerp(1.0, 1.8, $1)
             },
-            .move(to: spot(pad, x: 0.5)), .hold(1.0), .pause(1.0),
+            .pause(0.4),
+            .move(to: spot("clip-pulse-hold", x: 0.95)), .choose { $0.highlight.pulseShowsHold = true }, .pause(1.0),
         ])
 
-    /// The laser section is too tall to frame with the pad, so this one stays on the pad.
-    /// A Classic trail, then the GoodNotes look (Look sits below the pad, out of the picture, so it
-    /// changes without the pointer): slow, fast, then slow again, so the line goes
-    /// from thick to thin and back. Each point of a drag gets the same time, so close points are
-    /// slow and far ones fast.
+    /// The Classic look, then GoodNotes, a wider trail and the laser color as its outline, each
+    /// drawn in the preview above.
     private static let laser = FeatureClip(
-        cursorStart: spot(pad, x: 0.2, y: 0.5),
-        focusesOn: pad,
-        setUp: { $0.highlight.laserNeedsKeys = false; $0.highlight.laserLook = .classic },
+        cursorStart: spot("laser", x: 0.6, y: 0.2),
+        setUp: { $0.highlight.laserOn = true; $0.highlight.laserLook = .classic; $0.highlight.laserOutline = .dark },
         steps: [
             .pause(0.4),
-            .drag(through: [spot(pad, x: 0.35, y: 0.2), spot(pad, x: 0.5, y: 0.75), spot(pad, x: 0.65, y: 0.25),
-                            spot(pad, x: 0.8, y: 0.6)], seconds: 1.6),
-            .pause(0.8),
-            .act { $0.highlight.laserLook = .goodNotes },
-            .move(to: spot(pad, x: 0.06, y: 0.5)),
-            .drag(through: slowFastSlow, seconds: 1.76),
-            .pause(1.4),
+            .move(to: spot("clip-laser-look", x: 0.93)), .choose { $0.highlight.laserLook = .goodNotes }, .pause(0.9),
+            .move(to: along("clip-laser-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.03)),
+            .slide(to: along("clip-laser-size", 1.6, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.8) {
+                $0.highlight.laserSize = lerp(1.0, 1.6, $1)
+            },
+            .pause(0.4),
+            .move(to: spot("clip-laser-outline", x: 0.93)), .choose { $0.highlight.laserOutline = .laser }, .pause(1.0),
         ])
-
-    /// A wave across the demo pad: small steps at both ends, big ones through the middle.
-    private static let slowFastSlow: [ClipPoint] = {
-        let crawl = Array(repeating: 0.01, count: 8)
-        let steps = crawl + [0.04, 0.1, 0.22, 0.22, 0.1, 0.04] + crawl
-        var x = 0.06
-        return steps.map { step in
-            x += step
-            return spot(pad, x: x, y: 0.5 + 0.22 * sin(x * 2 * .pi * 1.5))
-        }
-    }()
 
     private static let highlightPairColors = FeatureClip(
         cursorStart: spot("highlight-pair-colors", x: 0.5, y: 0.2),

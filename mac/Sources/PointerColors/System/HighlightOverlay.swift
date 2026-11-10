@@ -503,7 +503,7 @@ struct LaserStroke: Equatable {
     var finishedAt: TimeInterval?
 }
 
-/// Everything a HighlightCanvas draws, like the demo pad in Preferences, in its own coordinates.
+/// Everything a highlight picture draws, like the previews in Preferences, in its own coordinates.
 @MainActor
 @Observable
 final class HighlightScene {

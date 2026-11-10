@@ -1,37 +1,7 @@
 import SwiftUI
 
-/// Draws a highlight scene in its own coordinates, like the demo pad in Preferences. Animates only
-/// while something on it is fading, and draws off the main thread.
-///
-/// The displays don't use this: there the ring, pulses and laser are Core Animation layers
-/// (HighlightOverlay).
-struct HighlightCanvas: View {
-    let scene: HighlightScene
-
-    var body: some View {
-        let snapshot = HighlightSnapshot(scene: scene, toLocal: { $0 })
-        TimelineView(.animation(paused: !snapshot.isAnimating)) { timeline in
-            HighlightLayer(snapshot: snapshot,
-                           now: snapshot.isAnimating ? timeline.date.timeIntervalSinceReferenceDate : 0)
-                .equatable()
-        }
-        .ignoresSafeArea()
-    }
-}
-
-/// The drawing itself. Equal inputs skip the redraw, which keeps idle displays idle.
-private struct HighlightLayer: View, Equatable {
-    let snapshot: HighlightSnapshot
-    let now: TimeInterval
-
-    var body: some View {
-        Canvas(rendersAsynchronously: true) { context, _ in
-            snapshot.draw(in: &context, now: now)
-        }
-    }
-}
-
-/// A copy of the scene for one frame, with points moved into the view's own coordinates.
+/// A copy of the scene for one frame, with points moved into the view's own coordinates. The
+/// Preferences previews draw it; the displays draw Core Animation layers instead (HighlightOverlay).
 struct HighlightSnapshot: Equatable {
     let style: HighlightStyle
     let pointer: CGPoint
