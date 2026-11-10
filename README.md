@@ -100,18 +100,20 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 **Mouse buttons**
 - **Back and forward in every app**: the mouse's side buttons go back and forward in Safari, Finder, Music and Apple's other apps, not just in browsers.
 - **Side buttons in Slack and other apps**: in apps that go back with their own keys, like Slack's ⌘[ and ⌘], the side buttons and the Magic Mouse's sideways swipe press those keys. Finder and Claude are on the list too.
-- **Fix accidental double-clicks**: a worn button that clicks twice clicks once; you choose how close together clicks are ignored.
+- **Fix accidental double-clicks**: a worn button that clicks twice clicks once; you choose how close together clicks are ignored, and whether it covers the left button only or both.
+- **Your own back and forward buttons**: press the mouse button to use for each, and set how far a Magic Mouse swipe travels, with its own switch.
 
 **Find the pointer**
-- **Press Control twice** and a ring in your pair's colors closes in on the cursor. Pick Option, Shift or Command instead.
+- **Press Control twice** and a ring in your pair's colors closes in on the cursor. Pick Option, Shift or Command instead, and set the ring's length, sizes, line width and how fast the two presses must be.
 - **Shake to find**: turn macOS's shake-to-locate on or off.
 
 **Windows**
-- **Focus the window under the pointer**: type into any window just by pointing at it, without bringing it to the front. Hold a modifier key to pass over windows.
+- **Focus the window under the pointer**: type into any window just by pointing at it, without bringing it to the front. Set how long the pointer rests first, and which modifier keys pass over windows.
 
 **Mouse battery**
 - **See the battery** next to the menu-bar icon, on the Dock icon or in a small label under the pointer, always or only when it's low. A bolt shows while the mouse is charging.
-- **Low-battery notification** once your mouse drops below 5%, 10% or 20%.
+- **Low-battery notification** below any level from 5% to 50%, with or without sound, and reminders as it keeps dropping.
+- **Label where you want it**: below or above the pointer, on either side.
 - **Battery health:** how many days each charge lasts and how much it drains a day, for every mouse, and whether charges are getting shorter. A drain report shows how fast it drains in use and idle, each day's hours of both, and tips to make a charge last longer. The history is kept in its own file on your Mac, so it stays through every update.
 
 **Menu bar and Dock**

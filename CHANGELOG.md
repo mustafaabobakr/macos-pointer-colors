@@ -3,6 +3,18 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.7.0 — 2026-11-11
+
+- **Battery, your levels.** **Preferences › Battery** shows the level next to the menu-bar icon, on the Dock icon or under the pointer **Always** or **When low**, with one **When low means below** slider (5–50%). The pointer label goes **below or above, right or left**, with a real-size picture of it, and turns red below your alert level.
+- **Low-battery notifications your way.** **Notify me** below any level from 5% to 50%, with or without **Sound**, and **Remind me again** every 1–10% lower until the mouse charges.
+- **Battery health settings.** **Wear tip after**, **Use counted over** and **Estimate chart** sliders set when the wear tip shows, how many days of use the averages take, and how far back the chart goes.
+- **Pointer locator.** **Animation length**, **Start size**, **End size**, **Line width** and **Time between presses**, under **Show pointer location** in **Preferences › Automation**, with a real-size picture of the ring.
+- **Hover focus.** **Focus after** sets how long the pointer rests before a window takes focus, and **Pause while holding** picks which of ⌃ ⌥ ⇧ ⌘ pass over windows.
+- **Buttons.** Record which mouse buttons go **back and forward**, give the Magic Mouse's **sideways swipe** its own switch and a **Swipe distance**, and have the double-click fix cover **Left only** or **Left and right**.
+- **Size step and apply sound.** **Preferences › Shortcuts** has a **Size change per press** slider, and **General** lets you pick the **Sound** played when a pair is applied.
+
+Your old battery choices carry over. **Export all…** saves every new setting, and **Import…** puts them back.
+
 ## 0.6.0 — 2026-11-10
 
 - **Highlight, a page for each.** **Preferences › Highlight** is now four pages, **Ring**, **Pulse**, **Laser** and **Press**, each with a picture at the top drawn by the same code as the real effect. The Ring, Pulse and Laser pictures show it at its real size, at your pointer size. Hover a setting's choices to see a picture of each.
