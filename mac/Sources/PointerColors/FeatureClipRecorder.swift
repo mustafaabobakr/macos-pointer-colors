@@ -138,8 +138,8 @@ final class FeatureClipRecorder {
     }
 
     /// An AppKit control under the pointer is clicked directly: the offscreen window is never
-    /// active, so it would take a real click as the one that activates it. Anything else, like
-    /// the demo pad, gets real mouse events.
+    /// active, so it would take a real click as the one that activates it. Anything else gets real
+    /// mouse events.
     private func click() async {
         isPressed = true
         let control = host.hitTest(CGPoint(x: cursor.x, y: host.bounds.height - cursor.y)) as? NSControl

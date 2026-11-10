@@ -12,19 +12,19 @@ struct ButtonsPreferences: View {
             SettingsCard("Side buttons", anchor: "buttons.side") {
                 SettingsToggle("Back and forward in every app", symbol: "arrow.left.arrow.right",
                                caption: "The mouse's side buttons go back and forward in Safari, Finder, Music and other apps that ignore them. Browsers like Chrome already follow them.",
-                               isOn: $buttons.sideButtonsNavigate)
+                               isOn: $buttons.sideButtonsNavigate.revealing())
                     .featureSpot("clip-side-buttons")
             }
             .featureSpot("side-buttons")
-            if buttons.sideButtonsNavigate {
+            Reveal(isShown: buttons.sideButtonsNavigate) {
                 NavigationAppsSection(buttons: buttons)
             }
             SettingsCard("Clicks", anchor: "buttons.clicks") {
                 SettingsToggle("Fix accidental double-clicks", symbol: "cursorarrow.click.2",
                                caption: "A worn button can click twice when you press once. This ignores a second click that comes too soon after the first.",
-                               isOn: $buttons.fixesDoubleClicks)
+                               isOn: $buttons.fixesDoubleClicks.revealing())
                     .featureSpot("clip-double-clicks")
-                if buttons.fixesDoubleClicks {
+                Reveal(isShown: buttons.fixesDoubleClicks) {
                     SettingsRow("Ignore clicks within", symbol: "timer",
                                 caption: "Raise it if double clicks still get through; lower it if your own fast double-clicks are lost.") {
                         HStack {
@@ -40,6 +40,7 @@ struct ButtonsPreferences: View {
             }
             .featureSpot("double-clicks")
         }
+        .animation(.reveal, value: buttons.navigationApps.map(\.id))
     }
 }
 
@@ -85,19 +86,19 @@ private struct NavigationAppRow: View {
                 AppIcon(bundleID: app.bundleID)
                 Text(app.name)
                 Spacer()
-                Toggle(app.name, isOn: Binding(get: { app.isOn }, set: { isOn in change { $0.isOn = isOn } }))
+                Toggle(app.name, isOn: Binding(get: { app.isOn }, set: { isOn in change { $0.isOn = isOn } }).revealing())
                     .labelsHidden()
                     .toggleStyle(.switch)
             }
             HStack(spacing: 16 * scale) {
-                LabeledContent("Back") {
-                    ShortcutRecorder(combo: app.back) { combo in change { $0.back = combo } }
+                if app.isOn {
+                    LabeledContent("Back") {
+                        ShortcutRecorder(combo: app.back) { combo in change { $0.back = combo } }
+                    }
+                    LabeledContent("Forward") {
+                        ShortcutRecorder(combo: app.forward) { combo in change { $0.forward = combo } }
+                    }
                 }
-                .disabled(!app.isOn)
-                LabeledContent("Forward") {
-                    ShortcutRecorder(combo: app.forward) { combo in change { $0.forward = combo } }
-                }
-                .disabled(!app.isOn)
                 Spacer()
                 Button("Remove", role: .destructive, action: remove)
             }
@@ -128,16 +129,17 @@ struct AccessibilityNotice: View {
 
     var body: some View {
         // A feature clip never starts the tap, so it would always show the notice.
-        if ScreenshotRenderer.isRendering {
-            EmptyView()
-        } else if isNeeded && !tap.isTrusted {
+        let shows = !ScreenshotRenderer.isRendering && isNeeded
+        Reveal(isShown: shows && !tap.isTrusted) {
             SettingsCard {
                 SettingsRow(symbol: "exclamationmark.triangle.fill", title: Text("Needs Accessibility").foregroundStyle(.orange),
                             caption: Text("Turn on Pointer Colors in System Settings › Privacy & Security › Accessibility. It starts working as soon as you do.")) {
                     Button("Allow…") { tap.requestAccess() }
                 }
             }
-        } else if isNeeded && !tap.isRunning {
+        }
+        .animation(.reveal, value: tap.isTrusted)
+        Reveal(isShown: shows && tap.isTrusted && !tap.isRunning) {
             SettingsCard {
                 SettingsRow(symbol: "arrow.clockwise.circle.fill", title: Text("Relaunch to finish").foregroundStyle(.orange),
                             caption: Text("Accessibility is on. macOS lets Pointer Colors watch clicks once it opens again.")) {
@@ -145,5 +147,6 @@ struct AccessibilityNotice: View {
                 }
             }
         }
+        .animation(.reveal, value: tap.isRunning)
     }
 }

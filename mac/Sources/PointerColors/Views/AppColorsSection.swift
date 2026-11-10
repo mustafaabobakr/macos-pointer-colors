@@ -11,19 +11,21 @@ struct AppColorsSection: View {
     var body: some View {
         SettingsCard("Apps", anchor: "automation.apps") {
             SettingsToggle("Different pair for each app", symbol: "square.grid.2x2",
-                           caption: "App pairs win over display pairs.", isOn: $automation.perAppColors)
-            SettingsMenu("Applies when", symbol: "cursorarrow.motionlines", selection: $automation.appRuleTrigger) {
-                Text("The pointer is over the app").tag(AppRuleTrigger.pointer)
-                Text("The app is in front").tag(AppRuleTrigger.frontmost)
+                           caption: "App pairs win over display pairs.", isOn: $automation.perAppColors.revealing())
+            Reveal(isShown: automation.perAppColors) {
+                SettingsMenu("Applies when", symbol: "cursorarrow.motionlines", selection: $automation.appRuleTrigger) {
+                    Text("The pointer is over the app").tag(AppRuleTrigger.pointer)
+                    Text("The app is in front").tag(AppRuleTrigger.frontmost)
+                }
+                .featureSpot("clip-app-trigger")
             }
-            .disabled(!automation.perAppColors)
-            .featureSpot("clip-app-trigger")
             ForEach(automation.appRuleIDs, id: \.self) { bundleID in
                 AppColorRow(automation: automation, bundleID: bundleID, pairs: pairs)
                     .featureSpot("clip-app-\(bundleID)")
             }
             Button("Add App…", action: addApp)
         }
+        .animation(.reveal, value: automation.appRuleIDs)
     }
 
     /// Picks an app; it starts with the first pair so it has a visible rule right away.

@@ -9,15 +9,14 @@ import QuartzCore
 @MainActor
 final class RingLayerView: NSView {
     private let ring = CAShapeLayer()
-    /// The color and size the ring was last drawn with.
-    private var look: (color: RGBA, side: Double)?
+    /// What the ring was last drawn with.
+    private var look: RingLook?
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
         layer?.masksToBounds = false
         ring.isHidden = true
-        ring.lineWidth = 3
         layer?.addSublayer(ring)
     }
 
@@ -36,11 +35,28 @@ final class RingLayerView: NSView {
     }
 
     private func restyle(_ style: HighlightStyle) {
-        let side = 44 * style.pointerScale * style.ringSize
-        if look?.color == style.ringColor, look?.side == side { return }
-        look = (style.ringColor, side)
+        let new = RingLook(style)
+        guard new != look else { return }
+        look = new
+        let side = new.side
         ring.path = CGPath(ellipseIn: CGRect(x: -side / 2, y: -side / 2, width: side, height: side), transform: nil)
-        ring.fillColor = style.ringColor.cgColor(alpha: 0.18)
-        ring.strokeColor = style.ringColor.cgColor(alpha: 0.9)
+        ring.fillColor = new.color.cgColor(alpha: new.fill)
+        ring.strokeColor = new.color.cgColor(alpha: new.opacity)
+        ring.lineWidth = new.lineWidth
+    }
+}
+
+/// Everything the ring is drawn with, to tell when it needs drawing again.
+private struct RingLook: Equatable {
+    let color: RGBA
+    let side: Double
+    let fill: Double
+    let lineWidth: Double
+    let opacity: Double
+
+    init(_ style: HighlightStyle) {
+        color = style.ringColor
+        side = 44 * style.pointerScale * style.ringSize
+        (fill, lineWidth, opacity) = (style.ringFill, style.ringLineWidth, style.ringOpacity)
     }
 }

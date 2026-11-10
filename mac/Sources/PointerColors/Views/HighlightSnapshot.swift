@@ -1,37 +1,7 @@
 import SwiftUI
 
-/// Draws a highlight scene in its own coordinates, like the demo pad in Preferences. Animates only
-/// while something on it is fading, and draws off the main thread.
-///
-/// The displays don't use this: there the ring, pulses and laser are Core Animation layers
-/// (HighlightOverlay).
-struct HighlightCanvas: View {
-    let scene: HighlightScene
-
-    var body: some View {
-        let snapshot = HighlightSnapshot(scene: scene, toLocal: { $0 })
-        TimelineView(.animation(paused: !snapshot.isAnimating)) { timeline in
-            HighlightLayer(snapshot: snapshot,
-                           now: snapshot.isAnimating ? timeline.date.timeIntervalSinceReferenceDate : 0)
-                .equatable()
-        }
-        .ignoresSafeArea()
-    }
-}
-
-/// The drawing itself. Equal inputs skip the redraw, which keeps idle displays idle.
-private struct HighlightLayer: View, Equatable {
-    let snapshot: HighlightSnapshot
-    let now: TimeInterval
-
-    var body: some View {
-        Canvas(rendersAsynchronously: true) { context, _ in
-            snapshot.draw(in: &context, now: now)
-        }
-    }
-}
-
-/// A copy of the scene for one frame, with points moved into the view's own coordinates.
+/// A copy of the scene for one frame, with points moved into the view's own coordinates. The
+/// Preferences previews draw it; the displays draw Core Animation layers instead (HighlightOverlay).
 struct HighlightSnapshot: Equatable {
     let style: HighlightStyle
     let pointer: CGPoint
@@ -69,8 +39,8 @@ struct HighlightSnapshot: Equatable {
 
     private func drawRing(in context: inout GraphicsContext) {
         let circle = Path(ellipseIn: square(at: pointer, side: baseDiameter * style.ringSize))
-        context.fill(circle, with: .color(style.ringColor.color.opacity(0.18)))
-        context.stroke(circle, with: .color(style.ringColor.color.opacity(0.9)), lineWidth: 3)
+        context.fill(circle, with: .color(style.ringColor.color.opacity(style.ringFill)))
+        context.stroke(circle, with: .color(style.ringColor.color.opacity(style.ringOpacity)), lineWidth: style.ringLineWidth)
     }
 
     /// Starts as a dot under the pointer, bright, then grows and fades.
@@ -86,39 +56,43 @@ struct HighlightSnapshot: Equatable {
     /// One ring that grows and fades.
     private func drawPulseRing(at point: CGPoint, progress: Double, in context: inout GraphicsContext) {
         let eased = 1 - (1 - progress) * (1 - progress)
-        let side = Pulse.startSide + (baseDiameter * style.pulseSize * 1.8 - Pulse.startSide) * eased
+        let side = Pulse.startSide + (baseDiameter * style.pulseSize * style.pulseGrowth - Pulse.startSide) * eased
         let circle = Path(ellipseIn: square(at: point, side: side))
-        strokePulse(circle, opacity: 0.95 * (1 - eased), lineWidth: 4, in: &context)
+        strokePulse(circle, opacity: style.pulseOpacity * (1 - eased), lineWidth: style.pulseLineWidth, in: &context)
     }
 
-    /// Three waves, each leaving a little after the one before, spreading wider and thinner than
-    /// the ring as they fade, like a ripple on water. All three finish within the pulse length.
+    /// Waves, each leaving a little after the one before, spreading and thinning as they fade,
+    /// like a ripple on water. All of them finish within the pulse length.
     private func drawRipple(at point: CGPoint, elapsed: TimeInterval, in context: inout GraphicsContext) {
-        let wave = style.pulseDuration * 0.7
-        let gap = style.pulseDuration * 0.15
-        for index in 0..<3 {
-            let progress = fraction(elapsed - Double(index) * gap, of: wave)
+        for index in 0..<style.rippleWaves {
+            let progress = fraction(elapsed - style.rippleDelay(index), of: style.rippleWaveLength)
             guard progress > 0, progress < 1 else { continue }
-            let eased = 1 - (1 - progress) * (1 - progress)
-            let side = Pulse.startSide + (baseDiameter * style.pulseSize * 2.2 - Pulse.startSide) * eased
-            let circle = Path(ellipseIn: square(at: point, side: side))
-            let opacity = 0.9 * (1 - progress) * (1 - progress)
-            strokePulse(circle, opacity: opacity, lineWidth: 3 - 2 * eased, in: &context)
+            drawRippleWave(at: point, progress: progress, in: &context)
         }
+    }
+
+    private func drawRippleWave(at point: CGPoint, progress: Double, in context: inout GraphicsContext) {
+        let eased = 1 - (1 - progress) * (1 - progress)
+        let side = Pulse.startSide + (baseDiameter * style.pulseSize * style.rippleGrowth - Pulse.startSide) * eased
+        let circle = Path(ellipseIn: square(at: point, side: side))
+        let opacity = style.rippleOpacity * (1 - progress) * (1 - progress)
+        let width = style.rippleLineWidth + (style.rippleEndLineWidth - style.rippleLineWidth) * eased
+        strokePulse(circle, opacity: opacity, lineWidth: width, in: &context)
     }
 
     /// After a long press: a small filled ring grows in under the pointer and breathes while held,
     /// then fades on release while a click pulse goes out from it.
     private func drawHold(_ hold: Hold, now: TimeInterval, in context: inout GraphicsContext) {
-        let shown = fraction(now - hold.start - Hold.threshold, of: Hold.grow)
+        let shown = fraction(now - hold.start - style.holdDelay, of: Hold.grow)
         guard shown > 0 else { return }
         let gone = hold.releasedAt.map { fraction(now - $0, of: Hold.release) } ?? 0
-        let breathe = hold.releasedAt == nil ? 0.04 * sin((now - hold.start) * 2 * .pi / 1.2) : 0
-        let scale = (0.6 + 0.4 * shown + breathe) * Hold.size
+        let breathes = style.holdBreathes && hold.releasedAt == nil
+        let breathe = breathes ? 0.04 * sin((now - hold.start) * 2 * .pi / 1.2) : 0
+        let scale = (0.6 + 0.4 * shown + breathe) * style.holdSize
         let opacity = shown * (1 - gone)
         let circle = Path(ellipseIn: square(at: hold.point, side: baseDiameter * style.pulseSize * scale))
-        context.fill(circle, with: .color(style.pulseColor.color.opacity(0.35 * opacity)))
-        strokePulse(circle, opacity: 0.95 * opacity, lineWidth: 3, in: &context)
+        context.fill(circle, with: .color(style.pulseColor.color.opacity(style.holdFill * opacity)))
+        strokePulse(circle, opacity: 0.95 * opacity, lineWidth: style.holdLineWidth, in: &context)
     }
 
     /// A pulse line in both of the pair's colors, as the laser has: the dark outline a little wider
@@ -132,7 +106,7 @@ struct HighlightSnapshot: Equatable {
 
     /// A soft glow, then the outlined core, its middle and center, fading once the pointer stops.
     private func drawDot(_ dot: LaserDot, now: TimeInterval, in context: inout GraphicsContext) {
-        let alpha = 1 - fraction(now - dot.updatedAt, of: LaserDot.fade)
+        let alpha = 1 - fraction(now - dot.updatedAt, of: style.dotFade)
         guard alpha > 0 else { return }
         for part in style.laserDotParts {
             let circle = Path(ellipseIn: square(at: dot.point, side: part.width))

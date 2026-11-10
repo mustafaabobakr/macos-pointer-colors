@@ -141,8 +141,17 @@ final class PointerHighlight {
     var laserOn: Bool { didSet { save(laserOn, Key.laserOn) } }
     /// A ring that stays around the pointer, on its own or together with a mode.
     var showsRing: Bool { didSet { save(showsRing, Key.ring) } }
-    /// 0.5...2, times the ring's default size, which follows the pointer size.
+    /// 0.1...2, times the ring's default size, which follows the pointer size.
     var ringSize: Double { didSet { save(ringSize, Key.ringSize) } }
+    /// Off uses `ringColor` instead of the pair's color.
+    var ringUsesPairColor: Bool { didSet { save(ringUsesPairColor, Key.ringPair) } }
+    var ringColor: RGBA { didSet { saveColor(ringColor, Key.ringColor) } }
+    /// How tinted the inside of the ring is, 0 for clear.
+    var ringFill: Double { didSet { save(ringFill, Key.ringFill) } }
+    /// Points wide, the ring's edge.
+    var ringLineWidth: Double { didSet { save(ringLineWidth, Key.ringLineWidth) } }
+    /// How solid the ring's edge is.
+    var ringOpacity: Double { didSet { save(ringOpacity, Key.ringOpacity) } }
     /// The pointer shrinks a little while a button is down, like a pressed button. Works on its
     /// own, without the overlay.
     var shrinksOnPress: Bool { didSet { save(shrinksOnPress, Key.pressShrink) } }
@@ -172,6 +181,25 @@ final class PointerHighlight {
     /// default: a long press then shows the same pulse as a click.
     var pulseShowsHold: Bool { didSet { save(pulseShowsHold, Key.pulseHold) } }
 
+    /// The Ring style: points wide, how far it grows (times its base size), and how solid it starts.
+    var pulseLineWidth: Double { didSet { save(pulseLineWidth, Key.pulseLineWidth) } }
+    var pulseGrowth: Double { didSet { save(pulseGrowth, Key.pulseGrowth) } }
+    var pulseOpacity: Double { didSet { save(pulseOpacity, Key.pulseOpacity) } }
+    /// The Ripple style: how many waves, how far each grows, the gap between them as a share of
+    /// the pulse length, each wave's starting width in points, and how solid it starts.
+    var rippleWaves: Int { didSet { save(rippleWaves, Key.rippleWaves) } }
+    var rippleGrowth: Double { didSet { save(rippleGrowth, Key.rippleGrowth) } }
+    var rippleSpacing: Double { didSet { save(rippleSpacing, Key.rippleSpacing) } }
+    var rippleLineWidth: Double { didSet { save(rippleLineWidth, Key.rippleLineWidth) } }
+    var rippleOpacity: Double { didSet { save(rippleOpacity, Key.rippleOpacity) } }
+    /// The long-press ring: seconds held before it shows, its size against the pulse's base
+    /// size, how tinted its inside is, its edge in points, and whether it breathes while held.
+    var holdDelay: Double { didSet { save(holdDelay, Key.holdDelay) } }
+    var holdSize: Double { didSet { save(holdSize, Key.holdSize) } }
+    var holdFill: Double { didSet { save(holdFill, Key.holdFill) } }
+    var holdLineWidth: Double { didSet { save(holdLineWidth, Key.holdLineWidth) } }
+    var holdBreathes: Bool { didSet { save(holdBreathes, Key.holdBreathes) } }
+
     /// Off uses `laserColor` instead of the pair's color.
     var laserUsesPairColor: Bool { didSet { save(laserUsesPairColor, Key.laserPair) } }
     var laserColor: RGBA { didSet { saveColor(laserColor, Key.laserColor) } }
@@ -184,7 +212,7 @@ final class PointerHighlight {
     /// Draws the laser only while `laserKeys` are held. Off, the laser draws on any drag.
     var laserNeedsKeys: Bool { didSet { save(laserNeedsKeys, Key.laserOption) } }
     /// While `laserNeedsKeys` and its keys are held, the drag draws without clicking or selecting
-    /// anything underneath. Off by default: the drag also reaches the app.
+    /// anything underneath. On by default; off, the drag also reaches the app.
     var laserBlocksClicks: Bool { didSet { save(laserBlocksClicks, Key.laserBlocksClicks) } }
     /// The keys `laserNeedsKeys` waits for; ⌥ Option unless changed.
     var laserKeys: HoldKeys { didSet { save(laserKeys.rawValue, Key.laserKeys) } }
@@ -196,18 +224,45 @@ final class PointerHighlight {
     var laserOutlineOpacity: Double { didSet { save(laserOutlineOpacity, Key.laserOutlineOpacity) } }
     /// Classic unless changed.
     var laserLook: LaserLook { didSet { save(laserLook.rawValue, Key.laserLook) } }
-
-    /// Pulse and laser colors chosen for particular pairs, by pair id.
-    private(set) var pairPulseColors: [String: RGBA] { didSet { saveColors(pairPulseColors, Key.pairPulse) } }
-    private(set) var pairLaserColors: [String: RGBA] { didSet { saveColors(pairLaserColors, Key.pairLaser) } }
+    /// Seconds the dot takes to fade once the pointer stops.
+    var laserDotFade: Double { didSet { save(laserDotFade, Key.laserDotFade) } }
+    /// Classic: how solid the trail is while drawn, how strong its glow is (the dot's is 90% of
+    /// it), and how far the middle line is lightened toward white.
+    var laserTrailOpacity: Double { didSet { save(laserTrailOpacity, Key.laserTrailOpacity) } }
+    var laserGlow: Double { didSet { save(laserGlow, Key.laserGlow) } }
+    var laserCoreLightness: Double { didSet { save(laserCoreLightness, Key.laserCoreLightness) } }
+    /// GoodNotes: seconds a finished trail takes to fade after it's held whole, and points the
+    /// edge adds around the line and dot.
+    var laserFadeOut: Double { didSet { save(laserFadeOut, Key.laserFadeOut) } }
+    var laserRim: Double { didSet { save(laserRim, Key.laserRim) } }
 
     static let sizeRange = 0.5...2.0
+    /// The ring can shrink to a tenth, tight around the pointer's tip.
+    static let ringSizeRange = 0.1...2.0
     static let pulseDurationRange = 0.2...1.5
     static let pulseOutlineWidthRange = 0.5...4.0
     static let trailFadeRange = 0.3...3.0
     static let outlineOpacityRange = 0.05...1.0
     static let pressScaleRange = 0.5...0.95
     static let pressDurationRange = 0.0...0.5
+    static let fillRange = 0.0...0.5
+    static let lineWidthRange = 1.0...8.0
+    static let opacityRange = 0.3...1.0
+    static let growthRange = 1.2...3.0
+    static let rippleWavesRange = 2...5
+    /// At most 20%, so even five waves leave each one a fifth of the pulse length to grow.
+    static let rippleSpacingRange = 0.05...0.2
+    static let rippleLineWidthRange = 1.0...6.0
+    static let holdDelayRange = 0.2...1.5
+    static let holdSizeRange = 0.3...1.2
+    static let holdFillRange = 0.0...0.8
+    static let holdLineWidthRange = 1.0...6.0
+    static let dotFadeRange = 0.2...3.0
+    static let trailOpacityRange = 0.4...1.0
+    static let glowRange = 0.0...0.6
+    static let coreLightnessRange = 0.0...0.8
+    static let fadeOutRange = 0.1...1.0
+    static let rimRange = 1.0...6.0
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -216,14 +271,39 @@ final class PointerHighlight {
         defaults.register(defaults: [Key.pulsePair: true, Key.pulseSize: 1.0, Key.ringSize: 1.0, Key.pulseDuration: 0.45,
                                      Key.pulseRight: true, Key.laserPair: true, Key.laserSize: 1.0,
                                      Key.laserTrail: true, Key.laserFade: 0.9, Key.laserOutlineOpacity: 1.0,
-                                     Key.laserKeys: HoldKeys.option.rawValue, Key.pressShrink: false, Key.pressScale: 0.88,
+                                     Key.laserKeys: HoldKeys.option.rawValue, Key.laserBlocksClicks: true, Key.pressShrink: false, Key.pressScale: 0.88,
                                      Key.pressDown: 0.08, Key.pressUp: 0.08, Key.pressRight: true])
+        defaults.register(defaults: Self.lookDefaults)
         // Builds before the switches stored one choice: off, pulse or laser.
         let earlier = defaults.string(forKey: Key.oldMode)
         pulseOn = defaults.object(forKey: Key.pulseOn) as? Bool ?? (earlier == "pulse")
         laserOn = defaults.object(forKey: Key.laserOn) as? Bool ?? (earlier == "laser")
         showsRing = defaults.bool(forKey: Key.ring)
         ringSize = defaults.double(forKey: Key.ringSize)
+        ringUsesPairColor = defaults.bool(forKey: Key.ringPair)
+        ringColor = Self.color(defaults, Key.ringColor) ?? RGBA(red: 1, green: 1, blue: 1)
+        ringFill = defaults.double(forKey: Key.ringFill)
+        ringLineWidth = defaults.double(forKey: Key.ringLineWidth)
+        ringOpacity = defaults.double(forKey: Key.ringOpacity)
+        pulseLineWidth = defaults.double(forKey: Key.pulseLineWidth)
+        pulseGrowth = defaults.double(forKey: Key.pulseGrowth)
+        pulseOpacity = defaults.double(forKey: Key.pulseOpacity)
+        rippleWaves = defaults.integer(forKey: Key.rippleWaves)
+        rippleGrowth = defaults.double(forKey: Key.rippleGrowth)
+        rippleSpacing = defaults.double(forKey: Key.rippleSpacing)
+        rippleLineWidth = defaults.double(forKey: Key.rippleLineWidth)
+        rippleOpacity = defaults.double(forKey: Key.rippleOpacity)
+        holdDelay = defaults.double(forKey: Key.holdDelay)
+        holdSize = defaults.double(forKey: Key.holdSize)
+        holdFill = defaults.double(forKey: Key.holdFill)
+        holdLineWidth = defaults.double(forKey: Key.holdLineWidth)
+        holdBreathes = defaults.bool(forKey: Key.holdBreathes)
+        laserDotFade = defaults.double(forKey: Key.laserDotFade)
+        laserTrailOpacity = defaults.double(forKey: Key.laserTrailOpacity)
+        laserGlow = defaults.double(forKey: Key.laserGlow)
+        laserCoreLightness = defaults.double(forKey: Key.laserCoreLightness)
+        laserFadeOut = defaults.double(forKey: Key.laserFadeOut)
+        laserRim = defaults.double(forKey: Key.laserRim)
         shrinksOnPress = defaults.bool(forKey: Key.pressShrink)
         pressScale = defaults.double(forKey: Key.pressScale)
         pressDownDuration = defaults.double(forKey: Key.pressDown)
@@ -252,9 +332,17 @@ final class PointerHighlight {
         laserOutline = defaults.string(forKey: Key.laserOutline).flatMap(LaserOutline.init(rawValue:)) ?? .dark
         laserOutlineOpacity = defaults.double(forKey: Key.laserOutlineOpacity)
         laserLook = defaults.string(forKey: Key.laserLook).flatMap(LaserLook.init(rawValue:)) ?? .classic
-        pairPulseColors = Self.colors(defaults, Key.pairPulse)
-        pairLaserColors = Self.colors(defaults, Key.pairLaser)
     }
+
+    /// The looks' starting values: what each one drew before it could be changed.
+    private static let lookDefaults: [String: Any] = [
+        Key.ringPair: true, Key.ringFill: 0.18, Key.ringLineWidth: 3.0, Key.ringOpacity: 0.9,
+        Key.pulseLineWidth: 4.0, Key.pulseGrowth: 1.8, Key.pulseOpacity: 0.95,
+        Key.rippleWaves: 3, Key.rippleGrowth: 2.2, Key.rippleSpacing: 0.15, Key.rippleLineWidth: 3.0, Key.rippleOpacity: 0.9,
+        Key.holdDelay: 0.35, Key.holdSize: 0.55, Key.holdFill: 0.35, Key.holdLineWidth: 3.0, Key.holdBreathes: true,
+        Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
+        Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
+    ]
 
     /// True when anything needs the overlay.
     var isActive: Bool { showsRing || pulseOn || laserOn }
@@ -307,41 +395,27 @@ final class PointerHighlight {
 
     /// The custom color when chosen; otherwise the color set for this pair, or the pair's own.
     func pulseColor(for pair: PointerPair) -> RGBA {
-        pulseUsesPairColor ? pulsePairColor(pair) : pulseColor
+        pulseUsesPairColor ? pair.highlightColor : pulseColor
     }
 
     /// The laser's glow, outline, middle and center: the laser color, the outline chosen in
     /// `laserOutline`, a lighter shade of the laser color, and white.
     func laserColors(for pair: PointerPair) -> LaserColors {
         let white = RGBA(red: 1, green: 1, blue: 1)
-        let base = laserUsesPairColor ? laserPairColor(pair) : laserColor
-        let middle = base.mixed(with: white, by: 0.45)
+        let base = laserUsesPairColor ? pair.highlightColor : laserColor
+        let middle = base.mixed(with: white, by: laserCoreLightness)
         let outlines: [LaserOutline: RGBA] = [.dark: pair.darkColor, .laser: base, .none: middle]
         return LaserColors(glow: base, outline: outlines[laserOutline] ?? base, middle: middle, center: white)
     }
 
-    /// The pulse color for a pair, ignoring the custom color: set for it, or its own.
-    func pulsePairColor(_ pair: PointerPair) -> RGBA { pairPulseColors[pair.id] ?? pair.highlightColor }
-
-    func laserPairColor(_ pair: PointerPair) -> RGBA { pairLaserColors[pair.id] ?? pair.highlightColor }
-
-    /// Nil goes back to the pair's own color.
-    func setPulseColor(_ color: RGBA?, for pair: PointerPair) { pairPulseColors[pair.id] = color }
-
-    func setLaserColor(_ color: RGBA?, for pair: PointerPair) { pairLaserColors[pair.id] = color }
+    func ringColor(for pair: PointerPair) -> RGBA {
+        ringUsesPairColor ? pair.highlightColor : ringColor
+    }
 
     private func save(_ value: Any, _ key: String) { defaults.set(value, forKey: key) }
 
     private func saveColor(_ color: RGBA, _ key: String) {
         defaults.set(try? JSONEncoder().encode(color), forKey: key)
-    }
-
-    private func saveColors(_ colors: [String: RGBA], _ key: String) {
-        defaults.set(try? JSONEncoder().encode(colors), forKey: key)
-    }
-
-    private static func colors(_ defaults: UserDefaults, _ key: String) -> [String: RGBA] {
-        defaults.data(forKey: key).flatMap { try? JSONDecoder().decode([String: RGBA].self, from: $0) } ?? [:]
     }
 
     private static func color(_ defaults: UserDefaults, _ key: String) -> RGBA? {
@@ -357,8 +431,6 @@ final class PointerHighlight {
         static let laserOutline = "highlightLaserOutline"
         static let laserOutlineOpacity = "highlightLaserOutlineOpacity"
         static let laserLook = "highlightLaserLook"
-        static let pairPulse = "highlightPairPulseColors"
-        static let pairLaser = "highlightPairLaserColors"
         static let pulseOn = "highlightPulse"
         static let laserOn = "highlightLaser"
         static let ring = "highlightRing"
@@ -383,6 +455,30 @@ final class PointerHighlight {
         static let ringSize = "highlightRingSize"
         static let laserTrail = "highlightLaserTrail"
         static let laserFade = "highlightLaserTrailFade"
+        static let ringPair = "highlightRingUsesPair"
+        static let ringColor = "highlightRingColor"
+        static let ringFill = "highlightRingFill"
+        static let ringLineWidth = "highlightRingLineWidth"
+        static let ringOpacity = "highlightRingOpacity"
+        static let pulseLineWidth = "highlightPulseLineWidth"
+        static let pulseGrowth = "highlightPulseGrowth"
+        static let pulseOpacity = "highlightPulseOpacity"
+        static let rippleWaves = "highlightRippleWaves"
+        static let rippleGrowth = "highlightRippleGrowth"
+        static let rippleSpacing = "highlightRippleSpacing"
+        static let rippleLineWidth = "highlightRippleLineWidth"
+        static let rippleOpacity = "highlightRippleOpacity"
+        static let holdDelay = "highlightHoldDelay"
+        static let holdSize = "highlightHoldSize"
+        static let holdFill = "highlightHoldFill"
+        static let holdLineWidth = "highlightHoldLineWidth"
+        static let holdBreathes = "highlightHoldBreathes"
+        static let laserDotFade = "highlightLaserDotFade"
+        static let laserTrailOpacity = "highlightLaserTrailOpacity"
+        static let laserGlow = "highlightLaserGlow"
+        static let laserCoreLightness = "highlightLaserCoreLightness"
+        static let laserFadeOut = "highlightLaserFadeOut"
+        static let laserRim = "highlightLaserRim"
     }
 }
 

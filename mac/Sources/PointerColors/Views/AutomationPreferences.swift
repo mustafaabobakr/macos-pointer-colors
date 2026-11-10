@@ -7,7 +7,7 @@ struct AutomationPreferences: View {
 
     var body: some View {
         SettingsPage("Automation") {
-            if model.needsFullDiskAccess {
+            Reveal(isShown: model.needsFullDiskAccess) {
                 Text("Automation needs Full Disk Access. Grant it in General › Permission.")
                     .appFont(.caption).foregroundStyle(.orange)
             }
@@ -28,6 +28,7 @@ struct AutomationPreferences: View {
             }
             .disabled(model.needsFullDiskAccess)
         }
+        .animation(.reveal, value: model.needsFullDiskAccess)
         .onAppear { shakeToFind = model.shakeToFind ?? false }
     }
 }
@@ -38,9 +39,9 @@ private struct PointerLocationRows: View {
 
     var body: some View {
         SettingsToggle(title: Text("Show pointer location"), symbol: "scope",
-                       caption: Text("Press \(locator.key.title) twice to reveal the pointer."), isOn: $locator.isOn)
+                       caption: Text("Press \(locator.key.title) twice to reveal the pointer."), isOn: $locator.isOn.revealing())
             .featureSpot("clip-pointer-location")
-        if locator.isOn {
+        Reveal(isShown: locator.isOn) {
             SettingsRow("Key", symbol: "keyboard") {
                 Picker("Key", selection: $locator.key) {
                     ForEach(PointerLocator.keys, id: \.rawValue) { Text($0.title).tag($0) }
@@ -79,10 +80,12 @@ private struct AppearanceSection: View {
         SettingsCard("Appearance", anchor: "automation.appearance") {
             SettingsToggle("Switch pairs with light and dark appearance", symbol: "circle.lefthalf.filled",
                            caption: "Applies a pair whenever macOS changes appearance, including on a schedule.",
-                           isOn: $automation.followsAppearance)
+                           isOn: $automation.followsAppearance.revealing())
                 .featureSpot("clip-follows-appearance")
-            pairPicker("Light appearance", symbol: "sun.max", selection: $automation.lightPairID)
-            pairPicker("Dark appearance", symbol: "moon", selection: $automation.darkPairID)
+            Reveal(isShown: automation.followsAppearance) {
+                pairPicker("Light appearance", symbol: "sun.max", selection: $automation.lightPairID)
+                pairPicker("Dark appearance", symbol: "moon", selection: $automation.darkPairID)
+            }
         }
     }
 
@@ -92,6 +95,5 @@ private struct AppearanceSection: View {
                            pairs: pairs, accessibilityTitle: String(localized: "Pair for this appearance"), allowsNone: false)
                 .fixedSize()
         }
-        .disabled(!automation.followsAppearance)
     }
 }

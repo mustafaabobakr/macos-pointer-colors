@@ -209,7 +209,7 @@ final class HighlightOverlay {
 
     /// The ring shows only on the displays the pointer is on or near.
     private func placeRing(at point: CGPoint) {
-        let reach = 22 * style.pointerScale * style.ringSize + 2
+        let reach = 22 * style.pointerScale * style.ringSize + style.ringLineWidth
         for display in displays {
             let spot = isNear(point, display.frame, reach: reach) ? local(point, in: display.frame) : nil
             display.ring.place(at: spot, style: style)
@@ -235,8 +235,8 @@ final class HighlightOverlay {
         }
     }
 
-    /// How far a pulse reaches from its point: a ripple at its widest.
-    private var pulseReach: Double { 44 * style.pointerScale * style.pulseSize * 1.2 }
+    /// How far a pulse reaches from its point.
+    private var pulseReach: Double { style.pulseRadius }
 
     // MARK: Laser
 
@@ -347,13 +347,34 @@ struct HighlightStyle: Equatable {
     var laserOutlineOpacity = 1.0
     var ringSize = 1.0
     var trailFade = 0.9
+    var ringFill = 0.18
+    var ringLineWidth = 3.0
+    var ringOpacity = 0.9
+    var pulseLineWidth = 4.0
+    var pulseGrowth = 1.8
+    var pulseOpacity = 0.95
+    var rippleWaves = 3
+    var rippleGrowth = 2.2
+    var rippleSpacing = 0.15
+    var rippleLineWidth = 3.0
+    var rippleOpacity = 0.9
+    var holdDelay = 0.35
+    var holdSize = 0.55
+    var holdFill = 0.35
+    var holdLineWidth = 3.0
+    var holdBreathes = true
+    var dotFade = 0.42
+    var classicTrailOpacity = 0.95
+    var laserGlow = 0.2
+    var goodNotesFadeOut = 0.35
+    var goodNotesRim = 2.4
 
     init() {}
 
     @MainActor
     init(settings: PointerHighlight, pair: PointerPair, pointerScale: Double) {
         showsRing = settings.showsRing
-        ringColor = pair.highlightColor
+        ringColor = settings.ringColor(for: pair)
         pulseColor = settings.pulseColor(for: pair)
         pulseOutline = settings.pulseOutlined ? pair.darkColor : nil
         pulseOutlineExtra = settings.pulseOutlineWidth * 2
@@ -369,6 +390,45 @@ struct HighlightStyle: Equatable {
         laserOutlineOpacity = settings.laserOutlineOpacity
         ringSize = settings.ringSize
         trailFade = settings.laserTrailFade
+        takeRingAndPulseLooks(settings)
+        takeLaserLooks(settings)
+    }
+
+    @MainActor
+    private mutating func takeRingAndPulseLooks(_ settings: PointerHighlight) {
+        (ringFill, ringLineWidth, ringOpacity) = (settings.ringFill, settings.ringLineWidth, settings.ringOpacity)
+        (pulseLineWidth, pulseGrowth, pulseOpacity) = (settings.pulseLineWidth, settings.pulseGrowth, settings.pulseOpacity)
+        (rippleWaves, rippleGrowth, rippleSpacing) = (settings.rippleWaves, settings.rippleGrowth, settings.rippleSpacing)
+        (rippleLineWidth, rippleOpacity) = (settings.rippleLineWidth, settings.rippleOpacity)
+        (holdDelay, holdSize, holdFill) = (settings.holdDelay, settings.holdSize, settings.holdFill)
+        (holdLineWidth, holdBreathes) = (settings.holdLineWidth, settings.holdBreathes)
+    }
+
+    @MainActor
+    private mutating func takeLaserLooks(_ settings: PointerHighlight) {
+        (dotFade, classicTrailOpacity, laserGlow) = (settings.laserDotFade, settings.laserTrailOpacity, settings.laserGlow)
+        (goodNotesFadeOut, goodNotesRim) = (settings.laserFadeOut, settings.laserRim)
+    }
+}
+
+extension HighlightStyle {
+    /// Seconds each ripple wave takes, so the last one, leaving `rippleSpacing` after the one
+    /// before it, still ends with the pulse.
+    var rippleWaveLength: Double {
+        pulseDuration * max(1 - rippleSpacing * Double(rippleWaves - 1), 0.2)
+    }
+
+    /// Seconds after the click that wave `index` leaves.
+    func rippleDelay(_ index: Int) -> Double { pulseDuration * rippleSpacing * Double(index) }
+
+    /// A ripple wave thins to a third of its starting width as it spreads.
+    var rippleEndLineWidth: Double { rippleLineWidth / 3 }
+
+    /// How far a pulse reaches from its point at its widest, its line included.
+    var pulseRadius: Double {
+        let base = 44 * pointerScale * pulseSize
+        let (growth, line) = pulseStyle == .ring ? (pulseGrowth, pulseLineWidth) : (rippleGrowth, rippleLineWidth)
+        return base * growth / 2 + line + pulseOutlineExtra
     }
 }
 
@@ -377,14 +437,14 @@ extension HighlightStyle {
     var laserDotParts: [LaserPart] {
         switch laserLook {
         case .classic:
-            return scaled([LaserPart(laser.glow, 32, opacity: 0.18), LaserPart(laser.outline, 16, opacity: laserOutlineOpacity),
+            return scaled([LaserPart(laser.glow, 32, opacity: laserGlow * 0.9), LaserPart(laser.outline, 16, opacity: laserOutlineOpacity),
                            LaserPart(laser.middle, 13), LaserPart(laser.center, 11)])
         case .goodNotes:
             // Measured from GoodNotes on a 1:1 display: a solid disc about 7pt wide, barely glowing.
             guard laserOutlined else { return scaled([LaserPart(laser.glow, 7, blur: 1.5)]) }
             // With an edge: the glow alone underneath, so it spreads beyond the edge without
             // tinting it, then the edge, then the disc.
-            return scaled([LaserPart(laser.glow, 7, blur: 1.5), LaserPart(laser.outline, 7, opacity: laserOutlineOpacity, rim: Self.goodNotesRim),
+            return scaled([LaserPart(laser.glow, 7, blur: 1.5), LaserPart(laser.outline, 7, opacity: laserOutlineOpacity, rim: goodNotesRim),
                            LaserPart(laser.glow, 7)])
         }
     }
@@ -393,7 +453,7 @@ extension HighlightStyle {
     var laserTrailParts: [LaserPart] {
         switch laserLook {
         case .classic:
-            return scaled([LaserPart(laser.glow, 14, opacity: 0.2), LaserPart(laser.outline, 6, opacity: laserOutlineOpacity),
+            return scaled([LaserPart(laser.glow, 14, opacity: laserGlow), LaserPart(laser.outline, 6, opacity: laserOutlineOpacity),
                            LaserPart(laser.middle, 4), LaserPart(laser.center, 2)])
         case .goodNotes:
             // Measured from GoodNotes: a line up to 14pt wide around a white core about a third of
@@ -403,27 +463,21 @@ extension HighlightStyle {
                 return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.center, 4.4)])
             }
             // With an edge, built like the dot: glow, edge, line, then the core.
-            return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.outline, 14, opacity: laserOutlineOpacity, rim: Self.goodNotesRim),
+            return scaled([LaserPart(laser.glow, 14, blur: 4), LaserPart(laser.outline, 14, opacity: laserOutlineOpacity, rim: goodNotesRim),
                            LaserPart(laser.glow, 14), LaserPart(laser.center, 4.4)])
         }
     }
 
-    /// How much wider the GoodNotes edge is than the line it sits behind, both sides together.
-    /// It stays this wide however fast the pointer moves, so a thin flick keeps its edge.
-    static let goodNotesRim = 2.4
-
-    /// GoodNotes thins its trail as the pointer speeds up; Classic keeps one width.
+    /// GoodNotes thins its trail as the pointer speeds up; Classic keeps one width. Its edge,
+    /// `goodNotesRim` wider than the line, keeps that width however fast the pointer moves.
     var trailVariesWithSpeed: Bool { laserLook == .goodNotes }
 
-    /// GoodNotes keeps a finished trail whole, then fades it over this long.
-    static let goodNotesFade = 0.35
-
     /// A trail's opacity while it's drawn: GoodNotes draws it solid.
-    var trailOpacity: Double { laserLook == .goodNotes ? 1 : 0.95 }
+    var trailOpacity: Double { laserLook == .goodNotes ? 1 : classicTrailOpacity }
 
     /// How long a finished trail stays at full opacity, out of `trailFade`, before fading. Classic
-    /// fades from the release; GoodNotes holds it and fades over the last `goodNotesFade` seconds.
-    var trailHold: Double { laserLook == .goodNotes ? max(trailFade - Self.goodNotesFade, 0) : 0 }
+    /// fades from the release; GoodNotes holds it and fades over the last `goodNotesFadeOut` seconds.
+    var trailHold: Double { laserLook == .goodNotes ? max(trailFade - goodNotesFadeOut, 0) : 0 }
 
     /// A finished trail's opacity `elapsed` seconds after the release.
     func trailOpacity(after elapsed: Double) -> Double {
@@ -477,21 +531,18 @@ struct Pulse: Equatable {
 /// A press held longer than a click: a small filled ring under the pointer until release, when it
 /// fades and a click pulse goes out from it. A quick click never shows it.
 struct Hold: Equatable {
-    /// Held this long, a press counts as a long press.
-    static let threshold: TimeInterval = 0.35
-    /// How long the ring takes to grow in, and to fade after release.
+    /// How long the ring takes to grow in, and to fade after release. How long a press must last
+    /// first, and the ring's size, are `HighlightStyle.holdDelay` and `holdSize`.
     static let grow: TimeInterval = 0.15
     static let release: TimeInterval = 0.12
-    /// Size against the pulse's base diameter.
-    static let size = 0.55
 
     var point: CGPoint
     let start: TimeInterval
     var releasedAt: TimeInterval?
 }
 
+/// The laser dot, which fades over `HighlightStyle.dotFade` from its last move.
 struct LaserDot: Equatable {
-    static let fade: TimeInterval = 0.42
     let point: CGPoint
     let updatedAt: TimeInterval
 }
@@ -503,7 +554,7 @@ struct LaserStroke: Equatable {
     var finishedAt: TimeInterval?
 }
 
-/// Everything a HighlightCanvas draws, like the demo pad in Preferences, in its own coordinates.
+/// Everything a highlight picture draws, like the previews in Preferences, in its own coordinates.
 @MainActor
 @Observable
 final class HighlightScene {
@@ -564,7 +615,7 @@ final class HighlightScene {
     func release(at time: TimeInterval) {
         finishStroke(at: time)
         guard let held = hold, held.releasedAt == nil else { return }
-        guard time - held.start >= Hold.threshold else { hold = nil; return }
+        guard time - held.start >= style.holdDelay else { hold = nil; return }
         hold = Hold(point: held.point, start: held.start, releasedAt: time)
         pulses.append(Pulse(point: held.point, start: time))
     }
@@ -579,7 +630,7 @@ final class HighlightScene {
         let before = liveCount
         pulses.removeAll { now - $0.start > style.pulseDuration }
         strokes.removeAll { stroke in stroke.finishedAt.map { now - $0 > style.trailFade } ?? false }
-        if let dot = laserDot, now - dot.updatedAt > LaserDot.fade { laserDot = nil }
+        if let dot = laserDot, now - dot.updatedAt > style.dotFade { laserDot = nil }
         if let released = hold?.releasedAt, now - released > Hold.release { hold = nil }
         return liveCount != before
     }

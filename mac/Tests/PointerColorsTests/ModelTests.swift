@@ -290,21 +290,6 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(macOSDark.highlightColor.hex, "FFFFFF")
     }
 
-    func testEachPairCanHaveItsOwnColors() {
-        let defaults = makeDefaults()
-        let highlight = PointerHighlight(defaults: defaults)
-        let pair = PointerPair.featured
-        highlight.setPulseColor(RGBA(hex: "FF0000")!, for: pair)
-        highlight.setLaserColor(RGBA(hex: "0000FF")!, for: pair)
-        let reopened = PointerHighlight(defaults: defaults)
-        XCTAssertEqual(reopened.pulseColor(for: pair).hex, "FF0000")
-        XCTAssertEqual(reopened.laserColors(for: pair).glow.hex, "0000FF")
-        reopened.setPulseColor(nil, for: pair)
-        XCTAssertEqual(reopened.pulseColor(for: pair), pair.highlightColor)
-        reopened.laserUsesPairColor = false
-        XCTAssertEqual(reopened.laserColors(for: pair).glow, reopened.laserColor)
-    }
-
     func testLaserLookIsClassicUnlessChangedAndSaved() {
         let defaults = makeDefaults()
         let highlight = PointerHighlight(defaults: defaults)
@@ -340,14 +325,14 @@ final class PointerHighlightTests: XCTestCase {
         XCTAssertEqual(trail.map(\.color.hex), ["FF0000", "000000", "FF0000", "FFFFFF"],
                        "glow, edge, line, core")
         XCTAssertEqual(trail.filter { $0.blur > 0 }.count, 1, "only the bottom layer glows, so the edge stays dark")
-        XCTAssertEqual(trail[1].width - trail[2].width, HighlightStyle.goodNotesRim, accuracy: 0.001)
+        XCTAssertEqual(trail[1].width - trail[2].width, style.goodNotesRim, accuracy: 0.001)
         XCTAssertEqual(style.laserDotParts.map(\.color.hex), ["FF0000", "000000", "FF0000"])
 
         // At the thinnest share the edge still shows the full rim around the line.
         let point = [CGPoint(x: 0, y: 0)]
         let shape = LaserTrailShape(parts: [trail[1], trail[2]], points: point, shares: [0.2])
         let edge = shape.paths[0].boundingBox.width, line = shape.paths[1].boundingBox.width
-        XCTAssertEqual(edge - line, HighlightStyle.goodNotesRim, accuracy: 0.01)
+        XCTAssertEqual(edge - line, style.goodNotesRim, accuracy: 0.01)
     }
 
     @MainActor
@@ -564,7 +549,8 @@ final class SettingsBackupTests: XCTestCase {
     func testRoundTripCarriesLaserBlocksClicks() throws {
         let (source, sourceName) = makeDefaults()
         let highlight = PointerHighlight(defaults: source)
-        XCTAssertFalse(highlight.laserBlocksClicks, "off by default")
+        XCTAssertTrue(highlight.laserBlocksClicks, "on by default")
+        highlight.laserBlocksClicks = false
         highlight.laserBlocksClicks = true
         XCTAssertTrue(PointerHighlight(defaults: source).laserBlocksClicks, "saved")
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
@@ -575,9 +561,16 @@ final class SettingsBackupTests: XCTestCase {
 
         // A file saved with it off turns it back off.
         let (off, offName) = makeDefaults()
+        PointerHighlight(defaults: off).laserBlocksClicks = false
         let offData = try SettingsBackup(defaults: off, domain: offName).export(launchAtLogin: false)
         try SettingsBackup(defaults: target, domain: targetName).restore(from: offData)
         XCTAssertFalse(PointerHighlight(defaults: target).laserBlocksClicks)
+
+        // A file from before the setting, or one that never changed it, gets the default: on.
+        let (untouched, untouchedName) = makeDefaults()
+        let untouchedData = try SettingsBackup(defaults: untouched, domain: untouchedName).export(launchAtLogin: false)
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: untouchedData)
+        XCTAssertTrue(PointerHighlight(defaults: target).laserBlocksClicks)
     }
 
     @MainActor

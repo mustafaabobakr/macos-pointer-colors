@@ -2,7 +2,8 @@ import SwiftUI
 
 /// A page of Preferences, listed in the sidebar under its group.
 enum PreferencesTab: String, CaseIterable, Identifiable {
-    case general, pairs, highlight, automation, appearance, speed, buttons, battery, shortcuts, about, whatsNew
+    case general, pairs, automation, appearance, ring, pulse, laser, press, speed, buttons, battery, shortcuts, about,
+         whatsNew
 
     var id: Self { self }
     /// Names the page's screen in docs/features/features.json.
@@ -14,7 +15,10 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .appearance: "Appearance"
         case .pairs: "Pairs"
         case .automation: "Automation"
-        case .highlight: "Highlight"
+        case .ring: "Ring"
+        case .pulse: "Pulse"
+        case .laser: "Laser"
+        case .press: "Press"
         case .speed: "Speed"
         case .buttons: "Buttons"
         case .battery: "Battery"
@@ -31,7 +35,10 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .appearance: String(localized: "Appearance")
         case .pairs: String(localized: "Pairs")
         case .automation: String(localized: "Automation")
-        case .highlight: String(localized: "Highlight")
+        case .ring: String(localized: "Ring")
+        case .pulse: String(localized: "Pulse")
+        case .laser: String(localized: "Laser")
+        case .press: String(localized: "Press")
         case .speed: String(localized: "Speed")
         case .buttons: String(localized: "Buttons")
         case .battery: String(localized: "Battery")
@@ -48,7 +55,10 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .appearance: "circle.lefthalf.filled"
         case .pairs: "cursorarrow"
         case .automation: "wand.and.stars"
-        case .highlight: "cursorarrow.rays"
+        case .ring: "circle.dashed"
+        case .pulse: "circle.circle"
+        case .laser: "scribble"
+        case .press: "arrow.down.right.and.arrow.up.left"
         case .speed: "hare"
         case .buttons: "computermouse"
         case .battery: "battery.75percent"
@@ -61,13 +71,14 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
 
 /// The sidebar's headings, each with its pages in order.
 enum PreferencesGroup: String, CaseIterable, Identifiable {
-    case pointer, mouse, app
+    case pointer, highlight, mouse, app
 
     var id: Self { self }
 
     var title: LocalizedStringKey {
         switch self {
         case .pointer: "Pointer"
+        case .highlight: "Highlight"
         case .mouse: "Mouse"
         case .app: "App"
         }
@@ -75,7 +86,8 @@ enum PreferencesGroup: String, CaseIterable, Identifiable {
 
     var tabs: [PreferencesTab] {
         switch self {
-        case .pointer: [.general, .pairs, .highlight, .automation, .appearance]
+        case .pointer: [.general, .pairs, .automation, .appearance]
+        case .highlight: [.ring, .pulse, .laser, .press]
         case .mouse: [.speed, .buttons, .battery]
         case .app: [.shortcuts, .about, .whatsNew]
         }

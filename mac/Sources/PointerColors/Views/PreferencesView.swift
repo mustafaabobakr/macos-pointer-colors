@@ -91,7 +91,10 @@ struct PreferencesView: View {
         case .appearance: AppearancePreferences(model: model)
         case .pairs: PairsPreferences(model: model)
         case .automation: AutomationPreferences(model: model)
-        case .highlight: HighlightPreferences(highlight: model.highlight, pair: model.menuBarPair, pairs: model.library.visible, pointerScale: model.scale)
+        case .ring: RingPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
+        case .pulse: PulsePreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
+        case .laser: LaserPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
+        case .press: PressPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
         case .speed: TrackingPreferences(tracking: model.tracking)
         case .buttons: ButtonsPreferences(buttons: model.buttons)
         case .battery: BatteryPreferences(model: model)
@@ -201,6 +204,7 @@ private struct GeneralPreferences: View {
                 }
                 NotificationPermissionRow()
             }
+            .animation(.reveal, value: model.needsFullDiskAccess)
             FeedbackCard()
         }
         .onAppear {
@@ -264,16 +268,17 @@ private struct MenuLookCard: View {
                 .pickerStyle(.segmented)
                 .fixedSize()
             }
-            SettingsMenu("Menu tint", symbol: "drop", selection: $model.menuTint) {
+            SettingsMenu("Menu tint", symbol: "drop", selection: $model.menuTint.revealing()) {
                 ForEach(MenuTint.allCases) { Text($0.title).tag($0) }
             }
             .featureSpot("clip-menu-tint")
-            SettingsRow("Tint strength", symbol: "slider.horizontal.3") {
-                Slider(value: $model.menuTintStrength, in: 0.1...0.8)
-                    .accessibilityLabel("Tint strength")
-                    .frame(width: 180)
+            Reveal(isShown: model.menuTint != .none) {
+                SettingsRow("Tint strength", symbol: "slider.horizontal.3") {
+                    Slider(value: $model.menuTintStrength, in: 0.1...0.8)
+                        .accessibilityLabel("Tint strength")
+                        .frame(width: 180)
+                }
             }
-            .disabled(model.menuTint == .none)
         }
     }
 }
@@ -330,6 +335,7 @@ private struct BackupSection: View {
             if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
         }
         .featureSpot("backup")
+        .animation(.reveal, value: errorMessage)
         .confirmationDialog("Replace all settings?", isPresented: Binding(
             get: { pendingImport != nil }, set: { if !$0 { pendingImport = nil } }
         )) {
@@ -421,7 +427,7 @@ private struct PairsPreferences: View {
                 }
             }
             .featureSpot("custom-pairs")
-            if isAdding || editing != nil { editor }
+            Reveal(isShown: isAdding || editing != nil) { editor }
             HStack {
                 Button("Add custom pair") { isAdding = true; editing = nil }.featureSpot("clip-add-custom")
                 Spacer()
@@ -430,6 +436,10 @@ private struct PairsPreferences: View {
             }
             if let errorMessage { Text(errorMessage).appFont(.caption).foregroundStyle(.red) }
         }
+        .animation(.reveal, value: isAdding)
+        .animation(.reveal, value: editing?.id)
+        .animation(.reveal, value: model.library.all.map(\.id))
+        .animation(.reveal, value: errorMessage)
     }
 
     @ViewBuilder private var editor: some View {
@@ -557,6 +567,11 @@ private struct AboutPreferences: View {
                 UpdateSection(model: model)
             }
             .featureSpot("updates")
+            .animation(.reveal, value: model.isCheckingForUpdates)
+            .animation(.reveal, value: model.isInstallingUpdate)
+            .animation(.reveal, value: model.availableUpdateURL)
+            .animation(.reveal, value: model.availableUpdateDownload)
+            .animation(.reveal, value: model.updateMessage)
         }
     }
 }

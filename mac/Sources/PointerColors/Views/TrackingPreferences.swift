@@ -10,14 +10,14 @@ struct TrackingPreferences: View {
             SettingsCard("Mouse", anchor: "speed.mouse") {
                 SettingsToggle("Disable pointer acceleration", symbol: "equal.circle",
                                caption: "The pointer moves the same distance however fast you move the mouse.",
-                               isOn: $tracking.accelerationOff)
+                               isOn: $tracking.accelerationOff.revealing())
                     .featureSpot("clip-acceleration-off")
                 NumberSlider(title: tracking.accelerationOff ? "Tracking speed" : "Pointer acceleration",
                              symbol: "gauge.with.dots.needle.67percent",
                              range: MouseTracking.accelerationRange, fractionDigits: 1,
                              value: $tracking.acceleration, defaultValue: tracking.defaultAcceleration,
                              reset: tracking.resetAcceleration, spot: "clip-acceleration")
-                if !tracking.accelerationOff {
+                Reveal(isShown: !tracking.accelerationOff) {
                     NumberSlider(title: "Pointer speed", symbol: "hare", range: MouseTracking.speedRange, fractionDigits: 3,
                                  value: $tracking.speed, defaultValue: MouseTracking.defaultSpeed,
                                  reset: tracking.resetSpeed, spot: "clip-speed") {

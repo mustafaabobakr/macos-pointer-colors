@@ -56,7 +56,7 @@ struct BatteryPreferences: View {
                     notificationsBlocked = !allowed
                     if allowed { BatteryNotifier.sendTest(level: model.tracking.batteryLevel) }
                 }
-                if notificationsBlocked {
+                Reveal(isShown: notificationsBlocked) {
                     SettingsRow(symbol: "exclamationmark.triangle.fill",
                                 title: Text("Notifications are off for Pointer Colors").foregroundStyle(.red),
                                 caption: Text("Turn on Allow notifications in System Settings, then send the test again.")) {
@@ -67,6 +67,7 @@ struct BatteryPreferences: View {
             BatteryHistoryCard(model: model)
         }
         .featureSpot("battery")
+        .animation(.reveal, value: notificationsBlocked)
         .onAppear { model.tracking.refreshBattery() }
         // Back from System Settings: drop the error once notifications are on.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
