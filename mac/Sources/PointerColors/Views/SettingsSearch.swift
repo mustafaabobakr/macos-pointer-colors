@@ -65,6 +65,8 @@ enum SettingsSearch {
         item(.automation, "automation.finding", String(localized: "Shake mouse pointer to locate"), "arrow.left.and.right"),
         item(.automation, "automation.finding", String(localized: "Show pointer location"), "scope"),
         item(.automation, "automation.windows", String(localized: "Focus the window under the pointer"), "macwindow"),
+        item(.automation, "automation.windows", String(localized: "Hover focus delay"), "timer"),
+        item(.automation, "automation.windows", String(localized: "Keys that pause hover focus"), "keyboard"),
         item(.ring, "highlight.ring", String(localized: "Ring around the pointer"), "circle.dashed"),
         item(.ring, "highlight.ring", String(localized: "Ring color, fill and line width"), "paintpalette"),
         item(.pulse, "highlight.pulse", String(localized: "Pulse line width, growth and opacity"), "lineweight"),

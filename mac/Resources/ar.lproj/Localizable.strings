@@ -364,3 +364,9 @@
 "Uses the brighter of the pair's outline and fill, so it follows the pair on each display." = "يستخدم الأزهى بين لوني حدود الزوج وتعبئته، فيتبع الزوج على كل شاشة.";
 "Pulse and laser color" = "لون النبضة والليزر";
 "A %@-drag doesn't click the app underneath, so no text gets selected. Off, the drag draws and also reaches the app. Works with Draw only while holding %@." = "السحب مع %@ لا ينقر على التطبيق أسفله، فلا يُحدَّد أي نص. عند الإيقاف يرسم السحب ويصل إلى التطبيق أيضًا. يعمل مع «الرسم فقط أثناء الضغط على %@».";
+"Focus after" = "التركيز بعد";
+"Pause while holding" = "الإيقاف المؤقت أثناء الضغط على";
+"Hold a chosen key to move across windows without changing focus. A held mouse button always pauses it." = "اضغط مع الاستمرار على مفتاح مختار لتنقل المؤشر بين النوافذ دون تغيير التركيز. الضغط على زر الماوس يوقفه مؤقتًا دائمًا.";
+"Type into a window just by pointing at it; it stays where it is." = "اكتب في نافذة بمجرد الإشارة إليها؛ وتبقى في مكانها.";
+"Hover focus delay" = "مهلة التركيز عند التمرير";
+"Keys that pause hover focus" = "المفاتيح التي توقف التركيز عند التمرير مؤقتًا";
