@@ -8,15 +8,28 @@ struct ButtonsPreferences: View {
 
     var body: some View {
         SettingsPage("Buttons") {
-            AccessibilityNotice(isNeeded: buttons.sideButtonsNavigate || buttons.fixesDoubleClicks)
+            AccessibilityNotice(isNeeded: buttons.sideButtonsNavigate || buttons.swipesNavigate || buttons.fixesDoubleClicks)
             SettingsCard("Side buttons", anchor: "buttons.side") {
                 SettingsToggle("Back and forward in every app", symbol: "arrow.left.arrow.right",
                                caption: "The mouse's side buttons go back and forward in Safari, Finder, Music and other apps that ignore them. Browsers like Chrome already follow them.",
                                isOn: $buttons.sideButtonsNavigate.revealing())
                     .featureSpot("clip-side-buttons")
+                Reveal(isShown: buttons.sideButtonsNavigate) {
+                    NavigationButtonRows(buttons: buttons)
+                }
             }
             .featureSpot("side-buttons")
-            Reveal(isShown: buttons.sideButtonsNavigate) {
+            SettingsCard("Magic Mouse", anchor: "buttons.swipe") {
+                SettingsToggle("Swipe sideways to go back and forward", symbol: "hand.draw",
+                               caption: "Swiping between pages presses the back and forward shortcuts of the apps listed below, which ignore the swipe.",
+                               isOn: $buttons.swipesNavigate.revealing())
+                Reveal(isShown: buttons.swipesNavigate) {
+                    ValueSlider(title: String(localized: "Swipe distance"), symbol: "arrow.left.and.right",
+                                value: $buttons.swipeDistance, range: MouseButtons.swipeDistanceRange, format: "%.0f pt",
+                                step: MouseButtons.swipeDistanceStep, ends: .spread)
+                }
+            }
+            Reveal(isShown: buttons.sideButtonsNavigate || buttons.swipesNavigate) {
                 NavigationAppsSection(buttons: buttons)
             }
             SettingsCard("Clicks", anchor: "buttons.clicks") {
@@ -24,6 +37,13 @@ struct ButtonsPreferences: View {
                                caption: "A worn button can click twice when you press once. This ignores a second click that comes too soon after the first.",
                                isOn: $buttons.fixesDoubleClicks.revealing())
                     .featureSpot("clip-double-clicks")
+                Reveal(isShown: buttons.fixesDoubleClicks) {
+                    SettingsMenu("Fix clicks of", symbol: "computermouse",
+                                 caption: "Left only keeps every right click, however fast.",
+                                 selection: $buttons.doubleClickButtons) {
+                        ForEach(DoubleClickButtons.allCases) { Text($0.title).tag($0) }
+                    }
+                }
                 Reveal(isShown: buttons.fixesDoubleClicks) {
                     SettingsRow("Ignore clicks within", symbol: "timer",
                                 caption: "Raise it if double clicks still get through; lower it if your own fast double-clicks are lost.") {
@@ -41,6 +61,36 @@ struct ButtonsPreferences: View {
             .featureSpot("double-clicks")
         }
         .animation(.reveal, value: buttons.navigationApps.map(\.id))
+    }
+}
+
+/// Which mouse buttons go back and forward, each recorded by pressing it.
+private struct NavigationButtonRows: View {
+    @Bindable var buttons: MouseButtons
+
+    private var isDefault: Bool {
+        buttons.backButton == MouseButtons.defaultBackButton && buttons.forwardButton == MouseButtons.defaultForwardButton
+    }
+
+    var body: some View {
+        SettingsRow("Back button", symbol: "arrow.backward.circle",
+                    caption: "Click, then press the mouse button to use. Picking the forward button swaps the two.") {
+            MouseButtonRecorder(title: "Back button", number: buttons.backButton, onRecord: buttons.setBackButton)
+            // Takes the reset button's room, so both recorders line up.
+            resetButton.hidden().accessibilityHidden(true)
+        }
+        SettingsRow("Forward button", symbol: "arrow.forward.circle") {
+            MouseButtonRecorder(title: "Forward button", number: buttons.forwardButton, onRecord: buttons.setForwardButton)
+            resetButton
+        }
+    }
+
+    private var resetButton: some View {
+        Button("Reset", systemImage: "arrow.counterclockwise", action: buttons.resetNavigationButtons)
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .disabled(isDefault)
+            .help(String(localized: "Use buttons 4 and 5"))
     }
 }
 
