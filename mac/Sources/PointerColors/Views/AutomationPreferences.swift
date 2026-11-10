@@ -51,6 +51,7 @@ private struct PointerLocationRows: View {
                 .featureSpot("clip-pointer-location-key")
                 Button("Show Now") { locator.reveal() }
             }
+            LocatorLookRows(locator: locator)
         }
     }
 }

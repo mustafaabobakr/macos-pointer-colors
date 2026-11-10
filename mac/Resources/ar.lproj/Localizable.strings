@@ -364,3 +364,9 @@
 "Uses the brighter of the pair's outline and fill, so it follows the pair on each display." = "يستخدم الأزهى بين لوني حدود الزوج وتعبئته، فيتبع الزوج على كل شاشة.";
 "Pulse and laser color" = "لون النبضة والليزر";
 "A %@-drag doesn't click the app underneath, so no text gets selected. Off, the drag draws and also reaches the app. Works with Draw only while holding %@." = "السحب مع %@ لا ينقر على التطبيق أسفله، فلا يُحدَّد أي نص. عند الإيقاف يرسم السحب ويصل إلى التطبيق أيضًا. يعمل مع «الرسم فقط أثناء الضغط على %@».";
+"Animation length" = "مدة الحركة";
+"Start size" = "الحجم في البداية";
+"End size" = "الحجم في النهاية";
+"Time between presses" = "الوقت بين الضغطتين";
+"Pointer location ring length, start and end size" = "مدة حلقة موقع المؤشر وحجمها في البداية والنهاية";
+"Pointer location line width" = "عرض خط حلقة موقع المؤشر";
