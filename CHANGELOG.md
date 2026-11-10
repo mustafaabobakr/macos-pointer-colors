@@ -3,6 +3,14 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.5.4 — 2026-11-10
+
+- **Block clicks while drawing, now a choice.** **Preferences › Highlight › Laser** has a new **Block clicks while drawing** switch under **Keys to hold**. With **Draw only while holding** on, a held-key drag now draws the laser *and* reaches the app underneath, so you can point at something while you select or drag it. Turn **Block clicks while drawing** on to get the old behavior back, where the drag only draws and nothing underneath is clicked or selected. It's off by default, so after updating, a ⌥-drag selects text again until you turn it on.
+- **A steadier drain report.** **Preferences › Battery › Battery health › Drain report** is now worked out once a day, from the last 7 whole days, so it no longer jumps with every 1% drop. A new chart shows how the estimate moved each day, or any of the three numbers behind it, with all four on hover. Long durations read in days and months, like 1d 21h 12m.
+- **Preferences in a new order.** The Pointer pages now read General, Pairs, Highlight, Automation, Appearance.
+
+**Export all…** saves the new switch, and **Import…** puts it back.
+
 ## 0.5.3 — 2026-11-06
 
 - **An outline for the GoodNotes laser.** **Preferences › Highlight › Laser › Outline** now works with the GoodNotes look too, so the laser shows on light backgrounds: a thin edge in the pair's dark color (or the laser color) around the glowing line and the dot. It keeps its width on a fast, thin stroke, and the glow spreads beyond it without tinting it. Choose **None** for the plain GoodNotes look. As **Outline** defaults to the pair's dark color, the GoodNotes look now has the edge unless you turn it off.

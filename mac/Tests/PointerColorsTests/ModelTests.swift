@@ -561,6 +561,26 @@ final class SettingsBackupTests: XCTestCase {
     }
 
     @MainActor
+    func testRoundTripCarriesLaserBlocksClicks() throws {
+        let (source, sourceName) = makeDefaults()
+        let highlight = PointerHighlight(defaults: source)
+        XCTAssertFalse(highlight.laserBlocksClicks, "off by default")
+        highlight.laserBlocksClicks = true
+        XCTAssertTrue(PointerHighlight(defaults: source).laserBlocksClicks, "saved")
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertTrue(PointerHighlight(defaults: target).laserBlocksClicks)
+
+        // A file saved with it off turns it back off.
+        let (off, offName) = makeDefaults()
+        let offData = try SettingsBackup(defaults: off, domain: offName).export(launchAtLogin: false)
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: offData)
+        XCTAssertFalse(PointerHighlight(defaults: target).laserBlocksClicks)
+    }
+
+    @MainActor
     func testRoundTripCarriesLaserOutlineOpacity() throws {
         let (source, sourceName) = makeDefaults()
         let highlight = PointerHighlight(defaults: source)

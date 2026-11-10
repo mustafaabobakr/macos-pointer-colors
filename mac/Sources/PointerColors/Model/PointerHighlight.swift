@@ -181,9 +181,11 @@ final class PointerHighlight {
     var laserTrail: Bool { didSet { save(laserTrail, Key.laserTrail) } }
     /// Seconds a finished trail takes to fade.
     var laserTrailFade: Double { didSet { save(laserTrailFade, Key.laserFade) } }
-    /// Draws the laser only while `laserKeys` are held, catching the mouse so nothing underneath is
-    /// clicked or selected. Off, the laser draws on any drag and the drag also reaches the app.
+    /// Draws the laser only while `laserKeys` are held. Off, the laser draws on any drag.
     var laserNeedsKeys: Bool { didSet { save(laserNeedsKeys, Key.laserOption) } }
+    /// While `laserNeedsKeys` and its keys are held, the drag draws without clicking or selecting
+    /// anything underneath. Off by default: the drag also reaches the app.
+    var laserBlocksClicks: Bool { didSet { save(laserBlocksClicks, Key.laserBlocksClicks) } }
     /// The keys `laserNeedsKeys` waits for; ⌥ Option unless changed.
     var laserKeys: HoldKeys { didSet { save(laserKeys.rawValue, Key.laserKeys) } }
     /// When the dot follows the pointer.
@@ -243,6 +245,7 @@ final class PointerHighlight {
         laserTrail = defaults.bool(forKey: Key.laserTrail)
         laserTrailFade = defaults.double(forKey: Key.laserFade)
         laserNeedsKeys = defaults.bool(forKey: Key.laserOption)
+        laserBlocksClicks = defaults.bool(forKey: Key.laserBlocksClicks)
         let keys = HoldKeys(rawValue: defaults.integer(forKey: Key.laserKeys))
         laserKeys = keys.isEmpty ? .option : keys
         laserDot = defaults.string(forKey: Key.laserDot).flatMap(LaserDotMode.init(rawValue:)) ?? .always
@@ -349,6 +352,7 @@ final class PointerHighlight {
         static let oldMode = "highlightMode"
         static let laserOption = "highlightLaserNeedsOption"
         static let laserKeys = "highlightLaserKeys"
+        static let laserBlocksClicks = "highlightLaserBlocksClicks"
         static let laserDot = "highlightLaserDot"
         static let laserOutline = "highlightLaserOutline"
         static let laserOutlineOpacity = "highlightLaserOutlineOpacity"
