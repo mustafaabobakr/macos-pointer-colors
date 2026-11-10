@@ -6,6 +6,7 @@ struct MouseHealthView: View {
     let mouse: MouseHistory
     /// When the drain report shows, the share of idle drain its tip waits for; nil hides it.
     var report: IdleTipThreshold?
+    let battery: BatterySettings
     @Environment(\.appTextScale) private var scale
 
     var body: some View {
@@ -16,7 +17,7 @@ struct MouseHealthView: View {
                 Label(mouse.name, systemImage: "computermouse.fill")
                     .appFont(.body, weight: .semibold)
                 Spacer()
-                if let trend = mouse.trend { TrendBadge(trend: trend) }
+                if let trend = mouse.trend { TrendBadge(trend: trend, wearShare: battery.wearShare) }
             }
             HStack(spacing: 10 * scale) {
                 StatTile(value: mouse.averageFullDays.map { ChargeText.days($0) } ?? "—",
@@ -38,7 +39,7 @@ struct MouseHealthView: View {
                 DrainSteps(charge: current, showsPace: report == nil)
                 DailyDrain(charge: current).featureSpot("clip-daily-drain")
             }
-            if let report { DrainReportView(mouse: mouse, idleTip: report).featureSpot("clip-drain-report") }
+            if let report { DrainReportView(mouse: mouse, idleTip: report, battery: battery).featureSpot("clip-drain-report") }
             let measured = mouse.measured
             if measured.count >= 2 {
                 ChargeChart(charges: measured, average: mouse.averageFullDays)

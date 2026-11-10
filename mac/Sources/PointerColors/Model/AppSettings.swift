@@ -39,19 +39,19 @@ struct AppSettings {
     }
 
     var batteryDisplay: BatteryDisplay {
-        get { defaults.string(forKey: "batteryDisplay").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        get { defaults.string(forKey: "batteryDisplay").flatMap(BatteryDisplay.init(stored:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "batteryDisplay") }
     }
 
     /// When the mouse's battery shows on the Dock icon, while the app is in the Dock.
     var dockBattery: BatteryDisplay {
-        get { defaults.string(forKey: "dockBattery").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        get { defaults.string(forKey: "dockBattery").flatMap(BatteryDisplay.init(stored:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "dockBattery") }
     }
 
     /// When the mouse's battery shows in a small label under the pointer.
     var pointerBattery: BatteryDisplay {
-        get { defaults.string(forKey: "pointerBattery").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        get { defaults.string(forKey: "pointerBattery").flatMap(BatteryDisplay.init(stored:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "pointerBattery") }
     }
 
@@ -77,11 +77,6 @@ struct AppSettings {
     var batteryHistory: BatteryHistory {
         get { BatteryHistoryStore(defaults: defaults).load() }
         nonmutating set { BatteryHistoryStore(defaults: defaults).save(newValue) }
-    }
-
-    var batteryAlert: BatteryAlert {
-        get { defaults.string(forKey: "batteryAlert").flatMap(BatteryAlert.init(rawValue:)) ?? .off }
-        nonmutating set { defaults.set(newValue.rawValue, forKey: "batteryAlert") }
     }
 
     var textSize: TextSize {

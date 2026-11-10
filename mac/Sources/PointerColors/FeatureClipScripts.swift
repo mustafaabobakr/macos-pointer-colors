@@ -375,13 +375,13 @@ enum FeatureClipScripts {
 
     private static let battery = FeatureClip(
         cursorStart: spot("battery", x: 0.3, y: 0.15),
-        setUp: { $0.batteryDisplay = .off; $0.dockBattery = .off; $0.pointerBattery = .off; $0.batteryAlert = .off },
+        setUp: { $0.batteryDisplay = .off; $0.dockBattery = .off; $0.pointerBattery = .off; $0.battery.alertsOn = false },
         steps: [
             .pause(0.4),
             .move(to: spot("clip-battery", x: 0.9)), .choose { $0.batteryDisplay = .always }, .pause(0.6),
-            .move(to: spot("clip-dock-battery", x: 0.9)), .choose { $0.dockBattery = .below20 }, .pause(0.6),
-            .move(to: spot("clip-pointer-battery", x: 0.9)), .choose { $0.pointerBattery = .below20 }, .pause(0.6),
-            .move(to: spot("clip-battery-alert", x: 0.9)), .choose { $0.batteryAlert = .below10 }, .pause(1.0),
+            .move(to: spot("clip-dock-battery", x: 0.9)), .choose { $0.dockBattery = .whenLow }, .pause(0.6),
+            .move(to: spot("clip-pointer-battery", x: 0.9)), .choose { $0.pointerBattery = .whenLow }, .pause(0.6),
+            .move(to: spot("clip-battery-alert", x: 0.9)), .choose { $0.battery.alertsOn = true }, .pause(1.0),
         ])
 
     private static let appIcon = FeatureClip(

@@ -60,9 +60,6 @@ final class AppModel {
         didSet { settings.idleTipThreshold = idleTipThreshold }
     }
     private(set) var batteryHistory: BatteryHistory
-    var batteryAlert: BatteryAlert {
-        didSet { settings.batteryAlert = batteryAlert; tracking.refreshBattery() }
-    }
     var theme: AppTheme = .saved {
         didSet { theme.save(); theme.apply() }
     }
@@ -124,6 +121,7 @@ final class AppModel {
     let settings = AppSettings()
     let hotKeys = HotKeyCenter()
     let highlight = PointerHighlight()
+    let battery = BatterySettings()
     let tracking = PointerTracking()
     let buttons = MouseButtons()
     let hoverFocus = HoverFocus()
@@ -159,13 +157,13 @@ final class AppModel {
         batteryDisplay = settings.batteryDisplay
         dockBattery = settings.dockBattery
         pointerBattery = settings.pointerBattery
-        batteryAlert = settings.batteryAlert
         tracksBatteryHistory = settings.tracksBatteryHistory
         showsDrainReport = settings.showsDrainReport
         idleTipThreshold = settings.idleTipThreshold
         batteryHistory = settings.batteryHistory
         installsUpdatesAutomatically = settings.installsUpdatesAutomatically
         tracking.onBatteryRead = { [weak self] level in self?.batteryRead(level) }
+        battery.onDisplayChange = { [weak self] in self?.showBattery() }
         // Once the app has finished launching, so the Dock tile is there for the first badge.
         DispatchQueue.main.async { [tracking] in tracking.refreshBattery() }
         DispatchQueue.main.async { [theme, appIconStyle] in theme.apply(); appIconStyle.apply() }
@@ -299,13 +297,16 @@ final class AppModel {
 
     /// The mouse battery shown next to the menu-bar icon, when it's set to show now.
     var menuBarBattery: Int? {
-        batteryDisplay.shows(tracking.batteryLevel) ? tracking.batteryLevel : nil
+        batteryDisplay.shows(tracking.batteryLevel, low: lowBattery) ? tracking.batteryLevel : nil
     }
 
     /// The mouse battery on the Dock icon, when the app is in the Dock and it's set to show now.
     var dockBadgeBattery: Int? {
-        showsInDock && dockBattery.shows(tracking.batteryLevel) ? tracking.batteryLevel : nil
+        showsInDock && dockBattery.shows(tracking.batteryLevel, low: lowBattery) ? tracking.batteryLevel : nil
     }
+
+    /// The level "When low" shows below.
+    private var lowBattery: Int { Int(battery.lowLevel) }
 
     /// The battery as text, with a bolt in front while it's charging.
     func batteryText(_ level: Int) -> String {
@@ -313,10 +314,18 @@ final class AppModel {
     }
 
     private func batteryRead(_ level: Int?) {
-        updateDockBadge()
-        batteryLabel?.show(pointerBattery.shows(level) ? level : nil, charging: tracking.batteryCharging)
-        batteryNotifier.check(level: level, charging: tracking.batteryCharging, alert: batteryAlert)
+        showBattery()
+        batteryNotifier.check(level: level, charging: tracking.batteryCharging, settings: battery)
         recordBattery()
+    }
+
+    /// Redraws the level on the Dock icon and under the pointer from the last reading, as its
+    /// settings change, without reading the mice again.
+    private func showBattery() {
+        updateDockBadge()
+        let level = tracking.batteryLevel
+        batteryLabel?.show(pointerBattery.shows(level, low: lowBattery) ? level : nil, charging: tracking.batteryCharging,
+                           redLevel: battery.redLevel, position: battery.labelPosition)
     }
 
     private func recordBattery() {

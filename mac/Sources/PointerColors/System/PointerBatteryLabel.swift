@@ -9,17 +9,17 @@ import SwiftUI
 final class PointerBatteryLabel {
     private var panel: NSPanel?
     private var monitors: [Any] = []
+    private var position = BatteryLabelPosition.belowRight
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged]
-    /// From the pointer's tip to the label's top left corner, clear of a large pointer.
-    private static let offset = CGSize(width: 14, height: 30)
-
-    /// Shows `level`, with a bolt while it's charging, or hides the label when it's nil.
-    func show(_ level: Int?, charging: Bool = false) {
+    /// Shows `level`, with a bolt while it's charging and red below `redLevel`, on the
+    /// `position` side of the pointer, or hides the label when it's nil.
+    func show(_ level: Int?, charging: Bool = false, redLevel: Int, position: BatteryLabelPosition) {
         guard let level else { return hide() }
+        self.position = position
         let panel = panel ?? makePanel()
-        let host = NSHostingView(rootView: LabelView(level: level, charging: charging))
+        let host = NSHostingView(rootView: BatteryLabelView(level: level, charging: charging, redLevel: redLevel))
         panel.contentView = host
         panel.setContentSize(host.fittingSize)
         self.panel = panel
@@ -47,17 +47,26 @@ final class PointerBatteryLabel {
         monitors = [global, local].compactMap { $0 }
     }
 
-    /// Below and to the right of the pointer, or above and to the left where that would leave its display.
+    /// On the chosen side of the pointer, or the other side where that would leave its display.
     private func follow() {
         guard let panel else { return }
         let point = NSEvent.mouseLocation
         let size = panel.frame.size
-        var origin = CGPoint(x: point.x + Self.offset.width, y: point.y - Self.offset.height - size.height)
+        var frame = Self.frame(at: point, size: size, position: position)
         if let screen = NSScreen.screens.first(where: { NSMouseInRect(point, $0.frame, false) })?.frame {
-            if origin.x + size.width > screen.maxX { origin.x = point.x - Self.offset.width - size.width }
-            if origin.y < screen.minY { origin.y = point.y + Self.offset.width }
+            let flipsX = frame.maxX > screen.maxX || frame.minX < screen.minX
+            let flipsY = frame.minY < screen.minY || frame.maxY > screen.maxY
+            if flipsX || flipsY {
+                frame = Self.frame(at: point, size: size, position: position.flipped(horizontally: flipsX, vertically: flipsY))
+            }
         }
-        panel.setFrameOrigin(origin)
+        panel.setFrameOrigin(frame.origin)
+    }
+
+    /// The label's frame on screen, where y grows upward, for the pointer's tip at `point`.
+    private static func frame(at point: CGPoint, size: CGSize, position: BatteryLabelPosition) -> CGRect {
+        let offset = position.offset(for: size)
+        return CGRect(origin: CGPoint(x: point.x + offset.x, y: point.y - offset.y - size.height), size: size)
     }
 
     private func makePanel() -> NSPanel {
@@ -70,31 +79,5 @@ final class PointerBatteryLabel {
         panel.level = .screenSaver
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
         return panel
-    }
-}
-
-private struct LabelView: View {
-    let level: Int
-    let charging: Bool
-
-    var body: some View {
-        Label("\(level)%", systemImage: symbol)
-            .font(.caption.weight(.semibold).monospacedDigit())
-            .foregroundStyle(level < 20 && !charging ? .red : .primary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(.regularMaterial, in: Capsule())
-            .padding(2)
-    }
-
-    private var symbol: String {
-        if charging { return "battery.100percent.bolt" }
-        return switch level {
-        case ..<13: "battery.0percent"
-        case ..<38: "battery.25percent"
-        case ..<63: "battery.50percent"
-        case ..<88: "battery.75percent"
-        default: "battery.100percent"
-        }
     }
 }

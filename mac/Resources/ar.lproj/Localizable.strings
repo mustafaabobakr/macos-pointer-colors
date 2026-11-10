@@ -364,3 +364,27 @@
 "Uses the brighter of the pair's outline and fill, so it follows the pair on each display." = "يستخدم الأزهى بين لوني حدود الزوج وتعبئته، فيتبع الزوج على كل شاشة.";
 "Pulse and laser color" = "لون النبضة والليزر";
 "A %@-drag doesn't click the app underneath, so no text gets selected. Off, the drag draws and also reaches the app. Works with Draw only while holding %@." = "السحب مع %@ لا ينقر على التطبيق أسفله، فلا يُحدَّد أي نص. عند الإيقاف يرسم السحب ويصل إلى التطبيق أيضًا. يعمل مع «الرسم فقط أثناء الضغط على %@».";
+
+/* Battery settings */
+"When low" = "عند الانخفاض";
+"When low means below" = "يُعدّ منخفضًا تحت";
+"Label position" = "موضع الملصق";
+"Below right" = "أسفل اليمين";
+"Below left" = "أسفل اليسار";
+"Above right" = "أعلى اليمين";
+"Above left" = "أعلى اليسار";
+"At a display's edge it moves to the other side. It turns red below the alert level." = "عند حافة الشاشة ينتقل إلى الجهة الأخرى. ويصبح أحمر تحت مستوى التنبيه.";
+"Preview of the battery label: %@" = "معاينة ملصق البطارية: %@";
+"Notify me" = "نبّهني";
+"When the battery drops below the level, and again after it's charged." = "عندما تنخفض البطارية تحت المستوى، ومرة أخرى بعد شحنها.";
+"Below" = "تحت";
+"Sound" = "الصوت";
+"Plays the notification sound with it." = "يُشغّل صوت الإشعار معه.";
+"Remind me again" = "ذكّرني مجددًا";
+"Notifies again as it keeps dropping, until it's charged." = "يُنبّه مجددًا كلما واصلت الانخفاض، حتى تُشحن.";
+"Every" = "كل";
+"Notification sound" = "صوت الإشعار";
+"Wear tip" = "نصيحة التآكل";
+"Wear tip after" = "نصيحة التآكل بعد";
+"Use counted over" = "يُحسب الاستخدام على مدى";
+"Estimate chart" = "مخطط التقدير";
