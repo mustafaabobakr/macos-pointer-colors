@@ -10,10 +10,14 @@ struct HighlightPreferences: View {
     let pointerScale: Double
 
     private var style: HighlightStyle { HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale) }
+    private var previews: HighlightSettingPreviews { HighlightSettingPreviews(highlight: highlight, pair: pair, style: style) }
 
     var body: some View {
         SettingsPage("Highlight") {
             SettingsCard("Highlight", anchor: "highlight.highlight") {
+                SettingsToggle("Show previews on hover", symbol: "eye",
+                               caption: "Rest the pointer on a setting below to see a picture of each of its choices.",
+                               isOn: $highlight.showsHoverPreviews)
                 Text("Click a picture to turn it on or off. Use any of them together, or none.")
                     .appFont(.caption).foregroundStyle(.secondary)
                 HighlightPreviewCards(highlight: highlight, style: style, pair: pair)
@@ -21,21 +25,32 @@ struct HighlightPreferences: View {
                 SettingsToggle("Ring around the pointer", symbol: "circle.dashed",
                                caption: "Makes the pointer easy to follow. Works with any highlight, or on its own.",
                                isOn: $highlight.showsRing)
+                    .hoverPreview { previews.toggle(.ring, isOn: highlight.showsRing) { $0.style.showsRing = $1 } }
                 ValueSlider(title: String(localized: "Ring size"), symbol: "arrow.up.left.and.arrow.down.right",
                             value: $highlight.ringSize, range: PointerHighlight.sizeRange, format: "%.1f×")
                     .disabled(!highlight.showsRing)
+                    .hoverPreview { ringSizePreview }
             }
             .featureSpot("highlight")
-            PulseSection(highlight: highlight).featureSpot("pulse")
-            LaserSection(highlight: highlight).featureSpot("laser")
-            PressSection(highlight: highlight, pointerScale: pointerScale).featureSpot("press-shrink")
+            PulseSection(highlight: highlight, previews: previews).featureSpot("pulse")
+            LaserSection(highlight: highlight, previews: previews).featureSpot("laser")
+            PressSection(highlight: highlight, previews: previews, pointerScale: pointerScale).featureSpot("press-shrink")
             PairColorsSection(highlight: highlight, pairs: pairs, current: pair).featureSpot("highlight-pair-colors")
+        }
+        .environment(\.showsSettingPreviews, highlight.showsHoverPreviews)
+    }
+
+    private var ringSizePreview: SettingPreviewStrip {
+        previews.slider(.ring, range: PointerHighlight.sizeRange, value: highlight.ringSize, format: "%.1f×") {
+            $0.style.showsRing = true
+            $0.style.ringSize = $1
         }
     }
 }
 
 private struct PressSection: View {
     @Bindable var highlight: PointerHighlight
+    let previews: HighlightSettingPreviews
     let pointerScale: Double
 
     private var caption: LocalizedStringKey {
@@ -49,10 +64,12 @@ private struct PressSection: View {
             SettingsToggle("Shrink the pointer on click", symbol: "arrow.down.right.and.arrow.up.left",
                            caption: caption, isOn: $highlight.shrinksOnPress)
                 .featureSpot("clip-press-toggle")
+                .hoverPreview { shrinkPreview }
             Group {
                 ValueSlider(title: String(localized: "Pressed size"), symbol: "arrow.down.forward.and.arrow.up.backward",
                             value: $highlight.pressScale, range: PointerHighlight.pressScaleRange, format: "%.2f×",
                             spot: "clip-press-size")
+                    .hoverPreview { pressSizePreview }
                 ValueSlider(title: String(localized: "Shrink in"), symbol: "timer", value: $highlight.pressDownDuration,
                             range: PointerHighlight.pressDurationRange, format: "%.2f s")
                 ValueSlider(title: String(localized: "Grow back in"), symbol: "timer", value: $highlight.pressUpDuration,
@@ -68,15 +85,28 @@ private struct PressSection: View {
             .disabled(!highlight.shrinksOnPress)
         }
     }
+
+    private var shrinkPreview: SettingPreviewStrip {
+        previews.toggle(.press, isOn: highlight.shrinksOnPress) { [scale = highlight.pressScale] in
+            $0.pressScale = $1 ? scale : 1
+        }
+    }
+
+    private var pressSizePreview: SettingPreviewStrip {
+        previews.slider(.press, range: PointerHighlight.pressScaleRange, value: highlight.pressScale,
+                        format: "%.2f×") { $0.pressScale = $1 }
+    }
 }
 
 private struct PulseSection: View {
     @Bindable var highlight: PointerHighlight
+    let previews: HighlightSettingPreviews
 
     var body: some View {
         SettingsCard("Pulse", anchor: "highlight.pulse") {
             ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor,
-                              pairHint: String(localized: "Uses the pair's color, set below for each pair."))
+                              pairHint: String(localized: "Uses the pair's color, set below for each pair."),
+                              preview: colorPreview)
             SettingsRow("Style", symbol: "circle.circle") {
                 Picker("Style", selection: $highlight.pulseStyle) {
                     ForEach(PulseStyle.allCases) { Text($0.title).tag($0) }
@@ -86,27 +116,60 @@ private struct PulseSection: View {
                 .fixedSize()
             }
             .featureSpot("clip-pulse-style")
+            .hoverPreview {
+                previews.options(.pulse, PulseStyle.allCases, current: highlight.pulseStyle, label: \.title) {
+                    $0.style.pulseStyle = $1
+                }
+            }
             SettingsToggle("Dark outline", symbol: "circle.dashed.inset.filled",
                            caption: "Draws each pulse over the pair's dark color, as the laser's outline, so it stays clear on light backgrounds.",
                            isOn: $highlight.pulseOutlined)
+                .hoverPreview { outlinePreview }
             ValueSlider(title: String(localized: "Outline width"), symbol: "lineweight", value: $highlight.pulseOutlineWidth,
                         range: PointerHighlight.pulseOutlineWidthRange, format: "%.1f pt")
                 .disabled(!highlight.pulseOutlined)
+                .hoverPreview { outlineWidthPreview }
             ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.pulseSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size")
+                .hoverPreview {
+                    previews.slider(.pulse, range: PointerHighlight.sizeRange, value: highlight.pulseSize,
+                                    format: "%.1f×") { $0.style.pulseSize = $1 }
+                }
             ValueSlider(title: String(localized: "Length"), symbol: "timer", value: $highlight.pulseDuration,
                         range: PointerHighlight.pulseDurationRange, format: "%.2f s")
             SettingsToggle("Pulse on right-clicks too", symbol: "cursorarrow.click", isOn: $highlight.pulsesOnRightClick)
             SettingsToggle("Show long presses", symbol: "hand.tap",
                            caption: "Holding the button keeps a small filled ring under the pointer, and letting go sends out a pulse, so a press looks different from a click.",
                            isOn: $highlight.pulseShowsHold)
+                .hoverPreview { previews.toggle(.pulse, isOn: highlight.pulseShowsHold) { $0.style.showsHold = $1 } }
         }
         .disabled(!highlight.pulseOn)
+    }
+
+    private var colorPreview: SettingPreviewStrip {
+        previews.colorSource(.pulse, usesPair: highlight.pulseUsesPairColor) { [highlight, pair = previews.pair] in
+            $0.style.pulseColor = $1 ? highlight.pulsePairColor(pair) : highlight.pulseColor
+        }
+    }
+
+    private var outlinePreview: SettingPreviewStrip {
+        previews.toggle(.pulse, isOn: highlight.pulseOutlined) { [dark = previews.pair.darkColor] in
+            $0.style.pulseOutline = $1 ? dark : nil
+        }
+    }
+
+    private var outlineWidthPreview: SettingPreviewStrip {
+        previews.slider(.pulse, range: PointerHighlight.pulseOutlineWidthRange, value: highlight.pulseOutlineWidth,
+                        format: "%.1f pt") { [dark = previews.pair.darkColor] in
+            $0.style.pulseOutline = dark
+            $0.style.pulseOutlineExtra = $1 * 2
+        }
     }
 }
 
 private struct LaserSection: View {
     @Bindable var highlight: PointerHighlight
+    let previews: HighlightSettingPreviews
 
     var body: some View {
         SettingsCard("Laser", anchor: "highlight.laser") {
@@ -115,24 +178,40 @@ private struct LaserSection: View {
                          selection: $highlight.laserLook) {
                 ForEach(LaserLook.allCases) { Text($0.title).tag($0) }
             }
+            .hoverPreview {
+                previews.options(.laser, LaserLook.allCases, current: highlight.laserLook, label: \.title) {
+                    $0.style.laserLook = $1
+                }
+            }
             ColorSourcePicker(usesPair: $highlight.laserUsesPairColor, color: $highlight.laserColor,
-                              pairHint: String(localized: "Uses the pair's color, set below for each pair."))
+                              pairHint: String(localized: "Uses the pair's color, set below for each pair."),
+                              preview: colorPreview)
             ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
                         range: PointerHighlight.sizeRange, format: "%.1f×")
                 .featureSpot("clip-laser-size")
+                .hoverPreview {
+                    previews.slider(.laser, range: PointerHighlight.sizeRange, value: highlight.laserSize,
+                                    format: "%.1f×") { $0.style.laserSize = $1 }
+                }
             SettingsMenu("Outline", symbol: "circle.dashed",
                          caption: "The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.",
                          selection: $highlight.laserOutline) {
                 ForEach(LaserOutline.allCases) { Text($0.title).tag($0) }
             }
             .featureSpot("clip-laser-outline")
+            .hoverPreview { outlinePreview }
             ValueSlider(title: String(localized: "Outline opacity"), symbol: "circle.lefthalf.filled",
                         value: $highlight.laserOutlineOpacity,
                         range: PointerHighlight.outlineOpacityRange, format: "%.0f%%", scale: 100, step: 0.05)
                 .disabled(highlight.laserOutline == .none)
+                .hoverPreview {
+                    previews.slider(.laser, range: PointerHighlight.outlineOpacityRange, value: highlight.laserOutlineOpacity,
+                                    format: "%.0f%%", scale: 100) { $0.style.laserOutlineOpacity = $1 }
+                }
             SettingsToggle("Draw a trail while dragging", symbol: "scribble",
                            caption: "Hold the mouse button and move to draw; the trail fades after you let go.",
                            isOn: $highlight.laserTrail)
+                .hoverPreview { previews.toggle(.laser, isOn: highlight.laserTrail) { $0.showsTrail = $1 } }
             ValueSlider(title: String(localized: "Trail fades after"), symbol: "timer", value: $highlight.laserTrailFade,
                         range: PointerHighlight.trailFadeRange, format: "%.1f s")
                 .disabled(!highlight.laserTrail)
@@ -142,8 +221,31 @@ private struct LaserSection: View {
                          selection: $highlight.laserDot) {
                 ForEach(LaserDotMode.allCases) { Text($0.title).tag($0) }
             }
+            .hoverPreview { dotPreview }
         }
         .disabled(!highlight.laserOn)
+    }
+
+    private var colorPreview: SettingPreviewStrip {
+        previews.colorSource(.laser, usesPair: highlight.laserUsesPairColor) { [highlight, pair = previews.pair] in
+            $0.style.laser = highlight.laserColors(for: pair, usesPair: $1)
+        }
+    }
+
+    private var outlinePreview: SettingPreviewStrip {
+        previews.options(.laser, LaserOutline.allCases, current: highlight.laserOutline, label: \.title) {
+            [highlight, pair = previews.pair] sample, outline in
+            sample.style.laser = highlight.laserColors(for: pair, outline: outline)
+            sample.style.laserOutlined = outline != .none
+        }
+    }
+
+    /// Always: the dot under a moving pointer, no trail. While drawing: at the tip of a trail. Hide: a trail alone.
+    private var dotPreview: SettingPreviewStrip {
+        previews.options(.laser, LaserDotMode.allCases, current: highlight.laserDot, label: \.title) {
+            $0.showsTrail = $1 != .always
+            $0.showsDot = $1 != .hidden
+        }
     }
 }
 
@@ -222,6 +324,8 @@ private struct ColorSourcePicker: View {
     @Binding var usesPair: Bool
     @Binding var color: RGBA
     let pairHint: String
+    /// Each choice pictured, shown on hover over the menu.
+    let preview: SettingPreviewStrip
 
     var body: some View {
         SettingsMenu(title: Text("Color"), symbol: "paintpalette",
@@ -230,6 +334,7 @@ private struct ColorSourcePicker: View {
             Text("Pointer pair").tag(true)
             Text("Custom").tag(false)
         }
+        .hoverPreview { preview }
         if !usesPair {
             SettingsRow("Custom color", symbol: "eyedropper") {
                 ColorPicker("Custom color", selection: Binding(get: { color.color }, set: { color = RGBA($0) }),

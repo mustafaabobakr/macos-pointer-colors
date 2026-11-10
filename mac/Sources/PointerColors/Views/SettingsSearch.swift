@@ -66,6 +66,7 @@ enum SettingsSearch {
         item(.automation, "automation.finding", String(localized: "Show pointer location"), "scope"),
         item(.automation, "automation.windows", String(localized: "Focus the window under the pointer"), "macwindow"),
         item(.highlight, "highlight.highlight", String(localized: "Ring around the pointer"), "circle.dashed"),
+        item(.highlight, "highlight.highlight", String(localized: "Show previews on hover"), "eye"),
         item(.highlight, "highlight.pulse", String(localized: "Pulse"), "circle.circle"),
         item(.highlight, "highlight.laser", String(localized: "Laser"), "scribble"),
         item(.highlight, "highlight.laser", String(localized: "Laser look: Classic or GoodNotes glow"), "wand.and.rays"),
