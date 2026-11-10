@@ -416,3 +416,9 @@
 "Type into a window just by pointing at it; it stays where it is." = "اكتب في نافذة بمجرد الإشارة إليها؛ وتبقى في مكانها.";
 "Hover focus delay" = "مهلة التركيز عند التمرير";
 "Keys that pause hover focus" = "المفاتيح التي توقف التركيز عند التمرير مؤقتًا";
+"Animation length" = "مدة الحركة";
+"Start size" = "الحجم في البداية";
+"End size" = "الحجم في النهاية";
+"Time between presses" = "الوقت بين الضغطتين";
+"Pointer location ring length, start and end size" = "مدة حلقة موقع المؤشر وحجمها في البداية والنهاية";
+"Pointer location line width" = "عرض خط حلقة موقع المؤشر";
