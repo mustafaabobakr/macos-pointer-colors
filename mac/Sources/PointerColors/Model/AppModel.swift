@@ -450,7 +450,12 @@ final class AppModel {
     /// `NSSound(named:)` hands back one shared sound, and `play()` does nothing while it's still
     /// playing, so a quick second change was silent. Stopping it first restarts it every time.
     private func playApplySound() {
-        guard let sound = NSSound(named: "Pop") else { return }
+        playSound(named: settings.applySound)
+    }
+
+    /// Plays one of the apply sounds now, as when one is picked in Preferences.
+    func playSound(named name: String) {
+        guard let sound = NSSound(named: ApplySound.resolved(name)) else { return }
         sound.stop()
         sound.play()
     }
