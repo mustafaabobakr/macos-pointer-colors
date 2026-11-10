@@ -27,6 +27,18 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: Key.playSoundOnApply) }
     }
 
+    /// The system sound played when a pair is applied, by name (see `ApplySound`).
+    var applySound: String {
+        get { ApplySound.resolved(defaults.string(forKey: Key.applySound)) }
+        nonmutating set { defaults.set(ApplySound.resolved(newValue), forKey: Key.applySound) }
+    }
+
+    /// How much the Bigger and Smaller pointer shortcuts change the size (see `SizeStep`).
+    var sizeShortcutStep: Double {
+        get { SizeStep.resolved(defaults.object(forKey: Key.sizeShortcutStep) as? Double) }
+        nonmutating set { defaults.set(SizeStep.resolved(newValue), forKey: Key.sizeShortcutStep) }
+    }
+
     /// Shows the app in the Dock and the app switcher, like a regular app.
     var showsInDock: Bool {
         get { defaults.bool(forKey: "showsInDock") }
@@ -205,5 +217,7 @@ struct AppSettings {
         static let displaySizes = "displaySizes"
         static let lastAppliedPairID = "lastAppliedPairID"
         static let lastAppliedScale = "lastAppliedScale"
+        static let applySound = "applySound"
+        static let sizeShortcutStep = "sizeShortcutStep"
     }
 }

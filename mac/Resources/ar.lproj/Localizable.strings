@@ -388,3 +388,7 @@
 "Wear tip after" = "نصيحة التآكل بعد";
 "Use counted over" = "يُحسب الاستخدام على مدى";
 "Estimate chart" = "مخطط التقدير";
+"Plays when you pick one." = "يُشغَّل عند اختياره.";
+"Sound when a pair is applied" = "الصوت عند تطبيق زوج";
+"Size change per press" = "تغيير الحجم مع كل ضغطة";
+"How much the bigger and smaller pointer shortcuts change the size each time." = "مقدار تغيير الحجم في كل مرة باختصاري تكبير المؤشر وتصغيره.";

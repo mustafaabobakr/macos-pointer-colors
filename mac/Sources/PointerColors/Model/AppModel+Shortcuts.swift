@@ -1,8 +1,6 @@
 import Foundation
 
 extension AppModel {
-    static let scaleStep = 0.25
-
     func setShortcut(_ combo: KeyCombo?, for action: ShortcutAction) {
         var all = shortcuts
         all[action] = combo
@@ -30,10 +28,15 @@ extension AppModel {
         switch action {
         case .nextPair: applyNeighbour(offset: 1)
         case .previousPair: applyNeighbour(offset: -1)
-        case .biggerPointer: setScale(min(scale + Self.scaleStep, SystemPointer.maximumScale))
-        case .smallerPointer: setScale(max(scale - Self.scaleStep, SystemPointer.minimumScale))
+        case .biggerPointer: stepScale(bigger: true)
+        case .smallerPointer: stepScale(bigger: false)
         case .resetPointer: reset()
         }
+    }
+
+    private func stepScale(bigger: Bool) {
+        let limits = SystemPointer.minimumScale...SystemPointer.maximumScale
+        setScale(SizeStep.next(from: scale, step: settings.sizeShortcutStep, bigger: bigger, limits: limits))
     }
 
     /// Selects and applies the visible pair before or after the current one, wrapping around.
