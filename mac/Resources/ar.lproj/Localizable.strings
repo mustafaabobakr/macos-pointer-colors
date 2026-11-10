@@ -410,3 +410,9 @@
 "Button %lld" = "الزر %lld";
 "Back and forward button numbers" = "أرقام زرَّي الرجوع والتقدّم";
 "Fix double-clicks of the left or both buttons" = "إصلاح النقر المزدوج للزر الأيسر أو للزرين";
+"Focus after" = "التركيز بعد";
+"Pause while holding" = "الإيقاف المؤقت أثناء الضغط على";
+"Hold a chosen key to move across windows without changing focus. A held mouse button always pauses it." = "اضغط مع الاستمرار على مفتاح مختار لتنقل المؤشر بين النوافذ دون تغيير التركيز. الضغط على زر الماوس يوقفه مؤقتًا دائمًا.";
+"Type into a window just by pointing at it; it stays where it is." = "اكتب في نافذة بمجرد الإشارة إليها؛ وتبقى في مكانها.";
+"Hover focus delay" = "مهلة التركيز عند التمرير";
+"Keys that pause hover focus" = "المفاتيح التي توقف التركيز عند التمرير مؤقتًا";

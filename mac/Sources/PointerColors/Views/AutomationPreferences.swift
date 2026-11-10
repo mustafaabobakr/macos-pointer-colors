@@ -63,12 +63,42 @@ private struct HoverFocusSection: View {
         AccessibilityNotice(isNeeded: hoverFocus.isOn)
         SettingsCard("Windows", anchor: "automation.windows") {
             SettingsToggle("Focus the window under the pointer", symbol: "macwindow",
-                           caption: "Type into a window just by pointing at it; it stays where it is. Hold a modifier key to move across windows without changing focus.",
-                           isOn: $hoverFocus.isOn)
+                           caption: "Type into a window just by pointing at it; it stays where it is.",
+                           isOn: $hoverFocus.isOn.revealing())
                 .disabled(!hoverFocus.isAvailable)
                 .featureSpot("clip-hover-focus")
+            Reveal(isShown: hoverFocus.isOn) {
+                ValueSlider(title: String(localized: "Focus after"), symbol: "timer", value: $hoverFocus.delay,
+                            range: HoverFocus.delayRange, format: "%.2f s", step: 0.01, ends: .time)
+                HoverPauseKeysRow(hoverFocus: hoverFocus)
+            }
         }
         .featureSpot("hover-focus")
+    }
+}
+
+/// A toggle button for each modifier key that pauses hover focus while held.
+private struct HoverPauseKeysRow: View {
+    @Bindable var hoverFocus: HoverFocus
+
+    private static let keys: [(key: HoverPauseKeys, symbol: String, name: LocalizedStringKey)] =
+        [(.control, "⌃", "Control"), (.option, "⌥", "Option"), (.shift, "⇧", "Shift"), (.command, "⌘", "Command")]
+
+    var body: some View {
+        SettingsRow("Pause while holding", symbol: "keyboard",
+                    caption: "Hold a chosen key to move across windows without changing focus. A held mouse button always pauses it.") {
+            HStack(spacing: 4) {
+                ForEach(Self.keys, id: \.key.rawValue) { item in
+                    Toggle(isOn: isOn(item.key)) { Text(verbatim: item.symbol) }
+                        .toggleStyle(KeyToggleStyle())
+                        .accessibilityLabel(Text(item.name))
+                }
+            }
+        }
+    }
+
+    private func isOn(_ key: HoverPauseKeys) -> Binding<Bool> {
+        Binding(get: { hoverFocus.pauseKeys.contains(key) }, set: { hoverFocus.pauseKeys.set(key, $0) })
     }
 }
 
