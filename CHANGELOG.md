@@ -3,6 +3,20 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.6.0 — 2026-11-10
+
+- **Highlight, a page for each.** **Preferences › Highlight** is now four pages, **Ring**, **Pulse**, **Laser** and **Press**, each with a picture at the top drawn by the same code as the real effect. The Ring, Pulse and Laser pictures show it at its real size, at your pointer size. Hover a setting's choices to see a picture of each.
+- **Shape every highlight.** About 25 new settings, each starting at what the effect drew before:
+  - **Ring:** a **Color** of its own (the pair's or one you pick), **Fill**, **Line width** and **Line opacity**. **Ring size** now goes down to 0.1×.
+  - **Pulse:** for the Ring style, **Line width**, **Grows to** and **Starting opacity**; for Ripple, **Waves**, **Grows to**, **Gap between waves**, **Line width** and **Starting opacity**. **Long presses** has its own section: how long a press must last, and the held ring's size, fill, line width and breathing.
+  - **Laser:** **Dot fades after**; for Classic, **Trail opacity**, **Glow** and **Middle lightness**; for GoodNotes, **Fade-out** and **Edge width**.
+- **Sliders that say what they do.** Time sliders run from a tortoise (longer) to a hare (shorter); the others show small and large, thin and thick, or faint and solid at their ends.
+- **Only the settings that apply.** Rows that depend on another setting are hidden until it's on, on every Preferences page, and open with a smooth motion that pushes the rest down.
+- **Block clicks while drawing is on by default** and now sits above **Draw only while holding**, so a held-key laser drag draws without selecting anything underneath. If you turned it off, it stays off.
+- **Highlight colors follow the pair on each display.** The **Pair colors** page is gone: with **Color** set to **Pointer pair**, the ring, pulse and laser use the pair shown on each display. Colors set for single pairs before are no longer used.
+
+**Export all…** saves every new setting, and **Import…** puts them back.
+
 ## 0.5.4 — 2026-11-10
 
 - **Block clicks while drawing, now a choice.** **Preferences › Highlight › Laser** has a new **Block clicks while drawing** switch under **Keys to hold**. With **Draw only while holding** on, a held-key drag now draws the laser *and* reaches the app underneath, so you can point at something while you select or drag it. Turn **Block clicks while drawing** on to get the old behavior back, where the drag only draws and nothing underneath is clicked or selected. It's off by default, so after updating, a ⌥-drag selects text again until you turn it on.
