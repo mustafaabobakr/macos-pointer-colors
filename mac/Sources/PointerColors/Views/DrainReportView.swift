@@ -5,12 +5,13 @@ import SwiftUI
 struct DrainReportView: View {
     let mouse: MouseHistory
     let idleTip: IdleTipThreshold
+    let battery: BatterySettings
     @Environment(\.appTextScale) private var scale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12 * scale) {
             Text("Drain report").appFont(.caption, weight: .semibold).foregroundStyle(.secondary)
-            if let report = mouse.drainReport { content(report) } else { waiting }
+            if let report = mouse.drainReport(useDays: useDays) { content(report) } else { waiting }
         }
     }
 
@@ -28,10 +29,10 @@ struct DrainReportView: View {
                 StatTile(value: ChargeText.duration(report.totalIdle), label: String(localized: "Idle in total"))
             }
             .fixedSize(horizontal: false, vertical: true)
-            let tips = report.tips(idleShare: idleTip.share, trend: mouse.trend)
+            let tips = report.tips(idleShare: idleTip.share, trend: mouse.trend, wearShare: battery.wearShare)
             ForEach(Array(tips.enumerated()), id: \.offset) { tip($0.element, report: report) }
             if tips.isEmpty { tipRow(String(localized: "Most of the drain is from use, so there's nothing to change."), symbol: "checkmark.circle") }
-            Text("Worked out each midnight from \(report.steps) measured drops of 1%, with your use over the last \(DrainReport.useDays) days. It settles as more come in.")
+            Text("Worked out each midnight from \(report.steps) measured drops of 1%, with your use over the last \(useDays) days. It settles as more come in.")
                 .appFont(.caption)
                 .foregroundStyle(.secondary)
             history
@@ -40,7 +41,7 @@ struct DrainReportView: View {
 
     @ViewBuilder
     private var history: some View {
-        let estimates = mouse.drainEstimates()
+        let estimates = mouse.drainEstimates(days: Int(battery.chartDays), useDays: useDays)
         if estimates.count > 1 {
             EstimateHistory(estimates: estimates).padding(.top, 6 * scale)
         } else {
@@ -49,6 +50,8 @@ struct DrainReportView: View {
                 .foregroundStyle(.secondary)
         }
     }
+
+    private var useDays: Int { Int(battery.useDays) }
 
     private var waiting: some View {
         let midnight = Calendar.current.startOfDay(for: .now)

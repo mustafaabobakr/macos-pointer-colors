@@ -27,6 +27,18 @@ struct AppSettings {
         nonmutating set { defaults.set(newValue, forKey: Key.playSoundOnApply) }
     }
 
+    /// The system sound played when a pair is applied, by name (see `ApplySound`).
+    var applySound: String {
+        get { ApplySound.resolved(defaults.string(forKey: Key.applySound)) }
+        nonmutating set { defaults.set(ApplySound.resolved(newValue), forKey: Key.applySound) }
+    }
+
+    /// How much the Bigger and Smaller pointer shortcuts change the size (see `SizeStep`).
+    var sizeShortcutStep: Double {
+        get { SizeStep.resolved(defaults.object(forKey: Key.sizeShortcutStep) as? Double) }
+        nonmutating set { defaults.set(SizeStep.resolved(newValue), forKey: Key.sizeShortcutStep) }
+    }
+
     /// Shows the app in the Dock and the app switcher, like a regular app.
     var showsInDock: Bool {
         get { defaults.bool(forKey: "showsInDock") }
@@ -39,19 +51,19 @@ struct AppSettings {
     }
 
     var batteryDisplay: BatteryDisplay {
-        get { defaults.string(forKey: "batteryDisplay").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        get { defaults.string(forKey: "batteryDisplay").flatMap(BatteryDisplay.init(stored:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "batteryDisplay") }
     }
 
     /// When the mouse's battery shows on the Dock icon, while the app is in the Dock.
     var dockBattery: BatteryDisplay {
-        get { defaults.string(forKey: "dockBattery").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        get { defaults.string(forKey: "dockBattery").flatMap(BatteryDisplay.init(stored:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "dockBattery") }
     }
 
     /// When the mouse's battery shows in a small label under the pointer.
     var pointerBattery: BatteryDisplay {
-        get { defaults.string(forKey: "pointerBattery").flatMap(BatteryDisplay.init(rawValue:)) ?? .off }
+        get { defaults.string(forKey: "pointerBattery").flatMap(BatteryDisplay.init(stored:)) ?? .off }
         nonmutating set { defaults.set(newValue.rawValue, forKey: "pointerBattery") }
     }
 
@@ -77,11 +89,6 @@ struct AppSettings {
     var batteryHistory: BatteryHistory {
         get { BatteryHistoryStore(defaults: defaults).load() }
         nonmutating set { BatteryHistoryStore(defaults: defaults).save(newValue) }
-    }
-
-    var batteryAlert: BatteryAlert {
-        get { defaults.string(forKey: "batteryAlert").flatMap(BatteryAlert.init(rawValue:)) ?? .off }
-        nonmutating set { defaults.set(newValue.rawValue, forKey: "batteryAlert") }
     }
 
     var textSize: TextSize {
@@ -210,5 +217,7 @@ struct AppSettings {
         static let displaySizes = "displaySizes"
         static let lastAppliedPairID = "lastAppliedPairID"
         static let lastAppliedScale = "lastAppliedScale"
+        static let applySound = "applySound"
+        static let sizeShortcutStep = "sizeShortcutStep"
     }
 }

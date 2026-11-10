@@ -15,31 +15,40 @@ enum MenuBarVisibility: String, CaseIterable, Identifiable {
     }
 }
 
-/// When the mouse's battery shows next to the menu-bar icon.
+/// When the mouse's battery shows: in the menu bar, on the Dock icon or under the pointer.
 enum BatteryDisplay: String, CaseIterable, Identifiable {
     case off
-    case below10
-    case below20
+    /// Below the shared low level, `BatterySettings.lowLevel`.
+    case whenLow
     case always
 
     var id: String { rawValue }
 
+    /// The defaults keys of the three places it shows.
+    static let keys = ["batteryDisplay", "dockBattery", "pointerBattery"]
+
+    /// Reads a stored choice, including Below 10% and Below 20% from earlier builds.
+    init?(stored raw: String) {
+        switch raw {
+        case "below10", "below20": self = .whenLow
+        default: self.init(rawValue: raw)
+        }
+    }
+
     var title: String {
         switch self {
         case .off: return String(localized: "Off")
-        case .below10: return String(localized: "Below 10%")
-        case .below20: return String(localized: "Below 20%")
+        case .whenLow: return String(localized: "When low")
         case .always: return String(localized: "Always show")
         }
     }
 
-    /// Whether a battery at `level` percent is shown.
-    func shows(_ level: Int?) -> Bool {
+    /// Whether a battery at `level` percent is shown, when low means below `low`.
+    func shows(_ level: Int?, low: Int) -> Bool {
         guard let level else { return false }
         switch self {
         case .off: return false
-        case .below10: return level < 10
-        case .below20: return level < 20
+        case .whenLow: return level < low
         case .always: return true
         }
     }

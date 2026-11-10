@@ -178,6 +178,7 @@ private struct GeneralPreferences: View {
     @Bindable var model: AppModel
     @State private var reapply = false
     @State private var sound = false
+    @State private var soundName = ApplySound.standard
 
     var body: some View {
         SettingsPage("General") {
@@ -189,8 +190,15 @@ private struct GeneralPreferences: View {
                     .onChange(of: reapply) { model.settings.reapplyAtLaunch = reapply }
                 SettingsToggle("Draw the menu-bar icon in my colors", symbol: "paintpalette",
                                caption: "Off shows a plain icon that follows the menu bar.", isOn: $model.iconInPairColors)
-                SettingsToggle("Play a sound when a pair is applied", symbol: "speaker.wave.2", isOn: $sound)
+                SettingsToggle("Play a sound when a pair is applied", symbol: "speaker.wave.2", isOn: $sound.revealing())
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
+                Reveal(isShown: sound) {
+                    SettingsMenu("Sound", symbol: "music.note", caption: "Plays when you pick one.",
+                                 selection: $soundName) {
+                        ForEach(ApplySound.names, id: \.self) { Text(verbatim: $0).tag($0) }
+                    }
+                    .onChange(of: soundName) { pickSound(soundName) }
+                }
             }
             MenuBarSection(model: model)
             BackupSection(model: model)
@@ -210,8 +218,16 @@ private struct GeneralPreferences: View {
         .onAppear {
             reapply = model.settings.reapplyAtLaunch
             sound = model.settings.playSoundOnApply
+            soundName = model.settings.applySound
             model.refreshFromSystem()
         }
+    }
+
+    /// Saves and plays a newly picked sound; loading the saved one when the page opens plays nothing.
+    private func pickSound(_ name: String) {
+        guard name != model.settings.applySound else { return }
+        model.settings.applySound = name
+        model.playSound(named: name)
     }
 }
 
@@ -383,6 +399,7 @@ private struct BackupSection: View {
 
 private struct ShortcutsPreferences: View {
     let model: AppModel
+    @State private var sizeStep = SizeStep.standard
 
     var body: some View {
         SettingsPage("Shortcuts") {
@@ -400,7 +417,15 @@ private struct ShortcutsPreferences: View {
                     .appFont(.caption).foregroundStyle(.secondary)
             }
             .featureSpot("shortcuts")
+            SettingsCard("Pointer size", anchor: "shortcuts.size") {
+                ValueSlider(title: String(localized: "Size change per press"), symbol: "plus.forwardslash.minus",
+                            value: $sizeStep, range: SizeStep.range, format: "%.2f×", step: 0.05, ends: .size)
+                Text("How much the bigger and smaller pointer shortcuts change the size each time.")
+                    .appFont(.caption).foregroundStyle(.secondary)
+            }
         }
+        .onAppear { sizeStep = model.settings.sizeShortcutStep }
+        .onChange(of: sizeStep) { model.settings.sizeShortcutStep = sizeStep }
     }
 
     private func conflict(_ action: ShortcutAction) -> Text? {

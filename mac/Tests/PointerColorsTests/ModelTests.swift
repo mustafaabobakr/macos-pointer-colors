@@ -665,7 +665,7 @@ final class SettingsBackupTests: XCTestCase {
         locator.key = .option
         let settings = AppSettings(defaults: source)
         settings.menuBarVisibility = .never
-        settings.batteryDisplay = .below20
+        settings.batteryDisplay = .whenLow
         settings.showsInDock = true
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
 
@@ -677,7 +677,7 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertEqual(PointerLocator(defaults: target, pair: { .featured }, pointerScale: { 1 }).key, .option)
         let restored = AppSettings(defaults: target)
         XCTAssertEqual(restored.menuBarVisibility, .never)
-        XCTAssertEqual(restored.batteryDisplay, .below20)
+        XCTAssertEqual(restored.batteryDisplay, .whenLow)
         XCTAssertTrue(restored.showsInDock)
     }
 
@@ -693,9 +693,8 @@ final class SettingsBackupTests: XCTestCase {
         source.set(true, forKey: "menuShowsCurrentPair")
         let settings = AppSettings(defaults: source)
         settings.textSize = .huge
-        settings.dockBattery = .below10
+        settings.dockBattery = .whenLow
         settings.pointerBattery = .always
-        settings.batteryAlert = .below5
         settings.showsDrainReport = false
         settings.idleTipThreshold = .above40
         source.set(["count": 2, "date": Date()], forKey: GitHubStars.defaultsKey)
@@ -710,9 +709,8 @@ final class SettingsBackupTests: XCTestCase {
         XCTAssertTrue(target.bool(forKey: "menuShowsCurrentPair"))
         let restored = AppSettings(defaults: target)
         XCTAssertEqual(restored.textSize, .huge)
-        XCTAssertEqual(restored.dockBattery, .below10)
+        XCTAssertEqual(restored.dockBattery, .whenLow)
         XCTAssertEqual(restored.pointerBattery, .always)
-        XCTAssertEqual(restored.batteryAlert, .below5)
         XCTAssertFalse(restored.showsDrainReport)
         XCTAssertEqual(restored.idleTipThreshold, .above40)
         XCTAssertNil(target.object(forKey: GitHubStars.defaultsKey))

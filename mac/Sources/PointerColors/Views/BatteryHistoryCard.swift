@@ -19,7 +19,7 @@ struct BatteryHistoryCard: View {
                     .foregroundStyle(.secondary)
             }
             ForEach(model.batteryHistory.mice) { mouse in
-                MouseHealthView(mouse: mouse, report: model.showsDrainReport ? model.idleTipThreshold : nil)
+                MouseHealthView(mouse: mouse, report: model.showsDrainReport ? model.idleTipThreshold : nil, battery: model.battery)
             }
             if !model.batteryHistory.mice.isEmpty {
                 HStack {
@@ -51,6 +51,22 @@ struct BatteryHistoryCard: View {
                          selection: $model.idleTipThreshold) {
                 ForEach(IdleTipThreshold.allCases) { Text($0.title).tag($0) }
             }
+            HealthRows(battery: model.battery)
         }
+    }
+}
+
+/// When the wear tip shows, the days of use the report averages and how far back its chart goes.
+private struct HealthRows: View {
+    @Bindable var battery: BatterySettings
+
+    var body: some View {
+        ValueSlider(title: String(localized: "Wear tip after"), symbol: "exclamationmark.triangle",
+                    value: $battery.wearShare, range: BatterySettings.wearRange, format: "%.0f%% shorter",
+                    scale: 100, step: 0.05, ends: .size)
+        ValueSlider(title: String(localized: "Use counted over"), symbol: "calendar", value: $battery.useDays,
+                    range: BatterySettings.useDaysRange, format: "%.0f days", ends: .days)
+        ValueSlider(title: String(localized: "Estimate chart"), symbol: "chart.xyaxis.line", value: $battery.chartDays,
+                    range: BatterySettings.chartDaysRange, format: "%.0f days", step: 30, ends: .days)
     }
 }

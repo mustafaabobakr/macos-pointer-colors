@@ -52,9 +52,15 @@ final class DrainReportTests: XCTestCase {
 
     func testSuggestsTurningItOffAndFlagsWear() throws {
         let report = try XCTUnwrap(DrainReport(steps: steps([0.5, 1, 1.5, 2, 2.5, 2.8, 0.8, 1.2, 1.8, 2.2])))
-        XCTAssertEqual(report.tips(idleShare: 0.99, trend: nil), [])
-        XCTAssertEqual(report.tips(idleShare: 0.01, trend: -0.2), [.idle(share: report.idleShare), .wear(trend: -0.2)])
-        XCTAssertEqual(report.tips(idleShare: 0.99, trend: -0.1), [], "A 10% shorter charge is within noise")
+        XCTAssertEqual(report.tips(idleShare: 0.99, trend: nil, wearShare: 0.15), [])
+        XCTAssertEqual(report.tips(idleShare: 0.01, trend: -0.2, wearShare: 0.15), [.idle(share: report.idleShare), .wear(trend: -0.2)])
+        XCTAssertEqual(report.tips(idleShare: 0.99, trend: -0.1, wearShare: 0.15), [], "A 10% shorter charge is within noise")
+    }
+
+    func testWearTipFollowsItsSetting() throws {
+        let report = try XCTUnwrap(DrainReport(steps: steps([0.5, 1, 1.5, 2, 2.5, 2.8, 0.8, 1.2, 1.8, 2.2])))
+        XCTAssertEqual(report.tips(idleShare: 0.99, trend: -0.2, wearShare: 0.25), [])
+        XCTAssertEqual(report.tips(idleShare: 0.99, trend: -0.06, wearShare: 0.05), [.wear(trend: -0.06)])
     }
 
     func testTakesTheUseADayItIsGiven() throws {
@@ -89,6 +95,17 @@ final class DrainReportTests: XCTestCase {
         let estimates = mouse.drainEstimates(calendar: calendar, now: midnight + 3_600)
         XCTAssertEqual(estimates.map(\.day), [midnight - 86_400, midnight])
         XCTAssertEqual(estimates.last?.report, report)
+    }
+
+    func testChartRangeAndDaysCountedAreTheirSettings() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let mouse = threeDays()
+        let midnight = Date(timeIntervalSince1970: 2 * 86_400)
+        let estimates = mouse.drainEstimates(days: 0, useDays: 1, calendar: calendar, now: midnight + 3_600)
+        XCTAssertEqual(estimates.map(\.day), [midnight], "Only as far back as the chart's range")
+        XCTAssertEqual(try XCTUnwrap(mouse.useHoursPerDay(before: midnight, days: 1, calendar: calendar)), 8, accuracy: 0.5)
+        XCTAssertNil(mouse.useHoursPerDay(before: midnight - 2 * 86_400, days: 3, calendar: calendar), "No use recorded before it")
     }
 
     func testIdleThresholdsReadPlainly() {

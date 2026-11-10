@@ -17,6 +17,10 @@ enum SliderEnds {
     case spread
     /// One ring to many.
     case count
+    /// An empty battery to a full one.
+    case level
+    /// A few days to many.
+    case days
 
     /// The slider runs from its largest value on the left to its smallest on the right.
     var isReversed: Bool { self == .time }
@@ -30,6 +34,8 @@ enum SliderEnds {
         case .brightness: SliderEnd("sun.min")
         case .spread: SliderEnd("arrow.right.and.line.vertical.and.arrow.left")
         case .count: SliderEnd("circle")
+        case .level: SliderEnd("battery.0percent")
+        case .days: SliderEnd("calendar", scale: .small)
         }
     }
 
@@ -42,6 +48,8 @@ enum SliderEnds {
         case .brightness: SliderEnd("sun.max.fill")
         case .spread: SliderEnd("arrow.left.and.line.vertical.and.arrow.right")
         case .count: SliderEnd("target")
+        case .level: SliderEnd("battery.100percent")
+        case .days: SliderEnd("calendar", scale: .large)
         }
     }
 }
