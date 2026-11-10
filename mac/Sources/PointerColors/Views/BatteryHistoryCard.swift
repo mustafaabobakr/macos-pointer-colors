@@ -9,18 +9,9 @@ struct BatteryHistoryCard: View {
         SettingsCard("Battery health", anchor: "battery.health") {
             SettingsToggle("Track each charge", symbol: "chart.line.downtrend.xyaxis",
                            caption: "Remembers how long every charge lasts, for each mouse.",
-                           isOn: $model.tracksBatteryHistory)
+                           isOn: $model.tracksBatteryHistory.revealing())
                 .featureSpot("clip-battery-health")
-            SettingsToggle("Drain report", symbol: "lightbulb",
-                           caption: "How fast it drains in use and idle, how long a charge lasts, and tips to make it last longer.",
-                           isOn: $model.showsDrainReport)
-                .disabled(!model.tracksBatteryHistory)
-            SettingsMenu(title: Text("Suggest switching it off"), symbol: "power",
-                         caption: Text("When idle drain passes this share of a day's drain."),
-                         selection: $model.idleTipThreshold) {
-                ForEach(IdleTipThreshold.allCases) { Text($0.title).tag($0) }
-            }
-            .disabled(!model.tracksBatteryHistory || !model.showsDrainReport)
+            Reveal(isShown: model.tracksBatteryHistory) { reportRows }
             if model.batteryHistory.mice.isEmpty {
                 Text(model.tracksBatteryHistory ? "Nothing yet: a mouse that reports its battery shows here after its first reading."
                                                 : "Turn on Track each charge to start.")
@@ -46,5 +37,20 @@ struct BatteryHistoryCard: View {
             }
         }
         .featureSpot("battery-health")
+        .animation(.reveal, value: model.batteryHistory.mice.count)
+    }
+
+    /// The drain report's switch and, while it's on, when it suggests switching the mouse off.
+    @ViewBuilder private var reportRows: some View {
+        SettingsToggle("Drain report", symbol: "lightbulb",
+                       caption: "How fast it drains in use and idle, how long a charge lasts, and tips to make it last longer.",
+                       isOn: $model.showsDrainReport.revealing())
+        Reveal(isShown: model.showsDrainReport) {
+            SettingsMenu(title: Text("Suggest switching it off"), symbol: "power",
+                         caption: Text("When idle drain passes this share of a day's drain."),
+                         selection: $model.idleTipThreshold) {
+                ForEach(IdleTipThreshold.allCases) { Text($0.title).tag($0) }
+            }
+        }
     }
 }

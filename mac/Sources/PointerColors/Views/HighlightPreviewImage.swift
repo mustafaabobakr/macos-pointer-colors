@@ -68,7 +68,7 @@ struct HighlightPreviewImage: View {
                     HighlightSnapshot(scene: scene, toLocal: { $0 }).draw(in: &context, now: Self.now)
                 }
                 PointerGlyph(pair: pair)
-                    .frame(width: 14 * zoom)
+                    .frame(width: 14 * zoom * scene.style.pointerScale)
                     .offset(x: (scene.pointer.x - 1) * zoom, y: (scene.pointer.y - 1) * zoom)
             }
         }
@@ -77,8 +77,8 @@ struct HighlightPreviewImage: View {
     private func sampleScene(in size: CGSize) -> HighlightScene {
         let scene = HighlightScene()
         scene.style = style
-        // Normal pointer size, so the pulses fit the card.
-        scene.style.pointerScale = 1
+        // Normal pointer size, so the pulses fit the card, unless drawn at real size.
+        if !sample.realSize { scene.style.pointerScale = 1 }
         switch self.scene {
         case .pulse: addPulses(to: scene, in: size)
         case .laser: addLaser(to: scene, in: size)
@@ -88,13 +88,15 @@ struct HighlightPreviewImage: View {
     }
 
     private func addPulses(to scene: HighlightScene, in size: CGSize) {
-        let spots = [(0.22, 0.6, 0.7), (0.5, 0.35, 0.4), (0.78, 0.6, 0.12)]
+        // At real size the pulses can fill the picture's height, so they sit on its middle line.
+        let rows = sample.realSize ? (0.5, 0.5) : (0.6, 0.35)
+        let spots = [(0.22, rows.0, 0.7), (0.5, rows.1, 0.4), (0.78, rows.0, 0.12)]
         scene.pulses = spots.map { x, y, age in
             Pulse(point: CGPoint(x: size.width * x, y: size.height * y), start: Self.now - age * style.pulseDuration)
         }
         scene.pointer = scene.pulses.last?.point ?? .zero
         // The pointer is mid long press, so the held ring shows next to the click pulses.
-        if style.showsHold { scene.hold = Hold(point: scene.pointer, start: Self.now - Hold.threshold - 1) }
+        if style.showsHold { scene.hold = Hold(point: scene.pointer, start: Self.now - style.holdDelay - 1) }
     }
 
     /// Widths as if the pointer started slowly, sped up through the middle and slowed to stop,

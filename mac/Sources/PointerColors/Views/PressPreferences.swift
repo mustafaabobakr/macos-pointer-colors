@@ -17,10 +17,9 @@ struct PressPreferences: View {
             SettingsCard(anchor: "highlight.press") {
                 HighlightPreviewBanner(scene: .press, pair: pair, sample: sample, isOn: highlight.shrinksOnPress)
                 SettingsToggle("Shrink the pointer on click", symbol: "arrow.down.right.and.arrow.up.left",
-                               caption: caption, isOn: $highlight.shrinksOnPress)
+                               caption: caption, isOn: $highlight.shrinksOnPress.revealing())
                     .featureSpot("clip-press-toggle")
-                PressRows(highlight: highlight)
-                    .disabled(!highlight.shrinksOnPress)
+                Reveal(isShown: highlight.shrinksOnPress) { PressRows(highlight: highlight) }
             }
             .featureSpot("press-shrink")
         }
@@ -40,11 +39,11 @@ private struct PressRows: View {
     var body: some View {
         ValueSlider(title: String(localized: "Pressed size"), symbol: "arrow.down.forward.and.arrow.up.backward",
                     value: $highlight.pressScale, range: PointerHighlight.pressScaleRange, format: "%.2f×",
-                    spot: "clip-press-size")
+                    spot: "clip-press-size", ends: .size)
         ValueSlider(title: String(localized: "Shrink in"), symbol: "timer", value: $highlight.pressDownDuration,
-                    range: PointerHighlight.pressDurationRange, format: "%.2f s")
+                    range: PointerHighlight.pressDurationRange, format: "%.2f s", ends: .time)
         ValueSlider(title: String(localized: "Grow back in"), symbol: "timer", value: $highlight.pressUpDuration,
-                    range: PointerHighlight.pressDurationRange, format: "%.2f s")
+                    range: PointerHighlight.pressDurationRange, format: "%.2f s", ends: .time)
         SettingsMenu("Animation", symbol: "waveform.path",
                      caption: "Bounce goes a little past the size, then settles, like a spring. 0 s skips the animation.",
                      selection: $highlight.pressCurve) {

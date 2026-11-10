@@ -16,12 +16,22 @@ struct HighlightPreviewBanner: View {
     private static let layoutHeight: CGFloat = 88
 
     var body: some View {
-        let height = Self.height * scale
-        HighlightPreviewImage(scene: scene, pair: pair, sample: sample, zoom: height / Self.layoutHeight)
+        let height = max(Self.height * scale, sample.realSize ? realHeight : 0)
+        HighlightPreviewImage(scene: scene, pair: pair, sample: sample, zoom: sample.realSize ? 1 : height / Self.layoutHeight)
             .frame(maxWidth: .infinity)
             .frame(height: height)
             .clipShape(RoundedRectangle(cornerRadius: 12 * scale, style: .continuous))
             .opacity(isOn ? 1 : 0.45)
             .accessibilityHidden(true)
+    }
+
+    /// At real size, tall enough for the widest ring or pulse, which can outgrow the usual picture.
+    private var realHeight: CGFloat {
+        let style = sample.style
+        switch scene {
+        case .ring: return 44 * style.pointerScale * style.ringSize + style.ringLineWidth + 16
+        case .pulse: return style.pulseRadius * 2 + 16
+        case .laser, .press: return 0
+        }
     }
 }

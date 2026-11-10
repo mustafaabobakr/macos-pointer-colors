@@ -24,4 +24,7 @@ struct HighlightPreviewSample {
     var showsDot = true
     /// Draws the press at its real size. Off, it's drawn at least 0.7× so it reads in a small picture.
     var exactPress = false
+    /// Draws pulses and the pointer exactly as large as on screen, at the pointer's own size,
+    /// instead of zoomed to fill a big picture.
+    var realSize = false
 }

@@ -13,7 +13,7 @@ struct SettingsPage<Content: View>: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20 * scale) {
+            SettingsStack(spacing: 20 * scale) {
                 Text(title)
                     .appFont(.title2, weight: .bold)
                     .accessibilityAddTraits(.isHeader)
@@ -45,7 +45,7 @@ struct SettingsCard<Content: View>: View {
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 16 * scale, style: .continuous)
-        VStack(alignment: .leading, spacing: 13 * scale) {
+        SettingsStack(spacing: 13 * scale) {
             if let title {
                 Text(title)
                     .appFont(.body, weight: .semibold)
@@ -56,6 +56,8 @@ struct SettingsCard<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16 * scale)
         .background { CardBackground(shape: shape) }
+        // Nothing shows past the card's edge while it grows or shrinks.
+        .clipShape(shape)
         .overlay { shape.strokeBorder(Color.accentColor, lineWidth: 2).opacity(isFocused ? 1 : 0) }
         .animation(.easeOut(duration: 0.3), value: isFocused)
         .id(anchor)

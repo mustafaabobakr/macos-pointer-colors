@@ -26,7 +26,7 @@ final class PulseLayerView: NSView {
     func pulse(at point: CGPoint, style: HighlightStyle) {
         switch style.pulseStyle {
         case .ring: addRing(at: point, style: style)
-        case .ripple: (0..<3).forEach { addRippleWave($0, at: point, style: style) }
+        case .ripple: (0..<style.rippleWaves).forEach { addRippleWave($0, at: point, style: style) }
         }
     }
 
@@ -35,7 +35,7 @@ final class PulseLayerView: NSView {
         endHold(fadeOut: false)
         let work = DispatchWorkItem { [weak self] in self?.showHold(at: point, style: style) }
         pendingHold = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + Hold.threshold, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + style.holdDelay, execute: work)
     }
 
     /// Keeps the ring under the pointer while the button is held.
@@ -69,39 +69,46 @@ final class PulseLayerView: NSView {
 
     private func addRing(at point: CGPoint, style: HighlightStyle) {
         let base = baseDiameter(style)
-        for (ring, _) in outlinedCircles(at: point, style: style, lineWidth: 4) {
+        for (ring, _) in outlinedCircles(at: point, style: style, lineWidth: style.pulseLineWidth) {
             animate(ring, duration: style.pulseDuration, timing: .easeOut, changes: [
-                ("path", circle(Pulse.startSide), circle(base * 1.8)),
-                ("opacity", 0.95, 0),
+                ("path", circle(Pulse.startSide), circle(base * style.pulseGrowth)),
+                ("opacity", style.pulseOpacity, 0),
             ])
         }
     }
 
-    /// One of three waves, each leaving a little after the one before.
+    /// One of the waves, each leaving a little after the one before.
     private func addRippleWave(_ index: Int, at point: CGPoint, style: HighlightStyle) {
         let base = baseDiameter(style)
-        let delay = style.pulseDuration * 0.15 * Double(index)
-        for (wave, extra) in outlinedCircles(at: point, style: style, lineWidth: 3) {
+        for (wave, extra) in outlinedCircles(at: point, style: style, lineWidth: style.rippleLineWidth) {
             wave.opacity = 0
-            animate(wave, duration: style.pulseDuration * 0.7, delay: delay, timing: .easeOut, changes: [
-                ("path", circle(Pulse.startSide), circle(base * 2.2)),
-                ("lineWidth", 3 + extra, 1 + extra),
-                ("opacity", 0.9, 0),
+            animate(wave, duration: style.rippleWaveLength, delay: style.rippleDelay(index), timing: .easeOut, changes: [
+                ("path", circle(Pulse.startSide), circle(base * style.rippleGrowth)),
+                ("lineWidth", style.rippleLineWidth + extra, style.rippleEndLineWidth + extra),
+                ("opacity", style.rippleOpacity, 0),
             ])
         }
     }
 
     private func showHold(at point: CGPoint, style: HighlightStyle) {
         pendingHold = nil
-        let side = baseDiameter(style) * Hold.size
-        let rings = outlinedCircles(at: point, style: style, lineWidth: 3).map(\.shape)
+        let side = baseDiameter(style) * style.holdSize
+        let rings = outlinedCircles(at: point, style: style, lineWidth: style.holdLineWidth).map(\.shape)
         rings.forEach { $0.path = circle(side) }
-        rings.last?.fillColor = style.pulseColor.cgColor(alpha: 0.35)
+        rings.last?.fillColor = style.pulseColor.cgColor(alpha: style.holdFill)
         holdLayers = rings
         let grow = CABasicAnimation(keyPath: "transform.scale")
         grow.fromValue = 0.6
         grow.toValue = 1
         grow.duration = Hold.grow
+        for ring in rings {
+            ring.add(grow, forKey: "grow")
+            if style.holdBreathes { ring.add(Self.breathing(), forKey: "breathe") }
+        }
+    }
+
+    /// The held ring grows a little and back, over and over, after it has grown in.
+    private static func breathing() -> CABasicAnimation {
         let breathe = CABasicAnimation(keyPath: "transform.scale")
         breathe.fromValue = 1
         breathe.toValue = 1.04
@@ -109,10 +116,7 @@ final class PulseLayerView: NSView {
         breathe.beginTime = CACurrentMediaTime() + Hold.grow
         breathe.autoreverses = true
         breathe.repeatCount = .infinity
-        for ring in rings {
-            ring.add(grow, forKey: "grow")
-            ring.add(breathe, forKey: "breathe")
-        }
+        return breathe
     }
 
     /// A pulse line in both of the pair's colors, as the laser has: the dark outline a little wider

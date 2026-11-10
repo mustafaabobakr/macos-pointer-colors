@@ -42,7 +42,7 @@ final class LaserLayerView: NSView {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = 1
         fade.toValue = 0
-        fade.duration = LaserDot.fade
+        fade.duration = style.dotFade
         dot.add(fade, forKey: "fade")
     }
 

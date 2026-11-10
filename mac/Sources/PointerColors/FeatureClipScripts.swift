@@ -51,7 +51,7 @@ enum FeatureClipScripts {
         "menu-pairs": menuPairs, "current-pair": currentPair, "pointer-size": pointerSize,
         "previews": previews, "display-colors": displayColors, "menu-highlight": menuHighlight,
         "custom-pairs": customPairs, "appearance-pairs": appearancePairs, "app-colors": appColors,
-        "highlight": highlight, "press-shrink": pressShrink, "pulse": pulse, "laser": laser, "highlight-pair-colors": highlightPairColors,
+        "highlight": highlight, "press-shrink": pressShrink, "pulse": pulse, "laser": laser,
         "shortcuts": shortcuts, "menu-appearance": menuAppearance, "backup": backup,
         "update-window": updateWindow, "updates": updates,
         "tracking": tracking, "pointer-location": pointerLocation, "menu-bar-dock": menuBarDock, "battery": battery, "battery-health": batteryHealth,
@@ -206,12 +206,12 @@ enum FeatureClipScripts {
         steps: [
             .pause(0.4),
             .move(to: spot("clip-ring-toggle", x: 0.95)), .choose { $0.highlight.showsRing = true }, .pause(0.6),
-            .move(to: along("clip-ring-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.03)),
-            .slide(to: along("clip-ring-size", 1.8, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.9) {
+            .move(to: along("clip-ring-size", 1.0, in: PointerHighlight.ringSizeRange, inset: 0.03)),
+            .slide(to: along("clip-ring-size", 1.8, in: PointerHighlight.ringSizeRange, inset: 0.03), seconds: 0.9) {
                 $0.highlight.ringSize = lerp(1.0, 1.8, $1)
             },
             .pause(0.3),
-            .slide(to: along("clip-ring-size", 1.2, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.6) {
+            .slide(to: along("clip-ring-size", 1.2, in: PointerHighlight.ringSizeRange, inset: 0.03), seconds: 0.6) {
                 $0.highlight.ringSize = lerp(1.8, 1.2, $1)
             },
             .pause(0.8),
@@ -260,17 +260,6 @@ enum FeatureClipScripts {
             },
             .pause(0.4),
             .move(to: spot("clip-laser-outline", x: 0.93)), .choose { $0.highlight.laserOutline = .laser }, .pause(1.0),
-        ])
-
-    private static let highlightPairColors = FeatureClip(
-        cursorStart: spot("highlight-pair-colors", x: 0.5, y: 0.2),
-        steps: [
-            .pause(0.4),
-            .move(to: spot("clip-pair-pulse-color", x: 0.93)),
-            .choose { model in model.highlight.setPulseColor(RGBA(red: 1, green: 0.3, blue: 0.6), for: model.menuBarPair) },
-            .pause(1.0),
-            .move(to: spot("highlight-pair-colors", x: 0.6, y: 0.3)), show("neon-lime"), .pause(1.2),
-            show("aqua-mint"), .pause(0.8),
         ])
 
     private static let shortcuts = FeatureClip(
