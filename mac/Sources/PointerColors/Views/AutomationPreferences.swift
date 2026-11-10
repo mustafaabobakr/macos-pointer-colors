@@ -89,8 +89,8 @@ private struct HoverPauseKeysRow: View {
                     caption: "Hold a chosen key to move across windows without changing focus. A held mouse button always pauses it.") {
             HStack(spacing: 4) {
                 ForEach(Self.keys, id: \.key.rawValue) { item in
-                    Toggle(isOn: isOn(item.key)) { Text(verbatim: item.symbol).frame(minWidth: 16) }
-                        .toggleStyle(.button)
+                    Toggle(isOn: isOn(item.key)) { Text(verbatim: item.symbol) }
+                        .toggleStyle(KeyToggleStyle())
                         .accessibilityLabel(Text(item.name))
                 }
             }
