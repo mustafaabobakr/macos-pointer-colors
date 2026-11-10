@@ -8,7 +8,7 @@ import Observation
 /// something is switched on, and the mouse is only watched then. Everything in them is a Core
 /// Animation layer that the app moves or hands an animation to, so nothing is redrawn per frame.
 ///
-/// A laser drag with its keys held goes through the session event tap when Accessibility allows it:
+/// With Block clicks on, a laser drag with its keys held goes through the session event tap when Accessibility allows it:
 /// the tap sees the press before any app and drops it, so even a game that reads the mouse on its own
 /// can't take the drag. Without the tap, the windows catch the mouse instead.
 @MainActor
@@ -61,7 +61,7 @@ final class HighlightOverlay {
         withObservationTracking {
             _ = HighlightStyle(settings: settings, pair: .featured, pointerScale: 1)
             _ = settings.isActive
-            _ = drawsWithKeys
+            _ = blocksClicks
         } onChange: { [weak self] in
             DispatchQueue.main.async {
                 self?.update()
@@ -76,17 +76,20 @@ final class HighlightOverlay {
         watchTap()
     }
 
-    /// Hooks into the tap while the laser draws with keys. Setting a handler rebuilds the tap, so only on a change.
+    /// Hooks into the tap while a laser drag keeps its clicks. Setting a handler rebuilds the tap, so only on a change.
     private func watchTap() {
-        guard drawsWithKeys != isWatchingTap else { return }
-        isWatchingTap = drawsWithKeys
+        guard blocksClicks != isWatchingTap else { return }
+        isWatchingTap = blocksClicks
         tapOwnsDrag = false
         tap.set(Self.tapID, types: [.leftMouseDown, .leftMouseDragged, .leftMouseUp],
                 handler: isWatchingTap ? { [weak self] in self?.tapEvent($0, $1) ?? .pass } : nil)
     }
 
-    /// The laser draws only while its keys are held, the one case where a drag must not reach the app.
-    private var drawsWithKeys: Bool { settings.laserOn && settings.laserTrail && settings.laserNeedsKeys }
+    /// The laser draws only while its keys are held, and that drag mustn't reach the app: the one case
+    /// where the overlay takes the mouse. With Block clicks off, the drag draws and reaches the app too.
+    private var blocksClicks: Bool {
+        settings.laserOn && settings.laserTrail && settings.laserNeedsKeys && settings.laserBlocksClicks
+    }
 
     private static let tapID = "highlightLaser"
 
@@ -260,10 +263,10 @@ final class HighlightOverlay {
         displays.forEach { $0.laser.extendStroke(to: local(point, in: $0.frame), style: style) }
     }
 
-    /// While the laser needs keys and they're held, the windows take the mouse: the drag draws, and the
+    /// While the laser blocks clicks and its keys are held, the windows take the mouse: the drag draws, and the
     /// app underneath gets no click to select text with. A drag already under way keeps its owner.
     private func updateCapture(keysHeld: Bool) {
-        let capture = !tap.isRunning && drawsWithKeys && keysHeld
+        let capture = !tap.isRunning && blocksClicks && keysHeld
         guard capture != isCapturing, NSEvent.pressedMouseButtons == 0 else { return }
         isCapturing = capture
         windows.forEach { $0.ignoresMouseEvents = !capture }

@@ -147,18 +147,23 @@ private struct LaserSection: View {
     }
 }
 
-/// Whether the laser draws only while keys are held, and which keys.
+/// Whether the laser draws only while keys are held, which keys, and whether that drag clicks the app underneath.
 private struct HoldKeysRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
         SettingsToggle(title: Text("Draw only while holding \(highlight.laserKeys.title)"), symbol: "command",
-                       caption: Text("A \(highlight.laserKeys.symbols)-drag draws the laser and doesn't click the app underneath, so no text gets selected. Without \(highlight.laserKeys.symbols), clicks and drags work as usual."),
+                       caption: Text("A \(highlight.laserKeys.symbols)-drag draws the laser. Without \(highlight.laserKeys.symbols), clicks and drags work as usual."),
                        isOn: $highlight.laserNeedsKeys)
             .disabled(!highlight.laserTrail)
-        SettingsRow("Keys to hold", symbol: "keyboard",
-                    caption: "Click, then press ⌘, ⌥, ⌃ or ⇧, alone or together, and let go.") {
-            HoldKeyRecorder(keys: highlight.laserKeys) { highlight.laserKeys = $0 }
+        Group {
+            SettingsRow("Keys to hold", symbol: "keyboard",
+                        caption: "Click, then press ⌘, ⌥, ⌃ or ⇧, alone or together, and let go.") {
+                HoldKeyRecorder(keys: highlight.laserKeys) { highlight.laserKeys = $0 }
+            }
+            SettingsToggle(title: Text("Block clicks while drawing"), symbol: "hand.raised",
+                           caption: Text("A \(highlight.laserKeys.symbols)-drag doesn't click the app underneath, so no text gets selected. Off, the drag draws and also reaches the app."),
+                           isOn: $highlight.laserBlocksClicks)
         }
         .disabled(!highlight.laserTrail || !highlight.laserNeedsKeys)
     }

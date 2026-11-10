@@ -149,7 +149,10 @@
 "Trail fades after" = "يتلاشى الأثر بعد";
 "Uses the pair's color, set below for each pair." = "يستخدم لون الزوج، ويمكن ضبطه أدناه لكل زوج.";
 "Draw only while holding ⌥ Option" = "الرسم فقط مع الضغط على ⌥ Option";
-"A ⌥-drag draws the laser and doesn't click the app underneath, so no text gets selected. Without ⌥, clicks and drags work as usual." = "السحب مع ⌥ يرسم الليزر دون النقر على التطبيق أسفله، فلا يُحدَّد أي نص. ومن دون ⌥ يعمل النقر والسحب كالمعتاد.";
+"A ⌥-drag draws the laser. Without ⌥, clicks and drags work as usual." = "السحب مع ⌥ يرسم الليزر. ومن دون ⌥ يعمل النقر والسحب كالمعتاد.";
+"Block clicks while drawing" = "منع النقر أثناء الرسم";
+"A ⌥-drag doesn't click the app underneath, so no text gets selected. Off, the drag draws and also reaches the app." = "السحب مع ⌥ لا ينقر على التطبيق أسفله، فلا يُحدَّد أي نص. عند الإيقاف يرسم السحب ويصل إلى التطبيق أيضًا.";
+"Laser: block clicks while drawing" = "الليزر: منع النقر أثناء الرسم";
 "Dot" = "النقطة";
 "When the glowing dot follows the pointer. While drawing, it shows only at the tip of a trail." = "متى تتبع النقطة المضيئة المؤشر. في وضع «أثناء الرسم» تظهر عند طرف الأثر فقط.";
 "Always" = "دائمًا";
