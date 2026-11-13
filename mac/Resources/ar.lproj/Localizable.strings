@@ -440,3 +440,14 @@
 "Laser: screenshot each drawing" = "الليزر: لقطة شاشة لكل رسمة";
 "Laser screenshot margin, clipboard, folder and Open in" = "لقطة الليزر: الهامش والحافظة والمجلد والفتح في";
 "Default app (%@)" = "التطبيق الافتراضي (%@)";
+"Permissions" = "الأذونات";
+"Accessibility" = "تسهيلات الاستخدام";
+"Screen Recording" = "تسجيل الشاشة";
+"Mouse buttons and laser" = "أزرار الفأرة والليزر";
+"Laser screenshots" = "لقطات الليزر";
+"Battery alerts" = "تنبيهات البطارية";
+"macOS keeps the pointer's colors and size in a protected settings file, and only Full Disk Access lets the app write it." = "يحفظ macOS ألوان المؤشر وحجمه في ملف إعدادات محمي، ولا يستطيع التطبيق الكتابة فيه إلا بإذن الوصول الكامل إلى القرص.";
+"Lets the app see mouse events before other apps do: side buttons and swipes go back and forward, accidental double-clicks are dropped, windows focus under the pointer, and the laser draws without clicking." = "يتيح للتطبيق رؤية أحداث الفأرة قبل التطبيقات الأخرى: الأزرار الجانبية والسحب للرجوع والتقدّم، وتجاهل النقرات المزدوجة غير المقصودة، وتركيز النوافذ تحت المؤشر، والرسم بالليزر من دون نقر.";
+"Captures the area around each laser drawing, only while Take a screenshot of each drawing is on. Nothing is recorded otherwise." = "يلتقط المنطقة المحيطة بكل رسمة ليزر، فقط عند تشغيل التقاط صورة للشاشة لكل رسمة. لا يُسجَّل شيء غير ذلك.";
+"Turn on Show the laser above to take screenshots of your drawings." = "شغّل إظهار الليزر أعلاه لالتقاط صور لرسوماتك.";
+"Allow…" = "سماح…";

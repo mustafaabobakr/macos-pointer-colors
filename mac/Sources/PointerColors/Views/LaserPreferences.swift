@@ -17,8 +17,14 @@ struct LaserPreferences: View {
             }
             .featureSpot("laser")
             SettingsCard("Screenshots", anchor: "highlight.laserShot") {
+                if !highlight.laserOn {
+                    Text("Turn on Show the laser above to take screenshots of your drawings.")
+                        .appFont(.caption).foregroundStyle(.secondary)
+                }
                 LaserShotRows(highlight: highlight)
+                    .disabled(!highlight.laserOn)
             }
+            .animation(.reveal, value: highlight.laserOn)
         }
     }
 

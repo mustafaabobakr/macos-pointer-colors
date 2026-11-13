@@ -58,6 +58,8 @@ enum SettingsSearch {
         item(.general, "general.backup", String(localized: "Back up all settings"), "externaldrive"),
         item(.general, "general.permission", String(localized: "Full Disk Access"), "lock.shield"),
         item(.general, "general.permission", String(localized: "Notifications"), "bell"),
+        item(.general, "general.permission", String(localized: "Accessibility"), "accessibility"),
+        item(.general, "general.permission", String(localized: "Screen Recording"), "rectangle.dashed.badge.record"),
         item(.general, "general.feedback", String(localized: "Send feedback"), "bubble.left.and.text.bubble.right"),
         item(.pairs, "pairs.list", String(localized: "Add custom pair"), "plus"),
         item(.pairs, "pairs.list", String(localized: "Hide pairs from the menu"), "eye.slash"),

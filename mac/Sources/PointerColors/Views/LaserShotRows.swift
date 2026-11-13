@@ -1,4 +1,3 @@
-import CoreGraphics
 import SwiftUI
 
 /// Preferences › Laser › Screenshots: a picture of the area around each finished trail, and
@@ -11,9 +10,9 @@ struct LaserShotRows: View {
                        caption: "When you let go after drawing a trail, captures the area around it. Needs Screen Recording access, which macOS asks for the first time.",
                        isOn: $highlight.laserShotOn.revealing())
             .onChange(of: highlight.laserShotOn) { _, isOn in
-                if isOn, !CGPreflightScreenCaptureAccess() { CGRequestScreenCaptureAccess() }
+                if isOn { ScreenRecordingAccess.request() }
             }
-        Reveal(isShown: highlight.laserShotOn) { options }
+        Reveal(isShown: highlight.laserOn && highlight.laserShotOn) { options }
             .onAppear(perform: dropMissingOpener)
     }
 

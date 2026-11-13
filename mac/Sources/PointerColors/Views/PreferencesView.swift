@@ -202,17 +202,7 @@ private struct GeneralPreferences: View {
             }
             MenuBarSection(model: model)
             BackupSection(model: model)
-            SettingsCard("Permission", anchor: "general.permission") {
-                SettingsRow("Pointer colors and size", symbol: "lock.shield") {
-                    if model.needsFullDiskAccess {
-                        Button("Grant Full Disk Access…") { model.openFullDiskAccessSettings() }
-                    } else {
-                        Label("Allowed", systemImage: "checkmark.circle").foregroundStyle(.green)
-                    }
-                }
-                NotificationPermissionRow()
-            }
-            .animation(.reveal, value: model.needsFullDiskAccess)
+            PermissionsCard(model: model)
             FeedbackCard()
         }
         .onAppear {
