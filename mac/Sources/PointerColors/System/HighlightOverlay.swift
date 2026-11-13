@@ -28,6 +28,12 @@ final class HighlightOverlay {
     /// The tap took the press that started this laser drag, so it also takes the drag and the release.
     private var tapOwnsDrag = false
     private var isWatchingTap = false
+    /// The points the current trail has passed through, for a screenshot of it; nil between trails.
+    private var trailBounds: CGRect?
+    /// Counts trails, so a screenshot that kept its trail on screen only fades that one.
+    private var trailNumber = 0
+    /// A screenshot with the trail in it is being taken, so the trail stays until it's done.
+    private var isHoldingTrail = false
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged, .leftMouseDown, .rightMouseDown,
@@ -183,6 +189,12 @@ final class HighlightOverlay {
     /// The button came up: the trail fades and, after a long press, a pulse goes out.
     private func release(at point: CGPoint) {
         releasePulse(at: point)
+        if let shot = finishedTrailShot() { return take(shot) }
+        guard !isHoldingTrail else { return }
+        finishTrails()
+    }
+
+    private func finishTrails() {
         displays.forEach { $0.laser.finishStroke(style: style) }
     }
 
@@ -256,11 +268,41 @@ final class HighlightOverlay {
 
     /// A trail is drawn on every display, so a drag can cross from one to the next.
     private func startTrail(at point: CGPoint) {
+        trailNumber += 1
+        trailBounds = CGRect(origin: point, size: .zero)
         displays.forEach { $0.laser.startStroke(at: local(point, in: $0.frame), style: style) }
     }
 
     private func extendTrail(to point: CGPoint) {
+        trailBounds = trailBounds?.union(CGRect(origin: point, size: .zero))
         displays.forEach { $0.laser.extendStroke(to: local(point, in: $0.frame), style: style) }
+    }
+
+    // MARK: Screenshots
+
+    /// The screenshot the trail that just ended asks for, if any. Each trail asks once.
+    private func finishedTrailShot() -> LaserShot? {
+        defer { trailBounds = nil }
+        guard let trailBounds else { return nil }
+        return LaserShot(settings: settings, trail: trailBounds, reach: style.laserTrailReach,
+                         overlayWindows: windows.map { CGWindowID($0.windowNumber) })
+    }
+
+    /// With the trail wanted in the picture, it stays on screen until the capture is done, then
+    /// fades as usual, unless a newer trail has replaced it by then.
+    private func take(_ shot: LaserShot) {
+        guard shot.includesTrail else {
+            finishTrails()
+            Task { await shot.take() }
+            return
+        }
+        isHoldingTrail = true
+        let number = trailNumber
+        Task {
+            await shot.take()
+            isHoldingTrail = false
+            if number == trailNumber { finishTrails() }
+        }
     }
 
     /// While the laser blocks clicks and its keys are held, the windows take the mouse: the drag draws, and the
@@ -447,6 +489,12 @@ extension HighlightStyle {
             return scaled([LaserPart(laser.glow, 7, blur: 1.5), LaserPart(laser.outline, 7, opacity: laserOutlineOpacity, rim: goodNotesRim),
                            LaserPart(laser.glow, 7)])
         }
+    }
+
+    /// How far the trail reaches past the points it passes through: half its widest line and that
+    /// line's glow.
+    var laserTrailReach: Double {
+        laserTrailParts.map { $0.width / 2 + $0.blur }.max() ?? 0
     }
 
     /// The trail's layers, bottom first, each a line `size` wide, already scaled by `laserSize`.

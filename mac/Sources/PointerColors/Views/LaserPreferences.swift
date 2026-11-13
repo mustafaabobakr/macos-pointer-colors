@@ -16,6 +16,9 @@ struct LaserPreferences: View {
                 Reveal(isShown: highlight.laserOn) { LaserRows(highlight: highlight) }
             }
             .featureSpot("laser")
+            SettingsCard("Screenshots", anchor: "highlight.laserShot") {
+                LaserShotRows(highlight: highlight)
+            }
         }
     }
 

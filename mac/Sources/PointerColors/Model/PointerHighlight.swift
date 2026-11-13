@@ -235,6 +235,18 @@ final class PointerHighlight {
     /// edge adds around the line and dot.
     var laserFadeOut: Double { didSet { save(laserFadeOut, Key.laserFadeOut) } }
     var laserRim: Double { didSet { save(laserRim, Key.laserRim) } }
+    /// Takes a screenshot of the area around each finished trail.
+    var laserShotOn: Bool { didSet { save(laserShotOn, Key.laserShotOn) } }
+    /// Points of screen kept around the trail on every side.
+    var laserShotMargin: Double { didSet { save(laserShotMargin, Key.laserShotMargin) } }
+    /// Keeps the drawn trail in the screenshot; off captures the screen under it.
+    var laserShotIncludesTrail: Bool { didSet { save(laserShotIncludesTrail, Key.laserShotTrail) } }
+    var laserShotCopies: Bool { didSet { save(laserShotCopies, Key.laserShotCopies) } }
+    /// Saves each screenshot in `laserShotFolder`.
+    var laserShotSaves: Bool { didSet { save(laserShotSaves, Key.laserShotSaves) } }
+    /// A folder path; the Desktop unless changed.
+    var laserShotFolder: String { didSet { save(laserShotFolder, Key.laserShotFolder) } }
+    var laserShotOpener: LaserShotOpener { didSet { save(laserShotOpener.rawValue, Key.laserShotOpener) } }
 
     static let sizeRange = 0.5...2.0
     /// The ring can shrink to a tenth, tight around the pointer's tip.
@@ -263,6 +275,7 @@ final class PointerHighlight {
     static let coreLightnessRange = 0.0...0.8
     static let fadeOutRange = 0.1...1.0
     static let rimRange = 1.0...6.0
+    static let shotMarginRange = 0.0...400.0
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -332,6 +345,18 @@ final class PointerHighlight {
         laserOutline = defaults.string(forKey: Key.laserOutline).flatMap(LaserOutline.init(rawValue:)) ?? .dark
         laserOutlineOpacity = defaults.double(forKey: Key.laserOutlineOpacity)
         laserLook = defaults.string(forKey: Key.laserLook).flatMap(LaserLook.init(rawValue:)) ?? .classic
+        laserShotOn = defaults.bool(forKey: Key.laserShotOn)
+        laserShotMargin = defaults.double(forKey: Key.laserShotMargin)
+        laserShotIncludesTrail = defaults.bool(forKey: Key.laserShotTrail)
+        laserShotCopies = defaults.bool(forKey: Key.laserShotCopies)
+        laserShotSaves = defaults.bool(forKey: Key.laserShotSaves)
+        laserShotFolder = defaults.string(forKey: Key.laserShotFolder) ?? Self.desktopPath
+        laserShotOpener = defaults.string(forKey: Key.laserShotOpener).flatMap(LaserShotOpener.init(rawValue:)) ?? .none
+    }
+
+    private static var desktopPath: String {
+        (FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first
+            ?? URL(filePath: NSHomeDirectory()).appending(path: "Desktop")).path(percentEncoded: false)
     }
 
     /// The looks' starting values: what each one drew before it could be changed.
@@ -342,6 +367,7 @@ final class PointerHighlight {
         Key.holdDelay: 0.35, Key.holdSize: 0.55, Key.holdFill: 0.35, Key.holdLineWidth: 3.0, Key.holdBreathes: true,
         Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
         Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
+        Key.laserShotMargin: 20.0, Key.laserShotTrail: true, Key.laserShotCopies: true, Key.laserShotSaves: true,
     ]
 
     /// True when anything needs the overlay.
@@ -479,6 +505,13 @@ final class PointerHighlight {
         static let laserCoreLightness = "highlightLaserCoreLightness"
         static let laserFadeOut = "highlightLaserFadeOut"
         static let laserRim = "highlightLaserRim"
+        static let laserShotOn = "highlightLaserShot"
+        static let laserShotMargin = "highlightLaserShotMargin"
+        static let laserShotTrail = "highlightLaserShotIncludesTrail"
+        static let laserShotCopies = "highlightLaserShotCopies"
+        static let laserShotSaves = "highlightLaserShotSaves"
+        static let laserShotFolder = "highlightLaserShotFolder"
+        static let laserShotOpener = "highlightLaserShotOpener"
     }
 }
 

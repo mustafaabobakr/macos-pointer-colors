@@ -80,6 +80,8 @@ enum SettingsSearch {
         item(.laser, "highlight.laser", String(localized: "Laser look: Classic or GoodNotes glow"), "wand.and.rays"),
         item(.laser, "highlight.laser", String(localized: "Laser outline opacity"), "circle.lefthalf.filled"),
         item(.laser, "highlight.laser", String(localized: "Laser: block clicks while drawing"), "hand.raised"),
+        item(.laser, "highlight.laserShot", String(localized: "Laser: screenshot each drawing"), "camera.viewfinder"),
+        item(.laser, "highlight.laserShot", String(localized: "Laser screenshot margin, clipboard, folder and Open in"), "rectangle.dashed"),
         item(.press, "highlight.press", String(localized: "Shrink the pointer on click"), "arrow.down.right.and.arrow.up.left"),
         item(.pulse, "highlight.pulse", String(localized: "Pulse and laser color"), "paintpalette"),
         item(.speed, "speed.mouse", String(localized: "Disable pointer acceleration"), "equal.circle"),
