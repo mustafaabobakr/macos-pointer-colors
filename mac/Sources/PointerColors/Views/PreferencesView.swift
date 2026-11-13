@@ -193,10 +193,8 @@ private struct GeneralPreferences: View {
                 SettingsToggle("Play a sound when a pair is applied", symbol: "speaker.wave.2", isOn: $sound.revealing())
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
                 Reveal(isShown: sound) {
-                    SettingsMenu("Sound", symbol: "music.note", caption: "Plays when you pick one.",
-                                 selection: $soundName) {
-                        ForEach(ApplySound.names, id: \.self) { Text(verbatim: $0).tag($0) }
-                    }
+                    SettingsChoice("Sound", symbol: "music.note", caption: "Plays when you pick one.",
+                                   selection: $soundName, options: ApplySound.names) { Text(verbatim: $0) }
                     .onChange(of: soundName) { pickSound(soundName) }
                 }
             }
@@ -235,11 +233,9 @@ private struct AppearancePreferences: View {
             }
             .featureSpot("menu-appearance")
             SettingsCard(anchor: "appearance.text") {
-                SettingsMenu("Text size", symbol: "textformat.size",
-                             caption: "Size of the menu and this window. Automatic uses Large on big screens.",
-                             selection: $model.textSize) {
-                    ForEach(TextSize.allCases) { Text($0.title).tag($0) }
-                }
+                SettingsChoice("Text size", symbol: "textformat.size",
+                               caption: "Size of the menu and this window. Automatic uses Large on big screens.",
+                               selection: $model.textSize, label: \.title)
             }
             .featureSpot("menu-appearance")
             SettingsCard("App icon", anchor: "appearance.icon") {
@@ -266,24 +262,12 @@ private struct MenuLookCard: View {
             SettingsToggle("Show current pair at the top", symbol: "rectangle.topthird.inset.filled",
                            caption: "Its colors, buttons to copy their hex codes, and whether it's applied.",
                            isOn: $model.menuShowsCurrentPair)
-            SettingsRow("Menu glass", symbol: "square.on.square") {
-                Picker("Menu glass", selection: $model.menuGlass) {
-                    ForEach(MenuGlass.allCases) { Text($0.title).tag($0) }
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-                .fixedSize()
-            }
-            SettingsMenu("Menu tint", symbol: "drop", selection: $model.menuTint.revealing()) {
-                ForEach(MenuTint.allCases) { Text($0.title).tag($0) }
-            }
+            SettingsChoice("Menu glass", symbol: "square.on.square", selection: $model.menuGlass, label: \.title)
+            SettingsChoice("Menu tint", symbol: "drop", selection: $model.menuTint.revealing(), label: \.title)
             .featureSpot("clip-menu-tint")
             Reveal(isShown: model.menuTint != .none) {
-                SettingsRow("Tint strength", symbol: "slider.horizontal.3") {
-                    Slider(value: $model.menuTintStrength, in: 0.1...0.8)
-                        .accessibilityLabel("Tint strength")
-                        .frame(width: 180)
-                }
+                ValueSlider(title: String(localized: "Tint strength"), symbol: "slider.horizontal.3",
+                            value: $model.menuTintStrength, range: 0.1...0.8, format: "%.0f%%", scale: 100, ends: .opacity)
             }
         }
     }
@@ -295,11 +279,9 @@ private struct MenuBarSection: View {
 
     var body: some View {
         SettingsCard("Menu bar and Dock", anchor: "general.menuBar") {
-            SettingsMenu(title: Text("Show in menu bar"), symbol: "menubar.rectangle",
+            SettingsChoice(title: Text("Show in menu bar"), symbol: "menubar.rectangle",
                          caption: model.menuBarVisibility == .never ? Text("Open Pointer Colors again to show Preferences.") : nil,
-                         selection: $model.menuBarVisibility) {
-                ForEach(MenuBarVisibility.allCases) { Text($0.title).tag($0) }
-            }
+                         selection: $model.menuBarVisibility, label: \.title)
             .featureSpot("clip-menu-bar-visibility")
             SettingsToggle("Show in Dock", symbol: "dock.rectangle",
                            caption: "Also lists Pointer Colors in the app switcher.", isOn: $model.showsInDock)
@@ -614,9 +596,7 @@ private struct UpdateSection: View {
         if let url = model.availableUpdateURL {
             Link("Download the new version", destination: url)
         }
-        SettingsMenu("Check automatically", symbol: "calendar", selection: $schedule) {
-            ForEach(UpdateSchedule.allCases) { Text($0.title).tag($0) }
-        }
+        SettingsChoice("Check automatically", symbol: "calendar", selection: $schedule, label: \.title)
         .onChange(of: schedule) { model.updateSchedule = schedule }
         SettingsToggle("Install updates automatically", symbol: "arrow.triangle.2.circlepath",
                        isOn: $model.installsUpdatesAutomatically)

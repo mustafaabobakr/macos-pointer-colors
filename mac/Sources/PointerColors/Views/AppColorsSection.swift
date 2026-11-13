@@ -13,9 +13,12 @@ struct AppColorsSection: View {
             SettingsToggle("Different pair for each app", symbol: "square.grid.2x2",
                            caption: "App pairs win over display pairs.", isOn: $automation.perAppColors.revealing())
             Reveal(isShown: automation.perAppColors) {
-                SettingsMenu("Applies when", symbol: "cursorarrow.motionlines", selection: $automation.appRuleTrigger) {
-                    Text("The pointer is over the app").tag(AppRuleTrigger.pointer)
-                    Text("The app is in front").tag(AppRuleTrigger.frontmost)
+                SettingsChoice("Applies when", symbol: "cursorarrow.motionlines", selection: $automation.appRuleTrigger,
+                               options: [AppRuleTrigger.pointer, .frontmost]) { trigger in
+                    switch trigger {
+                    case .pointer: Text("The pointer is over the app")
+                    case .frontmost: Text("The app is in front")
+                    }
                 }
                 .featureSpot("clip-app-trigger")
             }

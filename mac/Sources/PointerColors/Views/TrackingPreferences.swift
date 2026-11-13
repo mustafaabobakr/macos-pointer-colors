@@ -84,9 +84,8 @@ private struct NumberSlider<Accessory: View>: View {
                     caption: Text(verbatim: "(\(range.lowerBound.formatted())–\(range.upperBound.formatted()))")) {
             HStack {
                 accessory()
-                Slider(value: $value, in: range)
-                    .accessibilityLabel(title)
-                    .featureSpot(spot ?? "")
+                StepSlider(value: $value, range: range, nudge: pow(10, -Double(fractionDigits)), icons: .speed,
+                           title: Text(title), spot: spot)
                 TextField("", value: Binding(get: { value }, set: { value = $0.clamped(to: range) }),
                           format: .number.precision(.fractionLength(0...fractionDigits)))
                     .labelsHidden()
@@ -99,7 +98,7 @@ private struct NumberSlider<Accessory: View>: View {
                     .accessibilityLabel("Reset to default")
                     .disabled(abs(value - defaultValue) < 0.0005)
             }
-            .frame(width: 310)
+            .frame(width: 360)
         }
     }
 }

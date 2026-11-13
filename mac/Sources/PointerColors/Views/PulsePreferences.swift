@@ -40,14 +40,7 @@ private struct PulseRows: View {
     var body: some View {
         ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
         SharedPulseRows(highlight: highlight)
-        SettingsRow("Style", symbol: "circle.circle") {
-            Picker("Style", selection: $highlight.pulseStyle.revealing()) {
-                ForEach(PulseStyle.allCases) { Text($0.title).tag($0) }
-            }
-            .labelsHidden()
-            .pickerStyle(.segmented)
-            .fixedSize()
-        }
+        SettingsChoice("Style", symbol: "circle.circle", selection: $highlight.pulseStyle.revealing(), label: \.title)
         .featureSpot("clip-pulse-style")
         Reveal(isShown: highlight.pulseStyle == .ring) { RingStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .ripple) { RippleStyleRows(highlight: highlight) }

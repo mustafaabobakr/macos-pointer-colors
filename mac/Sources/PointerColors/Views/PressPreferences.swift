@@ -44,11 +44,9 @@ private struct PressRows: View {
                     range: PointerHighlight.pressDurationRange, format: "%.2f s", ends: .time)
         ValueSlider(title: String(localized: "Grow back in"), symbol: "timer", value: $highlight.pressUpDuration,
                     range: PointerHighlight.pressDurationRange, format: "%.2f s", ends: .time)
-        SettingsMenu("Animation", symbol: "waveform.path",
+        SettingsChoice("Animation", symbol: "waveform.path",
                      caption: "Bounce goes a little past the size, then settles, like a spring. 0 s skips the animation.",
-                     selection: $highlight.pressCurve) {
-            ForEach(PressCurve.allCases) { Text($0.title).tag($0) }
-        }
+                     selection: $highlight.pressCurve, label: \.title)
         .featureSpot("clip-press-curve")
         SettingsToggle("Shrink on right-clicks too", symbol: "cursorarrow.click", isOn: $highlight.shrinksOnRightClick)
     }

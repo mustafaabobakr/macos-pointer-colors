@@ -7,11 +7,10 @@ struct ColorSourcePicker: View {
     @Binding var color: RGBA
 
     var body: some View {
-        SettingsMenu(title: Text("Color"), symbol: "paintpalette",
-                     caption: usesPair ? Text("Uses the brighter of the pair's outline and fill, so it follows the pair on each display.") : Text("Uses the color you pick."),
-                     selection: $usesPair.revealing()) {
-            Text("Pointer pair").tag(true)
-            Text("Custom").tag(false)
+        SettingsChoice(title: Text("Color"), symbol: "paintpalette",
+                       caption: usesPair ? Text("Uses the brighter of the pair's outline and fill, so it follows the pair on each display.") : Text("Uses the color you pick."),
+                       selection: $usesPair.revealing(), options: [true, false]) { usesPair in
+            usesPair ? Text("Pointer pair") : Text("Custom")
         }
         Reveal(isShown: !usesPair) {
             SettingsRow("Custom color", symbol: "eyedropper") {

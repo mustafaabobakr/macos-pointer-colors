@@ -26,11 +26,11 @@ struct LaserShotRows: View {
         SettingsToggle("Copy to the clipboard", symbol: "doc.on.clipboard", isOn: $highlight.laserShotCopies)
         SettingsToggle("Save to a folder", symbol: "folder", isOn: $highlight.laserShotSaves.revealing())
         Reveal(isShown: highlight.laserShotSaves) { folderRow }
-        SettingsMenu("Open in", symbol: "arrow.up.forward.app",
-                     caption: "Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below.",
-                     selection: $highlight.laserShotOpener) {
-            ForEach(LaserShotOpener.allCases.filter(\.isAvailable)) { OpenerLabel(opener: $0).tag($0) }
-        }
+        // A menu even with four or fewer apps: segments don't show the app icons well.
+        SettingsChoice("Open in", symbol: "arrow.up.forward.app",
+                       caption: "Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below.",
+                       selection: $highlight.laserShotOpener, options: LaserShotOpener.allCases.filter(\.isAvailable),
+                       style: .menu) { OpenerLabel(opener: $0) }
         UnsavedShotsRow()
     }
 

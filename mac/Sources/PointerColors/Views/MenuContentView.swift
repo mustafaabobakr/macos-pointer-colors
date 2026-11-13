@@ -128,16 +128,10 @@ struct MenuContentView: View {
 
     private var sizeControls: some View {
         HStack(spacing: 10) {
-            Slider(value: Binding(get: { model.scale }, set: { model.setScale($0) }),
-                   in: SystemPointer.minimumScale...SystemPointer.maximumScale) {
-                Text("Pointer size")
-            } minimumValueLabel: {
-                Image(systemName: "textformat.size.smaller").accessibilityHidden(true)
-            } maximumValueLabel: {
-                Image(systemName: "textformat.size.larger").accessibilityHidden(true)
-            }
-            .labelsHidden()
-            .featureSpot("clip-size-slider")
+            StepSlider(value: Binding(get: { model.scale }, set: { model.setScale($0) }),
+                       range: SystemPointer.minimumScale...SystemPointer.maximumScale, nudge: 0.01,
+                       icons: .pointerSize, title: Text("Pointer size"))
+                .featureSpot("clip-size-slider")
             Text(String(format: "%.2f×", model.scale))
                 .appFont(.caption, monospacedDigits: true)
                 .frame(width: 40 * scale, alignment: .trailing)
@@ -375,10 +369,10 @@ private struct DisplaySizeRow: View {
                 }
             }
             HStack(spacing: 8) {
-                Slider(value: Binding(get: { automation.size(for: display) },
-                                      set: { automation.setSize($0, for: display) }),
-                       in: SystemPointer.minimumScale...SystemPointer.maximumScale)
-                    .accessibilityLabel("Pointer size on \(display.name)")
+                StepSlider(value: Binding(get: { automation.size(for: display) },
+                                          set: { automation.setSize($0, for: display) }),
+                           range: SystemPointer.minimumScale...SystemPointer.maximumScale, nudge: 0.01,
+                           icons: .pointerSize, title: Text("Pointer size on \(display.name)"))
                 Text(String(format: "%.2f×", automation.size(for: display)))
                     .appFont(.caption, monospacedDigits: true)
                     .frame(width: 40 * scale, alignment: .trailing)

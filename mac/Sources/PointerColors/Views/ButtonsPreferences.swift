@@ -38,24 +38,15 @@ struct ButtonsPreferences: View {
                                isOn: $buttons.fixesDoubleClicks.revealing())
                     .featureSpot("clip-double-clicks")
                 Reveal(isShown: buttons.fixesDoubleClicks) {
-                    SettingsMenu("Fix clicks of", symbol: "computermouse",
+                    SettingsChoice("Fix clicks of", symbol: "computermouse",
                                  caption: "Left only keeps every right click, however fast.",
-                                 selection: $buttons.doubleClickButtons) {
-                        ForEach(DoubleClickButtons.allCases) { Text($0.title).tag($0) }
-                    }
+                                 selection: $buttons.doubleClickButtons, label: \.title)
                 }
                 Reveal(isShown: buttons.fixesDoubleClicks) {
-                    SettingsRow("Ignore clicks within", symbol: "timer",
-                                caption: "Raise it if double clicks still get through; lower it if your own fast double-clicks are lost.") {
-                        HStack {
-                            Slider(value: $buttons.doubleClickWindow, in: MouseButtons.doubleClickWindowRange)
-                                .accessibilityLabel("Ignore clicks within")
-                                .featureSpot("clip-double-click-window")
-                            Text("\(Int((buttons.doubleClickWindow * 1000).rounded())) ms").monospacedDigit()
-                                .foregroundStyle(.secondary).frame(minWidth: 52, alignment: .trailing)
-                        }
-                        .frame(width: 280)
-                    }
+                    ValueSlider(title: String(localized: "Ignore clicks within"), symbol: "timer",
+                                caption: String(localized: "Raise it if double clicks still get through; lower it if your own fast double-clicks are lost."),
+                                value: $buttons.doubleClickWindow, range: MouseButtons.doubleClickWindowRange,
+                                format: "%.0f ms", spot: "clip-double-click-window", scale: 1000, ends: .time)
                 }
             }
             .featureSpot("double-clicks")

@@ -9,19 +9,19 @@ struct BatteryShowCard: View {
 
     var body: some View {
         SettingsCard("Show the level", anchor: "battery.show") {
-            SettingsMenu(title: Text("Next to the menu-bar icon"), symbol: "menubar.rectangle",
+            SettingsChoice(title: Text("Next to the menu-bar icon"), symbol: "menubar.rectangle",
                          caption: model.menuBarVisibility == .never ? Text("The menu-bar icon is hidden in General.") : nil,
-                         selection: $model.batteryDisplay.revealing()) { options }
+                         selection: $model.batteryDisplay.revealing(), label: \.title)
                 .disabled(model.menuBarVisibility == .never)
                 .featureSpot("clip-battery")
-            SettingsMenu(title: Text("On the Dock icon"), symbol: "dock.rectangle",
+            SettingsChoice(title: Text("On the Dock icon"), symbol: "dock.rectangle",
                          caption: model.showsInDock ? nil : Text("Turn on Show in Dock in General to see it."),
-                         selection: $model.dockBattery.revealing()) { options }
+                         selection: $model.dockBattery.revealing(), label: \.title)
                 .disabled(!model.showsInDock)
                 .featureSpot("clip-dock-battery")
-            SettingsMenu(title: Text("Under the pointer"), symbol: "cursorarrow",
+            SettingsChoice(title: Text("Under the pointer"), symbol: "cursorarrow",
                          caption: Text("A small label that follows the pointer."),
-                         selection: $model.pointerBattery.revealing()) { options }
+                         selection: $model.pointerBattery.revealing(), label: \.title)
                 .featureSpot("clip-pointer-battery")
             Reveal(isShown: model.pointerBattery != .off) { labelRows }
             Reveal(isShown: usesLowLevel) {
@@ -32,9 +32,6 @@ struct BatteryShowCard: View {
         }
     }
 
-    private var options: some View {
-        ForEach(BatteryDisplay.allCases) { Text($0.title).tag($0) }
-    }
 
     /// The label's side of the pointer, over a picture of it at real size.
     @ViewBuilder private var labelRows: some View {
@@ -43,11 +40,9 @@ struct BatteryShowCard: View {
                             charging: level != nil && model.tracking.batteryCharging, redLevel: battery.redLevel,
                             pair: model.menuBarPair, pointerScale: model.scale,
                             isOn: model.pointerBattery.shows(level ?? 0, low: Int(battery.lowLevel)))
-        SettingsMenu(title: Text("Label position"), symbol: "arrow.down.right.square",
+        SettingsChoice(title: Text("Label position"), symbol: "arrow.down.right.square",
                      caption: Text("At a display's edge it moves to the other side. It turns red below the alert level."),
-                     selection: $battery.labelPosition) {
-            ForEach(BatteryLabelPosition.allCases) { Text($0.title).tag($0) }
-        }
+                     selection: $battery.labelPosition, label: \.title)
     }
 
     private var usesLowLevel: Bool {

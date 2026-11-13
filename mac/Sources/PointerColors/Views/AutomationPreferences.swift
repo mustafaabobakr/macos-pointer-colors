@@ -43,11 +43,9 @@ private struct PointerLocationRows: View {
             .featureSpot("clip-pointer-location")
         Reveal(isShown: locator.isOn) {
             SettingsRow("Key", symbol: "keyboard") {
-                Picker("Key", selection: $locator.key) {
-                    ForEach(PointerLocator.keys, id: \.rawValue) { Text($0.title).tag($0) }
+                ChoicePicker(title: Text("Key"), selection: $locator.key, options: PointerLocator.keys) {
+                    Text(verbatim: $0.title)
                 }
-                .labelsHidden()
-                .fixedSize()
                 .featureSpot("clip-pointer-location-key")
                 Button("Show Now") { locator.reveal() }
             }

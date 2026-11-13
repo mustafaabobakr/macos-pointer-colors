@@ -42,22 +42,18 @@ private struct LaserRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
-        SettingsMenu("Look", symbol: "wand.and.rays",
+        SettingsChoice("Look", symbol: "wand.and.rays",
                      caption: "Classic draws a white center with an outline. GoodNotes draws a glowing line around a white core that's thick when you move slowly and thin when you move fast, and a solid dot, and keeps the trail whole before fading it out.",
-                     selection: $highlight.laserLook.revealing()) {
-            ForEach(LaserLook.allCases) { Text($0.title).tag($0) }
-        }
+                     selection: $highlight.laserLook.revealing(), label: \.title)
         .featureSpot("clip-laser-look")
         Reveal(isShown: highlight.laserLook == .classic) { ClassicLookRows(highlight: highlight) }
         Reveal(isShown: highlight.laserLook == .goodNotes) { GoodNotesLookRows(highlight: highlight) }
         ColorSourcePicker(usesPair: $highlight.laserUsesPairColor, color: $highlight.laserColor)
         ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
                     range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-laser-size", ends: .size)
-        SettingsMenu("Outline", symbol: "circle.dashed",
+        SettingsChoice("Outline", symbol: "circle.dashed",
                      caption: "The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.",
-                     selection: $highlight.laserOutline.revealing()) {
-            ForEach(LaserOutline.allCases) { Text($0.title).tag($0) }
-        }
+                     selection: $highlight.laserOutline.revealing(), label: \.title)
         .featureSpot("clip-laser-outline")
         Reveal(isShown: highlight.laserOutline != .none) {
             ValueSlider(title: String(localized: "Outline opacity"), symbol: "circle.lefthalf.filled",
@@ -72,11 +68,9 @@ private struct LaserRows: View {
                         range: PointerHighlight.trailFadeRange, format: "%.1f s", ends: .time)
             HoldKeysRows(highlight: highlight)
         }
-        SettingsMenu("Dot", symbol: "smallcircle.filled.circle",
+        SettingsChoice("Dot", symbol: "smallcircle.filled.circle",
                      caption: "When the glowing dot follows the pointer. While drawing, it shows only at the tip of a trail.",
-                     selection: $highlight.laserDot.revealing()) {
-            ForEach(LaserDotMode.allCases) { Text($0.title).tag($0) }
-        }
+                     selection: $highlight.laserDot.revealing(), label: \.title)
         Reveal(isShown: highlight.laserDot != .hidden) {
             ValueSlider(title: String(localized: "Dot fades after"), symbol: "timer", value: $highlight.laserDotFade,
                         range: PointerHighlight.dotFadeRange, format: "%.2f s", step: 0.2, ends: .time)

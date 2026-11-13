@@ -152,37 +152,6 @@ struct SettingsToggle: View {
     }
 }
 
-/// A menu row: a picker shown as a pop-up button on the right.
-struct SettingsMenu<Value: Hashable, Options: View>: View {
-    let title: Text
-    let symbol: String?
-    let caption: Text?
-    @Binding var selection: Value
-    @ViewBuilder var options: Options
-
-    init(_ title: LocalizedStringKey, symbol: String?, caption: LocalizedStringKey? = nil,
-         selection: Binding<Value>, @ViewBuilder options: () -> Options) {
-        self.init(title: Text(title), symbol: symbol, caption: caption.map { Text($0) }, selection: selection, options: options)
-    }
-
-    init(title: Text, symbol: String?, caption: Text? = nil, selection: Binding<Value>, @ViewBuilder options: () -> Options) {
-        self.title = title
-        self.symbol = symbol
-        self.caption = caption
-        _selection = selection
-        self.options = options()
-    }
-
-    var body: some View {
-        SettingsRow(symbol: symbol, title: title, caption: caption) {
-            Picker(selection: $selection) { options } label: { title }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .fixedSize()
-        }
-    }
-}
-
 /// A setting's symbol in a small accent-tinted tile, in front of its row.
 struct SettingIcon: View {
     let symbol: String

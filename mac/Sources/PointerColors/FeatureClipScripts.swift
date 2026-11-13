@@ -77,10 +77,12 @@ enum FeatureClipScripts {
         ClipPoint(spot: id, x: x, y: y)
     }
 
-    /// Where a value sits along a slider marked `spot`, between the end labels it may have.
+    /// Where a value sits along a slider marked `spot`, between the end labels it may have. A
+    /// reversed slider (a time) has its largest value on the left.
     private static func along(_ spot: String, _ value: Double, in range: ClosedRange<Double>,
-                              inset: Double = 0.06) -> ClipPoint {
-        let fraction = (value - range.lowerBound) / (range.upperBound - range.lowerBound)
+                              inset: Double = 0.06, reversed: Bool = false) -> ClipPoint {
+        let share = (value - range.lowerBound) / (range.upperBound - range.lowerBound)
+        let fraction = reversed ? 1 - share : share
         return ClipPoint(spot: spot, x: inset + (1 - 2 * inset) * fraction, y: 0.5)
     }
 
@@ -335,8 +337,8 @@ enum FeatureClipScripts {
         steps: [
             .pause(0.4),
             .move(to: spot("clip-double-clicks", x: 0.95)), .choose { $0.buttons.fixesDoubleClicks = true }, .pause(0.6),
-            .move(to: along("clip-double-click-window", 0.05, in: MouseButtons.doubleClickWindowRange)),
-            .slide(to: along("clip-double-click-window", 0.08, in: MouseButtons.doubleClickWindowRange), seconds: 0.8) {
+            .move(to: along("clip-double-click-window", 0.05, in: MouseButtons.doubleClickWindowRange, reversed: true)),
+            .slide(to: along("clip-double-click-window", 0.08, in: MouseButtons.doubleClickWindowRange, reversed: true), seconds: 0.8) {
                 $0.buttons.doubleClickWindow = lerp(0.05, 0.08, $1)
             },
             .pause(0.8),

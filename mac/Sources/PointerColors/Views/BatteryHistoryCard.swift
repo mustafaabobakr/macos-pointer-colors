@@ -46,11 +46,9 @@ struct BatteryHistoryCard: View {
                        caption: "How fast it drains in use and idle, how long a charge lasts, and tips to make it last longer.",
                        isOn: $model.showsDrainReport.revealing())
         Reveal(isShown: model.showsDrainReport) {
-            SettingsMenu(title: Text("Suggest switching it off"), symbol: "power",
+            SettingsChoice(title: Text("Suggest switching it off"), symbol: "power",
                          caption: Text("When idle drain passes this share of a day's drain."),
-                         selection: $model.idleTipThreshold) {
-                ForEach(IdleTipThreshold.allCases) { Text($0.title).tag($0) }
-            }
+                         selection: $model.idleTipThreshold, label: \.title)
             HealthRows(battery: model.battery)
         }
     }
