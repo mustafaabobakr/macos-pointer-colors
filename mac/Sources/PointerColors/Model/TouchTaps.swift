@@ -7,6 +7,9 @@ import Foundation
 struct TouchTaps {
     /// The longest touch that still counts as a tap. A Magic Mouse tap lasts about 0.1 s.
     static let longestTap: TimeInterval = 0.25
+    /// The shortest touch that counts as a tap. A real tap lasts 0.06 s or more; a finger shifting
+    /// on the mouse can flicker a touch for 0.02–0.03 s, which zoomed by itself.
+    static let shortestTap: TimeInterval = 0.05
     /// The farthest the pointer may travel, in points, during a touch that still counts as a tap.
     /// A real tap moves it 0–5 points; a finger brushing the mouse as it's moved, 40 or more.
     static let farthestTapTravel: CGFloat = 10
@@ -23,7 +26,7 @@ struct TouchTaps {
             return nil
         }
         defer { touchStart = nil; hadMoreFingers = false; lastPointer = nil; travel = 0 }
-        guard let touchStart, !hadMoreFingers, time - touchStart <= Self.longestTap else { return nil }
+        guard let touchStart, !hadMoreFingers, (Self.shortestTap...Self.longestTap).contains(time - touchStart) else { return nil }
         guard travel + distance(to: pointer) <= Self.farthestTapTravel else { return nil }
         return touchStart
     }

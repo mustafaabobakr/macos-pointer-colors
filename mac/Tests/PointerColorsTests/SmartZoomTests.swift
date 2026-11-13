@@ -108,6 +108,14 @@ final class MagicMouseDoubleTapTests: XCTestCase {
         XCTAssertTrue(movingTap(&taps, at: 0.25, length: 0.122, travel: 1))
     }
 
+    /// From the diagnostics log: a 0.017 s flicker of contact, then a real tap, zoomed by itself.
+    func testAContactFlickerIsNotATap() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(tap(&taps, at: 0, length: 0.017))
+        XCTAssertFalse(tap(&taps, at: 0.06, length: 0.135))
+        XCTAssertTrue(tap(&taps, at: 0.3, length: 0.062))
+    }
+
     /// One moving touch ruins only itself: the next two still taps zoom.
     func testAMovingTouchDoesntPairWithAStillTap() {
         var taps = MagicMouseDoubleTap(window: 0.5)
