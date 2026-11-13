@@ -433,7 +433,6 @@
 "Folder" = "المجلد";
 "Choose…" = "اختيار…";
 "Open in" = "الفتح في";
-"Opens each screenshot to mark up. Without Save to a folder, it opens from a temporary file you can discard." = "يفتح كل لقطة لتعلّق عليها. من دون الحفظ في مجلد، تُفتح من ملف مؤقت يمكنك تجاهله.";
 "Don't open" = "عدم الفتح";
 "Default app" = "التطبيق الافتراضي";
 "Laser %@" = "ليزر %@";
@@ -451,3 +450,13 @@
 "Captures the area around each laser drawing, only while Take a screenshot of each drawing is on. Nothing is recorded otherwise." = "يلتقط المنطقة المحيطة بكل رسمة ليزر، فقط عند تشغيل التقاط صورة للشاشة لكل رسمة. لا يُسجَّل شيء غير ذلك.";
 "Turn on Show the laser above to take screenshots of your drawings." = "شغّل إظهار الليزر أعلاه لالتقاط صور لرسوماتك.";
 "Allow…" = "سماح…";
+"Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below." = "يفتح كل لقطة لتعلّق عليها. من دون الحفظ في مجلد، تُحفظ في مجلد لقطات التطبيق أدناه.";
+"Screenshots kept by the app" = "اللقطات التي يحتفظ بها التطبيق";
+"Show in Finder" = "الإظهار في Finder";
+"Delete All…" = "حذف الكل…";
+"Delete All" = "حذف الكل";
+"Delete %lld screenshots for good?" = "حذف %lld لقطة نهائيًا؟";
+"They're removed right away, not moved to the Trash, and can't be recovered." = "تُحذف فورًا، ولا تُنقل إلى سلة المهملات، ولا يمكن استرجاعها.";
+"Shots opened without Save to a folder. %lld now, %@." = "لقطات فُتحت من دون الحفظ في مجلد. %lld الآن، %@.";
+"Couldn't delete them all: %@" = "تعذّر حذفها كلها: %@";
+"Screenshots kept by the app: show in Finder or delete" = "اللقطات التي يحتفظ بها التطبيق: الإظهار في Finder أو الحذف";

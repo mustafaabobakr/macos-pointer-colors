@@ -85,12 +85,16 @@ struct LaserShot {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setData(png, forType: .png)
         }
-        // Opening without saving goes through a temporary file, so the app can discard it.
-        guard let folder = folder ?? (opener == .none ? nil : FileManager.default.temporaryDirectory) else { return }
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        // Opened without saving: kept in the app's own folder, which Preferences can show and empty.
+        guard let folder = try folder.map(Self.prepared) ?? (opener == .none ? nil : LaserShotStore().prepared()) else { return }
         let file = Self.freeName(in: folder)
         try png.write(to: file)
         opener.open(file)
+    }
+
+    private static func prepared(_ folder: URL) throws -> URL {
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder
     }
 
     /// "Laser 2026-11-13 at 14.05.33.png", with a number added if that's taken.

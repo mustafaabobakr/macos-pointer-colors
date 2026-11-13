@@ -108,4 +108,31 @@ final class LaserShotTests: XCTestCase {
         XCTAssertEqual(restored.laserShotFolder, "/tmp/Laser shots")
         XCTAssertEqual(restored.laserShotOpener, .cleanShot)
     }
+
+    // MARK: The app's own folder
+
+    func testStoreCountsAndDeletesOnlyItsScreenshots() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "LaserShotStore-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = LaserShotStore(folder: folder)
+        XCTAssertEqual(store.usage.count, 0, "no folder yet counts as empty")
+
+        let made = try store.prepared()
+        try Data(count: 100).write(to: made.appending(path: "Laser 1.png"))
+        try Data(count: 50).write(to: made.appending(path: "Laser 2.PNG"))
+        try Data(count: 7).write(to: made.appending(path: "notes.txt"))
+        XCTAssertEqual(store.usage.count, 2)
+        XCTAssertEqual(store.usage.bytes, 150)
+
+        try store.deleteAll()
+        XCTAssertEqual(store.usage.count, 0)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: made.appending(path: "notes.txt").path(percentEncoded: false)),
+                      "only screenshots are deleted")
+    }
+
+    func testStoreLivesInTheAppsFolder() {
+        XCTAssertEqual(LaserShotStore().folder.lastPathComponent, "Screenshots")
+        XCTAssertEqual(LaserShotStore().folder.deletingLastPathComponent().standardizedFileURL,
+                       BatteryHistoryStore.defaultFolder.standardizedFileURL)
+    }
 }

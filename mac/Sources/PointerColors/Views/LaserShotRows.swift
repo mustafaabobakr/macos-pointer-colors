@@ -27,10 +27,11 @@ struct LaserShotRows: View {
         SettingsToggle("Save to a folder", symbol: "folder", isOn: $highlight.laserShotSaves.revealing())
         Reveal(isShown: highlight.laserShotSaves) { folderRow }
         SettingsMenu("Open in", symbol: "arrow.up.forward.app",
-                     caption: "Opens each screenshot to mark up. Without Save to a folder, it opens from a temporary file you can discard.",
+                     caption: "Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below.",
                      selection: $highlight.laserShotOpener) {
             ForEach(LaserShotOpener.allCases.filter(\.isAvailable)) { OpenerLabel(opener: $0).tag($0) }
         }
+        UnsavedShotsRow()
     }
 
     /// Without this, a chosen app that has since been removed would leave the menu showing nothing:
@@ -67,5 +68,49 @@ private struct OpenerLabel: View {
         } icon: {
             if let icon = opener.menuIcon(size: 24) { Image(nsImage: icon) }
         }
+    }
+}
+
+/// The app's own Screenshots folder, where shots that were only opened are kept: how much is in
+/// it, a way to look, and a way to empty it for good.
+private struct UnsavedShotsRow: View {
+    @State private var usage = (count: 0, bytes: 0)
+    @State private var isConfirming = false
+    @State private var failure: String?
+    private let store = LaserShotStore()
+
+    var body: some View {
+        SettingsRow(symbol: "photo.stack", title: Text("Screenshots kept by the app"), caption: caption) {
+            Button("Show in Finder", action: store.showInFinder)
+            Button("Delete All…", role: .destructive) { isConfirming = true }
+                .disabled(usage.count == 0)
+        }
+        .onAppear(perform: refresh)
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in refresh() }
+        .confirmationDialog(Text("Delete \(usage.count) screenshots for good?"), isPresented: $isConfirming) {
+            Button("Delete All", role: .destructive, action: deleteAll)
+        } message: {
+            Text("They're removed right away, not moved to the Trash, and can't be recovered.")
+        }
+    }
+
+    private var caption: Text {
+        if let failure { return Text(failure) }
+        let size = usage.bytes.formatted(.byteCount(style: .file))
+        return Text("Shots opened without Save to a folder. \(usage.count) now, \(size).")
+    }
+
+    private func refresh() {
+        usage = store.usage
+    }
+
+    private func deleteAll() {
+        do {
+            try store.deleteAll()
+            failure = nil
+        } catch {
+            failure = String(localized: "Couldn't delete them all: \(error.localizedDescription)")
+        }
+        refresh()
     }
 }
