@@ -33,6 +33,8 @@ final class MouseEventTap {
 
     /// Starts handing `types` to `handler` under `id`, or stops with nil.
     func set(_ id: String, types: [CGEventType], handler: Handler?) {
+        // Taking away a hook that isn't there changes nothing, so the tap stays as it is.
+        guard handler != nil || handlers[id] != nil else { return }
         handlers[id] = handler.map { (types, $0) }
         rebuild()
     }
@@ -66,8 +68,13 @@ final class MouseEventTap {
         self.source = source
     }
 
+    /// Ends the tap for good. Only switching it off would leave it registered with macOS for as
+    /// long as the app runs, one more with every rebuild.
     private func removeTap() {
-        if let tap { CGEvent.tapEnable(tap: tap, enable: false) }
+        if let tap {
+            CGEvent.tapEnable(tap: tap, enable: false)
+            CFMachPortInvalidate(tap)
+        }
         if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
         tap = nil
         source = nil
