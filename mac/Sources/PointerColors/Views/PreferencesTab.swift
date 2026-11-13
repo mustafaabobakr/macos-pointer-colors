@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A page of Preferences, listed in the sidebar under its group.
 enum PreferencesTab: String, CaseIterable, Identifiable {
-    case general, pairs, automation, appearance, ring, pulse, laser, press, speed, buttons, battery, shortcuts, about,
+    case general, pairs, automation, appearance, ring, pulse, laser, press, speed, zoom, buttons, battery, shortcuts, about,
          whatsNew
 
     var id: Self { self }
@@ -20,6 +20,7 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .laser: "Laser"
         case .press: "Press"
         case .speed: "Speed"
+        case .zoom: "Zoom"
         case .buttons: "Buttons"
         case .battery: "Battery"
         case .shortcuts: "Shortcuts"
@@ -40,6 +41,7 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .laser: String(localized: "Laser")
         case .press: String(localized: "Press")
         case .speed: String(localized: "Speed")
+        case .zoom: String(localized: "Zoom")
         case .buttons: String(localized: "Buttons")
         case .battery: String(localized: "Battery")
         case .shortcuts: String(localized: "Shortcuts")
@@ -60,6 +62,7 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
         case .laser: "scribble"
         case .press: "arrow.down.right.and.arrow.up.left"
         case .speed: "hare"
+        case .zoom: "plus.magnifyingglass"
         case .buttons: "computermouse"
         case .battery: "battery.75percent"
         case .shortcuts: "command"
@@ -88,7 +91,7 @@ enum PreferencesGroup: String, CaseIterable, Identifiable {
         switch self {
         case .pointer: [.general, .pairs, .automation, .appearance]
         case .highlight: [.ring, .pulse, .laser, .press]
-        case .mouse: [.speed, .buttons, .battery]
+        case .mouse: [.speed, .zoom, .buttons, .battery]
         case .app: [.shortcuts, .about, .whatsNew]
         }
     }

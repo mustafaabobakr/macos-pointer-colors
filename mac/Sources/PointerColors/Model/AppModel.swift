@@ -124,6 +124,7 @@ final class AppModel {
     let battery = BatterySettings()
     let tracking = PointerTracking()
     let buttons = MouseButtons()
+    let magicMouseZoom = MagicMouseZoom()
     let hoverFocus = HoverFocus()
     /// Double press of a modifier key shows where the pointer is. Set at the end of `init`.
     @ObservationIgnored private(set) var locator: PointerLocator!
@@ -173,6 +174,7 @@ final class AppModel {
         reapplyIfNeeded()
         registerShortcuts()
         automation.applyAppearancePair()
+        magicMouseZoom.pairColor = { [weak self] in (self?.menuBarPair ?? .featured).highlightColor }
         highlightOverlay = HighlightOverlay(settings: highlight,
                                             pair: { [weak self] in self?.menuBarPair ?? .featured },
                                             pointerScale: { [weak self] in self?.scale ?? 1 })

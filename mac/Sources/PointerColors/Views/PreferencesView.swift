@@ -96,6 +96,7 @@ struct PreferencesView: View {
         case .laser: LaserPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
         case .press: PressPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
         case .speed: TrackingPreferences(tracking: model.tracking)
+        case .zoom: ZoomPreferences(zoom: model.magicMouseZoom)
         case .buttons: ButtonsPreferences(buttons: model.buttons)
         case .battery: BatteryPreferences(model: model)
         case .shortcuts: ShortcutsPreferences(model: model)

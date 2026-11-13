@@ -29,6 +29,12 @@ struct PermissionsCard: View {
                     PermissionStatus(isAllowed: screenRecording, action: ScreenRecordingAccess.request)
                 }
             }
+            PermissionGroup("Magic Mouse smart zoom") {
+                SettingsRow("Screen Recording", symbol: "plus.magnifyingglass",
+                            caption: "Draws the zoom from a live picture of the screen, only while zoomed in. Nothing is saved or sent anywhere.") {
+                    PermissionStatus(isAllowed: screenRecording, action: ScreenRecordingAccess.request)
+                }
+            }
             PermissionGroup("Battery alerts") {
                 NotificationPermissionRow()
             }
