@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Tells a double tap on a Magic Mouse from single taps, rests, clicks and scrolls. A quick touch
@@ -23,9 +24,9 @@ struct MagicMouseDoubleTap {
         presses = DoublePress(window: presses.window)
     }
 
-    /// True when this frame finishes a double tap.
-    mutating func frame(fingers: Int, at time: TimeInterval) -> Bool {
-        guard let touchStart = taps.frame(fingers: fingers, at: time) else { return false }
+    /// True when this frame finishes a double tap. `pointer` is where the pointer is at this frame.
+    mutating func frame(fingers: Int, at time: TimeInterval, pointer: CGPoint = .zero) -> Bool {
+        guard let touchStart = taps.frame(fingers: fingers, at: time, pointer: pointer) else { return false }
         guard lastInterruption < touchStart - 0.05 else { return false }
         return presses.press(at: time)
     }

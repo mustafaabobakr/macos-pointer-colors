@@ -167,7 +167,7 @@ final class MagicMouseZoom {
 
     private func frame(fingers: Int, at time: TimeInterval) {
         ZoomDiagnostics.shared.frame(fingers: fingers, at: time) // DIAG
-        guard doubleTap.frame(fingers: fingers, at: time) else { return }
+        guard doubleTap.frame(fingers: fingers, at: time, pointer: NSEvent.mouseLocation) else { return }
         ZoomDiagnostics.shared.note("DOUBLE-TAP app=\(Self.appUnderPointer() ?? "?") zoomed=\(zoom.isZoomed)", at: time) // DIAG
         guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed) else { return }
         zoom.toggle()

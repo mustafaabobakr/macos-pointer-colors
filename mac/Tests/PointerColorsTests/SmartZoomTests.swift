@@ -85,6 +85,36 @@ final class MagicMouseDoubleTapTests: XCTestCase {
         XCTAssertFalse(tap(&taps, at: 0.25))
         XCTAssertTrue(tap(&taps, at: 0.45))
     }
+
+    /// Touches one finger at `time` while the pointer moves `travel` points to the right.
+    private func movingTap(_ taps: inout MagicMouseDoubleTap, at time: TimeInterval, length: TimeInterval, travel: CGFloat) -> Bool {
+        _ = taps.frame(fingers: 1, at: time, pointer: .zero)
+        _ = taps.frame(fingers: 1, at: time + length / 2, pointer: CGPoint(x: travel / 2, y: 0))
+        return taps.frame(fingers: 0, at: time + length, pointer: CGPoint(x: travel, y: 0))
+    }
+
+    /// From the diagnostics log: a finger brushing the mouse as it was moved (0.21 s with 42.5 pt
+    /// of pointer travel, then 0.18 s with 55.8 pt) zoomed in by itself.
+    func testBrushingTheMouseWhileMovingItDoesntZoom() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(movingTap(&taps, at: 0, length: 0.21, travel: 42.5))
+        XCTAssertFalse(movingTap(&taps, at: 0.25, length: 0.178, travel: 55.8))
+    }
+
+    /// Real double taps in the log nudged the pointer up to about 5 points, and still zoom.
+    func testATapThatNudgesThePointerStillZooms() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(movingTap(&taps, at: 0, length: 0.12, travel: 4.9))
+        XCTAssertTrue(movingTap(&taps, at: 0.25, length: 0.122, travel: 1))
+    }
+
+    /// One moving touch ruins only itself: the next two still taps zoom.
+    func testAMovingTouchDoesntPairWithAStillTap() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(movingTap(&taps, at: 0, length: 0.1, travel: 30))
+        XCTAssertFalse(tap(&taps, at: 0.2))
+        XCTAssertTrue(tap(&taps, at: 0.4))
+    }
 }
 
 final class ZoomGeometryTests: XCTestCase {
