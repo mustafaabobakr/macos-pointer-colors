@@ -92,6 +92,9 @@ private struct SmartZoomSection: View {
                             range: MagicMouseZoom.tapWindowRange, format: "%.0f ms", scale: 1000,
                             step: MagicMouseZoom.tapWindowStep, ends: .time)
             }
+            Reveal(isShown: zoom.isOn) {
+                TapLimitRows(zoom: zoom)
+            }
         }
         .animation(.reveal, value: zoom.style)
         .animation(.reveal, value: zoom.motion)
@@ -153,5 +156,31 @@ private struct NativeZoomAppRow: View {
             .resizable()
             .frame(width: 26 * scale, height: 26 * scale)
             .accessibilityHidden(true)
+    }
+}
+
+/// What a touch may do and still count as a tap, for tuning out zooms nobody asked for.
+private struct TapLimitRows: View {
+    @Bindable var zoom: MagicMouseZoom
+
+    var body: some View {
+        ValueSlider(title: String(localized: "Shortest tap"), symbol: "hand.tap",
+                    caption: String(localized: "A touch shorter than this is a flicker of contact as a finger shifts on the mouse, not a tap. Real taps last 60 ms or more; flickers that zoomed by themselves lasted 17–32 ms."),
+                    value: $zoom.shortestTap, range: MagicMouseZoom.shortestTapRange, format: "%.0f ms", scale: 1000,
+                    step: MagicMouseZoom.shortestTapStep, ends: .time)
+        ValueSlider(title: String(localized: "Longest tap"), symbol: "hand.raised",
+                    caption: String(localized: "A touch longer than this is a finger resting on the mouse, not a tap. Real taps last up to about 200 ms."),
+                    value: $zoom.longestTap, range: MagicMouseZoom.longestTapRange, format: "%.0f ms", scale: 1000,
+                    step: MagicMouseZoom.longestTapStep, ends: .time)
+        ValueSlider(title: String(localized: "Pointer movement during a tap"), symbol: "arrow.up.and.down.and.arrow.left.and.right",
+                    caption: String(localized: "A touch that moves the pointer farther than this is a finger brushing the mouse as you move it, not a tap. Real taps move it 0–5 pt; brushes that zoomed by themselves moved it 30 pt or more."),
+                    value: $zoom.tapTravel, range: MagicMouseZoom.tapTravelRange, format: "%.0f pt",
+                    step: MagicMouseZoom.tapTravelStep, ends: .size)
+        Reveal(isShown: !zoom.hasDefaultTapLimits) {
+            SettingsRow(symbol: "arrow.counterclockwise", title: Text("Tap limits changed"),
+                        caption: Text("Puts the shortest tap, longest tap and pointer movement back to 50 ms, 250 ms and 10 pt.")) {
+                Button("Reset", action: zoom.restoreTapLimits)
+            }
+        }
     }
 }

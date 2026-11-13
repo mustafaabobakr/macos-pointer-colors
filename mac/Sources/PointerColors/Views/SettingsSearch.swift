@@ -105,6 +105,7 @@ enum SettingsSearch {
         item(.zoom, "zoom.magicMouse", String(localized: "When the pointer moves"), "cursorarrow.motionlines"),
         item(.zoom, "zoom.magicMouse", String(localized: "Lens shape"), "square.on.circle"),
         item(.zoom, "zoom.magicMouse", String(localized: "Hold the zoom still for the laser"), "scope"),
+        item(.zoom, "zoom.magicMouse", String(localized: "Shortest tap, longest tap and pointer movement during a tap"), "hand.tap"),
         item(.zoom, "zoom.native", String(localized: "Let macOS Smart Zoom work in these apps"), "doc.text.magnifyingglass"),
         item(.battery, "battery.show", String(localized: "Next to the menu-bar icon"), "menubar.rectangle"),
         item(.battery, "battery.show", String(localized: "On the Dock icon"), "dock.rectangle"),

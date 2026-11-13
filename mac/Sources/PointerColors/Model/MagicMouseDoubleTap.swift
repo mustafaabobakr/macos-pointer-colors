@@ -15,6 +15,12 @@ struct MagicMouseDoubleTap {
         set { presses.window = newValue }
     }
 
+    /// What a touch may do and still count as a tap.
+    var limits: TapLimits {
+        get { taps.limits }
+        set { taps.limits = newValue }
+    }
+
     init(window: TimeInterval) { presses = DoublePress(window: window) }
 
     /// A mouse button went down, or the mouse scrolled, at `time`; it also ends any tap waiting

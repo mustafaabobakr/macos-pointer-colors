@@ -116,6 +116,14 @@ final class MagicMouseDoubleTapTests: XCTestCase {
         XCTAssertTrue(tap(&taps, at: 0.3, length: 0.062))
     }
 
+    /// Loosened limits let the logged flicker and brush through again.
+    func testLoosenedLimitsAcceptWhatTheDefaultsRefuse() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        taps.limits = TapLimits(shortest: 0, longest: 0.25, farthestTravel: 100)
+        XCTAssertFalse(tap(&taps, at: 0, length: 0.017))
+        XCTAssertTrue(movingTap(&taps, at: 0.06, length: 0.178, travel: 55.8))
+    }
+
     /// One moving touch ruins only itself: the next two still taps zoom.
     func testAMovingTouchDoesntPairWithAStillTap() {
         var taps = MagicMouseDoubleTap(window: 0.5)
@@ -397,6 +405,49 @@ final class ZoomHoldForLaserTests: XCTestCase {
         XCTAssertFalse(zoom.isHeldForLaser, "turning it off lets go at once")
         zoom.laserHolds(true)
         XCTAssertFalse(zoom.isHeldForLaser)
+    }
+
+    func testTapLimitsStartAtTheLoggedDefaults() {
+        let zoom = MagicMouseZoom(defaults: makeDefaults().0)
+        XCTAssertEqual(zoom.shortestTap, 0.05)
+        XCTAssertEqual(zoom.longestTap, 0.25)
+        XCTAssertEqual(zoom.tapTravel, 10)
+        XCTAssertTrue(zoom.hasDefaultTapLimits)
+    }
+
+    func testTapLimitsAreSavedClampedAndReset() {
+        let (defaults, _) = makeDefaults()
+        let zoom = MagicMouseZoom(defaults: defaults)
+        zoom.shortestTap = 0.03
+        zoom.longestTap = 0.3
+        zoom.tapTravel = 25
+        XCTAssertFalse(zoom.hasDefaultTapLimits)
+        let reloaded = MagicMouseZoom(defaults: defaults)
+        XCTAssertEqual(reloaded.shortestTap, 0.03)
+        XCTAssertEqual(reloaded.longestTap, 0.3)
+        XCTAssertEqual(reloaded.tapTravel, 25)
+        reloaded.restoreTapLimits()
+        XCTAssertTrue(MagicMouseZoom(defaults: defaults).hasDefaultTapLimits)
+        defaults.set(5.0, forKey: "magicMouseZoomShortestTap")
+        defaults.set(-3.0, forKey: "magicMouseZoomTapTravel")
+        let clamped = MagicMouseZoom(defaults: defaults)
+        XCTAssertEqual(clamped.shortestTap, MagicMouseZoom.shortestTapRange.upperBound)
+        XCTAssertEqual(clamped.tapTravel, MagicMouseZoom.tapTravelRange.lowerBound)
+    }
+
+    func testBackupCarriesTheTapLimits() throws {
+        let (source, sourceName) = makeDefaults()
+        let zoom = MagicMouseZoom(defaults: source)
+        zoom.shortestTap = 0.02
+        zoom.longestTap = 0.4
+        zoom.tapTravel = 40
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        let restored = MagicMouseZoom(defaults: target)
+        XCTAssertEqual(restored.shortestTap, 0.02)
+        XCTAssertEqual(restored.longestTap, 0.4)
+        XCTAssertEqual(restored.tapTravel, 40)
     }
 
     func testBackupCarriesTheSetting() throws {

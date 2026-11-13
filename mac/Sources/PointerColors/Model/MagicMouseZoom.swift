@@ -60,6 +60,13 @@ final class MagicMouseZoom {
     }
     /// Seconds the second tap may come after the first.
     var tapWindow: Double { didSet { defaults.set(tapWindow, forKey: Key.tapWindow); doubleTap.window = tapWindow } }
+    /// Seconds a touch must last to count as a tap; shorter is a flicker of contact.
+    var shortestTap: Double { didSet { defaults.set(shortestTap, forKey: Key.shortestTap); doubleTap.limits.shortest = shortestTap } }
+    /// Seconds a touch may last and still count as a tap; longer is a rest.
+    var longestTap: Double { didSet { defaults.set(longestTap, forKey: Key.longestTap); doubleTap.limits.longest = longestTap } }
+    /// Points the pointer may move during a touch that still counts as a tap; farther is a finger
+    /// brushing the mouse as it's moved.
+    var tapTravel: Double { didSet { defaults.set(tapTravel, forKey: Key.tapTravel); doubleTap.limits.farthestTravel = tapTravel } }
 
     nonisolated static let amountRange = 1.5...5.0
     nonisolated static let amountStep = 0.25
@@ -76,6 +83,13 @@ final class MagicMouseZoom {
     nonisolated static let tapWindowRange = 0.15...1.0
     /// 10 ms.
     nonisolated static let tapWindowStep = 0.01
+    nonisolated static let shortestTapRange = 0.0...0.12
+    /// 5 ms.
+    nonisolated static let shortestTapStep = 0.005
+    nonisolated static let longestTapRange = 0.12...0.6
+    nonisolated static let longestTapStep = 0.01
+    nonisolated static let tapTravelRange = 1.0...100.0
+    nonisolated static let tapTravelStep = 1.0
     /// The double-click speed set in System Settings › Mouse.
     static var defaultTapWindow: Double {
         min(max(NSEvent.doubleClickInterval, tapWindowRange.lowerBound), tapWindowRange.upperBound)
@@ -110,6 +124,9 @@ final class MagicMouseZoom {
         let window = Self.clamped(defaults.object(forKey: Key.tapWindow) as? Double ?? Self.defaultTapWindow, to: Self.tapWindowRange)
         tapWindow = window
         doubleTap = MagicMouseDoubleTap(window: window)
+        let limits = Self.storedTapLimits(defaults)
+        (shortestTap, longestTap, tapTravel) = (limits.shortest, limits.longest, limits.farthestTravel)
+        doubleTap.limits = limits
         zoom.style = style
         zoom.staysPut = motion == .stays
         zoom.amount = amount
@@ -219,6 +236,25 @@ final class MagicMouseZoom {
         }) { clickMonitors.append(local) }
     }
 
+    /// Whether the tap limits are as they came.
+    var hasDefaultTapLimits: Bool {
+        TapLimits(shortest: shortestTap, longest: longestTap, farthestTravel: tapTravel) == TapLimits()
+    }
+
+    func restoreTapLimits() {
+        let limits = TapLimits()
+        (shortestTap, longestTap, tapTravel) = (limits.shortest, limits.longest, limits.farthestTravel)
+    }
+
+    private static func storedTapLimits(_ defaults: UserDefaults) -> TapLimits {
+        func stored(_ key: String, _ fallback: Double, in range: ClosedRange<Double>) -> Double {
+            clamped(defaults.object(forKey: key) as? Double ?? fallback, to: range)
+        }
+        return TapLimits(shortest: stored(Key.shortestTap, TapLimits.defaultShortest, in: shortestTapRange),
+                         longest: stored(Key.longestTap, TapLimits.defaultLongest, in: longestTapRange),
+                         farthestTravel: stored(Key.tapTravel, TapLimits.defaultFarthestTravel, in: tapTravelRange))
+    }
+
     private static func clamped(_ value: Double, to range: ClosedRange<Double>) -> Double {
         min(max(value, range.lowerBound), range.upperBound)
     }
@@ -229,6 +265,9 @@ final class MagicMouseZoom {
         static let amount = "magicMouseZoomAmount"
         static let lensSize = "magicMouseZoomLensSize"
         static let tapWindow = "magicMouseZoomTapWindow"
+        static let shortestTap = "magicMouseZoomShortestTap"
+        static let longestTap = "magicMouseZoomLongestTap"
+        static let tapTravel = "magicMouseZoomTapTravel"
         static let animationLength = "magicMouseZoomAnimation"
         static let showsInScreenShare = "magicMouseZoomInScreenShare"
         static let leavesNativeZoom = "magicMouseZoomLeavesNative"

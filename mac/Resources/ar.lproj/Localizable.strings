@@ -498,6 +498,15 @@
 "Hold still for the laser" = "الثبات من أجل الليزر";
 "Holding the laser's keys, or drawing with it, stops the zoom following the pointer until you let go and the screenshot is taken, so the drawing stays on what it marks." = "عند الضغط على مفاتيح الليزر أو الرسم به يتوقف التكبير عن تتبع المؤشر حتى تفلت وتُلتقط لقطة الشاشة، فيبقى الرسم على ما يشير إليه.";
 "Hold the zoom still for the laser" = "تثبيت التكبير من أجل الليزر";
+"Shortest tap" = "أقصر نقرة";
+"A touch shorter than this is a flicker of contact as a finger shifts on the mouse, not a tap. Real taps last 60 ms or more; flickers that zoomed by themselves lasted 17–32 ms." = "اللمسة الأقصر من هذا هي ارتعاشة تلامس حين يتحرك إصبع على الماوس، وليست نقرة. النقرات الحقيقية تدوم 60 مللي ثانية أو أكثر، والارتعاشات التي كبّرت من تلقاء نفسها دامت 17–32 مللي ثانية.";
+"Longest tap" = "أطول نقرة";
+"A touch longer than this is a finger resting on the mouse, not a tap. Real taps last up to about 200 ms." = "اللمسة الأطول من هذا هي إصبع مستقر على الماوس، وليست نقرة. النقرات الحقيقية تدوم حتى 200 مللي ثانية تقريبًا.";
+"Pointer movement during a tap" = "حركة المؤشر أثناء النقرة";
+"A touch that moves the pointer farther than this is a finger brushing the mouse as you move it, not a tap. Real taps move it 0–5 pt; brushes that zoomed by themselves moved it 30 pt or more." = "اللمسة التي تحرّك المؤشر أبعد من هذا هي إصبع يلامس الماوس وأنت تحرّكه، وليست نقرة. النقرات الحقيقية تحرّكه 0–5 نقاط، واللمسات التي كبّرت من تلقاء نفسها حرّكته 30 نقطة أو أكثر.";
+"Tap limits changed" = "تغيّرت حدود النقر";
+"Puts the shortest tap, longest tap and pointer movement back to 50 ms, 250 ms and 10 pt." = "يعيد أقصر نقرة وأطول نقرة وحركة المؤشر إلى 50 مللي ثانية و250 مللي ثانية و10 نقاط.";
+"Shortest tap, longest tap and pointer movement during a tap" = "أقصر نقرة وأطول نقرة وحركة المؤشر أثناء النقرة";
 "Zoom out after the screenshot" = "التصغير بعد لقطة الشاشة";
 "Ends the Magic Mouse zoom once the screenshot is taken: a whole-screen zoom, a lens, or both." = "يُنهي تكبير Magic Mouse فور التقاط لقطة الشاشة: تكبير الشاشة كاملة أو العدسة أو كليهما.";
 "Zoom out after a laser screenshot" = "التصغير بعد لقطة شاشة الليزر";
