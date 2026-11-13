@@ -14,6 +14,7 @@ struct LaserShotRows: View {
                 if isOn, !CGPreflightScreenCaptureAccess() { CGRequestScreenCaptureAccess() }
             }
         Reveal(isShown: highlight.laserShotOn) { options }
+            .onAppear(perform: dropMissingOpener)
     }
 
     @ViewBuilder private var options: some View {
@@ -29,8 +30,14 @@ struct LaserShotRows: View {
         SettingsMenu("Open in", symbol: "arrow.up.forward.app",
                      caption: "Opens each screenshot to mark up. Without Save to a folder, it opens from a temporary file you can discard.",
                      selection: $highlight.laserShotOpener) {
-            ForEach(LaserShotOpener.allCases.filter { $0.isAvailable || $0 == highlight.laserShotOpener }) { Text($0.title).tag($0) }
+            ForEach(LaserShotOpener.allCases.filter(\.isAvailable)) { OpenerLabel(opener: $0).tag($0) }
         }
+    }
+
+    /// Without this, a chosen app that has since been removed would leave the menu showing nothing:
+    /// it falls back to the default app, as `LaserShotOpener.open` already does.
+    private func dropMissingOpener() {
+        if !highlight.laserShotOpener.isAvailable { highlight.laserShotOpener = .defaultApp }
     }
 
     private var folderRow: some View {
@@ -48,5 +55,18 @@ struct LaserShotRows: View {
         panel.directoryURL = URL(filePath: highlight.laserShotFolder, directoryHint: .isDirectory)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         highlight.laserShotFolder = url.path(percentEncoded: false)
+    }
+}
+
+/// One Open in choice in the menu: the app's icon, large enough to recognize, and its name.
+private struct OpenerLabel: View {
+    let opener: LaserShotOpener
+
+    var body: some View {
+        Label {
+            Text(opener.menuTitle)
+        } icon: {
+            if let icon = opener.menuIcon(size: 24) { Image(nsImage: icon) }
+        }
     }
 }
