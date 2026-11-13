@@ -163,7 +163,9 @@ final class MagicMouseZoom {
     }
 
     private func frame(fingers: Int, at time: TimeInterval) {
+        ZoomDiagnostics.shared.frame(fingers: fingers, at: time) // DIAG
         guard doubleTap.frame(fingers: fingers, at: time) else { return }
+        ZoomDiagnostics.shared.note("DOUBLE-TAP app=\(Self.appUnderPointer() ?? "?") zoomed=\(zoom.isZoomed)", at: time) // DIAG
         guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed) else { return }
         zoom.toggle()
     }
@@ -205,7 +207,8 @@ final class MagicMouseZoom {
         let mask: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown, .scrollWheel]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
             let time = event.timestamp
-            MainActor.assumeIsolated { self?.doubleTap.interrupt(at: time) }
+            let kind = event.type.rawValue // DIAG
+            MainActor.assumeIsolated { ZoomDiagnostics.shared.note("interrupt type=\(kind)", at: time); self?.doubleTap.interrupt(at: time) } // DIAG
         }) { clickMonitors.append(global) }
         if let local = NSEvent.addLocalMonitorForEvents(matching: mask, handler: { [weak self] event in
             self?.doubleTap.interrupt(at: event.timestamp)
