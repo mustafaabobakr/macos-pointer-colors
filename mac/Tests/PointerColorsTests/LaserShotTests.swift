@@ -63,6 +63,7 @@ final class LaserShotTests: XCTestCase {
         XCTAssertTrue(highlight.laserShotFolder.hasSuffix("/Desktop") || highlight.laserShotFolder.hasSuffix("/Desktop/"))
         XCTAssertEqual(highlight.laserShotOpener, LaserShotOpener.none)
         XCTAssertEqual(highlight.laserShotZoomOut, .both)
+        XCTAssertTrue(highlight.laserShotWholeZoom)
     }
 
     func testOffTakesNoShot() {
@@ -101,6 +102,7 @@ final class LaserShotTests: XCTestCase {
         highlight.laserShotFolder = "/tmp/Laser shots"
         highlight.laserShotOpener = .cleanShot
         highlight.laserShotZoomOut = .wholeScreen
+        highlight.laserShotWholeZoom = false
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
 
         let (target, targetName) = makeDefaults()
@@ -114,6 +116,7 @@ final class LaserShotTests: XCTestCase {
         XCTAssertEqual(restored.laserShotFolder, "/tmp/Laser shots")
         XCTAssertEqual(restored.laserShotOpener, .cleanShot)
         XCTAssertEqual(restored.laserShotZoomOut, .wholeScreen)
+        XCTAssertFalse(restored.laserShotWholeZoom)
     }
 
     // MARK: The app's own folder
@@ -152,5 +155,14 @@ final class LaserShotTests: XCTestCase {
         XCTAssertFalse(LaserShotZoomOut.lens.endsZoom(.wholeScreen))
         XCTAssertTrue(LaserShotZoomOut.both.endsZoom(.wholeScreen))
         XCTAssertTrue(LaserShotZoomOut.both.endsZoom(.lens))
+    }
+
+    func testWholeZoomShotKeepsTheZoomsAreaWithoutMargin() throws {
+        let highlight = PointerHighlight(defaults: makeDefaults().0)
+        let lens = CGRect(x: 300, y: 200, width: 400, height: 250)
+        XCTAssertNil(LaserShot(settings: highlight, area: lens, overlayWindows: []), "screenshots off")
+        highlight.laserShotOn = true
+        highlight.laserShotMargin = 80
+        XCTAssertEqual(try XCTUnwrap(LaserShot(settings: highlight, area: lens, overlayWindows: [])).area, lens)
     }
 }

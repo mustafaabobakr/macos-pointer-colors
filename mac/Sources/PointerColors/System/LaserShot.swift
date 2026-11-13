@@ -16,11 +16,17 @@ struct LaserShot {
     /// Which Magic Mouse zooms end once the screenshot is taken.
     let zoomOut: LaserShotZoomOut
 
-    /// Nil when screenshots are off, or the drag was too small to be a drawing.
+    /// The area around a drawing. Nil when screenshots are off, or the drag was too small to be a drawing.
     @MainActor
     init?(settings: PointerHighlight, trail: CGRect, reach: Double, overlayWindows: [CGWindowID]) {
-        guard settings.laserShotOn,
-              let area = LaserShotArea.area(around: trail, reach: reach, margin: settings.laserShotMargin) else { return nil }
+        guard let area = LaserShotArea.area(around: trail, reach: reach, margin: settings.laserShotMargin) else { return nil }
+        self.init(settings: settings, area: area, overlayWindows: overlayWindows)
+    }
+
+    /// Exactly `area`, like everything a zoom shows. Nil when screenshots are off.
+    @MainActor
+    init?(settings: PointerHighlight, area: CGRect, overlayWindows: [CGWindowID]) {
+        guard settings.laserShotOn else { return nil }
         self.area = area
         includesTrail = settings.laserShotIncludesTrail
         self.overlayWindows = overlayWindows

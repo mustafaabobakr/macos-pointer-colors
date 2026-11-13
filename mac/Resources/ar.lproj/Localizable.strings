@@ -502,3 +502,6 @@
 "Ends the Magic Mouse zoom once the screenshot is taken: a whole-screen zoom, a lens, or both." = "يُنهي تكبير Magic Mouse فور التقاط لقطة الشاشة: تكبير الشاشة كاملة أو العدسة أو كليهما.";
 "Zoom out after a laser screenshot" = "التصغير بعد لقطة شاشة الليزر";
 "Both" = "كلاهما";
+"Capture the whole zoom while zoomed" = "التقاط التكبير كاملًا أثناء التكبير";
+"With a Magic Mouse zoom up, takes everything the zoom shows, the whole screen or the lens, without the margin." = "عند وجود تكبير Magic Mouse، يلتقط كل ما يعرضه التكبير، الشاشة كاملة أو العدسة، بلا هامش.";
+"Laser screenshot of the whole zoom" = "لقطة شاشة الليزر للتكبير كاملًا";

@@ -142,6 +142,9 @@ final class MagicMouseZoom {
         if zoomOut.endsZoom(style) { zoom.zoomOut() }
     }
 
+    /// The global area the zoom covers on screen; nil when not zoomed.
+    var shownArea: CGRect? { zoom.shownArea }
+
     /// The zoom is held still for a laser drawing.
     var isHeldForLaser: Bool { zoom.isHeld }
 

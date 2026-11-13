@@ -20,6 +20,9 @@ struct LaserShotRows: View {
         ValueSlider(title: String(localized: "Margin around the trail"), symbol: "rectangle.dashed",
                     value: $highlight.laserShotMargin, range: PointerHighlight.shotMarginRange,
                     format: "%.0f pt", step: 5, ends: .size)
+        SettingsToggle("Capture the whole zoom while zoomed", symbol: "plus.magnifyingglass",
+                       caption: "With a Magic Mouse zoom up, takes everything the zoom shows, the whole screen or the lens, without the margin.",
+                       isOn: $highlight.laserShotWholeZoom)
         SettingsToggle("Show the laser in the screenshot", symbol: "scribble",
                        caption: "Off captures what's under the trail, without it.",
                        isOn: $highlight.laserShotIncludesTrail)

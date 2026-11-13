@@ -242,6 +242,8 @@ final class PointerHighlight {
     /// Keeps the drawn trail in the screenshot; off captures the screen under it.
     var laserShotIncludesTrail: Bool { didSet { save(laserShotIncludesTrail, Key.laserShotTrail) } }
     var laserShotCopies: Bool { didSet { save(laserShotCopies, Key.laserShotCopies) } }
+    /// While a Magic Mouse zoom is up, captures everything it shows, without the margin. On unless changed.
+    var laserShotWholeZoom: Bool { didSet { save(laserShotWholeZoom, Key.laserShotWholeZoom) } }
     /// Which Magic Mouse zooms end once the screenshot is taken. Both unless changed.
     var laserShotZoomOut: LaserShotZoomOut { didSet { save(laserShotZoomOut.rawValue, Key.laserShotZoomOut) } }
     /// Saves each screenshot in `laserShotFolder`.
@@ -351,6 +353,7 @@ final class PointerHighlight {
         laserShotMargin = defaults.double(forKey: Key.laserShotMargin)
         laserShotIncludesTrail = defaults.bool(forKey: Key.laserShotTrail)
         laserShotCopies = defaults.bool(forKey: Key.laserShotCopies)
+        laserShotWholeZoom = defaults.bool(forKey: Key.laserShotWholeZoom)
         laserShotZoomOut = defaults.string(forKey: Key.laserShotZoomOut).flatMap(LaserShotZoomOut.init) ?? .both
         laserShotSaves = defaults.bool(forKey: Key.laserShotSaves)
         laserShotFolder = defaults.string(forKey: Key.laserShotFolder) ?? Self.desktopPath
@@ -371,6 +374,7 @@ final class PointerHighlight {
         Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
         Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
         Key.laserShotMargin: 20.0, Key.laserShotTrail: true, Key.laserShotCopies: true, Key.laserShotSaves: true,
+        Key.laserShotWholeZoom: true,
     ]
 
     /// True when anything needs the overlay.
@@ -513,6 +517,7 @@ final class PointerHighlight {
         static let laserShotTrail = "highlightLaserShotIncludesTrail"
         static let laserShotCopies = "highlightLaserShotCopies"
         static let laserShotSaves = "highlightLaserShotSaves"
+        static let laserShotWholeZoom = "highlightLaserShotWholeZoom"
         static let laserShotZoomOut = "highlightLaserShotZoomOut"
         static let laserShotFolder = "highlightLaserShotFolder"
         static let laserShotOpener = "highlightLaserShotOpener"

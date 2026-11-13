@@ -179,6 +179,7 @@ final class AppModel {
                                             pair: { [weak self] in self?.menuBarPair ?? .featured },
                                             pointerScale: { [weak self] in self?.scale ?? 1 })
         highlightOverlay?.onHold = { [weak magicMouseZoom] in magicMouseZoom?.laserHolds($0) }
+        highlightOverlay?.zoomedArea = { [weak magicMouseZoom] in magicMouseZoom?.shownArea }
         highlightOverlay?.onShotTaken = { [weak magicMouseZoom] in magicMouseZoom?.laserShotTaken(zoomOut: $0.zoomOut) }
         pressShrink = PressShrink(settings: highlight, pointer: pointer)
         locator = PointerLocator(pair: { [weak self] in self?.menuBarPair ?? .featured },

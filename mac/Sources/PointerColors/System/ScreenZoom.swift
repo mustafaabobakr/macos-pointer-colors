@@ -34,6 +34,8 @@ final class ScreenZoom {
         didSet { heldPointer = isHeld ? NSEvent.mouseLocation : nil }
     }
     private var heldPointer: CGPoint?
+    /// The global area the zoom covers on screen: the whole display, or the lens; nil when not zoomed.
+    var shownArea: CGRect? { isZoomed ? panel?.frame : nil }
     /// Where the zoom takes the pointer to be: where it was held, or where it is.
     private var pointer: CGPoint { heldPointer ?? NSEvent.mouseLocation }
     private var sharingType: NSWindow.SharingType { showsInScreenShare ? .readOnly : .none }

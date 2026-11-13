@@ -39,6 +39,8 @@ final class HighlightOverlay {
     var onHold: (Bool) -> Void = { _ in }
     /// A laser screenshot is done, after the zoom is let go, with what it asked for.
     var onShotTaken: (LaserShot) -> Void = { _ in }
+    /// The global area the Magic Mouse zoom shows on screen; nil when nothing is zoomed.
+    var zoomedArea: () -> CGRect? = { nil }
     private var isDrawing = false { didSet { reportHold() } }
     /// The laser's keys are held, so a drag would draw.
     private var keysArmLaser = false { didSet { reportHold() } }
@@ -295,12 +297,16 @@ final class HighlightOverlay {
 
     // MARK: Screenshots
 
-    /// The screenshot the trail that just ended asks for, if any. Each trail asks once.
+    /// The screenshot the trail that just ended asks for, if any. Each trail asks once. While a
+    /// zoom is up, it can take everything the zoom shows instead of the area around the trail.
     private func finishedTrailShot() -> LaserShot? {
         defer { trailBounds = nil }
-        guard let trailBounds else { return nil }
-        return LaserShot(settings: settings, trail: trailBounds, reach: style.laserTrailReach,
-                         overlayWindows: windows.map { CGWindowID($0.windowNumber) })
+        let overlays = windows.map { CGWindowID($0.windowNumber) }
+        guard let trailBounds,
+              let aroundTrail = LaserShot(settings: settings, trail: trailBounds, reach: style.laserTrailReach,
+                                          overlayWindows: overlays) else { return nil }
+        guard settings.laserShotWholeZoom, let zoom = zoomedArea() else { return aroundTrail }
+        return LaserShot(settings: settings, area: zoom, overlayWindows: overlays)
     }
 
     /// With the trail wanted in the picture, it stays on screen until the capture is done, then
