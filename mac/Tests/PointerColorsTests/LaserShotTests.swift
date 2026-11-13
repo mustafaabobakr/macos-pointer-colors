@@ -62,6 +62,7 @@ final class LaserShotTests: XCTestCase {
         XCTAssertTrue(highlight.laserShotSaves)
         XCTAssertTrue(highlight.laserShotFolder.hasSuffix("/Desktop") || highlight.laserShotFolder.hasSuffix("/Desktop/"))
         XCTAssertEqual(highlight.laserShotOpener, LaserShotOpener.none)
+        XCTAssertEqual(highlight.laserShotZoomOut, .both)
     }
 
     func testOffTakesNoShot() {
@@ -83,6 +84,10 @@ final class LaserShotTests: XCTestCase {
         XCTAssertFalse(shot.includesTrail)
         XCTAssertEqual(shot.opener, .defaultApp)
         XCTAssertEqual(shot.overlayWindows, [7])
+        XCTAssertEqual(shot.zoomOut, .both)
+        highlight.laserShotZoomOut = .lens
+        XCTAssertEqual(LaserShot(settings: highlight, trail: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                 reach: 5, overlayWindows: [])?.zoomOut, .lens)
     }
 
     func testBackupRoundTripCarriesEveryScreenshotSetting() throws {
@@ -95,6 +100,7 @@ final class LaserShotTests: XCTestCase {
         highlight.laserShotSaves = false
         highlight.laserShotFolder = "/tmp/Laser shots"
         highlight.laserShotOpener = .cleanShot
+        highlight.laserShotZoomOut = .wholeScreen
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
 
         let (target, targetName) = makeDefaults()
@@ -107,6 +113,7 @@ final class LaserShotTests: XCTestCase {
         XCTAssertFalse(restored.laserShotSaves)
         XCTAssertEqual(restored.laserShotFolder, "/tmp/Laser shots")
         XCTAssertEqual(restored.laserShotOpener, .cleanShot)
+        XCTAssertEqual(restored.laserShotZoomOut, .wholeScreen)
     }
 
     // MARK: The app's own folder
@@ -134,5 +141,16 @@ final class LaserShotTests: XCTestCase {
         XCTAssertEqual(LaserShotStore().folder.lastPathComponent, "Screenshots")
         XCTAssertEqual(LaserShotStore().folder.deletingLastPathComponent().standardizedFileURL,
                        BatteryHistoryStore.defaultFolder.standardizedFileURL)
+    }
+
+    func testZoomOutChoiceEndsTheRightZooms() {
+        XCTAssertFalse(LaserShotZoomOut.off.endsZoom(.wholeScreen))
+        XCTAssertFalse(LaserShotZoomOut.off.endsZoom(.lens))
+        XCTAssertTrue(LaserShotZoomOut.wholeScreen.endsZoom(.wholeScreen))
+        XCTAssertFalse(LaserShotZoomOut.wholeScreen.endsZoom(.lens))
+        XCTAssertTrue(LaserShotZoomOut.lens.endsZoom(.lens))
+        XCTAssertFalse(LaserShotZoomOut.lens.endsZoom(.wholeScreen))
+        XCTAssertTrue(LaserShotZoomOut.both.endsZoom(.wholeScreen))
+        XCTAssertTrue(LaserShotZoomOut.both.endsZoom(.lens))
     }
 }

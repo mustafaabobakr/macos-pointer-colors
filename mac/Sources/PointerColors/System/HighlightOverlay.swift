@@ -34,6 +34,14 @@ final class HighlightOverlay {
     private var trailNumber = 0
     /// A screenshot with the trail in it is being taken, so the trail stays until it's done.
     private var isHoldingTrail = false
+    /// Whether something that zooms should hold still for the laser: its keys are held, or a
+    /// drawing is under way or waiting for its screenshot. Called with repeats; it must not mind.
+    var onHold: (Bool) -> Void = { _ in }
+    /// A laser screenshot is done, after the zoom is let go, with what it asked for.
+    var onShotTaken: (LaserShot) -> Void = { _ in }
+    private var isDrawing = false { didSet { reportHold() } }
+    /// The laser's keys are held, so a drag would draw.
+    private var keysArmLaser = false { didSet { reportHold() } }
 
     private static let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged,
                                                         .otherMouseDragged, .leftMouseDown, .rightMouseDown,
@@ -164,6 +172,7 @@ final class HighlightOverlay {
         let point = NSEvent.mouseLocation
         let keysHeld = settings.laserKeysHeld(in: NSEvent.modifierFlags)
         updateCapture(keysHeld: keysHeld)
+        keysArmLaser = keysHeld && settings.laserNeedsKeys && settings.laserDraws(keysHeld: true)
         switch type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             press(at: point, isLeft: type == .leftMouseDown, keysHeld: keysHeld)
@@ -196,6 +205,11 @@ final class HighlightOverlay {
 
     private func finishTrails() {
         displays.forEach { $0.laser.finishStroke(style: style) }
+        isDrawing = false
+    }
+
+    private func reportHold() {
+        onHold(isDrawing || keysArmLaser)
     }
 
     /// The ring, the long-press ring and the laser dot follow the pointer.
@@ -270,6 +284,7 @@ final class HighlightOverlay {
     private func startTrail(at point: CGPoint) {
         trailNumber += 1
         trailBounds = CGRect(origin: point, size: .zero)
+        isDrawing = true
         displays.forEach { $0.laser.startStroke(at: local(point, in: $0.frame), style: style) }
     }
 
@@ -289,19 +304,19 @@ final class HighlightOverlay {
     }
 
     /// With the trail wanted in the picture, it stays on screen until the capture is done, then
-    /// fades as usual, unless a newer trail has replaced it by then.
+    /// fades as usual, unless a newer trail has replaced it by then. Either way the drawing only
+    /// ends once the capture is done, so a zoom held still for it stays put for the picture.
     private func take(_ shot: LaserShot) {
-        guard shot.includesTrail else {
-            finishTrails()
-            Task { await shot.take() }
-            return
-        }
-        isHoldingTrail = true
+        isHoldingTrail = shot.includesTrail
+        if !shot.includesTrail { displays.forEach { $0.laser.finishStroke(style: style) } }
         let number = trailNumber
         Task {
             await shot.take()
             isHoldingTrail = false
-            if number == trailNumber { finishTrails() }
+            // A newer drawing under way keeps its zoom; its own screenshot ends it.
+            guard number == trailNumber else { return }
+            finishTrails()
+            onShotTaken(shot)
         }
     }
 

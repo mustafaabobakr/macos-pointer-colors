@@ -49,6 +49,11 @@ final class MagicMouseZoom {
     var showsInScreenShare: Bool {
         didSet { defaults.set(showsInScreenShare, forKey: Key.showsInScreenShare); zoom.showsInScreenShare = showsInScreenShare }
     }
+    /// While the laser's keys are held or it draws, a lens or a following zoom stays where it is, so
+    /// the drawing stays over what it marks and its screenshot shows that part zoomed.
+    var holdsForLaser: Bool {
+        didSet { defaults.set(holdsForLaser, forKey: Key.holdsForLaser); if !holdsForLaser { zoom.isHeld = false } }
+    }
     /// Seconds zooming in or out takes; 0 jumps.
     var animationLength: Double {
         didSet { defaults.set(animationLength, forKey: Key.animationLength); zoom.animationLength = animationLength }
@@ -94,6 +99,7 @@ final class MagicMouseZoom {
         nativeZoomApps = defaults.data(forKey: Key.nativeZoomApps)
             .flatMap { try? JSONDecoder().decode([ZoomApp].self, from: $0) } ?? ZoomApp.defaults
         showsInScreenShare = defaults.object(forKey: Key.showsInScreenShare) as? Bool ?? true
+        holdsForLaser = defaults.object(forKey: Key.holdsForLaser) as? Bool ?? true
         lensBorder = defaults.string(forKey: Key.lensBorder).flatMap(LensBorder.init) ?? .white
         lensBorderColor = defaults.data(forKey: Key.lensBorderColor)
             .flatMap { try? JSONDecoder().decode(RGBA.self, from: $0) } ?? Self.defaultLensBorderColor
@@ -124,6 +130,20 @@ final class MagicMouseZoom {
         case .custom: lensBorderColor
         }
     }
+
+    /// The laser wants the zoom held (its keys are held, or it's drawing) or lets it go.
+    func laserHolds(_ wantsHold: Bool) {
+        let held = wantsHold && holdsForLaser
+        if zoom.isHeld != held { zoom.isHeld = held }
+    }
+
+    /// A laser screenshot is done; it may ask to end a zoom of this style.
+    func laserShotTaken(zoomOut: LaserShotZoomOut) {
+        if zoomOut.endsZoom(style) { zoom.zoomOut() }
+    }
+
+    /// The zoom is held still for a laser drawing.
+    var isHeldForLaser: Bool { zoom.isHeld }
 
     /// Adds the app at `url`, unless it's in the list already.
     func addNativeZoomApp(at url: URL) {
@@ -208,6 +228,7 @@ final class MagicMouseZoom {
         static let leavesNativeZoom = "magicMouseZoomLeavesNative"
         static let nativeZoomApps = "magicMouseZoomNativeApps"
         static let motion = "magicMouseZoomMotion"
+        static let holdsForLaser = "magicMouseZoomHoldsForLaser"
         static let lensShape = "magicMouseZoomLensShape"
         static let lensBorder = "magicMouseZoomLensBorder"
         static let lensBorderColor = "magicMouseZoomLensBorderColor"

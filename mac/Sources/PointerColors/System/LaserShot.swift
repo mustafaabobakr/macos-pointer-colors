@@ -13,6 +13,8 @@ struct LaserShot {
     let copies: Bool
     let folder: URL?
     let opener: LaserShotOpener
+    /// Which Magic Mouse zooms end once the screenshot is taken.
+    let zoomOut: LaserShotZoomOut
 
     /// Nil when screenshots are off, or the drag was too small to be a drawing.
     @MainActor
@@ -25,6 +27,7 @@ struct LaserShot {
         copies = settings.laserShotCopies
         folder = settings.laserShotSaves ? URL(filePath: settings.laserShotFolder, directoryHint: .isDirectory) : nil
         opener = settings.laserShotOpener
+        zoomOut = settings.laserShotZoomOut
     }
 
     private static let log = Logger(subsystem: "PointerColors", category: "LaserShot")

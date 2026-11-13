@@ -31,6 +31,9 @@ struct LaserShotRows: View {
                        caption: "Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below.",
                        selection: $highlight.laserShotOpener, options: LaserShotOpener.allCases.filter(\.isAvailable),
                        style: .menu) { OpenerLabel(opener: $0) }
+        SettingsChoice("Zoom out after the screenshot", symbol: "minus.magnifyingglass",
+                       caption: "Ends the Magic Mouse zoom once the screenshot is taken: a whole-screen zoom, a lens, or both.",
+                       selection: $highlight.laserShotZoomOut, label: \.title)
         UnsavedShotsRow()
     }
 

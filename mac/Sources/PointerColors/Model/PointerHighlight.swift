@@ -242,6 +242,8 @@ final class PointerHighlight {
     /// Keeps the drawn trail in the screenshot; off captures the screen under it.
     var laserShotIncludesTrail: Bool { didSet { save(laserShotIncludesTrail, Key.laserShotTrail) } }
     var laserShotCopies: Bool { didSet { save(laserShotCopies, Key.laserShotCopies) } }
+    /// Which Magic Mouse zooms end once the screenshot is taken. Both unless changed.
+    var laserShotZoomOut: LaserShotZoomOut { didSet { save(laserShotZoomOut.rawValue, Key.laserShotZoomOut) } }
     /// Saves each screenshot in `laserShotFolder`.
     var laserShotSaves: Bool { didSet { save(laserShotSaves, Key.laserShotSaves) } }
     /// A folder path; the Desktop unless changed.
@@ -349,6 +351,7 @@ final class PointerHighlight {
         laserShotMargin = defaults.double(forKey: Key.laserShotMargin)
         laserShotIncludesTrail = defaults.bool(forKey: Key.laserShotTrail)
         laserShotCopies = defaults.bool(forKey: Key.laserShotCopies)
+        laserShotZoomOut = defaults.string(forKey: Key.laserShotZoomOut).flatMap(LaserShotZoomOut.init) ?? .both
         laserShotSaves = defaults.bool(forKey: Key.laserShotSaves)
         laserShotFolder = defaults.string(forKey: Key.laserShotFolder) ?? Self.desktopPath
         laserShotOpener = defaults.string(forKey: Key.laserShotOpener).flatMap(LaserShotOpener.init(rawValue:)) ?? .none
@@ -510,6 +513,7 @@ final class PointerHighlight {
         static let laserShotTrail = "highlightLaserShotIncludesTrail"
         static let laserShotCopies = "highlightLaserShotCopies"
         static let laserShotSaves = "highlightLaserShotSaves"
+        static let laserShotZoomOut = "highlightLaserShotZoomOut"
         static let laserShotFolder = "highlightLaserShotFolder"
         static let laserShotOpener = "highlightLaserShotOpener"
     }

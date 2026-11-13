@@ -323,3 +323,50 @@ final class LensBorderTests: XCTestCase {
         XCTAssertEqual(reloaded.borderColor, pink)
     }
 }
+
+/// The ring and laser are left out of the zoom's capture, so they must draw above the zoom window.
+@MainActor
+final class ZoomWindowLevelTests: XCTestCase {
+    func testZoomSitsUnderTheOverlays() {
+        XCTAssertLessThan(ScreenZoom.level.rawValue, NSWindow.Level.screenSaver.rawValue)
+    }
+}
+
+/// The laser's keys or a drawing hold a lens or following zoom still, when the setting allows it.
+@MainActor
+final class ZoomHoldForLaserTests: XCTestCase {
+    private func makeDefaults() -> (UserDefaults, String) {
+        let name = "ZoomHoldForLaserTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        addTeardownBlock { defaults.removePersistentDomain(forName: name) }
+        return (defaults, name)
+    }
+
+    func testHoldsWhileDrawingByDefault() {
+        let zoom = MagicMouseZoom(defaults: makeDefaults().0)
+        XCTAssertTrue(zoom.holdsForLaser)
+        zoom.laserHolds(true)
+        XCTAssertTrue(zoom.isHeldForLaser)
+        zoom.laserHolds(false)
+        zoom.laserHolds(false)
+        XCTAssertFalse(zoom.isHeldForLaser, "repeated ends are fine")
+    }
+
+    func testOffNeverHolds() {
+        let zoom = MagicMouseZoom(defaults: makeDefaults().0)
+        zoom.laserHolds(true)
+        zoom.holdsForLaser = false
+        XCTAssertFalse(zoom.isHeldForLaser, "turning it off lets go at once")
+        zoom.laserHolds(true)
+        XCTAssertFalse(zoom.isHeldForLaser)
+    }
+
+    func testBackupCarriesTheSetting() throws {
+        let (source, sourceName) = makeDefaults()
+        MagicMouseZoom(defaults: source).holdsForLaser = false
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertFalse(MagicMouseZoom(defaults: target).holdsForLaser)
+    }
+}

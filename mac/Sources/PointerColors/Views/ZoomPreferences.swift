@@ -64,6 +64,11 @@ private struct SmartZoomSection: View {
                                caption: "Stay where you zoomed keeps the zoomed view still, like macOS Smart Zoom. The pointer stays on that display, stopping 10 pt from its edges.",
                                selection: $zoom.motion, label: \.title)
             }
+            Reveal(isShown: zoom.isOn && (zoom.style == .lens || zoom.motion == .follows)) {
+                SettingsToggle("Hold still for the laser", symbol: "scope",
+                               caption: "Holding the laser's keys, or drawing with it, stops the zoom following the pointer until you let go and the screenshot is taken, so the drawing stays on what it marks.",
+                               isOn: $zoom.holdsForLaser)
+            }
             Reveal(isShown: zoom.isOn) {
                 ValueSlider(title: String(localized: "Zoom amount"), symbol: "plus.magnifyingglass", value: $zoom.amount,
                             range: MagicMouseZoom.amountRange, format: "%.2g×", step: MagicMouseZoom.amountStep, ends: .size)
@@ -89,6 +94,7 @@ private struct SmartZoomSection: View {
             }
         }
         .animation(.reveal, value: zoom.style)
+        .animation(.reveal, value: zoom.motion)
         .animation(.reveal, value: zoom.touches.hasMagicMouse)
         .animation(.reveal, value: canRecord)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in

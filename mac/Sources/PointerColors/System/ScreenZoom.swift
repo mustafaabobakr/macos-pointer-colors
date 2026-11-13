@@ -28,6 +28,14 @@ final class ScreenZoom {
     }
     /// A whole-screen zoom stays where it zoomed in rather than following the pointer.
     var staysPut = true
+    /// Holds the zoom where the pointer is now, as if the pointer stayed there, until set back.
+    /// A lens, or a whole-screen zoom that follows the pointer, stops following it.
+    var isHeld = false {
+        didSet { heldPointer = isHeld ? NSEvent.mouseLocation : nil }
+    }
+    private var heldPointer: CGPoint?
+    /// Where the zoom takes the pointer to be: where it was held, or where it is.
+    private var pointer: CGPoint { heldPointer ?? NSEvent.mouseLocation }
     private var sharingType: NSWindow.SharingType { showsInScreenShare ? .readOnly : .none }
     /// Seconds zooming in or out takes; 0 jumps.
     var animationLength: TimeInterval {
@@ -72,6 +80,8 @@ final class ScreenZoom {
         guard let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) else { return }
         guard ScreenRecordingAccess.isAllowed else { return ScreenRecordingAccess.request() }
         isZoomed = true
+        // Held from before it zoomed in: held here instead.
+        if isHeld { heldPointer = mouse }
         anchor = CGPoint(x: (mouse.x - screen.frame.minX) / screen.frame.width,
                          y: (screen.frame.maxY - mouse.y) / screen.frame.height)
         Task { await startCapture(on: screen) }
@@ -97,7 +107,10 @@ final class ScreenZoom {
         displayLink = nil
         panel?.orderOut(nil)
         panel = nil
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         imageLayer.contents = nil
+        CATransaction.commit()
         keyMonitors.forEach(NSEvent.removeMonitor)
         keyMonitors = []
         if let stream { Task { try? await stream.stopCapture() } }
@@ -142,6 +155,10 @@ final class ScreenZoom {
 
     // MARK: Window
 
+    /// Just under the app's overlays, so the ring, the laser and the click pulses draw over the
+    /// zoom at the pointer. They're left out of the capture, so above it is the only place they show.
+    static let level = NSWindow.Level(rawValue: NSWindow.Level.screenSaver.rawValue - 1)
+
     private func show(on screen: NSScreen) {
         screenFrame = screen.frame
         let top = NSScreen.screens.first?.frame.maxY ?? screen.frame.maxY
@@ -152,7 +169,7 @@ final class ScreenZoom {
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
         panel.sharingType = sharingType
-        panel.level = .screenSaver
+        panel.level = Self.level
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
         let view = NSView(frame: CGRect(origin: .zero, size: screen.frame.size))
         view.wantsLayer = true
@@ -171,7 +188,13 @@ final class ScreenZoom {
 
     private func styleLayer() {
         let isLens = style == .lens
+        // A layer of its own animates every change unless told not to: the last zoom's lens border
+        // would fade out over a whole-screen zoom.
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        defer { CATransaction.commit() }
         imageLayer.contentsGravity = .resize
+        imageLayer.cornerRadius = 0
         imageLayer.masksToBounds = isLens
         imageLayer.borderWidth = isLens ? 2 : 0
         let border = lensBorderColor()
@@ -183,7 +206,7 @@ final class ScreenZoom {
     @objc private func tick(_ link: CADisplayLink) {
         // A still zoom keeps the pointer in; one that follows it zooms out when it leaves.
         // A zoom that follows the pointer goes when the pointer leaves its display.
-        if !isStill, !screenFrame.contains(NSEvent.mouseLocation) {
+        if !isStill, !screenFrame.contains(pointer) {
             return zoomOut(animated: false)
         }
         // The animation waits for the first frame of the capture.
@@ -204,7 +227,7 @@ final class ScreenZoom {
     /// Moves the lens to the pointer and shows the part of the display under it.
     private func place() {
         guard let panel else { return }
-        let mouse = NSEvent.mouseLocation
+        let mouse = self.pointer
         let pointer = CGPoint(x: (mouse.x - screenFrame.minX) / screenFrame.width,
                               y: (screenFrame.maxY - mouse.y) / screenFrame.height)
         let grown = animation.eased
