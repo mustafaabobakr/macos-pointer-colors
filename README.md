@@ -98,6 +98,7 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **macOS Smart Zoom stays where it's better**: Safari, Chrome, Brave, Preview and Photos keep their own page zoom, and you pick the apps.
 - **Your choice of tap detection**: by default only a double tap macOS itself recognizes zooms, the same way browsers do. Advanced settings let Pointer Colors read the taps itself, or require both, with tap limits you can tune against stray zooms.
 - **Shows in screen sharing**, so people on a call see what you zoomed into. Animation length and zoom amount up to 5× are yours to set.
+- **Smooth, Sharp or Sharper**: keep the display's soft blending, or have text and thin lines drawn crisper when zoomed, each shown with a live sample at your zoom amount.
 - **Laser screenshots**: let go after drawing with the laser and the area around it, or the whole zoom, is copied, saved or opened in Shottr, CleanShot X or your default app.
 
 **Mouse speed and acceleration**

@@ -3,7 +3,7 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
-## 0.8.0 — Unreleased
+## 0.8.0 — 2026-11-14
 
 - **Smart zoom in every app (beta).** Double-tap the Magic Mouse with one finger to zoom in on what's under the pointer, in any app and on any display, the way macOS Smart Zoom does in Safari. Double-tap again, or press Esc, to zoom back out. Turn it on in the new **Preferences › Mouse › Zoom** page.
   - **Whole screen or lens.** **Whole screen** zooms the display and, with **Stay where you zoomed**, holds the view still like macOS Smart Zoom, keeping the pointer 10 pt inside the display's edges; or choose **Follow the pointer**. **Lens** magnifies an area that follows the pointer, as a **Rectangle**, **Square** or **Circle** up to 2000 pt wide, outlined in **White**, the **Pointer pair**'s color or a **Custom** color.
