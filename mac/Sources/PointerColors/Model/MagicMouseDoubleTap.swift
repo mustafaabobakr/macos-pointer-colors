@@ -30,9 +30,10 @@ struct MagicMouseDoubleTap {
         presses = DoublePress(window: presses.window)
     }
 
-    /// True when this frame finishes a double tap. `pointer` is where the pointer is at this frame.
-    mutating func frame(fingers: Int, at time: TimeInterval, pointer: CGPoint = .zero) -> Bool {
-        guard let touchStart = taps.frame(fingers: fingers, at: time, pointer: pointer) else { return false }
+    /// True when this frame finishes a double tap. `pointer` is where the pointer is at this frame,
+    /// and `size` the biggest contact in it.
+    mutating func frame(fingers: Int, at time: TimeInterval, pointer: CGPoint = .zero, size: Float = 1) -> Bool {
+        guard let touchStart = taps.frame(fingers: fingers, at: time, pointer: pointer, size: size) else { return false }
         guard lastInterruption < touchStart - 0.05 else { return false }
         return presses.press(at: time)
     }

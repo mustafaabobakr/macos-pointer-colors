@@ -14,8 +14,8 @@ import QuartzCore
 final class MagicMouseTouches {
     /// A Magic Mouse is connected and being read.
     private(set) var hasMagicMouse = false
-    /// Gets each frame's finger count and its time, on the system uptime clock.
-    @ObservationIgnored var onFrame: ((Int, TimeInterval) -> Void)?
+    /// Gets each frame's finger count, its time on the system uptime clock, and its biggest contact.
+    @ObservationIgnored var onFrame: ((Int, TimeInterval, Float) -> Void)?
 
     /// The family Apple's multitouch driver gives a Magic Mouse. Trackpads have others.
     nonisolated static let magicMouseFamily: Int32 = 112
@@ -117,11 +117,15 @@ final class MagicMouseTouches {
     }
 
     /// Runs on the framework's own thread, so it only stamps the time and moves to the main actor.
-    private static let callback: Multitouch.Callback = { _, _, fingers, _, _ in
+    private static let callback: Multitouch.Callback = { _, data, fingers, _, _ in
         let count = Int(fingers)
         let time = CACurrentMediaTime()
+        let contacts = TouchContact.read(data, count: count)
+        let size = TouchContact.largestSize(contacts)
         DispatchQueue.main.async {
-            MainActor.assumeIsolated { MagicMouseTouches.active?.onFrame?(count, time) }
+            MainActor.assumeIsolated {
+                MagicMouseTouches.active?.onFrame?(count, time, size)
+            }
         }
         return 0
     }

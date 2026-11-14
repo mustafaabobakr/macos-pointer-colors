@@ -43,7 +43,7 @@ struct PreferencesSidebar: View {
             Section {
                 if !collapsed.contains(group) {
                     ForEach(group.tabs) { tab in
-                        SidebarRow(title: Text(tab.title), symbol: tab.symbol, isSelected: router.tab == tab)
+                        SidebarRow(title: Text(tab.title), symbol: tab.symbol, isSelected: router.tab == tab, isBeta: tab.isBeta)
                             .tag(tab)
                     }
                 }
@@ -85,6 +85,7 @@ private struct SidebarRow: View {
     let title: Text
     let symbol: String
     let isSelected: Bool
+    var isBeta = false
     @Environment(\.appTextScale) private var scale
 
     var body: some View {
@@ -96,6 +97,7 @@ private struct SidebarRow: View {
                 .foregroundStyle(isSelected ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
                 .accessibilityHidden(true)
             title.appFont(.body)
+            if isBeta { BetaBadge() }
         }
         // Room between rows that grows with the text, so large sizes don't crowd.
         .padding(.vertical, 3 * scale)

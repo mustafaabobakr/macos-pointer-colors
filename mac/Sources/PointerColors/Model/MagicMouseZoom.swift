@@ -21,8 +21,22 @@ final class MagicMouseZoom {
             keepPointerInside()
         }
     }
-    /// A still zoom stops the pointer at its display's edges through the event tap, which needs Accessibility.
-    var needsAccessibility: Bool { isOn && style == .wholeScreen && motion == .stays }
+    /// How the zoom enlarges the screen's picture.
+    var upscaling: ZoomUpscaling {
+        didSet { defaults.set(upscaling.rawValue, forKey: Key.upscaling); zoom.upscaling = upscaling }
+    }
+    /// Who decides a double tap happened: macOS, Pointer Colors' own touch reading, or both.
+    var tapDetection: TapDetection {
+        didSet {
+            defaults.set(tapDetection.rawValue, forKey: Key.tapDetection)
+            votes = TapVotes(detection: tapDetection)
+            watchSmartMagnify()
+        }
+    }
+    /// A still zoom stops the pointer at its display's edges through the event tap.
+    var keepsPointerInside: Bool { isOn && style == .wholeScreen && motion == .stays }
+    /// The event tap, for a still zoom's edges or macOS's double tap, needs Accessibility.
+    var needsAccessibility: Bool { keepsPointerInside || (isOn && tapDetection.usesMacOS) }
     /// How many times larger things look.
     var amount: Double { didSet { defaults.set(amount, forKey: Key.amount); zoom.amount = amount } }
     /// The lens's width and height, in points.
@@ -67,6 +81,15 @@ final class MagicMouseZoom {
     /// Points the pointer may move during a touch that still counts as a tap; farther is a finger
     /// brushing the mouse as it's moved.
     var tapTravel: Double { didSet { defaults.set(tapTravel, forKey: Key.tapTravel); doubleTap.limits.farthestTravel = tapTravel } }
+    /// Seconds after a flicker of contact before a touch can be a tap again; sooner is the finger
+    /// still settling on the mouse.
+    /// The smallest finger contact that counts as a tap; smaller is a finger grazing the mouse.
+    var lightestTap: Double {
+        didSet { defaults.set(lightestTap, forKey: Key.lightestTap); doubleTap.limits.lightest = Float(lightestTap) }
+    }
+    var flickerSettle: Double {
+        didSet { defaults.set(flickerSettle, forKey: Key.flickerSettle); doubleTap.limits.settleAfterFlicker = flickerSettle }
+    }
 
     nonisolated static let amountRange = 1.5...5.0
     nonisolated static let amountStep = 0.25
@@ -90,6 +113,11 @@ final class MagicMouseZoom {
     nonisolated static let longestTapStep = 0.01
     nonisolated static let tapTravelRange = 1.0...100.0
     nonisolated static let tapTravelStep = 1.0
+    nonisolated static let lightestTapRange = 0.0...1.5
+    nonisolated static let lightestTapStep = 0.05
+    nonisolated static let flickerSettleRange = 0.0...1.0
+    /// 10 ms.
+    nonisolated static let flickerSettleStep = 0.01
     /// The double-click speed set in System Settings › Mouse.
     static var defaultTapWindow: Double {
         min(max(NSEvent.doubleClickInterval, tapWindowRange.lowerBound), tapWindowRange.upperBound)
@@ -99,6 +127,7 @@ final class MagicMouseZoom {
     let touches = MagicMouseTouches()
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let zoom = ScreenZoom()
+    @ObservationIgnored private var votes: TapVotes
     @ObservationIgnored private var doubleTap: MagicMouseDoubleTap
     @ObservationIgnored private var clickMonitors: [Any] = []
     @ObservationIgnored private let tap = MouseEventTap.shared
@@ -106,6 +135,10 @@ final class MagicMouseZoom {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         isOn = defaults.bool(forKey: Key.isOn)
+        let detection = defaults.string(forKey: Key.tapDetection).flatMap(TapDetection.init) ?? .macOS
+        tapDetection = detection
+        votes = TapVotes(detection: detection)
+        upscaling = defaults.string(forKey: Key.upscaling).flatMap(ZoomUpscaling.init) ?? .smooth
         style = defaults.string(forKey: Key.style).flatMap(ZoomStyle.init) ?? .wholeScreen
         motion = defaults.string(forKey: Key.motion).flatMap(ZoomMotion.init) ?? .stays
         amount = Self.clamped(defaults.object(forKey: Key.amount) as? Double ?? Self.defaultAmount, to: Self.amountRange)
@@ -125,7 +158,8 @@ final class MagicMouseZoom {
         tapWindow = window
         doubleTap = MagicMouseDoubleTap(window: window)
         let limits = Self.storedTapLimits(defaults)
-        (shortestTap, longestTap, tapTravel) = (limits.shortest, limits.longest, limits.farthestTravel)
+        (shortestTap, longestTap, tapTravel, flickerSettle) = (limits.shortest, limits.longest, limits.farthestTravel, limits.settleAfterFlicker)
+        lightestTap = Double(limits.lightest)
         doubleTap.limits = limits
         zoom.style = style
         zoom.staysPut = motion == .stays
@@ -134,8 +168,9 @@ final class MagicMouseZoom {
         zoom.lensShape = lensShape
         zoom.lensBorderColor = { [weak self] in self?.borderColor ?? Self.whiteBorder }
         zoom.animationLength = animationLength
+        zoom.upscaling = upscaling
         zoom.showsInScreenShare = showsInScreenShare
-        touches.onFrame = { [weak self] fingers, time in self?.frame(fingers: fingers, at: time) }
+        touches.onFrame = { [weak self] fingers, time, size in self?.frame(fingers: fingers, at: time, size: size) }
         update()
     }
 
@@ -182,13 +217,32 @@ final class MagicMouseZoom {
         return nativeZoomApps.contains { $0.bundleID == bundleID }
     }
 
-    private func frame(fingers: Int, at time: TimeInterval) {
-        ZoomDiagnostics.shared.frame(fingers: fingers, at: time) // DIAG
-        guard doubleTap.frame(fingers: fingers, at: time, pointer: NSEvent.mouseLocation) else { return }
-        ZoomDiagnostics.shared.note("DOUBLE-TAP app=\(Self.appUnderPointer() ?? "?") zoomed=\(zoom.isZoomed)", at: time) // DIAG
-        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed) else { return }
+    private func frame(fingers: Int, at time: TimeInterval, size: Float) {
+        guard doubleTap.frame(fingers: fingers, at: time, pointer: NSEvent.mouseLocation, size: size) else { return }
+        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed), votes.own(at: time) else { return }
         zoom.toggle()
     }
+
+    /// macOS recognized a double tap and is sending it to the app under the pointer. Over an app
+    /// left to macOS it goes on; anywhere else Pointer Colors takes it, so the app doesn't zoom too.
+    private func smartMagnify(_ event: CGEvent) -> MouseEventTap.Verdict {
+        guard NSEvent(cgEvent: event)?.type == .smartMagnify else { return .pass }
+        let time = CACurrentMediaTime()
+        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed) else { return .pass }
+        if votes.macOS(at: time) { zoom.toggle() }
+        return .drop
+    }
+
+    /// Hears macOS's double tap while zoom is on and macOS has a say in it.
+    private func watchSmartMagnify() {
+        let listens = isOn && tapDetection.usesMacOS && !ScreenshotRenderer.isRendering
+        tap.set(Key.smartMagnify, types: [Self.gestureEvent], handler: listens ? { [weak self] _, event in
+            self?.smartMagnify(event) ?? .pass
+        } : nil)
+    }
+
+    /// The event type macOS sends trackpad and Magic Mouse gestures as, smart magnify among them.
+    nonisolated static let gestureEvent = CGEventType(rawValue: 29)!
 
     /// The bundle ID of the app whose window is under the pointer.
     private static func appUnderPointer() -> String? {
@@ -200,6 +254,7 @@ final class MagicMouseZoom {
 
     private func update() {
         keepPointerInside()
+        watchSmartMagnify()
         guard isOn else {
             touches.stop()
             zoom.zoomOut(animated: false)
@@ -207,13 +262,15 @@ final class MagicMouseZoom {
             clickMonitors = []
             return
         }
+        // A clip recording shows the settings only; it never reads the mouse's touches.
+        guard !ScreenshotRenderer.isRendering else { return }
         touches.start()
         watchClicks()
     }
 
     /// While a still zoom is up, every pointer movement stops short of the display's edges.
     private func keepPointerInside() {
-        tap.set(Key.keepInside, types: Self.pointerEvents, handler: needsAccessibility ? { [weak self] _, event in
+        tap.set(Key.keepInside, types: Self.pointerEvents, handler: keepsPointerInside ? { [weak self] _, event in
             self?.zoom.keepInside(event)
             return .pass
         } : nil)
@@ -227,8 +284,7 @@ final class MagicMouseZoom {
         let mask: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown, .scrollWheel]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
             let time = event.timestamp
-            let kind = event.type.rawValue // DIAG
-            MainActor.assumeIsolated { ZoomDiagnostics.shared.note("interrupt type=\(kind)", at: time); self?.doubleTap.interrupt(at: time) } // DIAG
+            MainActor.assumeIsolated { self?.doubleTap.interrupt(at: time) }
         }) { clickMonitors.append(global) }
         if let local = NSEvent.addLocalMonitorForEvents(matching: mask, handler: { [weak self] event in
             self?.doubleTap.interrupt(at: event.timestamp)
@@ -238,12 +294,14 @@ final class MagicMouseZoom {
 
     /// Whether the tap limits are as they came.
     var hasDefaultTapLimits: Bool {
-        TapLimits(shortest: shortestTap, longest: longestTap, farthestTravel: tapTravel) == TapLimits()
+        TapLimits(shortest: shortestTap, longest: longestTap, farthestTravel: tapTravel,
+                  settleAfterFlicker: flickerSettle, lightest: Float(lightestTap)) == TapLimits()
     }
 
     func restoreTapLimits() {
         let limits = TapLimits()
-        (shortestTap, longestTap, tapTravel) = (limits.shortest, limits.longest, limits.farthestTravel)
+        (shortestTap, longestTap, tapTravel, flickerSettle) = (limits.shortest, limits.longest, limits.farthestTravel, limits.settleAfterFlicker)
+        lightestTap = Double(limits.lightest)
     }
 
     private static func storedTapLimits(_ defaults: UserDefaults) -> TapLimits {
@@ -252,7 +310,9 @@ final class MagicMouseZoom {
         }
         return TapLimits(shortest: stored(Key.shortestTap, TapLimits.defaultShortest, in: shortestTapRange),
                          longest: stored(Key.longestTap, TapLimits.defaultLongest, in: longestTapRange),
-                         farthestTravel: stored(Key.tapTravel, TapLimits.defaultFarthestTravel, in: tapTravelRange))
+                         farthestTravel: stored(Key.tapTravel, TapLimits.defaultFarthestTravel, in: tapTravelRange),
+                         settleAfterFlicker: stored(Key.flickerSettle, TapLimits.defaultSettleAfterFlicker, in: flickerSettleRange),
+                         lightest: Float(stored(Key.lightestTap, Double(TapLimits.defaultLightest), in: lightestTapRange)))
     }
 
     private static func clamped(_ value: Double, to range: ClosedRange<Double>) -> Double {
@@ -268,6 +328,8 @@ final class MagicMouseZoom {
         static let shortestTap = "magicMouseZoomShortestTap"
         static let longestTap = "magicMouseZoomLongestTap"
         static let tapTravel = "magicMouseZoomTapTravel"
+        static let flickerSettle = "magicMouseZoomFlickerSettle"
+        static let lightestTap = "magicMouseZoomLightestTap"
         static let animationLength = "magicMouseZoomAnimation"
         static let showsInScreenShare = "magicMouseZoomInScreenShare"
         static let leavesNativeZoom = "magicMouseZoomLeavesNative"
@@ -279,5 +341,9 @@ final class MagicMouseZoom {
         static let lensBorderColor = "magicMouseZoomLensBorderColor"
         /// The event tap's name for stopping the pointer at a still zoom's edges.
         static let keepInside = "magicMouseZoomKeepInside"
+        /// The event tap's name for hearing macOS's double tap.
+        static let smartMagnify = "magicMouseZoomSmartMagnify"
+        static let tapDetection = "magicMouseZoomTapDetection"
+        static let upscaling = "magicMouseZoomUpscaling"
     }
 }

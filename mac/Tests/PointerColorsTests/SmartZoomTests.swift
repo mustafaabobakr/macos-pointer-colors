@@ -1,3 +1,5 @@
+import IOSurface
+import CoreVideo
 import XCTest
 @testable import PointerColors
 
@@ -113,13 +115,69 @@ final class MagicMouseDoubleTapTests: XCTestCase {
         var taps = MagicMouseDoubleTap(window: 0.5)
         XCTAssertFalse(tap(&taps, at: 0, length: 0.017))
         XCTAssertFalse(tap(&taps, at: 0.06, length: 0.135))
-        XCTAssertTrue(tap(&taps, at: 0.3, length: 0.062))
+        XCTAssertFalse(tap(&taps, at: 0.5, length: 0.062))
+        XCTAssertTrue(tap(&taps, at: 0.75, length: 0.1))
+    }
+
+    /// From the diagnostics log: the finger settling after the mouse was moved flickered for 0.03 s,
+    /// then two still 0.167 s touches 0.06 s later zoomed by themselves.
+    func testTwoTapsRightAfterAFlickerDontZoom() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(tap(&taps, at: 0, length: 0.03))
+        XCTAssertFalse(tap(&taps, at: 0.09, length: 0.167))
+        XCTAssertFalse(tap(&taps, at: 0.315, length: 0.167))
+    }
+
+    /// From the diagnostics log: a hand settling on the mouse after moving it touched for 0.181 s,
+    /// then 0.197 s, both nearly still, and zoomed by itself.
+    func testTwoLongStillTouchesDontZoom() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(movingTap(&taps, at: 0, length: 0.181, travel: 6.5))
+        XCTAssertFalse(movingTap(&taps, at: 0.285, length: 0.197, travel: 0.8))
+    }
+
+    private func sizedTap(_ taps: inout MagicMouseDoubleTap, at time: TimeInterval, length: TimeInterval, size: Float) -> Bool {
+        _ = taps.frame(fingers: 1, at: time, size: size)
+        _ = taps.frame(fingers: 1, at: time + length / 2, size: size)
+        return taps.frame(fingers: 0, at: time + length, size: 0)
+    }
+
+    /// From the diagnostics log: 0.10 s after a two-finger touch, a finger grazed the side of the
+    /// mouse twice (contacts 0.12 and 0.25) and zoomed by itself.
+    func testLightGrazesDontZoom() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(sizedTap(&taps, at: 0, length: 0.106, size: 0.12))
+        XCTAssertFalse(sizedTap(&taps, at: 0.134, length: 0.169, size: 0.25))
+    }
+
+    /// The double tap that zoomed back out right after: fingertip contacts of 0.88.
+    func testFingertipTapsZoom() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(sizedTap(&taps, at: 0, length: 0.139, size: 0.88))
+        XCTAssertTrue(sizedTap(&taps, at: 0.212, length: 0.122, size: 0.88))
+    }
+
+    /// With no wait after a flicker, the logged grip change zooms again.
+    func testNoWaitAfterAFlickerLetsTheLoggedPairZoom() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        taps.limits.settleAfterFlicker = 0
+        XCTAssertFalse(tap(&taps, at: 0, length: 0.03))
+        XCTAssertFalse(tap(&taps, at: 0.09, length: 0.167))
+        XCTAssertTrue(tap(&taps, at: 0.315, length: 0.167))
+    }
+
+    /// The closest real double tap in the log came 0.46 s after a flicker, and still zooms.
+    func testADoubleTapWellAfterAFlickerZooms() {
+        var taps = MagicMouseDoubleTap(window: 0.5)
+        XCTAssertFalse(tap(&taps, at: 0, length: 0.045))
+        XCTAssertFalse(tap(&taps, at: 0.51, length: 0.12))
+        XCTAssertTrue(tap(&taps, at: 0.7, length: 0.12))
     }
 
     /// Loosened limits let the logged flicker and brush through again.
     func testLoosenedLimitsAcceptWhatTheDefaultsRefuse() {
         var taps = MagicMouseDoubleTap(window: 0.5)
-        taps.limits = TapLimits(shortest: 0, longest: 0.25, farthestTravel: 100)
+        taps.limits = TapLimits(shortest: 0, longest: 0.25, farthestTravel: 100, settleAfterFlicker: 0, lightest: 0)
         XCTAssertFalse(tap(&taps, at: 0, length: 0.017))
         XCTAssertTrue(movingTap(&taps, at: 0.06, length: 0.178, travel: 55.8))
     }
@@ -254,7 +312,7 @@ final class NativeZoomAppsTests: XCTestCase {
         let (zoom, _) = makeZoom()
         XCTAssertTrue(zoom.leavesNativeZoom)
         XCTAssertEqual(zoom.nativeZoomApps.map(\.bundleID),
-                       ["com.apple.Safari", "com.google.Chrome", "com.apple.Preview", "com.apple.Photos"])
+                       ["com.apple.Safari", "com.google.Chrome", "com.brave.Browser", "com.apple.Preview", "com.apple.Photos"])
     }
 
     func testListedAppIsLeftToMacOS() {
@@ -410,8 +468,10 @@ final class ZoomHoldForLaserTests: XCTestCase {
     func testTapLimitsStartAtTheLoggedDefaults() {
         let zoom = MagicMouseZoom(defaults: makeDefaults().0)
         XCTAssertEqual(zoom.shortestTap, 0.05)
-        XCTAssertEqual(zoom.longestTap, 0.25)
+        XCTAssertEqual(zoom.longestTap, 0.17)
         XCTAssertEqual(zoom.tapTravel, 10)
+        XCTAssertEqual(zoom.flickerSettle, 0.3)
+        XCTAssertEqual(zoom.lightestTap, 0.5)
         XCTAssertTrue(zoom.hasDefaultTapLimits)
     }
 
@@ -421,11 +481,15 @@ final class ZoomHoldForLaserTests: XCTestCase {
         zoom.shortestTap = 0.03
         zoom.longestTap = 0.3
         zoom.tapTravel = 25
+        zoom.flickerSettle = 0.5
+        zoom.lightestTap = 0.3
         XCTAssertFalse(zoom.hasDefaultTapLimits)
         let reloaded = MagicMouseZoom(defaults: defaults)
         XCTAssertEqual(reloaded.shortestTap, 0.03)
         XCTAssertEqual(reloaded.longestTap, 0.3)
         XCTAssertEqual(reloaded.tapTravel, 25)
+        XCTAssertEqual(reloaded.flickerSettle, 0.5)
+        XCTAssertEqual(reloaded.lightestTap, 0.3, accuracy: 0.0001)
         reloaded.restoreTapLimits()
         XCTAssertTrue(MagicMouseZoom(defaults: defaults).hasDefaultTapLimits)
         defaults.set(5.0, forKey: "magicMouseZoomShortestTap")
@@ -435,12 +499,48 @@ final class ZoomHoldForLaserTests: XCTestCase {
         XCTAssertEqual(clamped.tapTravel, MagicMouseZoom.tapTravelRange.lowerBound)
     }
 
+    func testDetectionStartsWithMacOSAndIsSaved() throws {
+        let (source, sourceName) = makeDefaults()
+        let zoom = MagicMouseZoom(defaults: source)
+        XCTAssertEqual(zoom.tapDetection, .macOS)
+        zoom.tapDetection = .both
+        XCTAssertEqual(MagicMouseZoom(defaults: source).tapDetection, .both)
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertEqual(MagicMouseZoom(defaults: target).tapDetection, .both)
+    }
+
+    func testUpscalingStartsSmoothAndIsSaved() throws {
+        let (source, sourceName) = makeDefaults()
+        let zoom = MagicMouseZoom(defaults: source)
+        XCTAssertEqual(zoom.upscaling, .smooth)
+        zoom.upscaling = .sharper
+        XCTAssertEqual(MagicMouseZoom(defaults: source).upscaling, .sharper)
+        let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
+        let (target, targetName) = makeDefaults()
+        try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
+        XCTAssertEqual(MagicMouseZoom(defaults: target).upscaling, .sharper)
+    }
+
+    func testMacOSDetectionNeedsTheEventTap() {
+        let zoom = MagicMouseZoom(defaults: makeDefaults().0)
+        zoom.style = .lens
+        zoom.isOn = true
+        XCTAssertTrue(zoom.needsAccessibility)
+        zoom.tapDetection = .pointerColors
+        XCTAssertFalse(zoom.needsAccessibility)
+        zoom.isOn = false
+    }
+
     func testBackupCarriesTheTapLimits() throws {
         let (source, sourceName) = makeDefaults()
         let zoom = MagicMouseZoom(defaults: source)
         zoom.shortestTap = 0.02
         zoom.longestTap = 0.4
         zoom.tapTravel = 40
+        zoom.flickerSettle = 0.6
+        zoom.lightestTap = 0.8
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
         let (target, targetName) = makeDefaults()
         try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
@@ -448,6 +548,8 @@ final class ZoomHoldForLaserTests: XCTestCase {
         XCTAssertEqual(restored.shortestTap, 0.02)
         XCTAssertEqual(restored.longestTap, 0.4)
         XCTAssertEqual(restored.tapTravel, 40)
+        XCTAssertEqual(restored.flickerSettle, 0.6)
+        XCTAssertEqual(restored.lightestTap, 0.8, accuracy: 0.0001)
     }
 
     func testBackupCarriesTheSetting() throws {
@@ -457,5 +559,141 @@ final class ZoomHoldForLaserTests: XCTestCase {
         let (target, targetName) = makeDefaults()
         try SettingsBackup(defaults: target, domain: targetName).restore(from: data)
         XCTAssertFalse(MagicMouseZoom(defaults: target).holdsForLaser)
+    }
+}
+
+final class TapVotesTests: XCTestCase {
+    func testMacOSOnlyZoomsOnMacOSAlone() {
+        var votes = TapVotes(detection: .macOS)
+        XCTAssertFalse(votes.own(at: 1))
+        XCTAssertTrue(votes.macOS(at: 1))
+    }
+
+    func testPointerColorsOnlyIgnoresMacOS() {
+        var votes = TapVotes(detection: .pointerColors)
+        XCTAssertFalse(votes.macOS(at: 1))
+        XCTAssertTrue(votes.own(at: 1))
+    }
+
+    /// From the probe: macOS's double tap came 11 ms before Pointer Colors' own.
+    func testBothZoomsWhenTheyAgreeInEitherOrder() {
+        var votes = TapVotes(detection: .both)
+        XCTAssertFalse(votes.macOS(at: 28412.702))
+        XCTAssertTrue(votes.own(at: 28412.713))
+        XCTAssertFalse(votes.own(at: 30))
+        XCTAssertTrue(votes.macOS(at: 30.05))
+    }
+
+    func testBothNeedsTheTwoCloseTogether() {
+        var votes = TapVotes(detection: .both)
+        XCTAssertFalse(votes.macOS(at: 1))
+        XCTAssertFalse(votes.own(at: 1.5))
+    }
+
+    /// One agreement makes one zoom; a stray vote right after doesn't pair with it again.
+    func testAnAgreementIsUsedUp() {
+        var votes = TapVotes(detection: .both)
+        XCTAssertFalse(votes.macOS(at: 1))
+        XCTAssertTrue(votes.own(at: 1.01))
+        XCTAssertFalse(votes.macOS(at: 1.05))
+    }
+
+    func testTheGestureEventTypeExists() {
+        XCTAssertEqual(MagicMouseZoom.gestureEvent.rawValue, 29)
+    }
+}
+
+@MainActor
+final class ZoomSharpenerTests: XCTestCase {
+    /// A capture whose top half is white and bottom half black.
+    private func capture(width: Int = 64, height: Int = 64) -> IOSurfaceRef {
+        let surface = IOSurfaceCreate([kIOSurfaceWidth: width, kIOSurfaceHeight: height, kIOSurfaceBytesPerElement: 4,
+                                       kIOSurfacePixelFormat: kCVPixelFormatType_32BGRA] as CFDictionary)!
+        IOSurfaceLock(surface, [], nil)
+        let base = IOSurfaceGetBaseAddress(surface).assumingMemoryBound(to: UInt8.self)
+        let row = IOSurfaceGetBytesPerRow(surface)
+        for y in 0..<height { memset(base + y * row, y < height / 2 ? 255 : 0, width * 4) }
+        IOSurfaceUnlock(surface, [], nil)
+        return surface
+    }
+
+    private func pixel(_ surface: IOSurfaceRef, x: Int, y: Int) -> UInt8 {
+        IOSurfaceLock(surface, .readOnly, nil)
+        defer { IOSurfaceUnlock(surface, .readOnly, nil) }
+        let base = IOSurfaceGetBaseAddress(surface).assumingMemoryBound(to: UInt8.self)
+        return base[y * IOSurfaceGetBytesPerRow(surface) + x * 4]
+    }
+
+    func testDrawsThePartAtTheAskedSize() throws {
+        let sharpener = ZoomSharpener()
+        let out = try XCTUnwrap(sharpener.picture(of: capture(), frame: 1, part: CGRect(x: 0, y: 0, width: 0.5, height: 0.5),
+                                                  size: CGSize(width: 200, height: 100), sharpening: 0.5))
+        XCTAssertEqual(IOSurfaceGetWidth(out), 200)
+        XCTAssertEqual(IOSurfaceGetHeight(out), 100)
+    }
+
+    /// The part is counted from the top left, as the zoom counts it: the top quarter is white.
+    func testKeepsTheTopAtTheTop() throws {
+        let sharpener = ZoomSharpener()
+        let top = try XCTUnwrap(sharpener.picture(of: capture(), frame: 1, part: CGRect(x: 0.25, y: 0, width: 0.5, height: 0.25),
+                                                  size: CGSize(width: 64, height: 32), sharpening: 0.5))
+        XCTAssertGreaterThan(pixel(top, x: 32, y: 16), 200)
+        let bottom = try XCTUnwrap(sharpener.picture(of: capture(), frame: 2, part: CGRect(x: 0.25, y: 0.75, width: 0.5, height: 0.25),
+                                                     size: CGSize(width: 64, height: 32), sharpening: 0.5))
+        XCTAssertLessThan(pixel(bottom, x: 32, y: 16), 50)
+    }
+
+    func testTheSameJobIsntDrawnAgain() throws {
+        let sharpener = ZoomSharpener()
+        let surface = capture()
+        let part = CGRect(x: 0, y: 0, width: 1, height: 1), size = CGSize(width: 64, height: 64)
+        let first = sharpener.picture(of: surface, frame: 1, part: part, size: size, sharpening: 0.5)
+        let again = sharpener.picture(of: surface, frame: 1, part: part, size: size, sharpening: 0.5)
+        XCTAssertTrue(first === again)
+        let next = sharpener.picture(of: surface, frame: 2, part: part, size: size, sharpening: 0.5)
+        XCTAssertFalse(first === next)
+    }
+}
+
+@MainActor
+final class ZoomUpscalingSampleTests: XCTestCase {
+    /// Each card's sample fills its frame in the display's pixels, and the choices look different.
+    /// Each card's sample fills its frame in the display's pixels, and the choices look different.
+    func testSamplesFillTheirFrameAndDiffer() throws {
+        let size = CGSize(width: 160, height: 64)
+        let pictures = try ZoomUpscaling.allCases.map {
+            try XCTUnwrap(ZoomUpscalingSample.picture($0, size: size, amount: 2.5, scale: 2, dark: false))
+        }
+        for picture in pictures {
+            XCTAssertEqual(picture.width, 320)
+            XCTAssertEqual(picture.height, 128)
+        }
+        let bytes = pictures.map { $0.dataProvider?.data as Data? }
+        XCTAssertNotEqual(bytes[0], bytes[1])
+        XCTAssertNotEqual(bytes[1], bytes[2])
+    }
+
+    func testEveryChoiceSaysWhatItCosts() {
+        for option in ZoomUpscaling.allCases {
+            XCTAssertFalse(option.upsides.isEmpty)
+            XCTAssertFalse(option.downsides.isEmpty)
+        }
+    }
+}
+
+
+final class HeldFrameTests: XCTestCase {
+    /// The capture paints new frames into surfaces not in use, so a held one must count as in use.
+    func testAHeldFrameIsInUseUntilLetGo() throws {
+        let surface = try XCTUnwrap(IOSurfaceCreate([
+            kIOSurfaceWidth: 8, kIOSurfaceHeight: 8, kIOSurfaceBytesPerElement: 4,
+            kIOSurfacePixelFormat: kCVPixelFormatType_32BGRA,
+        ] as CFDictionary))
+        XCTAssertFalse(IOSurfaceIsInUse(surface))
+        var frame: HeldFrame? = HeldFrame(surface)
+        XCTAssertTrue(IOSurfaceIsInUse(surface))
+        XCTAssertEqual(frame?.surface, surface)
+        frame = nil
+        XCTAssertFalse(IOSurfaceIsInUse(surface))
     }
 }

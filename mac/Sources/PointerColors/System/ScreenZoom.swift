@@ -39,6 +39,10 @@ final class ScreenZoom {
     /// Where the zoom takes the pointer to be: where it was held, or where it is.
     private var pointer: CGPoint { heldPointer ?? NSEvent.mouseLocation }
     private var sharingType: NSWindow.SharingType { showsInScreenShare ? .readOnly : .none }
+    /// How the screen's picture is enlarged: the display's smoothing, or a sharp picture of our own.
+    var upscaling = ZoomUpscaling.smooth {
+        didSet { sharpener.reset(); if upscaling == .smooth { imageLayer.contents = latestFrame?.surface } }
+    }
     /// Seconds zooming in or out takes; 0 jumps.
     var animationLength: TimeInterval {
         get { animation.length }
@@ -48,7 +52,11 @@ final class ScreenZoom {
     private var panel: NSPanel?
     private let imageLayer = CALayer()
     private var stream: SCStream?
-    private lazy var output = ZoomStreamOutput { [weak self] surface in self?.imageLayer.contents = surface }
+    private lazy var output = ZoomStreamOutput { [weak self] frame, source in self?.received(frame, from: source) }
+    private let sharpener = ZoomSharpener()
+    /// The capture's newest frame, and how many have come, so a sharp picture is drawn again.
+    private var latestFrame: HeldFrame?
+    private var frameCount = 0
     private var displayLink: CADisplayLink?
     private var screenFrame = CGRect.zero
     private var keyMonitors: [Any] = []
@@ -113,6 +121,8 @@ final class ScreenZoom {
         CATransaction.setDisableActions(true)
         imageLayer.contents = nil
         CATransaction.commit()
+        latestFrame = nil
+        sharpener.reset()
         keyMonitors.forEach(NSEvent.removeMonitor)
         keyMonitors = []
         if let stream { Task { try? await stream.stopCapture() } }
@@ -126,9 +136,12 @@ final class ScreenZoom {
             show(on: screen)
             let stream = try await makeStream(for: screen)
             try stream.addStreamOutput(output, type: .screen, sampleHandlerQueue: output.queue)
-            try await stream.startCapture()
-            guard isZoomed else { try? await stream.stopCapture(); return finish() }
+            // Its own from the start, so its first frames aren't taken for an older capture's.
             self.stream = stream
+            try await stream.startCapture()
+            // Zoomed out meanwhile, and maybe in again with a capture of its own.
+            guard self.stream === stream else { try? await stream.stopCapture(); return }
+            guard isZoomed else { try? await stream.stopCapture(); return finish() }
         } catch {
             zoomOut(animated: false)
         }
@@ -243,7 +256,7 @@ final class ScreenZoom {
             let shown = ZoomGeometry.wholeScreen(pointer: focus, amount: shownAmount)
             shownRect = shown
             imageLayer.frame = CGRect(origin: .zero, size: screenFrame.size)
-            imageLayer.contentsRect = ZoomGeometry.layerRect(shown)
+            showPart(shown)
         }
         CATransaction.commit()
     }
@@ -258,7 +271,34 @@ final class ScreenZoom {
                                   width: size.width, height: size.height)
         imageLayer.cornerRadius = lensShape.cornerRadius(for: size)
         let unit = CGSize(width: size.width / screenFrame.width, height: size.height / screenFrame.height)
-        imageLayer.contentsRect = ZoomGeometry.layerRect(ZoomGeometry.lens(pointer: pointer, amount: amount, lens: unit))
+        showPart(ZoomGeometry.lens(pointer: pointer, amount: amount, lens: unit))
+    }
+
+    /// A new frame of the current capture. Smooth shows it straight away; a sharp picture is drawn from it
+    /// on the next display frame.
+    private func received(_ frame: HeldFrame, from source: ObjectIdentifier) {
+        // A capture still stopping sends a last few frames, maybe of another display.
+        guard let stream, ObjectIdentifier(stream) == source else { return }
+        latestFrame = frame
+        frameCount += 1
+        if upscaling == .smooth { imageLayer.contents = frame.surface }
+    }
+
+    /// Shows `part` of the display (units from its top left) across the image layer.
+    private func showPart(_ part: CGRect) {
+        guard let sharpening = upscaling.sharpening, let surface = latestFrame?.surface else {
+            imageLayer.contentsRect = ZoomGeometry.layerRect(part)
+            return
+        }
+        let scale = panel?.backingScaleFactor ?? 1
+        let size = CGSize(width: imageLayer.bounds.width * scale, height: imageLayer.bounds.height * scale)
+        guard let picture = sharpener.picture(of: surface, frame: frameCount, part: part, size: size, sharpening: sharpening) else {
+            imageLayer.contents = surface
+            imageLayer.contentsRect = ZoomGeometry.layerRect(part)
+            return
+        }
+        imageLayer.contents = picture
+        imageLayer.contentsRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     }
 
     /// Esc zooms out, in any app. Seeing keys pressed in other apps needs Accessibility.

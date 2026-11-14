@@ -11,6 +11,7 @@ struct ZoomApp: Codable, Identifiable, Equatable {
     static let defaults = [
         ZoomApp(bundleID: "com.apple.Safari", name: "Safari"),
         ZoomApp(bundleID: "com.google.Chrome", name: "Google Chrome"),
+        ZoomApp(bundleID: "com.brave.Browser", name: "Brave Browser"),
         ZoomApp(bundleID: "com.apple.Preview", name: "Preview"),
         ZoomApp(bundleID: "com.apple.Photos", name: "Photos"),
     ]

@@ -3,20 +3,26 @@ import SwiftUI
 /// A Preferences page: its title over a column of cards, scrolling as one.
 struct SettingsPage<Content: View>: View {
     let title: LocalizedStringKey
+    /// Shows a BETA badge beside the title.
+    let isBeta: Bool
     @ViewBuilder var content: Content
     @Environment(\.appTextScale) private var scale
 
-    init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+    init(_ title: LocalizedStringKey, isBeta: Bool = false, @ViewBuilder content: () -> Content) {
         self.title = title
+        self.isBeta = isBeta
         self.content = content()
     }
 
     var body: some View {
         ScrollView {
             SettingsStack(spacing: 20 * scale) {
-                Text(title)
-                    .appFont(.title2, weight: .bold)
-                    .accessibilityAddTraits(.isHeader)
+                HStack(spacing: 10 * scale) {
+                    Text(title)
+                        .appFont(.title2, weight: .bold)
+                        .accessibilityAddTraits(.isHeader)
+                    if isBeta { BetaBadge() }
+                }
                 content
             }
             .frame(maxWidth: 760 * scale)

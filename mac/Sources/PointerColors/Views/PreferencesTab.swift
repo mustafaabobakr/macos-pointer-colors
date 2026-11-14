@@ -6,6 +6,8 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
          whatsNew
 
     var id: Self { self }
+    /// Still being tuned, so its sidebar row and page carry a BETA badge.
+    var isBeta: Bool { self == .zoom }
     /// Names the page's screen in docs/features/features.json.
     var slug: String { rawValue }
 
