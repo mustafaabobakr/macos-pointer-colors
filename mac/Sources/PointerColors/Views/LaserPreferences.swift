@@ -24,6 +24,7 @@ struct LaserPreferences: View {
                 LaserShotRows(highlight: highlight)
                     .disabled(!highlight.laserOn)
             }
+            .featureSpot("laser-shots")
             .animation(.reveal, value: highlight.laserOn)
         }
     }

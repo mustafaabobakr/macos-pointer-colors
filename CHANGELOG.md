@@ -3,6 +3,24 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.8.0 — Unreleased
+
+- **Smart zoom in every app (beta).** Double-tap the Magic Mouse with one finger to zoom in on what's under the pointer, in any app and on any display, the way macOS Smart Zoom does in Safari. Double-tap again, or press Esc, to zoom back out. Turn it on in the new **Preferences › Mouse › Zoom** page.
+  - **Whole screen or lens.** **Whole screen** zooms the display and, with **Stay where you zoomed**, holds the view still like macOS Smart Zoom, keeping the pointer 10 pt inside the display's edges; or choose **Follow the pointer**. **Lens** magnifies an area that follows the pointer, as a **Rectangle**, **Square** or **Circle** up to 2000 pt wide, outlined in **White**, the **Pointer pair**'s color or a **Custom** color.
+  - **Zoom amount** from 1.5× to 5×, and an **Animation length** from 0 to 600 ms.
+  - **Show zoom when sharing your screen**, so people in a Slack huddle, Google Meet or other call see what you zoomed into when you share your whole screen.
+  - **macOS Smart Zoom where it's better.** In Safari, Google Chrome, Brave Browser, Preview and Photos a double tap still zooms the page, document or image the way macOS does, and Pointer Colors stays out of the way. **Add App…** and **Remove** change the list.
+  - **Detected like macOS does it.** By default a zoom starts only when macOS itself recognizes the double tap, the same recognizer Safari and Chrome use. **Advanced › Detect double taps with** also offers **Pointer Colors only**, which reads your fingers itself, and **Both**, which needs the two to agree. This needs Smart zoom on in **System Settings › Mouse**, and the page tells you when it's off.
+  - **Tap limits** for Pointer Colors' own detection, in **Advanced**: **Double-tap within**, **Shortest tap**, **Longest tap**, **Pointer movement during a tap**, **Lightest tap** and **Wait after a flicker**, each set from logged real taps and stray touches, with **Reset**.
+  - **Enlarge the picture your way**, in **Advanced**: **Smooth** (the default) blends pixels as before, while **Sharp** and **Sharper** keep text and thin lines crisper. Each is a card with a sample drawn at your zoom amount, and its upsides and downsides.
+  - Zoom needs **Screen Recording**, to draw the zoomed picture, and **Accessibility**, to hear macOS's double tap and keep the pointer inside a still zoom. **General › Permissions** lists both under **Magic Mouse smart zoom**.
+- **A screenshot of each laser drawing.** **Preferences › Laser › Screenshots** captures the area around a finished trail, with a **Margin around the trail** of 0–400 pt, with or without the laser in it. Each shot can be **copied to the clipboard**, **saved to a folder** (the Desktop by default) and **opened** in the default app, Shottr or CleanShot X, each shown with its icon. Shots only opened, not saved, are kept in the app's Screenshots folder, with **Show in Finder** and **Delete All…**.
+- **Laser and zoom together.** **Hold still for the laser** stops a lens or a following zoom from moving while you hold the laser's keys or draw, so the drawing stays on what it marks. While zoomed, **Capture the whole zoom while zoomed** takes everything the zoom shows, **Only while zoomed** takes screenshots only with a zoom up, and **Zoom out after the screenshot** ends a whole-screen zoom, a lens, or both.
+- **Every permission in one place.** **Preferences › General › Permissions** shows Full Disk Access, Accessibility, Screen Recording and Notifications, each under the feature that needs it and saying why, with an **Allowed** or **Allow…** status.
+- **Easier settings.** A choice of up to four options is now a row of side-by-side buttons; more options stay a menu. Sliders have buttons to nudge them one step and icons at their ends.
+
+**Export all…** saves every new setting, and **Import…** puts them back.
+
 ## 0.7.0 — 2026-11-11
 
 - **Battery, your levels.** **Preferences › Battery** shows the level next to the menu-bar icon, on the Dock icon or under the pointer **Always** or **When low**, with one **When low means below** slider (5–50%). The pointer label goes **below or above, right or left**, with a real-size picture of it, and turns red below your alert level.

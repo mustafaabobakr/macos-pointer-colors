@@ -125,6 +125,14 @@
     {"id": "updates", "screen": "preferences-about", "spot": "updates", "since": "0.3.0",
      "title": "Updates in one click", "caption": "Check on a schedule, read what's new, and install without a security prompt.",
      "use": "Use it to stay current without checking the website.",
-     "sources": ["mac/Sources/PointerColors/Views/PreferencesView.swift", "mac/Sources/PointerColors/Model/AppModel+Updates.swift"]}
+     "sources": ["mac/Sources/PointerColors/Views/PreferencesView.swift", "mac/Sources/PointerColors/Model/AppModel+Updates.swift"]},
+    {"id": "smart-zoom", "screen": "preferences-zoom", "spot": "zoom", "since": "0.8.0",
+     "title": "Magic Mouse smart zoom", "caption": "Double-tap the Magic Mouse to zoom in on what's under the pointer, in any app, the way macOS Smart Zoom does in Safari: the whole screen, or a lens that follows the pointer.",
+     "use": "Use it to read small text or show a detail up close, also to people watching your shared screen.",
+     "sources": ["mac/Sources/PointerColors/Views/ZoomPreferences.swift", "mac/Sources/PointerColors/Model/MagicMouseZoom.swift", "mac/Sources/PointerColors/System/ScreenZoom.swift", "mac/Sources/PointerColors/Model/TapDetection.swift"]},
+    {"id": "laser-screenshots", "screen": "preferences-laser", "spot": "laser-shots", "since": "0.8.0",
+     "title": "A screenshot of each drawing", "caption": "Let go after drawing with the laser and the area around the trail is copied, saved or opened to mark up.",
+     "use": "Use it to grab what you just pointed at, ready to paste into a chat or a ticket.",
+     "sources": ["mac/Sources/PointerColors/Views/LaserShotRows.swift", "mac/Sources/PointerColors/System/LaserShot.swift"]}
   ]
 }

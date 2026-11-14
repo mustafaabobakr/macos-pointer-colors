@@ -22,7 +22,7 @@ struct LaserShotRows: View {
                        isOn: $highlight.laserShotOnlyZoomed)
         ValueSlider(title: String(localized: "Margin around the trail"), symbol: "rectangle.dashed",
                     value: $highlight.laserShotMargin, range: PointerHighlight.shotMarginRange,
-                    format: "%.0f pt", step: 5, ends: .size)
+                    format: "%.0f pt", spot: "clip-laser-shot-margin", step: 5, ends: .size)
         SettingsToggle("Capture the whole zoom while zoomed", symbol: "plus.magnifyingglass",
                        caption: "With a Magic Mouse zoom up, takes everything the zoom shows, the whole screen or the lens, without the margin.",
                        isOn: $highlight.laserShotWholeZoom)
@@ -40,6 +40,7 @@ struct LaserShotRows: View {
         SettingsChoice("Zoom out after the screenshot", symbol: "minus.magnifyingglass",
                        caption: "Ends the Magic Mouse zoom once the screenshot is taken: a whole-screen zoom, a lens, or both.",
                        selection: $highlight.laserShotZoomOut, label: \.title)
+            .featureSpot("clip-laser-shot-zoom-out")
         UnsavedShotsRow()
     }
 

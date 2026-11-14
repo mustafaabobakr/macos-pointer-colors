@@ -57,6 +57,7 @@ enum FeatureClipScripts {
         "tracking": tracking, "pointer-location": pointerLocation, "menu-bar-dock": menuBarDock, "battery": battery, "battery-health": batteryHealth,
         "side-buttons": sideButtons, "side-button-apps": sideButtonApps, "double-clicks": doubleClicks, "hover-focus": hoverFocus,
         "whats-new": whatsNew, "app-icon": appIcon,
+        "smart-zoom": smartZoom, "laser-screenshots": laserScreenshots,
     ]
 
     // MARK: Helpers
@@ -425,5 +426,40 @@ enum FeatureClipScripts {
         steps: [
             .pause(0.4),
             .move(to: spot("clip-check-updates")), .choose { ScreenshotRenderer.showDemoUpdate($0) }, .pause(2.2),
+        ])
+
+    // MARK: Zoom and laser screenshots
+
+    private static let lensSizes = MagicMouseZoom.lensSizeRange
+
+    private static let smartZoom = FeatureClip(
+        cursorStart: spot("zoom", x: 0.3, y: 0.1),
+        setUp: { $0.magicMouseZoom.isOn = false; $0.magicMouseZoom.style = .wholeScreen; $0.magicMouseZoom.lensSize = 400 },
+        steps: [
+            .pause(0.4),
+            .move(to: spot("clip-zoom-on", x: 0.95)), .choose { $0.magicMouseZoom.isOn = true }, .pause(0.8),
+            .move(to: spot("clip-zoom-style", x: 0.93)), .choose { $0.magicMouseZoom.style = .lens }, .pause(0.8),
+            .move(to: along("clip-lens-size", 400, in: lensSizes)),
+            .slide(to: along("clip-lens-size", 800, in: lensSizes), seconds: 0.9) {
+                $0.magicMouseZoom.lensSize = (lerp(400, 800, $1) / 10).rounded() * 10
+            },
+            .pause(1.0),
+        ])
+
+    private static let laserScreenshots = FeatureClip(
+        cursorStart: spot("laser-shots", x: 0.3, y: 0.1),
+        // On already: switching it on asks macOS for Screen Recording.
+        setUp: {
+            $0.highlight.laserOn = true; $0.highlight.laserShotOn = true
+            $0.highlight.laserShotMargin = 40; $0.highlight.laserShotZoomOut = .off
+        },
+        steps: [
+            .pause(0.4),
+            .move(to: along("clip-laser-shot-margin", 40, in: PointerHighlight.shotMarginRange)),
+            .slide(to: along("clip-laser-shot-margin", 120, in: PointerHighlight.shotMarginRange), seconds: 0.9) {
+                $0.highlight.laserShotMargin = (lerp(40, 120, $1) / 5).rounded() * 5
+            },
+            .pause(0.5),
+            .move(to: spot("clip-laser-shot-zoom-out", x: 0.95)), .choose { $0.highlight.laserShotZoomOut = .both }, .pause(1.0),
         ])
 }

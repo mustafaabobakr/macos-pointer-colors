@@ -92,6 +92,14 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.
 - **Every detail yours**: line widths, growth, opacity, ripple waves, long-press timing, laser glow and fade, each previewed at real size in Preferences.
 
+**Smart zoom (beta)**
+- **Double-tap to zoom in any app**: one-finger double tap on the Magic Mouse zooms in on what's under the pointer, in every app and on every display, like macOS Smart Zoom in Safari. Double-tap again, or press Esc, to zoom out.
+- **Whole screen or a lens**: zoom the display and keep it still, or let it follow the pointer; or a rectangle, square or circle lens up to 2000 pt, outlined in white, your pair's color or any color.
+- **macOS Smart Zoom stays where it's better**: Safari, Chrome, Brave, Preview and Photos keep their own page zoom, and you pick the apps.
+- **Your choice of tap detection**: by default only a double tap macOS itself recognizes zooms, the same way browsers do. Advanced settings let Pointer Colors read the taps itself, or require both, with tap limits you can tune against stray zooms.
+- **Shows in screen sharing**, so people on a call see what you zoomed into. Animation length and zoom amount up to 5× are yours to set.
+- **Laser screenshots**: let go after drawing with the laser and the area around it, or the whole zoom, is copied, saved or opened in Shottr, CleanShot X or your default app.
+
 **Mouse speed and acceleration**
 - **Disable pointer acceleration**: the pointer moves the same distance however fast you move the mouse, with its own tracking speed.
 - **Pointer acceleration** from 0 to 40, and **pointer speed** from 0 to 1, past what System Settings › Mouse allows.
