@@ -507,6 +507,9 @@
 "Tap limits changed" = "تغيّرت حدود النقر";
 "Puts the shortest tap, longest tap and pointer movement back to 50 ms, 250 ms and 10 pt." = "يعيد أقصر نقرة وأطول نقرة وحركة المؤشر إلى 50 مللي ثانية و250 مللي ثانية و10 نقاط.";
 "Shortest tap, longest tap and pointer movement during a tap" = "أقصر نقرة وأطول نقرة وحركة المؤشر أثناء النقرة";
+"Only while zoomed" = "أثناء التكبير فقط";
+"Takes a screenshot only while a Magic Mouse zoom is up. Without a zoom, the laser just draws." = "يلتقط لقطة شاشة فقط أثناء تكبير Magic Mouse. من دون تكبير، يرسم الليزر فقط.";
+"Laser screenshots only while zoomed" = "لقطات شاشة الليزر أثناء التكبير فقط";
 "Zoom out after the screenshot" = "التصغير بعد لقطة الشاشة";
 "Ends the Magic Mouse zoom once the screenshot is taken: a whole-screen zoom, a lens, or both." = "يُنهي تكبير Magic Mouse فور التقاط لقطة الشاشة: تكبير الشاشة كاملة أو العدسة أو كليهما.";
 "Zoom out after a laser screenshot" = "التصغير بعد لقطة شاشة الليزر";

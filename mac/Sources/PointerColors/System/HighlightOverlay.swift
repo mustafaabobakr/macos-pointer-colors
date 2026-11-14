@@ -302,10 +302,11 @@ final class HighlightOverlay {
     private func finishedTrailShot() -> LaserShot? {
         defer { trailBounds = nil }
         let overlays = windows.map { CGWindowID($0.windowNumber) }
-        guard let trailBounds,
+        let zoom = zoomedArea()
+        guard settings.takesLaserShot(zoomed: zoom != nil), let trailBounds,
               let aroundTrail = LaserShot(settings: settings, trail: trailBounds, reach: style.laserTrailReach,
                                           overlayWindows: overlays) else { return nil }
-        guard settings.laserShotWholeZoom, let zoom = zoomedArea() else { return aroundTrail }
+        guard settings.laserShotWholeZoom, let zoom else { return aroundTrail }
         return LaserShot(settings: settings, area: zoom, overlayWindows: overlays)
     }
 

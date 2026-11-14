@@ -244,6 +244,10 @@ final class PointerHighlight {
     var laserShotCopies: Bool { didSet { save(laserShotCopies, Key.laserShotCopies) } }
     /// While a Magic Mouse zoom is up, captures everything it shows, without the margin. On unless changed.
     var laserShotWholeZoom: Bool { didSet { save(laserShotWholeZoom, Key.laserShotWholeZoom) } }
+    /// Takes screenshots only while a Magic Mouse zoom is up; without one, the laser just draws. On unless changed.
+    var laserShotOnlyZoomed: Bool { didSet { save(laserShotOnlyZoomed, Key.laserShotOnlyZoomed) } }
+    /// Whether a finished trail gets a screenshot, given whether a Magic Mouse zoom is up.
+    func takesLaserShot(zoomed: Bool) -> Bool { laserShotOn && (zoomed || !laserShotOnlyZoomed) }
     /// Which Magic Mouse zooms end once the screenshot is taken. Both unless changed.
     var laserShotZoomOut: LaserShotZoomOut { didSet { save(laserShotZoomOut.rawValue, Key.laserShotZoomOut) } }
     /// Saves each screenshot in `laserShotFolder`.
@@ -354,6 +358,7 @@ final class PointerHighlight {
         laserShotIncludesTrail = defaults.bool(forKey: Key.laserShotTrail)
         laserShotCopies = defaults.bool(forKey: Key.laserShotCopies)
         laserShotWholeZoom = defaults.bool(forKey: Key.laserShotWholeZoom)
+        laserShotOnlyZoomed = defaults.bool(forKey: Key.laserShotOnlyZoomed)
         laserShotZoomOut = defaults.string(forKey: Key.laserShotZoomOut).flatMap(LaserShotZoomOut.init) ?? .both
         laserShotSaves = defaults.bool(forKey: Key.laserShotSaves)
         laserShotFolder = defaults.string(forKey: Key.laserShotFolder) ?? Self.desktopPath
@@ -374,7 +379,7 @@ final class PointerHighlight {
         Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
         Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
         Key.laserShotMargin: 20.0, Key.laserShotTrail: true, Key.laserShotCopies: true, Key.laserShotSaves: true,
-        Key.laserShotWholeZoom: true,
+        Key.laserShotWholeZoom: true, Key.laserShotOnlyZoomed: true,
     ]
 
     /// True when anything needs the overlay.
@@ -519,6 +524,7 @@ final class PointerHighlight {
         static let laserShotSaves = "highlightLaserShotSaves"
         static let laserShotWholeZoom = "highlightLaserShotWholeZoom"
         static let laserShotZoomOut = "highlightLaserShotZoomOut"
+        static let laserShotOnlyZoomed = "highlightLaserShotOnlyZoomed"
         static let laserShotFolder = "highlightLaserShotFolder"
         static let laserShotOpener = "highlightLaserShotOpener"
     }

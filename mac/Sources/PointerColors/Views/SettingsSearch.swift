@@ -83,6 +83,7 @@ enum SettingsSearch {
         item(.laser, "highlight.laser", String(localized: "Laser outline opacity"), "circle.lefthalf.filled"),
         item(.laser, "highlight.laser", String(localized: "Laser: block clicks while drawing"), "hand.raised"),
         item(.laser, "highlight.laserShot", String(localized: "Laser: screenshot each drawing"), "camera.viewfinder"),
+        item(.laser, "highlight.laserShot", String(localized: "Laser screenshots only while zoomed"), "plus.magnifyingglass"),
         item(.laser, "highlight.laserShot", String(localized: "Laser screenshot margin, clipboard, folder and Open in"), "rectangle.dashed"),
         item(.laser, "highlight.laserShot", String(localized: "Screenshots kept by the app: show in Finder or delete"), "photo.stack"),
         item(.laser, "highlight.laserShot", String(localized: "Zoom out after a laser screenshot"), "minus.magnifyingglass"),

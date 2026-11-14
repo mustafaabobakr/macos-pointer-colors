@@ -64,6 +64,18 @@ final class LaserShotTests: XCTestCase {
         XCTAssertEqual(highlight.laserShotOpener, LaserShotOpener.none)
         XCTAssertEqual(highlight.laserShotZoomOut, .both)
         XCTAssertTrue(highlight.laserShotWholeZoom)
+        XCTAssertTrue(highlight.laserShotOnlyZoomed)
+    }
+
+    func testOnlyWhileZoomedSkipsShotsWithoutAZoom() {
+        let highlight = PointerHighlight(defaults: makeDefaults().0)
+        XCTAssertFalse(highlight.takesLaserShot(zoomed: true), "screenshots off")
+        highlight.laserShotOn = true
+        XCTAssertTrue(highlight.takesLaserShot(zoomed: true))
+        XCTAssertFalse(highlight.takesLaserShot(zoomed: false))
+        highlight.laserShotOnlyZoomed = false
+        XCTAssertTrue(highlight.takesLaserShot(zoomed: false))
+        XCTAssertTrue(highlight.takesLaserShot(zoomed: true))
     }
 
     func testOffTakesNoShot() {
@@ -103,6 +115,7 @@ final class LaserShotTests: XCTestCase {
         highlight.laserShotOpener = .cleanShot
         highlight.laserShotZoomOut = .wholeScreen
         highlight.laserShotWholeZoom = false
+        highlight.laserShotOnlyZoomed = false
         let data = try SettingsBackup(defaults: source, domain: sourceName).export(launchAtLogin: false)
 
         let (target, targetName) = makeDefaults()
@@ -117,6 +130,7 @@ final class LaserShotTests: XCTestCase {
         XCTAssertEqual(restored.laserShotOpener, .cleanShot)
         XCTAssertEqual(restored.laserShotZoomOut, .wholeScreen)
         XCTAssertFalse(restored.laserShotWholeZoom)
+        XCTAssertFalse(restored.laserShotOnlyZoomed)
     }
 
     // MARK: The app's own folder

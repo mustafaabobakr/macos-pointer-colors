@@ -17,6 +17,9 @@ struct LaserShotRows: View {
     }
 
     @ViewBuilder private var options: some View {
+        SettingsToggle("Only while zoomed", symbol: "plus.magnifyingglass",
+                       caption: "Takes a screenshot only while a Magic Mouse zoom is up. Without a zoom, the laser just draws.",
+                       isOn: $highlight.laserShotOnlyZoomed)
         ValueSlider(title: String(localized: "Margin around the trail"), symbol: "rectangle.dashed",
                     value: $highlight.laserShotMargin, range: PointerHighlight.shotMarginRange,
                     format: "%.0f pt", step: 5, ends: .size)
