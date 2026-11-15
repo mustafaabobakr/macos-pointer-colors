@@ -44,18 +44,23 @@ final class FrostBurstTests: XCTestCase {
         XCTAssertEqual(highlight.frostGrowth, 3)
         XCTAssertEqual(highlight.frostShards, 6)
         XCTAssertTrue(highlight.frostFlash)
-        XCTAssertTrue(highlight.frostIce)
+        XCTAssertEqual(highlight.frostColorSource, .ice)
         highlight.pulseStyle = .frost
         highlight.frostGrowth = 4.5
         highlight.frostShards = 0
         highlight.frostFlash = false
-        highlight.frostIce = false
+        highlight.frostColorSource = .custom
+        highlight.frostColor = RGBA(hex: "FF3B30")!
         let reread = PointerHighlight(defaults: defaults)
         XCTAssertEqual(reread.pulseStyle, .frost)
         XCTAssertEqual([reread.frostGrowth, Double(reread.frostShards)], [4.5, 0])
-        XCTAssertFalse(reread.frostFlash || reread.frostIce)
+        XCTAssertFalse(reread.frostFlash)
+        XCTAssertEqual(reread.frostColorSource, .custom)
         let style = HighlightStyle(settings: reread, pair: .featured, pointerScale: 1)
-        XCTAssertEqual(style.frostColors, .tinted(style.pulseColor), "ice colors off uses the pulse color")
+        XCTAssertEqual(style.frostColors, .tinted(RGBA(hex: "FF3B30")!), "custom uses its own color, not the pulse color")
+        XCTAssertEqual(style.frostColors.core, RGBA(red: 1, green: 1, blue: 1), "the flash stays white")
+        reread.frostColorSource = .pair
+        XCTAssertEqual(reread.frostColors(for: .featured), .tinted(PointerPair.featured.highlightColor))
         XCTAssertEqual(style.pulseRadius, style.frost.reach)
     }
 }

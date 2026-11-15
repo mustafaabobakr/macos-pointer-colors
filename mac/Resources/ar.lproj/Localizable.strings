@@ -346,7 +346,7 @@
 "Ring color, fill and line width" = "لون الحلقة وتعبئتها وعرض خطها";
 "Pulse line width, growth and opacity" = "عرض خط النبضة واتساعها وعتامتها";
 "Ripple waves and gap" = "موجات التموج والفاصل بينها";
-"Frost flash, shards and ice colors" = "وميض الصقيع وشظاياه وألوان الجليد";
+"Frost color, flash and shards" = "لون الصقيع ووميضه وشظاياه";
 "Long presses" = "الضغطات المطوّلة";
 "Laser glow, trail opacity and dot fade" = "توهج الليزر وعتامة الأثر وتلاشي النقطة";
 "A ring that grows and fades where you click. The picture shows it at its real size." = "حلقة تكبر وتتلاشى حيث تنقر. تعرضها الصورة بحجمها الحقيقي.";
@@ -354,8 +354,8 @@
 "Starting opacity" = "العتامة في البداية";
 "Waves" = "الموجات";
 "Gap between waves" = "الفاصل بين الموجات";
-"Ice colors" = "ألوان الجليد";
-"White and icy blue. Off tints the glow and shards in the pulse color." = "أبيض وأزرق جليدي. عند الإيقاف يأخذ التوهج والشظايا لون النبضة.";
+"Ice" = "جليد";
+"White and icy blue." = "أبيض وأزرق جليدي.";
 "Flash" = "وميض";
 "A bright white flash under the pointer as the click lands." = "وميض أبيض ساطع تحت المؤشر لحظة النقر.";
 "Shards" = "الشظايا";

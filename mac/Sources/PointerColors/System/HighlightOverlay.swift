@@ -444,6 +444,7 @@ struct HighlightStyle: Equatable {
         showsRing = settings.showsRing
         ringColor = settings.ringColor(for: pair)
         pulseColor = settings.pulseColor(for: pair)
+        frostColors = settings.frostColors(for: pair)
         pulseOutline = settings.pulseOutlined ? pair.darkColor : nil
         pulseOutlineExtra = settings.pulseOutlineWidth * 2
         laser = settings.laserColors(for: pair)
@@ -469,7 +470,6 @@ struct HighlightStyle: Equatable {
         (rippleWaves, rippleGrowth, rippleSpacing) = (settings.rippleWaves, settings.rippleGrowth, settings.rippleSpacing)
         (rippleLineWidth, rippleOpacity) = (settings.rippleLineWidth, settings.rippleOpacity)
         (frostGrowth, frostShards, frostFlash) = (settings.frostGrowth, settings.frostShards, settings.frostFlash)
-        frostColors = settings.frostIce ? .ice : .tinted(pulseColor)
         (holdDelay, holdSize, holdFill) = (settings.holdDelay, settings.holdSize, settings.holdFill)
         (holdLineWidth, holdBreathes) = (settings.holdLineWidth, settings.holdBreathes)
     }

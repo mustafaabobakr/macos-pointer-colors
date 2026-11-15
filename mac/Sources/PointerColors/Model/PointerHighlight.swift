@@ -196,11 +196,12 @@ final class PointerHighlight {
     var rippleLineWidth: Double { didSet { save(rippleLineWidth, Key.rippleLineWidth) } }
     var rippleOpacity: Double { didSet { save(rippleOpacity, Key.rippleOpacity) } }
     /// The Frost style: how far its ring grows against the pulse's base size, how many shards fly
-    /// out, whether it starts with a flash, and whether it's in ice colors or the pulse color.
+    /// out, whether it starts with a flash, and where its color comes from, with its own custom color.
     var frostGrowth: Double { didSet { save(frostGrowth, Key.frostGrowth) } }
     var frostShards: Int { didSet { save(frostShards, Key.frostShards) } }
     var frostFlash: Bool { didSet { save(frostFlash, Key.frostFlash) } }
-    var frostIce: Bool { didSet { save(frostIce, Key.frostIce) } }
+    var frostColorSource: FrostColorSource { didSet { save(frostColorSource.rawValue, Key.frostColorSource) } }
+    var frostColor: RGBA { didSet { saveColor(frostColor, Key.frostColor) } }
     /// The long-press ring: seconds held before it shows, its size against the pulse's base
     /// size, how tinted its inside is, its edge in points, and whether it breathes while held.
     var holdDelay: Double { didSet { save(holdDelay, Key.holdDelay) } }
@@ -328,7 +329,8 @@ final class PointerHighlight {
         frostGrowth = defaults.double(forKey: Key.frostGrowth)
         frostShards = defaults.integer(forKey: Key.frostShards)
         frostFlash = defaults.bool(forKey: Key.frostFlash)
-        frostIce = defaults.bool(forKey: Key.frostIce)
+        frostColorSource = defaults.string(forKey: Key.frostColorSource).flatMap(FrostColorSource.init(rawValue:)) ?? .ice
+        frostColor = Self.color(defaults, Key.frostColor) ?? FrostColors.ice.glow
         holdDelay = defaults.double(forKey: Key.holdDelay)
         holdSize = defaults.double(forKey: Key.holdSize)
         holdFill = defaults.double(forKey: Key.holdFill)
@@ -390,7 +392,7 @@ final class PointerHighlight {
         Key.ringPair: true, Key.ringFill: 0.18, Key.ringLineWidth: 3.0, Key.ringOpacity: 0.9,
         Key.pulseLineWidth: 4.0, Key.pulseGrowth: 1.8, Key.pulseOpacity: 0.95,
         Key.rippleWaves: 3, Key.rippleGrowth: 2.2, Key.rippleSpacing: 0.15, Key.rippleLineWidth: 3.0, Key.rippleOpacity: 0.9,
-        Key.frostGrowth: 3.0, Key.frostShards: 6, Key.frostFlash: true, Key.frostIce: true,
+        Key.frostGrowth: 3.0, Key.frostShards: 6, Key.frostFlash: true,
         Key.holdDelay: 0.35, Key.holdSize: 0.55, Key.holdFill: 0.35, Key.holdLineWidth: 3.0, Key.holdBreathes: true,
         Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
         Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
@@ -462,6 +464,15 @@ final class PointerHighlight {
         return LaserColors(glow: base, outline: outlines[laserOutline] ?? base, middle: middle, center: white)
     }
 
+    /// The Frost pulse's colors: ice, or shades of the pair's color or the custom one.
+    func frostColors(for pair: PointerPair) -> FrostColors {
+        switch frostColorSource {
+        case .ice: return .ice
+        case .pair: return .tinted(pair.highlightColor)
+        case .custom: return .tinted(frostColor)
+        }
+    }
+
     func ringColor(for pair: PointerPair) -> RGBA {
         ringUsesPairColor ? pair.highlightColor : ringColor
     }
@@ -525,7 +536,8 @@ final class PointerHighlight {
         static let frostGrowth = "highlightFrostGrowth"
         static let frostShards = "highlightFrostShards"
         static let frostFlash = "highlightFrostFlash"
-        static let frostIce = "highlightFrostIce"
+        static let frostColorSource = "highlightFrostColorSource"
+        static let frostColor = "highlightFrostColor"
         static let holdDelay = "highlightHoldDelay"
         static let holdSize = "highlightHoldSize"
         static let holdFill = "highlightHoldFill"

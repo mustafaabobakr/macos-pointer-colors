@@ -77,7 +77,7 @@ enum SettingsSearch {
         item(.ring, "highlight.ring", String(localized: "Ring color, fill and line width"), "paintpalette"),
         item(.pulse, "highlight.pulse", String(localized: "Pulse line width, growth and opacity"), "lineweight"),
         item(.pulse, "highlight.pulse", String(localized: "Ripple waves and gap"), "dot.radiowaves.right"),
-        item(.pulse, "highlight.pulse", String(localized: "Frost flash, shards and ice colors"), "snowflake"),
+        item(.pulse, "highlight.pulse", String(localized: "Frost color, flash and shards"), "snowflake"),
         item(.pulse, "highlight.hold", String(localized: "Long presses"), "hand.tap"),
         item(.laser, "highlight.laser", String(localized: "Laser glow, trail opacity and dot fade"), "sun.max"),
         item(.laser, "highlight.laser", String(localized: "Laser look: Classic or GoodNotes glow"), "wand.and.rays"),

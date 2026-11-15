@@ -38,7 +38,8 @@ private struct PulseRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
-        Reveal(isShown: !(highlight.pulseStyle == .frost && highlight.frostIce)) {
+        // Frost has a color row of its own, in its rows below.
+        Reveal(isShown: highlight.pulseStyle != .frost) {
             ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
         }
         SharedPulseRows(highlight: highlight)
@@ -120,9 +121,7 @@ private struct FrostStyleRows: View {
 
     var body: some View {
         let range = PointerHighlight.frostShardsRange
-        SettingsToggle("Ice colors", symbol: "snowflake",
-                       caption: "White and icy blue. Off tints the glow and shards in the pulse color.",
-                       isOn: $highlight.frostIce.revealing())
+        FrostColorPicker(source: $highlight.frostColorSource, color: $highlight.frostColor)
         SettingsToggle("Flash", symbol: "sparkle", caption: "A bright white flash under the pointer as the click lands.",
                        isOn: $highlight.frostFlash)
         ValueSlider(title: String(localized: "Shards"), symbol: "rhombus", value: shards,
