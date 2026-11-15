@@ -19,6 +19,13 @@ final class ScreenZoom {
     /// The lens's width and height, in points.
     var lensSize = MagicMouseZoom.defaultLensSize
     var lensShape = LensShape.rectangle
+    /// Where the lens sits relative to the pointer.
+    var lensPlacement = LensPlacement.onPointer
+    /// Which part of the display the lens magnifies, and Pointer spot's fraction for `.pointerSpot`.
+    var lensView = LensView.centred
+    var lensViewSpot = MagicMouseZoom.defaultLensViewSpot
+    /// Where the lens grows out of and shrinks back into.
+    var lensGrowth = LensGrowth.nearestEdge
     /// The lens outline's color, read each time it zooms in.
     var lensBorderColor: () -> RGBA = { MagicMouseZoom.whiteBorder }
     /// People you share your screen with see the zoom too. Off, the zoom is hidden from screen
@@ -62,6 +69,9 @@ final class ScreenZoom {
     private var keyMonitors: [Any] = []
     private var animation = ZoomAnimation(length: MagicMouseZoom.defaultAnimationLength)
     private var lastTick: CFTimeInterval?
+    /// Eases the lens to a new side of the pointer, and when it last moved.
+    private var lensGlide = LensGlide()
+    private var lastLensMove: CFTimeInterval?
     /// Where the pointer was when it zoomed in, in units of the display from its top left.
     private var anchor: CGPoint?
     /// The part of the display a whole-screen zoom shows now, in the same units.
@@ -110,6 +120,8 @@ final class ScreenZoom {
     private func finish() {
         animation = ZoomAnimation(length: animation.length)
         lastTick = nil
+        lensGlide.reset()
+        lastLensMove = nil
         shownRect = nil
         anchor = nil
 
@@ -250,7 +262,7 @@ final class ScreenZoom {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         if style == .lens {
-            placeLens(in: panel, at: mouse, pointer: pointer, amount: shownAmount, grown: grown)
+            placeLens(in: panel, at: mouse, amount: shownAmount, grown: grown)
         } else {
             let focus = staysPut ? anchor ?? pointer : pointer
             let shown = ZoomGeometry.wholeScreen(pointer: focus, amount: shownAmount)
@@ -261,17 +273,33 @@ final class ScreenZoom {
         CATransaction.commit()
     }
 
-    /// The lens grows out of the pointer, its picture magnifying as it does.
-    private func placeLens(in panel: NSPanel, at mouse: CGPoint, pointer: CGPoint, amount: Double, grown: Double) {
-        let full = lensShape.size(width: lensSize)
-        let window = CGRect(x: mouse.x - full.width / 2, y: mouse.y - full.height / 2, width: full.width, height: full.height)
-        panel.setFrame(window, display: false)
-        let size = CGSize(width: max(full.width * grown, 1), height: max(full.height * grown, 1))
-        imageLayer.frame = CGRect(x: (full.width - size.width) / 2, y: (full.height - size.height) / 2,
-                                  width: size.width, height: size.height)
-        imageLayer.cornerRadius = lensShape.cornerRadius(for: size)
-        let unit = CGSize(width: size.width / screenFrame.width, height: size.height / screenFrame.height)
-        showPart(ZoomGeometry.lens(pointer: pointer, amount: amount, lens: unit))
+    /// The lens grows out of its starting point to where its placement puts it, its picture magnifying as it does.
+    private func placeLens(in panel: NSPanel, at mouse: CGPoint, amount: Double, grown: Double) {
+        // On the display, from its top left, as the placement measures it.
+        let local = CGPoint(x: mouse.x - screenFrame.minX, y: screenFrame.maxY - mouse.y)
+        let lens = glidedLensFrame(pointer: local, lens: lensShape.size(width: lensSize))
+        var shown = lensGrowth.frame(grown, lens: lens, pointer: local)
+        shown.size = CGSize(width: max(shown.width, 1), height: max(shown.height, 1))
+        panel.setFrame(CGRect(x: screenFrame.minX + shown.minX, y: screenFrame.maxY - shown.maxY,
+                              width: shown.width, height: shown.height), display: false)
+        imageLayer.frame = CGRect(origin: .zero, size: shown.size)
+        imageLayer.cornerRadius = lensShape.cornerRadius(for: shown.size)
+        let area = lensView.shownArea(pointer: local, lens: shown, amount: amount, spot: lensViewSpot)
+        showPart(CGRect(x: area.minX / screenFrame.width, y: area.minY / screenFrame.height,
+                        width: area.width / screenFrame.width, height: area.height / screenFrame.height))
+    }
+
+    /// Where the placement puts the lens, reached by easing its offset from the pointer, so it glides
+    /// to a new side yet follows the pointer at once.
+    private func glidedLensFrame(pointer: CGPoint, lens: CGSize) -> CGRect {
+        let target = lensPlacement.frame(pointer: pointer, lens: lens, screen: screenFrame.size)
+        let now = CACurrentMediaTime()
+        let offset = lensGlide.step(toward: CGVector(dx: target.minX - pointer.x, dy: target.minY - pointer.y),
+                                    after: lastLensMove.map { now - $0 } ?? 0,
+                                    snaps: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
+        lastLensMove = now
+        let frame = CGRect(origin: CGPoint(x: pointer.x + offset.dx, y: pointer.y + offset.dy), size: lens)
+        return lensPlacement.staysOnScreen ? LensPlacement.kept(frame, in: screenFrame.size) : frame
     }
 
     /// A new frame of the current capture. Smooth shows it straight away; a sharp picture is drawn from it

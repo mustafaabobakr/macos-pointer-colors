@@ -201,14 +201,6 @@ final class ZoomGeometryTests: XCTestCase {
         XCTAssertEqual(rect.minY + pointer.y * rect.height, pointer.y, accuracy: 1e-9)
     }
 
-    func testLensIsCentredOnThePointer() {
-        let rect = ZoomGeometry.lens(pointer: CGPoint(x: 0.5, y: 0.5), amount: 2, lens: CGSize(width: 0.2, height: 0.4))
-        XCTAssertEqual(rect.midX, 0.5, accuracy: 1e-9)
-        XCTAssertEqual(rect.midY, 0.5, accuracy: 1e-9)
-        XCTAssertEqual(rect.width, 0.1, accuracy: 1e-9)
-        XCTAssertEqual(rect.height, 0.2, accuracy: 1e-9)
-    }
-
     func testLayerRectStartsAtTheBottom() {
         let rect = ZoomGeometry.layerRect(CGRect(x: 0.1, y: 0.1, width: 0.5, height: 0.2))
         XCTAssertEqual(rect.minY, 0.7, accuracy: 1e-9)

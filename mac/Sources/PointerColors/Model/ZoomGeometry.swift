@@ -9,13 +9,6 @@ enum ZoomGeometry {
         return CGRect(x: pointer.x * (1 - size), y: pointer.y * (1 - size), width: size, height: size)
     }
 
-    /// A lens of `lens` size, in units of the display, centred on the pointer.
-    static func lens(pointer: CGPoint, amount: Double, lens: CGSize) -> CGRect {
-        let width = lens.width / amount
-        let height = lens.height / amount
-        return CGRect(x: pointer.x - width / 2, y: pointer.y - height / 2, width: width, height: height)
-    }
-
     /// `point` moved inside `frame`, `margin` points from its edges.
     static func kept(_ point: CGPoint, inside frame: CGRect, margin: CGFloat) -> CGPoint {
         let inner = frame.insetBy(dx: margin, dy: margin)

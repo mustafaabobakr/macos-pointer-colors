@@ -166,7 +166,7 @@ private struct AdvancedTapSection: View {
 
     var body: some View {
         SettingsCard("Advanced", anchor: "zoom.advanced") {
-            Text("These decide what counts as a double tap, and how the zoomed picture is drawn. The tap settings are used to avoid accidental zooms: a finger shifting, resting, brushing or grazing the mouse isn't a tap. Change them only if zooms start or stop by themselves.")
+            Text("These decide what counts as a double tap, how the zoomed picture is drawn, and where the lens sits. The tap settings are used to avoid accidental zooms: a finger shifting, resting, brushing or grazing the mouse isn't a tap. Change them only if zooms start or stop by themselves.")
                 .appFont(.caption).foregroundStyle(.secondary)
             SettingsChoice(title: Text("Detect double taps with"), symbol: "hand.tap", caption: Text(Self.detectionList),
                            selection: $zoom.tapDetection, label: \.title)
@@ -187,9 +187,32 @@ private struct AdvancedTapSection: View {
                 EmptyView()
             }
             ZoomUpscalingPicker(selection: $zoom.upscaling, amount: zoom.amount)
+            Reveal(isShown: zoom.style == .lens) {
+                SettingsRow("Lens position", symbol: "rectangle.and.arrow.up.right.and.arrow.down.left",
+                            caption: "Where the lens sits next to the pointer. Move the pointer over a card to try it.") {
+                    EmptyView()
+                }
+                LensPlacementPicker(selection: $zoom.lensPlacement, zoom: zoom)
+                SettingsRow("What the lens shows", symbol: "viewfinder",
+                            caption: "Which part of the screen the lens magnifies. Move the pointer over a card to try it: the dashed outline marks the part the lens shows.") {
+                    EmptyView()
+                }
+                LensViewPicker(selection: $zoom.lensView, zoom: zoom)
+                Reveal(isShown: zoom.lensView == .pointerSpot) {
+                    ValueSlider(title: String(localized: "Pointer spot"), symbol: "scope",
+                                caption: String(localized: "How far in from the picture's top left the pointer's tip sits, as a share of its width and height."),
+                                value: $zoom.lensViewSpot, range: MagicMouseZoom.lensViewSpotRange, format: "%.0f%%", scale: 100,
+                                step: MagicMouseZoom.lensViewSpotStep, ends: .size)
+                }
+                SettingsChoice("Lens grows from", symbol: "arrow.up.left.and.arrow.down.right",
+                               caption: "Where the lens grows out of as it zooms in, and shrinks back into as it zooms out. Pointer flies it out from the pointer to where it sits.",
+                               selection: $zoom.lensGrowth, label: \.title)
+            }
         }
         .animation(.reveal, value: zoom.tapDetection)
         .animation(.reveal, value: macSmartZoomIsOn)
+        .animation(.reveal, value: zoom.style)
+        .animation(.reveal, value: zoom.lensView)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             macSmartZoomIsOn = MacSmartZoomSetting.isOn
         }

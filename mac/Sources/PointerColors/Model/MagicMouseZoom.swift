@@ -50,6 +50,18 @@ final class MagicMouseZoom {
     @ObservationIgnored var pairColor: () -> RGBA = { PointerPair.featured.highlightColor }
     /// A wide lens, a square one or a round one.
     var lensShape: LensShape { didSet { defaults.set(lensShape.rawValue, forKey: Key.lensShape); zoom.lensShape = lensShape } }
+    /// Where the lens sits: on the pointer, or beside it in one of the ways that keep it in view.
+    var lensPlacement: LensPlacement {
+        didSet { defaults.set(lensPlacement.rawValue, forKey: Key.lensPlacement); zoom.lensPlacement = lensPlacement }
+    }
+    /// Which part of the display the lens magnifies.
+    var lensView: LensView { didSet { defaults.set(lensView.rawValue, forKey: Key.lensView); zoom.lensView = lensView } }
+    /// Where the pointer's tip sits in the picture for Pointer at a spot, as a fraction from its top left.
+    var lensViewSpot: Double {
+        didSet { defaults.set(lensViewSpot, forKey: Key.lensViewSpot); zoom.lensViewSpot = lensViewSpot }
+    }
+    /// Where the lens grows out of as it zooms in.
+    var lensGrowth: LensGrowth { didSet { defaults.set(lensGrowth.rawValue, forKey: Key.lensGrowth); zoom.lensGrowth = lensGrowth } }
     var lensSize: Double {
         didSet { defaults.set(lensSize, forKey: Key.lensSize); zoom.zoomOut(animated: false); zoom.lensSize = lensSize }
     }
@@ -100,6 +112,10 @@ final class MagicMouseZoom {
     nonisolated static let whiteBorder = RGBA(red: 1, green: 1, blue: 1, alpha: 0.85)
     nonisolated static let defaultLensBorderColor = RGBA(red: 0.04, green: 0.52, blue: 1)
     nonisolated static let defaultLensSize = 300.0
+    nonisolated static let lensViewSpotRange = 0.1...0.9
+    nonisolated static let lensViewSpotStep = 0.05
+    /// About a third in from the top left, leaving more of what's right of and below the arrow.
+    nonisolated static let defaultLensViewSpot = 0.3
     nonisolated static let animationLengthRange = 0.0...0.6
     nonisolated static let animationLengthStep = 0.05
     nonisolated static let defaultAnimationLength = 0.25
@@ -151,6 +167,11 @@ final class MagicMouseZoom {
         lensBorderColor = defaults.data(forKey: Key.lensBorderColor)
             .flatMap { try? JSONDecoder().decode(RGBA.self, from: $0) } ?? Self.defaultLensBorderColor
         lensShape = defaults.string(forKey: Key.lensShape).flatMap(LensShape.init) ?? .rectangle
+        lensPlacement = defaults.string(forKey: Key.lensPlacement).flatMap(LensPlacement.init) ?? .onPointer
+        lensView = defaults.string(forKey: Key.lensView).flatMap(LensView.init) ?? .centred
+        lensViewSpot = Self.clamped(defaults.object(forKey: Key.lensViewSpot) as? Double ?? Self.defaultLensViewSpot,
+                                    to: Self.lensViewSpotRange)
+        lensGrowth = defaults.string(forKey: Key.lensGrowth).flatMap(LensGrowth.init) ?? .nearestEdge
         lensSize = Self.clamped(defaults.object(forKey: Key.lensSize) as? Double ?? Self.defaultLensSize, to: Self.lensSizeRange)
         animationLength = Self.clamped(defaults.object(forKey: Key.animationLength) as? Double ?? Self.defaultAnimationLength,
                                        to: Self.animationLengthRange)
@@ -166,6 +187,10 @@ final class MagicMouseZoom {
         zoom.amount = amount
         zoom.lensSize = lensSize
         zoom.lensShape = lensShape
+        zoom.lensPlacement = lensPlacement
+        zoom.lensView = lensView
+        zoom.lensViewSpot = lensViewSpot
+        zoom.lensGrowth = lensGrowth
         zoom.lensBorderColor = { [weak self] in self?.borderColor ?? Self.whiteBorder }
         zoom.animationLength = animationLength
         zoom.upscaling = upscaling
@@ -337,6 +362,10 @@ final class MagicMouseZoom {
         static let motion = "magicMouseZoomMotion"
         static let holdsForLaser = "magicMouseZoomHoldsForLaser"
         static let lensShape = "magicMouseZoomLensShape"
+        static let lensPlacement = "magicMouseZoomLensPlacement"
+        static let lensView = "magicMouseZoomLensView"
+        static let lensViewSpot = "magicMouseZoomLensViewSpot"
+        static let lensGrowth = "magicMouseZoomLensGrowth"
         static let lensBorder = "magicMouseZoomLensBorder"
         static let lensBorderColor = "magicMouseZoomLensBorderColor"
         /// The event tap's name for stopping the pointer at a still zoom's edges.
