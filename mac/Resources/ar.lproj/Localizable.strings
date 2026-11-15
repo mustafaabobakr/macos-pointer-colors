@@ -363,9 +363,7 @@
 "Ice" = "جليد";
 "White and icy blue." = "أبيض وأزرق جليدي.";
 "Flash" = "وميض";
-"A bright flash under the pointer as the click lands." = "وميض ساطع تحت المؤشر لحظة النقر.";
-"Deep colors" = "ألوان داكنة";
-"Darker shades of the color instead of white and pale ones, so Frost shows on light windows." = "درجات أغمق من اللون بدل الأبيض والفاتح، ليظهر الصقيع على النوافذ الفاتحة.";
+"A bright white flash under the pointer as the click lands." = "وميض أبيض ساطع تحت المؤشر لحظة النقر.";
 "Shards" = "الشظايا";
 "Counts as long after" = "تُعدّ مطوّلة بعد";
 "Breathe while held" = "تنبض أثناء الضغط";

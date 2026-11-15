@@ -127,10 +127,7 @@ private struct FrostStyleRows: View {
 
     var body: some View {
         let range = PointerHighlight.frostShardsRange
-        SettingsToggle("Deep colors", symbol: "circle.lefthalf.filled",
-                       caption: "Darker shades of the color instead of white and pale ones, so Frost shows on light windows.",
-                       isOn: $highlight.frostDeep)
-        SettingsToggle("Flash", symbol: "sparkle", caption: "A bright flash under the pointer as the click lands.",
+        SettingsToggle("Flash", symbol: "sparkle", caption: "A bright white flash under the pointer as the click lands.",
                        isOn: $highlight.frostFlash)
         ValueSlider(title: String(localized: "Shards"), symbol: "rhombus", value: shards,
                     range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
