@@ -141,6 +141,7 @@
 "Pulse on right-clicks too" = "نبضة عند النقر بالزر الأيمن أيضًا";
 "Ring" = "حلقة";
 "Ripple" = "تموّج";
+"Frost" = "صقيع";
 "Style" = "النمط";
 "Show long presses" = "إظهار الضغطات المطوّلة";
 "Holding the button keeps a small filled ring under the pointer, and letting go sends out a pulse, so a press looks different from a click." = "عند إبقاء الزر مضغوطًا تبقى حلقة صغيرة ممتلئة تحت المؤشر، وعند الإفلات تنطلق نبضة، فتبدو الضغطة المطوّلة مختلفة عن النقرة.";
@@ -345,6 +346,7 @@
 "Ring color, fill and line width" = "لون الحلقة وتعبئتها وعرض خطها";
 "Pulse line width, growth and opacity" = "عرض خط النبضة واتساعها وعتامتها";
 "Ripple waves and gap" = "موجات التموج والفاصل بينها";
+"Frost flash, shards and ice colors" = "وميض الصقيع وشظاياه وألوان الجليد";
 "Long presses" = "الضغطات المطوّلة";
 "Laser glow, trail opacity and dot fade" = "توهج الليزر وعتامة الأثر وتلاشي النقطة";
 "A ring that grows and fades where you click. The picture shows it at its real size." = "حلقة تكبر وتتلاشى حيث تنقر. تعرضها الصورة بحجمها الحقيقي.";
@@ -352,6 +354,11 @@
 "Starting opacity" = "العتامة في البداية";
 "Waves" = "الموجات";
 "Gap between waves" = "الفاصل بين الموجات";
+"Ice colors" = "ألوان الجليد";
+"White and icy blue. Off tints the glow and shards in the pulse color." = "أبيض وأزرق جليدي. عند الإيقاف يأخذ التوهج والشظايا لون النبضة.";
+"Flash" = "وميض";
+"A bright white flash under the pointer as the click lands." = "وميض أبيض ساطع تحت المؤشر لحظة النقر.";
+"Shards" = "الشظايا";
 "Counts as long after" = "تُعدّ مطوّلة بعد";
 "Breathe while held" = "تنبض أثناء الضغط";
 "The ring grows a little and back while you hold the button." = "تكبر الحلقة قليلًا ثم تعود أثناء ضغطك على الزر.";
