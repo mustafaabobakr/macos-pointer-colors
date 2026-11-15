@@ -63,7 +63,7 @@ private struct SharedPulseRows: View {
 
     var body: some View {
         ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.pulseSize,
-                    range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size", ends: .size)
+                    range: PointerHighlight.pulseSizeRange, format: "%.1f×", spot: "clip-pulse-size", ends: .size)
         ValueSlider(title: String(localized: "Length"), symbol: "timer", value: $highlight.pulseDuration,
                     range: PointerHighlight.pulseDurationRange, format: "%.2f s", ends: .time)
     }

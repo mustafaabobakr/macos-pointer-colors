@@ -241,8 +241,8 @@ enum FeatureClipScripts {
         steps: [
             .pause(0.4),
             .move(to: spot("clip-pulse-style", x: 0.5)), .choose { $0.highlight.pulseStyle = .ripple }, .pause(0.8),
-            .move(to: along("clip-pulse-size", 1.0, in: PointerHighlight.sizeRange, inset: 0.03)),
-            .slide(to: along("clip-pulse-size", 1.8, in: PointerHighlight.sizeRange, inset: 0.03), seconds: 0.8) {
+            .move(to: along("clip-pulse-size", 1.0, in: PointerHighlight.pulseSizeRange, inset: 0.03)),
+            .slide(to: along("clip-pulse-size", 1.8, in: PointerHighlight.pulseSizeRange, inset: 0.03), seconds: 0.8) {
                 $0.highlight.pulseSize = lerp(1.0, 1.8, $1)
             },
             .pause(0.4),

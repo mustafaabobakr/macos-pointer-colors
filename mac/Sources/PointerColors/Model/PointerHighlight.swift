@@ -276,6 +276,8 @@ final class PointerHighlight {
     var laserShotOpener: LaserShotOpener { didSet { save(laserShotOpener.rawValue, Key.laserShotOpener) } }
 
     static let sizeRange = 0.5...2.0
+    /// The pulse can go much smaller than the laser: down to a tenth of its base size.
+    static let pulseSizeRange = 0.1...2.0
     /// The ring can shrink to a tenth, tight around the pointer's tip.
     static let ringSizeRange = 0.1...2.0
     static let pulseDurationRange = 0.2...1.5
