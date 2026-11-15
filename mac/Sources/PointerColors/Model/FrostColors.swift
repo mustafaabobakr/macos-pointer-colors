@@ -27,6 +27,18 @@ struct FrostColors: Equatable {
                                  glow: RGBA(hex: "A8DDF5")!, center: RGBA(hex: "7FD3EE")!,
                                  shard: RGBA(hex: "F2FAFF")!, shardShade: RGBA(hex: "A9D8F5")!)
 
+    /// Deep colors' ice: a stronger blue than the clip's pale one, which darkened turns grey.
+    static let deepIce = RGBA(hex: "3FA9E0")!
+
+    /// For light windows: every part a darker shade of `tint` instead of white or pale, so the
+    /// burst stands out on a light background.
+    static func deep(_ tint: RGBA) -> FrostColors {
+        let black = RGBA(red: 0, green: 0, blue: 0)
+        return FrostColors(core: tint.mixed(with: black, by: 0.15), flash: tint.mixed(with: black, by: 0.05),
+                           glow: tint.mixed(with: black, by: 0.35), center: tint,
+                           shard: tint.mixed(with: black, by: 0.2), shardShade: tint.mixed(with: black, by: 0.5))
+    }
+
     /// The same parts in `tint`: white at the core, lighter shades of the tint around it.
     static func tinted(_ tint: RGBA) -> FrostColors {
         let white = RGBA(red: 1, green: 1, blue: 1)

@@ -61,6 +61,12 @@ final class FrostBurstTests: XCTestCase {
         XCTAssertEqual(style.frostColors.core, RGBA(red: 1, green: 1, blue: 1), "the flash stays white")
         reread.frostColorSource = .pair
         XCTAssertEqual(reread.frostColors(for: .featured), .tinted(PointerPair.featured.highlightColor))
+        XCTAssertFalse(PointerHighlight(defaults: UserDefaults(suiteName: "FrostDeep-\(UUID().uuidString)")!).frostDeep)
+        reread.frostDeep = true
+        XCTAssertEqual(reread.frostColors(for: .featured), .deep(PointerPair.featured.highlightColor))
+        XCTAssertTrue(PointerHighlight(defaults: defaults).frostDeep, "deep colors is remembered")
+        reread.frostColorSource = .ice
+        XCTAssertEqual(reread.frostColors(for: .featured), .deep(FrostColors.deepIce))
         XCTAssertEqual(style.pulseRadius, style.frost.reach)
     }
 }

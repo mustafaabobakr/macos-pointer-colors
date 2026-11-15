@@ -209,6 +209,8 @@ final class PointerHighlight {
     var frostGrowth: Double { didSet { save(frostGrowth, Key.frostGrowth) } }
     var frostShards: Int { didSet { save(frostShards, Key.frostShards) } }
     var frostFlash: Bool { didSet { save(frostFlash, Key.frostFlash) } }
+    /// Darker shades of the color instead of white and pale ones, so Frost shows on light windows.
+    var frostDeep: Bool { didSet { save(frostDeep, Key.frostDeep) } }
     var frostColorSource: FrostColorSource { didSet { save(frostColorSource.rawValue, Key.frostColorSource) } }
     var frostColor: RGBA { didSet { saveColor(frostColor, Key.frostColor) } }
     /// The long-press ring: seconds held before it shows, its size against the pulse's base
@@ -336,6 +338,7 @@ final class PointerHighlight {
         frostGrowth = defaults.double(forKey: Key.frostGrowth)
         frostShards = defaults.integer(forKey: Key.frostShards)
         frostFlash = defaults.bool(forKey: Key.frostFlash)
+        frostDeep = defaults.bool(forKey: Key.frostDeep)
         frostColorSource = defaults.string(forKey: Key.frostColorSource).flatMap(FrostColorSource.init(rawValue:)) ?? .ice
         frostColor = Self.color(defaults, Key.frostColor) ?? FrostColors.ice.glow
         holdDelay = defaults.double(forKey: Key.holdDelay)
@@ -472,12 +475,15 @@ final class PointerHighlight {
     }
 
     /// The Frost pulse's colors: ice, or shades of the pair's color or the custom one.
+    /// Deep colors darken the same color for light windows.
     func frostColors(for pair: PointerPair) -> FrostColors {
+        let tint: RGBA
         switch frostColorSource {
-        case .ice: return .ice
-        case .pair: return .tinted(pair.highlightColor)
-        case .custom: return .tinted(frostColor)
+        case .ice: return frostDeep ? .deep(FrostColors.deepIce) : .ice
+        case .pair: tint = pair.highlightColor
+        case .custom: tint = frostColor
         }
+        return frostDeep ? .deep(tint) : .tinted(tint)
     }
 
     func ringColor(for pair: PointerPair) -> RGBA {
@@ -543,6 +549,7 @@ final class PointerHighlight {
         static let frostGrowth = "highlightFrostGrowth"
         static let frostShards = "highlightFrostShards"
         static let frostFlash = "highlightFrostFlash"
+        static let frostDeep = "highlightFrostDeep"
         static let frostColorSource = "highlightFrostColorSource"
         static let frostColor = "highlightFrostColor"
         static let holdDelay = "highlightHoldDelay"
