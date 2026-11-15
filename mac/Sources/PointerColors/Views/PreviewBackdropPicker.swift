@@ -5,6 +5,11 @@ import SwiftUI
 struct PreviewBackdropPicker: View {
     @AppStorage(PreviewBackdrop.key) private var backdrop = PreviewBackdrop.dark
 
+    /// A plate just darker or lighter than the picture, so the switch stands out from it.
+    private var backing: Color {
+        backdrop == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.1)
+    }
+
     var body: some View {
         Picker(selection: $backdrop) {
             ForEach(PreviewBackdrop.allCases) { option in
@@ -19,6 +24,11 @@ struct PreviewBackdropPicker: View {
         .labelsHidden()
         .controlSize(.small)
         .fixedSize()
+        .padding(2)
+        .background(backing, in: RoundedRectangle(cornerRadius: 7))
+        // In the picture's own appearance, so both icons show on a light picture in a dark window
+        // and the other way round.
+        .environment(\.colorScheme, backdrop == .light ? .light : .dark)
         .padding(6)
         .help(Text("Picture background"))
     }
