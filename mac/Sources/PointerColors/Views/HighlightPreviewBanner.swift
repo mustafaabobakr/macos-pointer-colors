@@ -23,6 +23,7 @@ struct HighlightPreviewBanner: View {
             .clipShape(RoundedRectangle(cornerRadius: 12 * scale, style: .continuous))
             .opacity(isOn ? 1 : 0.45)
             .accessibilityHidden(true)
+            .previewBackdropSwitch()
     }
 
     /// At real size, tall enough for the widest ring or pulse, which can outgrow the usual picture.

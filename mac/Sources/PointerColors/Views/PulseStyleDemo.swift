@@ -6,6 +6,7 @@ struct PulseStyleDemo: View {
     let style: HighlightStyle
     let pair: PointerPair
     @State private var playingSince: Date?
+    @Environment(\.previewBackdrop) private var backdrop
 
     /// The pause between one pulse ending and the next starting while it plays.
     private static let gap = 0.45
@@ -16,7 +17,7 @@ struct PulseStyleDemo: View {
                 let center = CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2)
                 let scene = scene(at: center, age: age(at: timeline.date))
                 ZStack(alignment: .topLeading) {
-                    Color(white: 0.12)
+                    backdrop.color
                     Canvas { context, _ in
                         HighlightSnapshot(scene: scene, toLocal: { $0 }).draw(in: &context, now: Self.now)
                     }

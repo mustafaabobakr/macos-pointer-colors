@@ -14,6 +14,7 @@ struct HighlightPreviewImage: View {
     private static let now: TimeInterval = 1_000
 
     private var style: HighlightStyle { sample.style }
+    @Environment(\.previewBackdrop) private var backdrop
 
     var body: some View {
         if scene == .press { pressImage } else { sceneImage }
@@ -33,7 +34,7 @@ struct HighlightPreviewImage: View {
                 pressedPointer(width: width)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
-            .background(Color(white: 0.12))
+            .background(backdrop.color)
         }
     }
 
@@ -62,7 +63,7 @@ struct HighlightPreviewImage: View {
             // Laid out at overlay size, then drawn scaled up, so it stays sharp.
             let scene = sampleScene(in: CGSize(width: proxy.size.width / zoom, height: proxy.size.height / zoom))
             ZStack(alignment: .topLeading) {
-                Color(white: 0.12)
+                backdrop.color
                 Canvas { [zoom] context, _ in
                     context.scaleBy(x: zoom, y: zoom)
                     HighlightSnapshot(scene: scene, toLocal: { $0 }).draw(in: &context, now: Self.now)

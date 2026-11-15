@@ -8,6 +8,7 @@ struct PulseStylePicker: View {
     let style: HighlightStyle
     let pair: PointerPair
     @Environment(\.appTextScale) private var scale
+    @AppStorage(PreviewBackdrop.key) private var backdrop = PreviewBackdrop.dark
 
     var body: some View {
         HStack(alignment: .top, spacing: 10 * scale) {
@@ -16,6 +17,7 @@ struct PulseStylePicker: View {
                                isSelected: selection == option) { selection = option }
             }
         }
+        .environment(\.previewBackdrop, backdrop)
     }
 
     private func style(for option: PulseStyle) -> HighlightStyle {
@@ -65,6 +67,8 @@ private struct PulseStyleCard: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        // Over the picture's corner but outside the card's button, so it takes its own clicks.
+        .overlay(alignment: .topLeading) { PreviewBackdropPicker().padding(8 * scale) }
     }
 
     private var title: some View {
