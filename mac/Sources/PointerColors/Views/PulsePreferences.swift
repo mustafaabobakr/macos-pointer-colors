@@ -30,8 +30,8 @@ struct PulsePreferences: View {
     }
 }
 
-/// Everything that shapes a pulse, under its switch: the style first, then the rows every style
-/// shows, then the rows that come and go with the style, at the bottom so nothing above them moves.
+/// Everything that shapes a pulse, under its switch: right-clicks and the style first, then the
+/// rows every style shows, then the rows that come and go with the style, at the bottom so nothing above them moves.
 private struct PulseRows: View {
     @Bindable var highlight: PointerHighlight
     /// The pulse as drawn on screen, for the style cards.
@@ -39,6 +39,7 @@ private struct PulseRows: View {
     let pair: PointerPair
 
     var body: some View {
+        SettingsToggle("Pulse on right-clicks too", symbol: "cursorarrow.click", isOn: $highlight.pulsesOnRightClick)
         SettingsRow("Style", symbol: "circle.circle", caption: "Move the pointer over a card to play it at its real size.") {
             EmptyView()
         }
@@ -56,7 +57,7 @@ private struct PulseRows: View {
     }
 }
 
-/// Size, length and right-clicks, the same for every style.
+/// Size and length, the same for every style.
 private struct SharedPulseRows: View {
     @Bindable var highlight: PointerHighlight
 
@@ -65,7 +66,6 @@ private struct SharedPulseRows: View {
                     range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size", ends: .size)
         ValueSlider(title: String(localized: "Length"), symbol: "timer", value: $highlight.pulseDuration,
                     range: PointerHighlight.pulseDurationRange, format: "%.2f s", ends: .time)
-        SettingsToggle("Pulse on right-clicks too", symbol: "cursorarrow.click", isOn: $highlight.pulsesOnRightClick)
     }
 }
 
