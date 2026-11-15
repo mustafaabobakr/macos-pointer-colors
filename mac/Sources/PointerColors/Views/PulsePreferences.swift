@@ -38,26 +38,32 @@ private struct PulseRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
-        ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
+        Reveal(isShown: !(highlight.pulseStyle == .frost && highlight.frostIce)) {
+            ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
+        }
         SharedPulseRows(highlight: highlight)
         SettingsChoice("Style", symbol: "circle.circle", selection: $highlight.pulseStyle.revealing(), label: \.title)
         .featureSpot("clip-pulse-style")
         Reveal(isShown: highlight.pulseStyle == .ring) { RingStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .ripple) { RippleStyleRows(highlight: highlight) }
+        Reveal(isShown: highlight.pulseStyle == .frost) { FrostStyleRows(highlight: highlight) }
     }
 }
 
-/// Outline, size, length and right-clicks, the same for the Ring and Ripple styles.
+/// Outline, size, length and right-clicks, shared by the styles. Frost glows instead of having an
+/// outline, so the outline rows are for Ring and Ripple only.
 private struct SharedPulseRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
-        SettingsToggle("Dark outline", symbol: "circle.dashed.inset.filled",
-                       caption: "Draws each pulse over the pair's dark color, as the laser's outline, so it stays clear on light backgrounds.",
-                       isOn: $highlight.pulseOutlined.revealing())
-        Reveal(isShown: highlight.pulseOutlined) {
-            ValueSlider(title: String(localized: "Outline width"), symbol: "lineweight", value: $highlight.pulseOutlineWidth,
-                        range: PointerHighlight.pulseOutlineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
+        Reveal(isShown: highlight.pulseStyle != .frost) {
+            SettingsToggle("Dark outline", symbol: "circle.dashed.inset.filled",
+                           caption: "Draws each pulse over the pair's dark color, as the laser's outline, so it stays clear on light backgrounds.",
+                           isOn: $highlight.pulseOutlined.revealing())
+            Reveal(isShown: highlight.pulseOutlined) {
+                ValueSlider(title: String(localized: "Outline width"), symbol: "lineweight", value: $highlight.pulseOutlineWidth,
+                            range: PointerHighlight.pulseOutlineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
+            }
         }
         ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.pulseSize,
                     range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size", ends: .size)
@@ -101,6 +107,28 @@ private struct RippleStyleRows: View {
                     range: PointerHighlight.rippleLineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
         ValueSlider(title: String(localized: "Starting opacity"), symbol: "circle.lefthalf.filled", value: $highlight.rippleOpacity,
                     range: PointerHighlight.opacityRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .opacity)
+    }
+}
+
+/// The Frost style: a flash, a glowing ring and ice shards.
+private struct FrostStyleRows: View {
+    @Bindable var highlight: PointerHighlight
+
+    private var shards: Binding<Double> {
+        Binding(get: { Double(highlight.frostShards) }, set: { highlight.frostShards = Int($0.rounded()) })
+    }
+
+    var body: some View {
+        let range = PointerHighlight.frostShardsRange
+        SettingsToggle("Ice colors", symbol: "snowflake",
+                       caption: "White and icy blue. Off tints the glow and shards in the pulse color.",
+                       isOn: $highlight.frostIce.revealing())
+        SettingsToggle("Flash", symbol: "sparkle", caption: "A bright white flash under the pointer as the click lands.",
+                       isOn: $highlight.frostFlash)
+        ValueSlider(title: String(localized: "Shards"), symbol: "rhombus", value: shards,
+                    range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
+        ValueSlider(title: String(localized: "Grows to"), symbol: "arrow.up.left.and.arrow.down.right.circle",
+                    value: $highlight.frostGrowth, range: PointerHighlight.frostGrowthRange, format: "%.1f×", step: 0.25, ends: .size)
     }
 }
 

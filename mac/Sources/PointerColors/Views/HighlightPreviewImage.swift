@@ -90,9 +90,13 @@ struct HighlightPreviewImage: View {
     private func addPulses(to scene: HighlightScene, in size: CGSize) {
         // At real size the pulses can fill the picture's height, so they sit on its middle line.
         let rows = sample.realSize ? (0.5, 0.5) : (0.6, 0.35)
-        let spots = [(0.22, rows.0, 0.7), (0.5, rows.1, 0.4), (0.78, rows.0, 0.12)]
-        scene.pulses = spots.map { x, y, age in
-            Pulse(point: CGPoint(x: size.width * x, y: size.height * y), start: Self.now - age * style.pulseDuration)
+        // Frost changes most in its first frames, so its three show the shards, the ring and the flash.
+        let ages = style.pulseStyle == .frost ? [0.45, 0.2, 0.03] : [0.7, 0.4, 0.12]
+        let spots = zip([(0.22, rows.0), (0.5, rows.1), (0.78, rows.0)], ages)
+        scene.pulses = spots.enumerated().map { index, spot in
+            let ((x, y), age) = spot
+            return Pulse(point: CGPoint(x: size.width * x, y: size.height * y), start: Self.now - age * style.pulseDuration,
+                         seed: UInt64(index + 7))
         }
         scene.pointer = scene.pulses.last?.point ?? .zero
         // The pointer is mid long press, so the held ring shows next to the click pulses.

@@ -27,6 +27,9 @@ final class PulseLayerView: NSView {
         switch style.pulseStyle {
         case .ring: addRing(at: point, style: style)
         case .ripple: (0..<style.rippleWaves).forEach { addRippleWave($0, at: point, style: style) }
+        case .frost:
+            guard let layer else { return }
+            FrostBurstLayers(style: style).add(to: layer, at: point, flash: style.frostFlash, shards: style.frostShards)
         }
     }
 

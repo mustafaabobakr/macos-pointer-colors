@@ -17,7 +17,7 @@ struct HighlightSnapshot: Equatable {
         style = scene.style
         pointer = local(scene.pointer)
         showsPointerRing = scene.style.showsRing
-        pulses = scene.pulses.map { Pulse(point: local($0.point), start: $0.start) }
+        pulses = scene.pulses.map { Pulse(point: local($0.point), start: $0.start, seed: $0.seed) }
         hold = scene.hold.map { Hold(point: local($0.point), start: $0.start, releasedAt: $0.releasedAt) }
         laserDot = scene.laserDot.map { LaserDot(point: local($0.point), updatedAt: $0.updatedAt) }
         strokes = scene.strokes.map { LaserStroke(points: $0.points.map(local), shares: $0.shares, finishedAt: $0.finishedAt) }
@@ -50,6 +50,9 @@ struct HighlightSnapshot: Equatable {
         switch style.pulseStyle {
         case .ring: drawPulseRing(at: pulse.point, progress: fraction(elapsed, of: style.pulseDuration), in: &context)
         case .ripple: drawRipple(at: pulse.point, elapsed: elapsed, in: &context)
+        case .frost:
+            let time = fraction(elapsed, of: style.pulseDuration)
+            FrostBurstDrawing(style: style, seed: pulse.seed).draw(at: pulse.point, time: time, in: &context)
         }
     }
 

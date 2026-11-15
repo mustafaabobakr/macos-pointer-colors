@@ -422,6 +422,10 @@ struct HighlightStyle: Equatable {
     var rippleSpacing = 0.15
     var rippleLineWidth = 3.0
     var rippleOpacity = 0.9
+    var frostGrowth = 3.0
+    var frostShards = 6
+    var frostFlash = true
+    var frostColors = FrostColors.ice
     var holdDelay = 0.35
     var holdSize = 0.55
     var holdFill = 0.35
@@ -464,6 +468,8 @@ struct HighlightStyle: Equatable {
         (pulseLineWidth, pulseGrowth, pulseOpacity) = (settings.pulseLineWidth, settings.pulseGrowth, settings.pulseOpacity)
         (rippleWaves, rippleGrowth, rippleSpacing) = (settings.rippleWaves, settings.rippleGrowth, settings.rippleSpacing)
         (rippleLineWidth, rippleOpacity) = (settings.rippleLineWidth, settings.rippleOpacity)
+        (frostGrowth, frostShards, frostFlash) = (settings.frostGrowth, settings.frostShards, settings.frostFlash)
+        frostColors = settings.frostIce ? .ice : .tinted(pulseColor)
         (holdDelay, holdSize, holdFill) = (settings.holdDelay, settings.holdSize, settings.holdFill)
         (holdLineWidth, holdBreathes) = (settings.holdLineWidth, settings.holdBreathes)
     }
@@ -485,11 +491,15 @@ extension HighlightStyle {
     /// Seconds after the click that wave `index` leaves.
     func rippleDelay(_ index: Int) -> Double { pulseDuration * rippleSpacing * Double(index) }
 
+    /// The Frost pulse's timeline at this size: its ring grows to `frostGrowth` times the base.
+    var frost: FrostBurst { FrostBurst(radius: 44 * pointerScale * pulseSize * frostGrowth / 2) }
+
     /// A ripple wave thins to a third of its starting width as it spreads.
     var rippleEndLineWidth: Double { rippleLineWidth / 3 }
 
     /// How far a pulse reaches from its point at its widest, its line included.
     var pulseRadius: Double {
+        if pulseStyle == .frost { return frost.reach }
         let base = 44 * pointerScale * pulseSize
         let (growth, line) = pulseStyle == .ring ? (pulseGrowth, pulseLineWidth) : (rippleGrowth, rippleLineWidth)
         return base * growth / 2 + line + pulseOutlineExtra
@@ -596,6 +606,8 @@ struct Pulse: Equatable {
 
     let point: CGPoint
     let start: TimeInterval
+    /// Picks the Frost style's shards, so the same pulse draws the same ones on every frame.
+    var seed: UInt64 = 0
 }
 
 /// A press held longer than a click: a small filled ring under the pointer until release, when it
@@ -662,7 +674,7 @@ final class HighlightScene {
         pointer = point
         if isLeft, settings.laserDraws(keysHeld: keysHeld) { startStroke(at: point, now: now) }
         guard settings.pulses(isLeft: isLeft) else { return }
-        pulses.append(Pulse(point: point, start: now))
+        pulses.append(Pulse(point: point, start: now, seed: .random(in: .min ... .max)))
         if settings.pulseShowsHold { hold = Hold(point: point, start: now) }
     }
 
@@ -687,7 +699,7 @@ final class HighlightScene {
         guard let held = hold, held.releasedAt == nil else { return }
         guard time - held.start >= style.holdDelay else { hold = nil; return }
         hold = Hold(point: held.point, start: held.start, releasedAt: time)
-        pulses.append(Pulse(point: held.point, start: time))
+        pulses.append(Pulse(point: held.point, start: time, seed: .random(in: .min ... .max)))
     }
 
     func finishStroke(at time: TimeInterval) {

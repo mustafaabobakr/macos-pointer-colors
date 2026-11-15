@@ -7,6 +7,8 @@ enum PulseStyle: String, CaseIterable, Identifiable {
     case ring
     /// Three thin rings, one after another, like a ripple on water.
     case ripple
+    /// A white flash, a glowing ring and ice shards flying out.
+    case frost
 
     var id: String { rawValue }
 
@@ -14,6 +16,7 @@ enum PulseStyle: String, CaseIterable, Identifiable {
         switch self {
         case .ring: return String(localized: "Ring")
         case .ripple: return String(localized: "Ripple")
+        case .frost: return String(localized: "Frost")
         }
     }
 }
@@ -192,6 +195,12 @@ final class PointerHighlight {
     var rippleSpacing: Double { didSet { save(rippleSpacing, Key.rippleSpacing) } }
     var rippleLineWidth: Double { didSet { save(rippleLineWidth, Key.rippleLineWidth) } }
     var rippleOpacity: Double { didSet { save(rippleOpacity, Key.rippleOpacity) } }
+    /// The Frost style: how far its ring grows against the pulse's base size, how many shards fly
+    /// out, whether it starts with a flash, and whether it's in ice colors or the pulse color.
+    var frostGrowth: Double { didSet { save(frostGrowth, Key.frostGrowth) } }
+    var frostShards: Int { didSet { save(frostShards, Key.frostShards) } }
+    var frostFlash: Bool { didSet { save(frostFlash, Key.frostFlash) } }
+    var frostIce: Bool { didSet { save(frostIce, Key.frostIce) } }
     /// The long-press ring: seconds held before it shows, its size against the pulse's base
     /// size, how tinted its inside is, its edge in points, and whether it breathes while held.
     var holdDelay: Double { didSet { save(holdDelay, Key.holdDelay) } }
@@ -273,6 +282,8 @@ final class PointerHighlight {
     /// At most 20%, so even five waves leave each one a fifth of the pulse length to grow.
     static let rippleSpacingRange = 0.05...0.2
     static let rippleLineWidthRange = 1.0...6.0
+    static let frostGrowthRange = 1.5...6.0
+    static let frostShardsRange = 0...12
     static let holdDelayRange = 0.2...1.5
     static let holdSizeRange = 0.3...1.2
     static let holdFillRange = 0.0...0.8
@@ -314,6 +325,10 @@ final class PointerHighlight {
         rippleSpacing = defaults.double(forKey: Key.rippleSpacing)
         rippleLineWidth = defaults.double(forKey: Key.rippleLineWidth)
         rippleOpacity = defaults.double(forKey: Key.rippleOpacity)
+        frostGrowth = defaults.double(forKey: Key.frostGrowth)
+        frostShards = defaults.integer(forKey: Key.frostShards)
+        frostFlash = defaults.bool(forKey: Key.frostFlash)
+        frostIce = defaults.bool(forKey: Key.frostIce)
         holdDelay = defaults.double(forKey: Key.holdDelay)
         holdSize = defaults.double(forKey: Key.holdSize)
         holdFill = defaults.double(forKey: Key.holdFill)
@@ -375,6 +390,7 @@ final class PointerHighlight {
         Key.ringPair: true, Key.ringFill: 0.18, Key.ringLineWidth: 3.0, Key.ringOpacity: 0.9,
         Key.pulseLineWidth: 4.0, Key.pulseGrowth: 1.8, Key.pulseOpacity: 0.95,
         Key.rippleWaves: 3, Key.rippleGrowth: 2.2, Key.rippleSpacing: 0.15, Key.rippleLineWidth: 3.0, Key.rippleOpacity: 0.9,
+        Key.frostGrowth: 3.0, Key.frostShards: 6, Key.frostFlash: true, Key.frostIce: true,
         Key.holdDelay: 0.35, Key.holdSize: 0.55, Key.holdFill: 0.35, Key.holdLineWidth: 3.0, Key.holdBreathes: true,
         Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
         Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
@@ -506,6 +522,10 @@ final class PointerHighlight {
         static let rippleSpacing = "highlightRippleSpacing"
         static let rippleLineWidth = "highlightRippleLineWidth"
         static let rippleOpacity = "highlightRippleOpacity"
+        static let frostGrowth = "highlightFrostGrowth"
+        static let frostShards = "highlightFrostShards"
+        static let frostFlash = "highlightFrostFlash"
+        static let frostIce = "highlightFrostIce"
         static let holdDelay = "highlightHoldDelay"
         static let holdSize = "highlightHoldSize"
         static let holdFill = "highlightHoldFill"
