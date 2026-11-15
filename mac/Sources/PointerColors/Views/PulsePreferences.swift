@@ -13,7 +13,7 @@ struct PulsePreferences: View {
                 SettingsToggle("Show a pulse on each click", symbol: "circle.circle",
                                caption: "A ring that grows and fades where you click. The picture shows it at its real size.",
                                isOn: $highlight.pulseOn.revealing())
-                Reveal(isShown: highlight.pulseOn) { PulseRows(highlight: highlight) }
+                Reveal(isShown: highlight.pulseOn) { PulseRows(highlight: highlight, style: sample.style, pair: pair) }
             }
             .featureSpot("pulse")
             Reveal(isShown: highlight.pulseOn) {
@@ -36,6 +36,9 @@ struct PulsePreferences: View {
 /// style, then the rows that change with it.
 private struct PulseRows: View {
     @Bindable var highlight: PointerHighlight
+    /// The pulse as drawn on screen, for the style cards.
+    let style: HighlightStyle
+    let pair: PointerPair
 
     var body: some View {
         // Frost has a color row of its own, in its rows below.
@@ -43,8 +46,11 @@ private struct PulseRows: View {
             ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
         }
         SharedPulseRows(highlight: highlight)
-        SettingsChoice("Style", symbol: "circle.circle", selection: $highlight.pulseStyle.revealing(), label: \.title)
-        .featureSpot("clip-pulse-style")
+        SettingsRow("Style", symbol: "circle.circle", caption: "Move the pointer over a card to play it at its real size.") {
+            EmptyView()
+        }
+        PulseStylePicker(selection: $highlight.pulseStyle.revealing(), style: style, pair: pair)
+            .featureSpot("clip-pulse-style")
         Reveal(isShown: highlight.pulseStyle == .ring) { RingStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .ripple) { RippleStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .frost) { FrostStyleRows(highlight: highlight) }

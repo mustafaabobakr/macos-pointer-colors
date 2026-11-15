@@ -19,6 +19,15 @@ enum PulseStyle: String, CaseIterable, Identifiable {
         case .frost: return String(localized: "Frost")
         }
     }
+
+    /// One line on what the style draws, under its card.
+    var summary: String {
+        switch self {
+        case .ring: return String(localized: "One ring that grows and fades.")
+        case .ripple: return String(localized: "Thin waves, one after another, like a ripple on water.")
+        case .frost: return String(localized: "A white flash, a glowing ring and ice shards flying out.")
+        }
+    }
 }
 
 /// When the laser dot follows the pointer.

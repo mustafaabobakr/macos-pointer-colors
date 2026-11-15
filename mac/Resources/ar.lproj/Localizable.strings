@@ -142,6 +142,10 @@
 "Ring" = "حلقة";
 "Ripple" = "تموّج";
 "Frost" = "صقيع";
+"One ring that grows and fades." = "حلقة واحدة تكبر وتتلاشى.";
+"Thin waves, one after another, like a ripple on water." = "موجات رفيعة تتوالى، كتموّج الماء.";
+"A white flash, a glowing ring and ice shards flying out." = "وميض أبيض وحلقة متوهجة وشظايا جليد تتطاير.";
+"Move the pointer over a card to play it at its real size." = "مرّر المؤشر فوق بطاقة لتشغيلها بحجمها الحقيقي.";
 "Style" = "النمط";
 "Show long presses" = "إظهار الضغطات المطوّلة";
 "Holding the button keeps a small filled ring under the pointer, and letting go sends out a pulse, so a press looks different from a click." = "عند إبقاء الزر مضغوطًا تبقى حلقة صغيرة ممتلئة تحت المؤشر، وعند الإفلات تنطلق نبضة، فتبدو الضغطة المطوّلة مختلفة عن النقرة.";
