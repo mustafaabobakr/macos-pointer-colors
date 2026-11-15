@@ -30,8 +30,8 @@ struct PulsePreferences: View {
     }
 }
 
-/// Everything that shapes a pulse, under its switch: what both styles share first, then the
-/// style, then the rows that change with it.
+/// Everything that shapes a pulse, under its switch: the style first, then the rows every style
+/// shows, then the rows that come and go with the style, at the bottom so nothing above them moves.
 private struct PulseRows: View {
     @Bindable var highlight: PointerHighlight
     /// The pulse as drawn on screen, for the style cards.
@@ -39,42 +39,48 @@ private struct PulseRows: View {
     let pair: PointerPair
 
     var body: some View {
-        // Frost has a color row of its own, in its rows below.
-        Reveal(isShown: highlight.pulseStyle != .frost) {
-            ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
-        }
-        SharedPulseRows(highlight: highlight)
         SettingsRow("Style", symbol: "circle.circle", caption: "Move the pointer over a card to play it at its real size.") {
             EmptyView()
         }
         PulseStylePicker(selection: $highlight.pulseStyle.revealing(), style: style, pair: pair)
             .featureSpot("clip-pulse-style")
+        SharedPulseRows(highlight: highlight)
+        // Frost has a color row of its own and glows instead of having an outline.
+        Reveal(isShown: highlight.pulseStyle != .frost) {
+            ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
+            OutlineRows(highlight: highlight)
+        }
         Reveal(isShown: highlight.pulseStyle == .ring) { RingStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .ripple) { RippleStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .frost) { FrostStyleRows(highlight: highlight) }
     }
 }
 
-/// Outline, size, length and right-clicks, shared by the styles. Frost glows instead of having an
-/// outline, so the outline rows are for Ring and Ripple only.
+/// Size, length and right-clicks, the same for every style.
 private struct SharedPulseRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
-        Reveal(isShown: highlight.pulseStyle != .frost) {
-            SettingsToggle("Dark outline", symbol: "circle.dashed.inset.filled",
-                           caption: "Draws each pulse over the pair's dark color, as the laser's outline, so it stays clear on light backgrounds.",
-                           isOn: $highlight.pulseOutlined.revealing())
-            Reveal(isShown: highlight.pulseOutlined) {
-                ValueSlider(title: String(localized: "Outline width"), symbol: "lineweight", value: $highlight.pulseOutlineWidth,
-                            range: PointerHighlight.pulseOutlineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
-            }
-        }
         ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.pulseSize,
                     range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-pulse-size", ends: .size)
         ValueSlider(title: String(localized: "Length"), symbol: "timer", value: $highlight.pulseDuration,
                     range: PointerHighlight.pulseDurationRange, format: "%.2f s", ends: .time)
         SettingsToggle("Pulse on right-clicks too", symbol: "cursorarrow.click", isOn: $highlight.pulsesOnRightClick)
+    }
+}
+
+/// The dark outline behind Ring and Ripple lines, with its width under its switch.
+private struct OutlineRows: View {
+    @Bindable var highlight: PointerHighlight
+
+    var body: some View {
+        SettingsToggle("Dark outline", symbol: "circle.dashed.inset.filled",
+                       caption: "Draws each pulse over the pair's dark color, as the laser's outline, so it stays clear on light backgrounds.",
+                       isOn: $highlight.pulseOutlined.revealing())
+        Reveal(isShown: highlight.pulseOutlined) {
+            ValueSlider(title: String(localized: "Outline width"), symbol: "lineweight", value: $highlight.pulseOutlineWidth,
+                        range: PointerHighlight.pulseOutlineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
+        }
     }
 }
 
