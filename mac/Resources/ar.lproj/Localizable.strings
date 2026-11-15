@@ -348,13 +348,12 @@
 "Line width" = "عرض الخط";
 "Line opacity" = "عتامة الخط";
 "Ring color, fill and line width" = "لون الحلقة وتعبئتها وعرض خطها";
-"Pulse line width, growth and opacity" = "عرض خط النبضة واتساعها وعتامتها";
+"Pulse line width and opacity" = "عرض خط النبضة وعتامتها";
 "Ripple waves and gap" = "موجات التموج والفاصل بينها";
 "Frost color, flash and shards" = "لون الصقيع ووميضه وشظاياه";
 "Long presses" = "الضغطات المطوّلة";
 "Laser glow, trail opacity and dot fade" = "توهج الليزر وعتامة الأثر وتلاشي النقطة";
 "A ring that grows and fades where you click. The picture shows it at its real size." = "حلقة تكبر وتتلاشى حيث تنقر. تعرضها الصورة بحجمها الحقيقي.";
-"Grows to" = "تكبر حتى";
 "Starting opacity" = "العتامة في البداية";
 "Waves" = "الموجات";
 "Gap between waves" = "الفاصل بين الموجات";

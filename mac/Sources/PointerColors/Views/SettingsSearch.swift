@@ -75,7 +75,7 @@ enum SettingsSearch {
         item(.automation, "automation.windows", String(localized: "Keys that pause hover focus"), "keyboard"),
         item(.ring, "highlight.ring", String(localized: "Ring around the pointer"), "circle.dashed"),
         item(.ring, "highlight.ring", String(localized: "Ring color, fill and line width"), "paintpalette"),
-        item(.pulse, "highlight.pulse", String(localized: "Pulse line width, growth and opacity"), "lineweight"),
+        item(.pulse, "highlight.pulse", String(localized: "Pulse line width and opacity"), "lineweight"),
         item(.pulse, "highlight.pulse", String(localized: "Ripple waves and gap"), "dot.radiowaves.right"),
         item(.pulse, "highlight.pulse", String(localized: "Frost color, flash and shards"), "snowflake"),
         item(.pulse, "highlight.hold", String(localized: "Long presses"), "hand.tap"),

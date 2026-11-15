@@ -25,10 +25,14 @@ struct PulseStylePicker: View {
         return shown
     }
 
-    /// Tall enough for the widest of the three, so all the cards line up.
+    /// Tall enough for the widest of the three, so all the cards line up, up to `maxPictureHeight`.
+    /// A larger pulse is cut off at the edges rather than shrunk, so it stays at its real size.
     private var pictureHeight: CGFloat {
-        PulseStyle.allCases.map { style(for: $0).pulseRadius * 2 + 16 }.max() ?? 0
+        let widest = PulseStyle.allCases.map { style(for: $0).pulseRadius * 2 + 16 }.max() ?? 0
+        return min(widest, Self.maxPictureHeight * scale)
     }
+
+    private static let maxPictureHeight: CGFloat = 160
 }
 
 private struct PulseStyleCard: View {

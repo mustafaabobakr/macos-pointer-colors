@@ -9,11 +9,10 @@ struct PulsePreferences: View {
     var body: some View {
         SettingsPage("Pulse") {
             SettingsCard(anchor: "highlight.pulse") {
-                HighlightPreviewBanner(scene: .pulse, pair: pair, sample: sample, isOn: highlight.pulseOn)
                 SettingsToggle("Show a pulse on each click", symbol: "circle.circle",
-                               caption: "A ring that grows and fades where you click. The picture shows it at its real size.",
+                               caption: "A ring that grows and fades where you click.",
                                isOn: $highlight.pulseOn.revealing())
-                Reveal(isShown: highlight.pulseOn) { PulseRows(highlight: highlight, style: sample.style, pair: pair) }
+                Reveal(isShown: highlight.pulseOn) { PulseRows(highlight: highlight, style: style, pair: pair) }
             }
             .featureSpot("pulse")
             Reveal(isShown: highlight.pulseOn) {
@@ -24,11 +23,10 @@ struct PulsePreferences: View {
         }
     }
 
-    /// The pulses alone, without the ring around the pointer, as large as they show on screen.
-    private var sample: HighlightPreviewSample {
-        var style = HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale)
-        style.showsRing = false
-        return HighlightPreviewSample(style: style, pressScale: highlight.pressScale, realSize: true)
+    /// The pulse as it shows on screen, for the style cards. Size is the one slider for how large
+    /// it grows; each style's saved growth (no longer shown) still applies, so no look changes.
+    private var style: HighlightStyle {
+        HighlightStyle(settings: highlight, pair: pair, pointerScale: pointerScale)
     }
 }
 
@@ -87,8 +85,6 @@ private struct RingStyleRows: View {
     var body: some View {
         ValueSlider(title: String(localized: "Line width"), symbol: "lineweight", value: $highlight.pulseLineWidth,
                     range: PointerHighlight.lineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
-        ValueSlider(title: String(localized: "Grows to"), symbol: "arrow.up.left.and.arrow.down.right.circle",
-                    value: $highlight.pulseGrowth, range: PointerHighlight.growthRange, format: "%.1f×", step: 0.2, ends: .size)
         ValueSlider(title: String(localized: "Starting opacity"), symbol: "circle.lefthalf.filled", value: $highlight.pulseOpacity,
                     range: PointerHighlight.opacityRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .opacity)
     }
@@ -106,8 +102,6 @@ private struct RippleStyleRows: View {
         let range = PointerHighlight.rippleWavesRange
         ValueSlider(title: String(localized: "Waves"), symbol: "dot.radiowaves.right", value: waves,
                     range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
-        ValueSlider(title: String(localized: "Grows to"), symbol: "arrow.up.left.and.arrow.down.right.circle",
-                    value: $highlight.rippleGrowth, range: PointerHighlight.growthRange, format: "%.1f×", step: 0.2, ends: .size)
         ValueSlider(title: String(localized: "Gap between waves"), symbol: "arrow.left.and.right", value: $highlight.rippleSpacing,
                     range: PointerHighlight.rippleSpacingRange, format: "%.0f%%", scale: 100, step: 0.01, ends: .spread)
         ValueSlider(title: String(localized: "Line width"), symbol: "lineweight", value: $highlight.rippleLineWidth,
@@ -132,8 +126,6 @@ private struct FrostStyleRows: View {
                        isOn: $highlight.frostFlash)
         ValueSlider(title: String(localized: "Shards"), symbol: "rhombus", value: shards,
                     range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
-        ValueSlider(title: String(localized: "Grows to"), symbol: "arrow.up.left.and.arrow.down.right.circle",
-                    value: $highlight.frostGrowth, range: PointerHighlight.frostGrowthRange, format: "%.1f×", step: 0.25, ends: .size)
     }
 }
 

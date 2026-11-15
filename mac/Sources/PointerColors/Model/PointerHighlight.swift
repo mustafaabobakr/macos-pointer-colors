@@ -287,12 +287,10 @@ final class PointerHighlight {
     static let fillRange = 0.0...0.5
     static let lineWidthRange = 1.0...8.0
     static let opacityRange = 0.3...1.0
-    static let growthRange = 1.2...3.0
     static let rippleWavesRange = 2...5
     /// At most 20%, so even five waves leave each one a fifth of the pulse length to grow.
     static let rippleSpacingRange = 0.05...0.2
     static let rippleLineWidthRange = 1.0...6.0
-    static let frostGrowthRange = 1.5...6.0
     static let frostShardsRange = 0...12
     static let holdDelayRange = 0.2...1.5
     static let holdSizeRange = 0.3...1.2
