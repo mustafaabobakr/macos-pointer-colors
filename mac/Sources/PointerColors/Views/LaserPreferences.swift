@@ -43,15 +43,13 @@ private struct LaserRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
+        ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
+                    range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-laser-size", ends: .size)
         SettingsChoice("Look", symbol: "wand.and.rays",
                      caption: "Classic draws a white center with an outline. GoodNotes draws a glowing line around a white core that's thick when you move slowly and thin when you move fast, and a solid dot, and keeps the trail whole before fading it out.",
                      selection: $highlight.laserLook.revealing(), label: \.title)
         .featureSpot("clip-laser-look")
-        Reveal(isShown: highlight.laserLook == .classic) { ClassicLookRows(highlight: highlight) }
-        Reveal(isShown: highlight.laserLook == .goodNotes) { GoodNotesLookRows(highlight: highlight) }
         ColorSourcePicker(usesPair: $highlight.laserUsesPairColor, color: $highlight.laserColor)
-        ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
-                    range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-laser-size", ends: .size)
         SettingsChoice("Outline", symbol: "circle.dashed",
                      caption: "The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.",
                      selection: $highlight.laserOutline.revealing(), label: \.title)
@@ -76,6 +74,8 @@ private struct LaserRows: View {
             ValueSlider(title: String(localized: "Dot fades after"), symbol: "timer", value: $highlight.laserDotFade,
                         range: PointerHighlight.dotFadeRange, format: "%.2f s", step: 0.2, ends: .time)
         }
+        Reveal(isShown: highlight.laserLook == .classic) { ClassicLookRows(highlight: highlight) }
+        Reveal(isShown: highlight.laserLook == .goodNotes) { GoodNotesLookRows(highlight: highlight) }
     }
 }
 
