@@ -17,6 +17,8 @@ final class PulseLayerView: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
+        // The Bokeh squares come into focus through a Core Image blur on their layers.
+        layerUsesCoreImageFilters = true
         layer?.masksToBounds = false
     }
 
@@ -30,6 +32,9 @@ final class PulseLayerView: NSView {
         case .frost:
             guard let layer else { return }
             FrostBurstLayers(style: style).add(to: layer, at: point, flash: style.frostFlash, shards: style.frostShards)
+        case .bokeh:
+            guard let layer else { return }
+            BokehBurstLayers(style: style).add(to: layer, at: point)
         }
     }
 

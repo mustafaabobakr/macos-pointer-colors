@@ -46,14 +46,15 @@ private struct PulseRows: View {
         PulseStylePicker(selection: $highlight.pulseStyle.revealing(), style: style, pair: pair)
             .featureSpot("clip-pulse-style")
         SharedPulseRows(highlight: highlight)
-        // Frost has a color row of its own and glows instead of having an outline.
-        Reveal(isShown: highlight.pulseStyle != .frost) {
+        // Frost and Bokeh have color rows of their own and glow instead of having an outline.
+        Reveal(isShown: !highlight.pulseStyle.hasOwnColors) {
             ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
             OutlineRows(highlight: highlight)
         }
         Reveal(isShown: highlight.pulseStyle == .ring) { RingStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .ripple) { RippleStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .frost) { FrostStyleRows(highlight: highlight) }
+        Reveal(isShown: highlight.pulseStyle == .bokeh) { BokehStyleRows(highlight: highlight) }
     }
 }
 
@@ -133,6 +134,29 @@ private struct FrostStyleRows: View {
                     range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
         // Last, since its custom color row comes and goes.
         FrostColorPicker(source: $highlight.frostColorSource, color: $highlight.frostColor)
+    }
+}
+
+/// The Bokeh style: a glow frame and rounded squares that come into focus as they fly out.
+private struct BokehStyleRows: View {
+    @Bindable var highlight: PointerHighlight
+
+    private var tiles: Binding<Double> {
+        Binding(get: { Double(highlight.bokehTiles) }, set: { highlight.bokehTiles = Int($0.rounded()) })
+    }
+
+    var body: some View {
+        let range = PointerHighlight.bokehTilesRange
+        SettingsToggle("Glow frame", symbol: "square.dashed",
+                       caption: "A large glowing square flashes around the pointer as the click lands, and shrinks away.",
+                       isOn: $highlight.bokehFrame)
+        ValueSlider(title: String(localized: "Squares"), symbol: "square.on.square", value: tiles,
+                    range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
+        SettingsToggle("Focus blur", symbol: "camera.aperture",
+                       caption: "The squares start blurred and come into focus as they fly out. Off, they stay sharp.",
+                       isOn: $highlight.bokehFocus)
+        // Last, since its custom color row comes and goes.
+        BokehColorPicker(source: $highlight.bokehColorSource, color: $highlight.bokehColor)
     }
 }
 

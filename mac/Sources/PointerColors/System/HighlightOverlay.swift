@@ -426,6 +426,10 @@ struct HighlightStyle: Equatable {
     var frostShards = 6
     var frostFlash = true
     var frostColors = FrostColors.ice
+    var bokehTiles = 6
+    var bokehFrame = true
+    var bokehFocus = true
+    var bokehColors = BokehColors.gold
     var holdDelay = 0.35
     var holdSize = 0.55
     var holdFill = 0.35
@@ -445,6 +449,7 @@ struct HighlightStyle: Equatable {
         ringColor = settings.ringColor(for: pair)
         pulseColor = settings.pulseColor(for: pair)
         frostColors = settings.frostColors(for: pair)
+        bokehColors = settings.bokehColors(for: pair)
         pulseOutline = settings.pulseOutlined ? pair.darkColor : nil
         pulseOutlineExtra = settings.pulseOutlineWidth * 2
         laser = settings.laserColors(for: pair)
@@ -470,6 +475,7 @@ struct HighlightStyle: Equatable {
         (rippleWaves, rippleGrowth, rippleSpacing) = (settings.rippleWaves, settings.rippleGrowth, settings.rippleSpacing)
         (rippleLineWidth, rippleOpacity) = (settings.rippleLineWidth, settings.rippleOpacity)
         (frostGrowth, frostShards, frostFlash) = (settings.frostGrowth, settings.frostShards, settings.frostFlash)
+        (bokehTiles, bokehFrame, bokehFocus) = (settings.bokehTiles, settings.bokehFrame, settings.bokehFocus)
         (holdDelay, holdSize, holdFill) = (settings.holdDelay, settings.holdSize, settings.holdFill)
         (holdLineWidth, holdBreathes) = (settings.holdLineWidth, settings.holdBreathes)
     }
@@ -494,12 +500,16 @@ extension HighlightStyle {
     /// The Frost pulse's timeline at this size: its ring grows to `frostGrowth` times the base.
     var frost: FrostBurst { FrostBurst(radius: 44 * pointerScale * pulseSize * frostGrowth / 2) }
 
+    /// The Bokeh pulse's timeline at this size: its glow frame and squares are sized against the base.
+    var bokeh: BokehBurst { BokehBurst(base: 44 * pointerScale * pulseSize, focus: bokehFocus) }
+
     /// A ripple wave thins to a third of its starting width as it spreads.
     var rippleEndLineWidth: Double { rippleLineWidth / 3 }
 
     /// How far a pulse reaches from its point at its widest, its line included.
     var pulseRadius: Double {
         if pulseStyle == .frost { return frost.reach }
+        if pulseStyle == .bokeh { return bokeh.reach }
         let base = 44 * pointerScale * pulseSize
         let (growth, line) = pulseStyle == .ring ? (pulseGrowth, pulseLineWidth) : (rippleGrowth, rippleLineWidth)
         return base * growth / 2 + line + pulseOutlineExtra
@@ -606,7 +616,7 @@ struct Pulse: Equatable {
 
     let point: CGPoint
     let start: TimeInterval
-    /// Picks the Frost style's shards, so the same pulse draws the same ones on every frame.
+    /// Picks the Frost style's shards and the Bokeh style's squares, so the same pulse draws the same ones on every frame.
     var seed: UInt64 = 0
 }
 

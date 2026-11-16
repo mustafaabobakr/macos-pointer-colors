@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Ring, Ripple and Frost as cards side by side, each playing its pulse at real size while the
+/// Ring, Ripple, Frost and Bokeh as cards side by side, each playing its pulse at real size while the
 /// pointer is over it. The chosen one is outlined.
 struct PulseStylePicker: View {
     @Binding var selection: PulseStyle

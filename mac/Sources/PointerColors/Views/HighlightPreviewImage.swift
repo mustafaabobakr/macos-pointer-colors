@@ -13,6 +13,10 @@ struct HighlightPreviewImage: View {
     /// A fixed moment the sample scene is drawn at.
     private static let now: TimeInterval = 1_000
 
+    /// How far into the pulse each of the three pictured pulses is. Frost and Bokeh change most in
+    /// their first frames, so theirs show the pieces flying out, mid-burst and the first frame.
+    private static let pulseAges: [PulseStyle: [Double]] = [.frost: [0.45, 0.2, 0.03], .bokeh: [0.55, 0.25, 0.03]]
+
     private var style: HighlightStyle { sample.style }
     @Environment(\.previewBackdrop) private var backdrop
 
@@ -91,8 +95,7 @@ struct HighlightPreviewImage: View {
     private func addPulses(to scene: HighlightScene, in size: CGSize) {
         // At real size the pulses can fill the picture's height, so they sit on its middle line.
         let rows = sample.realSize ? (0.5, 0.5) : (0.6, 0.35)
-        // Frost changes most in its first frames, so its three show the shards, the ring and the flash.
-        let ages = style.pulseStyle == .frost ? [0.45, 0.2, 0.03] : [0.7, 0.4, 0.12]
+        let ages = Self.pulseAges[style.pulseStyle] ?? [0.7, 0.4, 0.12]
         let spots = zip([(0.22, rows.0), (0.5, rows.1), (0.78, rows.0)], ages)
         scene.pulses = spots.enumerated().map { index, spot in
             let ((x, y), age) = spot

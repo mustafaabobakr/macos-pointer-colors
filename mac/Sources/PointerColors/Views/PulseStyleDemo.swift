@@ -45,6 +45,7 @@ struct PulseStyleDemo: View {
         case .ring: 0.35
         case .ripple: 0.45
         case .frost: 0.22
+        case .bokeh: 0.3
         }
     }
 

@@ -9,6 +9,8 @@ enum PulseStyle: String, CaseIterable, Identifiable {
     case ripple
     /// A white flash, a glowing ring and ice shards flying out.
     case frost
+    /// A glowing square flashes, and rounded squares burst out, coming into focus as they fly.
+    case bokeh
 
     var id: String { rawValue }
 
@@ -17,6 +19,7 @@ enum PulseStyle: String, CaseIterable, Identifiable {
         case .ring: return String(localized: "Ring")
         case .ripple: return String(localized: "Ripple")
         case .frost: return String(localized: "Frost")
+        case .bokeh: return String(localized: "Bokeh")
         }
     }
 
@@ -26,8 +29,12 @@ enum PulseStyle: String, CaseIterable, Identifiable {
         case .ring: return String(localized: "One ring that grows and fades.")
         case .ripple: return String(localized: "Thin waves, one after another, like a ripple on water.")
         case .frost: return String(localized: "A white flash, a glowing ring and ice shards flying out.")
+        case .bokeh: return String(localized: "A glowing square flashes, and rounded squares burst out, coming into focus as they fly.")
         }
     }
+
+    /// Frost and Bokeh glow in colors of their own, so they have no outline or pulse color row.
+    var hasOwnColors: Bool { self == .frost || self == .bokeh }
 }
 
 /// When the laser dot follows the pointer.
@@ -211,6 +218,13 @@ final class PointerHighlight {
     var frostFlash: Bool { didSet { save(frostFlash, Key.frostFlash) } }
     var frostColorSource: FrostColorSource { didSet { save(frostColorSource.rawValue, Key.frostColorSource) } }
     var frostColor: RGBA { didSet { saveColor(frostColor, Key.frostColor) } }
+    /// The Bokeh style: how many squares fly out, whether the glow frame flashes first, whether
+    /// the squares come into focus as they fly, and where its color comes from, with its own custom color.
+    var bokehTiles: Int { didSet { save(bokehTiles, Key.bokehTiles) } }
+    var bokehFrame: Bool { didSet { save(bokehFrame, Key.bokehFrame) } }
+    var bokehFocus: Bool { didSet { save(bokehFocus, Key.bokehFocus) } }
+    var bokehColorSource: BokehColorSource { didSet { save(bokehColorSource.rawValue, Key.bokehColorSource) } }
+    var bokehColor: RGBA { didSet { saveColor(bokehColor, Key.bokehColor) } }
     /// The long-press ring: seconds held before it shows, its size against the pulse's base
     /// size, how tinted its inside is, its edge in points, and whether it breathes while held.
     var holdDelay: Double { didSet { save(holdDelay, Key.holdDelay) } }
@@ -294,6 +308,7 @@ final class PointerHighlight {
     static let rippleSpacingRange = 0.05...0.2
     static let rippleLineWidthRange = 1.0...6.0
     static let frostShardsRange = 0...12
+    static let bokehTilesRange = 0...12
     static let holdDelayRange = 0.2...1.5
     static let holdSizeRange = 0.3...1.2
     static let holdFillRange = 0.0...0.8
@@ -340,6 +355,11 @@ final class PointerHighlight {
         frostFlash = defaults.bool(forKey: Key.frostFlash)
         frostColorSource = defaults.string(forKey: Key.frostColorSource).flatMap(FrostColorSource.init(rawValue:)) ?? .ice
         frostColor = Self.color(defaults, Key.frostColor) ?? FrostColors.ice.glow
+        bokehTiles = defaults.integer(forKey: Key.bokehTiles)
+        bokehFrame = defaults.bool(forKey: Key.bokehFrame)
+        bokehFocus = defaults.bool(forKey: Key.bokehFocus)
+        bokehColorSource = defaults.string(forKey: Key.bokehColorSource).flatMap(BokehColorSource.init(rawValue:)) ?? .gold
+        bokehColor = Self.color(defaults, Key.bokehColor) ?? BokehColors.gold.warm
         holdDelay = defaults.double(forKey: Key.holdDelay)
         holdSize = defaults.double(forKey: Key.holdSize)
         holdFill = defaults.double(forKey: Key.holdFill)
@@ -402,6 +422,7 @@ final class PointerHighlight {
         Key.pulseLineWidth: 4.0, Key.pulseGrowth: 1.8, Key.pulseOpacity: 0.95,
         Key.rippleWaves: 3, Key.rippleGrowth: 2.2, Key.rippleSpacing: 0.15, Key.rippleLineWidth: 3.0, Key.rippleOpacity: 0.9,
         Key.frostGrowth: 3.0, Key.frostShards: 6, Key.frostFlash: true,
+        Key.bokehTiles: 6, Key.bokehFrame: true, Key.bokehFocus: true,
         Key.holdDelay: 0.35, Key.holdSize: 0.55, Key.holdFill: 0.35, Key.holdLineWidth: 3.0, Key.holdBreathes: true,
         Key.laserDotFade: 0.42, Key.laserTrailOpacity: 0.95, Key.laserGlow: 0.2, Key.laserCoreLightness: 0.45,
         Key.laserFadeOut: 0.35, Key.laserRim: 2.4,
@@ -482,6 +503,15 @@ final class PointerHighlight {
         }
     }
 
+    /// The Bokeh pulse's colors: gold, or shades of the pair's color or the custom one.
+    func bokehColors(for pair: PointerPair) -> BokehColors {
+        switch bokehColorSource {
+        case .gold: return .gold
+        case .pair: return .tinted(pair.highlightColor)
+        case .custom: return .tinted(bokehColor)
+        }
+    }
+
     func ringColor(for pair: PointerPair) -> RGBA {
         ringUsesPairColor ? pair.highlightColor : ringColor
     }
@@ -547,6 +577,11 @@ final class PointerHighlight {
         static let frostFlash = "highlightFrostFlash"
         static let frostColorSource = "highlightFrostColorSource"
         static let frostColor = "highlightFrostColor"
+        static let bokehTiles = "highlightBokehTiles"
+        static let bokehFrame = "highlightBokehFrame"
+        static let bokehFocus = "highlightBokehFocus"
+        static let bokehColorSource = "highlightBokehColorSource"
+        static let bokehColor = "highlightBokehColor"
         static let holdDelay = "highlightHoldDelay"
         static let holdSize = "highlightHoldSize"
         static let holdFill = "highlightHoldFill"

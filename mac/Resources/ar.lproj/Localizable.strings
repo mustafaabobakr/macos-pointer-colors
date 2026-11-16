@@ -145,6 +145,16 @@
 "One ring that grows and fades." = "حلقة واحدة تكبر وتتلاشى.";
 "Thin waves, one after another, like a ripple on water." = "موجات رفيعة تتوالى، كتموّج الماء.";
 "A white flash, a glowing ring and ice shards flying out." = "وميض أبيض وحلقة متوهجة وشظايا جليد تتطاير.";
+"Bokeh" = "بوكيه";
+"A glowing square flashes, and rounded squares burst out, coming into focus as they fly." = "مربع متوهج يومض، ومربعات مستديرة الزوايا تتطاير وتتضح أثناء طيرانها.";
+"Glow frame" = "إطار متوهج";
+"A large glowing square flashes around the pointer as the click lands, and shrinks away." = "مربع كبير متوهج يومض حول المؤشر لحظة النقر ثم ينكمش ويختفي.";
+"Squares" = "المربعات";
+"Focus blur" = "ضبابية التركيز";
+"The squares start blurred and come into focus as they fly out. Off, they stay sharp." = "تبدأ المربعات ضبابية ثم تتضح أثناء تطايرها. عند الإيقاف تبقى واضحة.";
+"Gold" = "ذهبي";
+"Pale gold and amber." = "ذهبي فاتح وكهرماني.";
+"Bokeh color, glow frame, squares and focus blur" = "لون البوكيه وإطاره المتوهج ومربعاته وضبابية التركيز";
 "Move the pointer over a card to play it at its real size." = "مرّر المؤشر فوق بطاقة لتشغيلها بحجمها الحقيقي.";
 "Picture background" = "خلفية الصورة";
 "Light background" = "خلفية فاتحة";

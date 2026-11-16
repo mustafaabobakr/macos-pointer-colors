@@ -53,6 +53,9 @@ struct HighlightSnapshot: Equatable {
         case .frost:
             let time = fraction(elapsed, of: style.pulseDuration)
             FrostBurstDrawing(style: style, seed: pulse.seed).draw(at: pulse.point, time: time, in: &context)
+        case .bokeh:
+            let time = fraction(elapsed, of: style.pulseDuration)
+            BokehBurstDrawing(style: style, seed: pulse.seed).draw(at: pulse.point, time: time, in: &context)
         }
     }
 
