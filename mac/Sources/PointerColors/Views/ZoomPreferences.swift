@@ -66,7 +66,7 @@ private struct SmartZoomSection: View {
             }
             Reveal(isShown: zoom.isOn && zoom.style == .wholeScreen) {
                 SettingsChoice("When the pointer moves", symbol: "cursorarrow.motionlines",
-                               caption: "Stay where you zoomed keeps the zoomed view still, like macOS Smart Zoom. The pointer stays on that display, stopping 10 pt from its edges.",
+                               caption: "Stay where you zoomed keeps the zoomed view still, like macOS Smart Zoom. Each display zooms by itself, so the pointer can go to another one and zoom it too.",
                                selection: $zoom.motion, label: \.title)
             }
             Reveal(isShown: zoom.isOn && (zoom.style == .lens || zoom.motion == .follows)) {

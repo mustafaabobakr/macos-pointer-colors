@@ -491,7 +491,7 @@
 "When the pointer moves" = "عند تحريك المؤشر";
 "Stay where you zoomed" = "البقاء حيث كبّرت";
 "Follow the pointer" = "تتبّع المؤشر";
-"Stay where you zoomed keeps the zoomed view still, like macOS Smart Zoom. The pointer stays on that display, stopping 10 pt from its edges." = "«البقاء حيث كبّرت» يُبقي العرض المكبّر ثابتًا، مثل التكبير الذكي في macOS. ويبقى المؤشر على تلك الشاشة، ويتوقف على بُعد 10 نقاط من حوافها.";
+"Stay where you zoomed keeps the zoomed view still, like macOS Smart Zoom. Each display zooms by itself, so the pointer can go to another one and zoom it too." = "«البقاء حيث كبّرت» يُبقي العرض المكبّر ثابتًا، مثل التكبير الذكي في macOS. وتُكبَّر كل شاشة وحدها، فيمكن للمؤشر الانتقال إلى شاشة أخرى وتكبيرها أيضًا.";
 "Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below." = "يفتح كل لقطة لتعلّق عليها. من دون الحفظ في مجلد، تُحفظ في مجلد لقطات التطبيق أدناه.";
 "Screenshots kept by the app" = "اللقطات التي يحتفظ بها التطبيق";
 "Show in Finder" = "الإظهار في Finder";
@@ -545,7 +545,7 @@
 "• macOS only: zooms when macOS itself recognizes the double tap, the same way Safari and Chrome do. Needs Smart zoom on in System Settings › Mouse. The tap settings below don't apply; macOS uses its own." = "• macOS فقط: يكبّر حين يتعرّف macOS نفسه على النقر المزدوج، بالطريقة نفسها التي يعمل بها Safari وChrome. يحتاج إلى تشغيل التكبير الذكي في إعدادات النظام › الماوس. لا تنطبق إعدادات النقر أدناه، إذ يستخدم macOS إعداداته.";
 "• Pointer Colors only: Pointer Colors reads your fingers on the mouse itself, using the double-tap time and tap limits below. Works with Smart zoom off." = "• Pointer Colors فقط: يقرأ Pointer Colors أصابعك على الماوس بنفسه، مستخدمًا مدة النقر المزدوج وحدود النقر أدناه. يعمل والتكبير الذكي متوقف.";
 "• Both: zooms only when macOS and Pointer Colors see the same double tap, so it's the strictest. Uses the settings below and needs Smart zoom on." = "• كلاهما: يكبّر فقط حين يرى macOS وPointer Colors النقر المزدوج نفسه، فهو الأشد صرامة. يستخدم الإعدادات أدناه ويحتاج إلى تشغيل التكبير الذكي.";
-"Hears the double tap macOS recognizes before the app under the pointer does, and keeps the pointer inside a still zoom." = "يلتقط النقر المزدوج الذي يتعرّف عليه macOS قبل أن يصل إلى التطبيق تحت المؤشر، ويُبقي المؤشر داخل التكبير الثابت.";
+"Hears the double tap macOS recognizes before the app under the pointer does." = "يلتقط النقر المزدوج الذي يتعرّف عليه macOS قبل أن يصل إلى التطبيق تحت المؤشر.";
 "Open…" = "فتح…";
 "Enlarge the picture" = "تكبير الصورة";
 "Smooth" = "ناعم";

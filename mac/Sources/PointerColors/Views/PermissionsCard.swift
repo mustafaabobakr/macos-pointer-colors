@@ -31,7 +31,7 @@ struct PermissionsCard: View {
             }
             PermissionGroup("Magic Mouse smart zoom") {
                 SettingsRow("Accessibility", symbol: "accessibility",
-                            caption: "Hears the double tap macOS recognizes before the app under the pointer does, and keeps the pointer inside a still zoom.") {
+                            caption: "Hears the double tap macOS recognizes before the app under the pointer does.") {
                     PermissionStatus(isAllowed: accessibility) { MouseEventTap.shared.requestAccess() }
                 }
                 SettingsRow("Screen Recording", symbol: "plus.magnifyingglass",

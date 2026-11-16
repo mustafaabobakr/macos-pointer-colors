@@ -9,8 +9,8 @@ import ScreenCaptureKit
 /// doesn't film itself. The app's ordinary windows, like Preferences, are filmed like any other.
 /// It grows in from 1×, and shrinks back before it goes, over `animationLength` seconds.
 ///
-/// With `staysPut`, a whole-screen zoom stays where it zoomed in, like macOS Smart Zoom, and
-/// `keepInside` stops the pointer short of the display's edges.
+/// With `staysPut`, a whole-screen zoom stays where it zoomed in, like macOS Smart Zoom. Each display
+/// has a zoom of its own (`DisplayZooms`), which stays on it while the pointer visits the others.
 @MainActor
 final class ScreenZoom {
     private(set) var isZoomed = false
@@ -41,6 +41,9 @@ final class ScreenZoom {
         didSet { heldPointer = isHeld ? NSEvent.mouseLocation : nil }
     }
     private var heldPointer: CGPoint?
+    /// The pointer's last spot on this zoom's display. With the pointer on another display, a lens or
+    /// a zoom that follows the pointer stops here, and follows again once the pointer is back.
+    private var lastPointerHere: CGPoint?
     /// The global area the zoom covers on screen: the whole display, or the lens; nil when not zoomed.
     var shownArea: CGRect? { isZoomed ? panel?.frame : nil }
     /// Where the zoom takes the pointer to be: where it was held, or where it is.
@@ -76,17 +79,6 @@ final class ScreenZoom {
     private var anchor: CGPoint?
     /// The part of the display a whole-screen zoom shows now, in the same units.
     private var shownRect: CGRect?
-
-    /// The display's frame in global coordinates from the top left, as mouse events give them.
-    private var eventFrame = CGRect.zero
-
-    /// Stops a pointer movement at `edgeMargin` inside the display while a zoom stays put, so the
-    /// pointer never slips onto the display next to it. Moving an event moves the pointer with it.
-    func keepInside(_ event: CGEvent) {
-        guard isStill else { return }
-        let kept = ZoomGeometry.kept(event.location, inside: eventFrame, margin: Self.edgeMargin)
-        if kept != event.location { event.location = kept }
-    }
 
     func toggle() {
         isZoomed ? zoomOut() : zoomIn()
@@ -124,6 +116,7 @@ final class ScreenZoom {
         lastLensMove = nil
         shownRect = nil
         anchor = nil
+        lastPointerHere = nil
 
         displayLink?.invalidate()
         displayLink = nil
@@ -188,8 +181,6 @@ final class ScreenZoom {
 
     private func show(on screen: NSScreen) {
         screenFrame = screen.frame
-        let top = NSScreen.screens.first?.frame.maxY ?? screen.frame.maxY
-        eventFrame = CGRect(x: screen.frame.minX, y: top - screen.frame.maxY, width: screen.frame.width, height: screen.frame.height)
         let panel = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.isOpaque = false
         panel.backgroundColor = .clear
@@ -231,11 +222,6 @@ final class ScreenZoom {
     }
 
     @objc private func tick(_ link: CADisplayLink) {
-        // A still zoom keeps the pointer in; one that follows it zooms out when it leaves.
-        // A zoom that follows the pointer goes when the pointer leaves its display.
-        if !isStill, !screenFrame.contains(pointer) {
-            return zoomOut(animated: false)
-        }
         // The animation waits for the first frame of the capture.
         if imageLayer.contents != nil {
             animation.advance(by: lastTick.map { link.timestamp - $0 } ?? 0)
@@ -245,16 +231,12 @@ final class ScreenZoom {
         place()
     }
 
-    /// Points between the pointer and the display's edges while a zoom stays put.
-    static let edgeMargin: CGFloat = 10
-
-    /// A whole-screen zoom is up and staying where it zoomed in.
-    private var isStill: Bool { isZoomed && staysPut && style == .wholeScreen && panel != nil }
-
-    /// Moves the lens to the pointer and shows the part of the display under it.
+    /// Moves the lens to the pointer and shows the part of the display under it. The zoom stays on the
+    /// display it zoomed in on: with the pointer on another one, it stops where the pointer left, still zoomed.
     private func place() {
         guard let panel else { return }
-        let mouse = self.pointer
+        if screenFrame.contains(self.pointer) { lastPointerHere = self.pointer }
+        let mouse = lastPointerHere ?? ZoomGeometry.kept(self.pointer, inside: screenFrame, margin: 0)
         let pointer = CGPoint(x: (mouse.x - screenFrame.minX) / screenFrame.width,
                               y: (screenFrame.maxY - mouse.y) / screenFrame.height)
         let grown = animation.eased
@@ -329,9 +311,12 @@ final class ScreenZoom {
         imageLayer.contentsRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     }
 
-    /// Esc zooms out, in any app. Seeing keys pressed in other apps needs Accessibility.
+    /// Esc zooms out, in any app, when the pointer is on this zoom's display; other displays keep
+    /// theirs. Seeing keys pressed in other apps needs Accessibility.
     private func watchEscape() {
-        let isEscape: (NSEvent) -> Bool = { Int($0.keyCode) == kVK_Escape }
+        let isEscape: (NSEvent) -> Bool = { [weak self] event in
+            Int(event.keyCode) == kVK_Escape && self?.screenFrame.contains(NSEvent.mouseLocation) == true
+        }
         if let global = NSEvent.addGlobalMonitorForEvents(matching: .keyDown, handler: { [weak self] event in
             if isEscape(event) { MainActor.assumeIsolated { self?.zoomOut() } }
         }) { keyMonitors.append(global) }

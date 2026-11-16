@@ -2,7 +2,7 @@ import AppKit
 import Observation
 
 /// A double tap on a Magic Mouse zooms in on whatever is under the pointer, in any app and on any
-/// display, and the next double tap, or Esc, zooms back out. Over an app in `nativeZoomApps` the
+/// display, and the next double tap, or Esc, zooms back out. Each display zooms by itself. Over an app in `nativeZoomApps` the
 /// double tap is left to macOS's own Smart Zoom instead. Pointer Colors draws the zoom itself,
 /// from a screen capture, so it needs Screen Recording.
 @MainActor
@@ -10,20 +10,19 @@ import Observation
 final class MagicMouseZoom {
     var isOn: Bool { didSet { defaults.set(isOn, forKey: Key.isOn); update() } }
     var style: ZoomStyle {
-        didSet { defaults.set(style.rawValue, forKey: Key.style); zoom.zoomOut(animated: false); zoom.style = style; keepPointerInside() }
+        didSet { defaults.set(style.rawValue, forKey: Key.style); zooms.zoomOutAll(animated: false); zooms.forEach { $0.style = style } }
     }
     /// A whole-screen zoom stays where it zoomed in, like macOS Smart Zoom, or follows the pointer.
     var motion: ZoomMotion {
         didSet {
             defaults.set(motion.rawValue, forKey: Key.motion)
-            zoom.zoomOut(animated: false)
-            zoom.staysPut = motion == .stays
-            keepPointerInside()
+            zooms.zoomOutAll(animated: false)
+            zooms.forEach { $0.staysPut = motion == .stays }
         }
     }
     /// How the zoom enlarges the screen's picture.
     var upscaling: ZoomUpscaling {
-        didSet { defaults.set(upscaling.rawValue, forKey: Key.upscaling); zoom.upscaling = upscaling }
+        didSet { defaults.set(upscaling.rawValue, forKey: Key.upscaling); zooms.forEach { $0.upscaling = upscaling } }
     }
     /// Who decides a double tap happened: macOS, Pointer Colors' own touch reading, or both.
     var tapDetection: TapDetection {
@@ -33,12 +32,10 @@ final class MagicMouseZoom {
             watchSmartMagnify()
         }
     }
-    /// A still zoom stops the pointer at its display's edges through the event tap.
-    var keepsPointerInside: Bool { isOn && style == .wholeScreen && motion == .stays }
-    /// The event tap, for a still zoom's edges or macOS's double tap, needs Accessibility.
-    var needsAccessibility: Bool { keepsPointerInside || (isOn && tapDetection.usesMacOS) }
+    /// The event tap, for macOS's double tap, needs Accessibility.
+    var needsAccessibility: Bool { isOn && tapDetection.usesMacOS }
     /// How many times larger things look.
-    var amount: Double { didSet { defaults.set(amount, forKey: Key.amount); zoom.amount = amount } }
+    var amount: Double { didSet { defaults.set(amount, forKey: Key.amount); zooms.forEach { $0.amount = amount } } }
     /// The lens's width and height, in points.
     /// The lens's outline: white, the pointer pair's color, or `lensBorderColor`.
     var lensBorder: LensBorder { didSet { defaults.set(lensBorder.rawValue, forKey: Key.lensBorder) } }
@@ -49,21 +46,21 @@ final class MagicMouseZoom {
     /// The color highlights use for the pair on screen, set by the app.
     @ObservationIgnored var pairColor: () -> RGBA = { PointerPair.featured.highlightColor }
     /// A wide lens, a square one or a round one.
-    var lensShape: LensShape { didSet { defaults.set(lensShape.rawValue, forKey: Key.lensShape); zoom.lensShape = lensShape } }
+    var lensShape: LensShape { didSet { defaults.set(lensShape.rawValue, forKey: Key.lensShape); zooms.forEach { $0.lensShape = lensShape } } }
     /// Where the lens sits: on the pointer, or beside it in one of the ways that keep it in view.
     var lensPlacement: LensPlacement {
-        didSet { defaults.set(lensPlacement.rawValue, forKey: Key.lensPlacement); zoom.lensPlacement = lensPlacement }
+        didSet { defaults.set(lensPlacement.rawValue, forKey: Key.lensPlacement); zooms.forEach { $0.lensPlacement = lensPlacement } }
     }
     /// Which part of the display the lens magnifies.
-    var lensView: LensView { didSet { defaults.set(lensView.rawValue, forKey: Key.lensView); zoom.lensView = lensView } }
+    var lensView: LensView { didSet { defaults.set(lensView.rawValue, forKey: Key.lensView); zooms.forEach { $0.lensView = lensView } } }
     /// Where the pointer's tip sits in the picture for Pointer at a spot, as a fraction from its top left.
     var lensViewSpot: Double {
-        didSet { defaults.set(lensViewSpot, forKey: Key.lensViewSpot); zoom.lensViewSpot = lensViewSpot }
+        didSet { defaults.set(lensViewSpot, forKey: Key.lensViewSpot); zooms.forEach { $0.lensViewSpot = lensViewSpot } }
     }
     /// Where the lens grows out of as it zooms in.
-    var lensGrowth: LensGrowth { didSet { defaults.set(lensGrowth.rawValue, forKey: Key.lensGrowth); zoom.lensGrowth = lensGrowth } }
+    var lensGrowth: LensGrowth { didSet { defaults.set(lensGrowth.rawValue, forKey: Key.lensGrowth); zooms.forEach { $0.lensGrowth = lensGrowth } } }
     var lensSize: Double {
-        didSet { defaults.set(lensSize, forKey: Key.lensSize); zoom.zoomOut(animated: false); zoom.lensSize = lensSize }
+        didSet { defaults.set(lensSize, forKey: Key.lensSize); zooms.zoomOutAll(animated: false); zooms.forEach { $0.lensSize = lensSize } }
     }
     /// Leaves a double tap over an app in `nativeZoomApps` to macOS's own Smart Zoom.
     var leavesNativeZoom: Bool { didSet { defaults.set(leavesNativeZoom, forKey: Key.leavesNativeZoom) } }
@@ -73,16 +70,16 @@ final class MagicMouseZoom {
     }
     /// People you share your screen with in a call see the zoom too.
     var showsInScreenShare: Bool {
-        didSet { defaults.set(showsInScreenShare, forKey: Key.showsInScreenShare); zoom.showsInScreenShare = showsInScreenShare }
+        didSet { defaults.set(showsInScreenShare, forKey: Key.showsInScreenShare); zooms.forEach { $0.showsInScreenShare = showsInScreenShare } }
     }
     /// While the laser's keys are held or it draws, a lens or a following zoom stays where it is, so
     /// the drawing stays over what it marks and its screenshot shows that part zoomed.
     var holdsForLaser: Bool {
-        didSet { defaults.set(holdsForLaser, forKey: Key.holdsForLaser); if !holdsForLaser { zoom.isHeld = false } }
+        didSet { defaults.set(holdsForLaser, forKey: Key.holdsForLaser); if !holdsForLaser { holdZooms(false) } }
     }
     /// Seconds zooming in or out takes; 0 jumps.
     var animationLength: Double {
-        didSet { defaults.set(animationLength, forKey: Key.animationLength); zoom.animationLength = animationLength }
+        didSet { defaults.set(animationLength, forKey: Key.animationLength); zooms.forEach { $0.animationLength = animationLength } }
     }
     /// Seconds the second tap may come after the first.
     var tapWindow: Double { didSet { defaults.set(tapWindow, forKey: Key.tapWindow); doubleTap.window = tapWindow } }
@@ -142,7 +139,8 @@ final class MagicMouseZoom {
     /// The Magic Mouse's touches, read while the feature is on.
     let touches = MagicMouseTouches()
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private let zoom = ScreenZoom()
+    /// Each display zooms by itself.
+    @ObservationIgnored private let zooms = DisplayZooms()
     @ObservationIgnored private var votes: TapVotes
     @ObservationIgnored private var doubleTap: MagicMouseDoubleTap
     @ObservationIgnored private var clickMonitors: [Any] = []
@@ -182,19 +180,7 @@ final class MagicMouseZoom {
         (shortestTap, longestTap, tapTravel, flickerSettle) = (limits.shortest, limits.longest, limits.farthestTravel, limits.settleAfterFlicker)
         lightestTap = Double(limits.lightest)
         doubleTap.limits = limits
-        zoom.style = style
-        zoom.staysPut = motion == .stays
-        zoom.amount = amount
-        zoom.lensSize = lensSize
-        zoom.lensShape = lensShape
-        zoom.lensPlacement = lensPlacement
-        zoom.lensView = lensView
-        zoom.lensViewSpot = lensViewSpot
-        zoom.lensGrowth = lensGrowth
-        zoom.lensBorderColor = { [weak self] in self?.borderColor ?? Self.whiteBorder }
-        zoom.animationLength = animationLength
-        zoom.upscaling = upscaling
-        zoom.showsInScreenShare = showsInScreenShare
+        zooms.make = { [weak self] in self?.makeZoom() ?? ScreenZoom() }
         touches.onFrame = { [weak self] fingers, time, size in self?.frame(fingers: fingers, at: time, size: size) }
         update()
     }
@@ -208,22 +194,46 @@ final class MagicMouseZoom {
         }
     }
 
-    /// The laser wants the zoom held (its keys are held, or it's drawing) or lets it go.
+    /// A new display's zoom, set up with the current settings.
+    private func makeZoom() -> ScreenZoom {
+        let zoom = ScreenZoom()
+        zoom.style = style
+        zoom.staysPut = motion == .stays
+        zoom.amount = amount
+        zoom.lensSize = lensSize
+        zoom.lensShape = lensShape
+        zoom.lensPlacement = lensPlacement
+        zoom.lensView = lensView
+        zoom.lensViewSpot = lensViewSpot
+        zoom.lensGrowth = lensGrowth
+        zoom.lensBorderColor = { [weak self] in self?.borderColor ?? Self.whiteBorder }
+        zoom.animationLength = animationLength
+        zoom.upscaling = upscaling
+        zoom.showsInScreenShare = showsInScreenShare
+        zoom.isHeld = isHeldForLaser
+        return zoom
+    }
+
+    /// The laser wants the zooms held (its keys are held, or it's drawing) or lets them go.
     func laserHolds(_ wantsHold: Bool) {
-        let held = wantsHold && holdsForLaser
-        if zoom.isHeld != held { zoom.isHeld = held }
+        holdZooms(wantsHold && holdsForLaser)
     }
 
-    /// A laser screenshot is done; it may ask to end a zoom of this style.
+    /// Every display's zoom is held still for a laser drawing.
+    @ObservationIgnored private(set) var isHeldForLaser = false
+
+    private func holdZooms(_ held: Bool) {
+        isHeldForLaser = held
+        zooms.forEach { if $0.isHeld != held { $0.isHeld = held } }
+    }
+
+    /// A laser screenshot is done; it may ask to end the zoom under the pointer if it's of this style.
     func laserShotTaken(zoomOut: LaserShotZoomOut) {
-        if zoomOut.endsZoom(style) { zoom.zoomOut() }
+        if zoomOut.endsZoom(style) { zooms.underPointer?.zoomOut() }
     }
 
-    /// The global area the zoom covers on screen; nil when not zoomed.
-    var shownArea: CGRect? { zoom.shownArea }
-
-    /// The zoom is held still for a laser drawing.
-    var isHeldForLaser: Bool { zoom.isHeld }
+    /// The global area the zoom under the pointer covers on screen; nil when that display isn't zoomed.
+    var shownArea: CGRect? { zooms.underPointer?.shownArea }
 
     /// Adds the app at `url`, unless it's in the list already.
     func addNativeZoomApp(at url: URL) {
@@ -244,8 +254,9 @@ final class MagicMouseZoom {
 
     private func frame(fingers: Int, at time: TimeInterval, size: Float) {
         guard doubleTap.frame(fingers: fingers, at: time, pointer: NSEvent.mouseLocation, size: size) else { return }
-        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed), votes.own(at: time) else { return }
-        zoom.toggle()
+        let zoom = zooms.underPointer
+        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom?.isZoomed ?? false), votes.own(at: time) else { return }
+        zoom?.toggle()
     }
 
     /// macOS recognized a double tap and is sending it to the app under the pointer. Over an app
@@ -253,8 +264,9 @@ final class MagicMouseZoom {
     private func smartMagnify(_ event: CGEvent) -> MouseEventTap.Verdict {
         guard NSEvent(cgEvent: event)?.type == .smartMagnify else { return .pass }
         let time = CACurrentMediaTime()
-        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom.isZoomed) else { return .pass }
-        if votes.macOS(at: time) { zoom.toggle() }
+        let zoom = zooms.underPointer
+        guard !leavesToMacOS(Self.appUnderPointer(), isZoomed: zoom?.isZoomed ?? false) else { return .pass }
+        if votes.macOS(at: time) { zoom?.toggle() }
         return .drop
     }
 
@@ -278,11 +290,10 @@ final class MagicMouseZoom {
     }
 
     private func update() {
-        keepPointerInside()
         watchSmartMagnify()
         guard isOn else {
             touches.stop()
-            zoom.zoomOut(animated: false)
+            zooms.zoomOutAll(animated: false)
             clickMonitors.forEach(NSEvent.removeMonitor)
             clickMonitors = []
             return
@@ -293,15 +304,6 @@ final class MagicMouseZoom {
         watchClicks()
     }
 
-    /// While a still zoom is up, every pointer movement stops short of the display's edges.
-    private func keepPointerInside() {
-        tap.set(Key.keepInside, types: Self.pointerEvents, handler: keepsPointerInside ? { [weak self] _, event in
-            self?.zoom.keepInside(event)
-            return .pass
-        } : nil)
-    }
-
-    private static let pointerEvents: [CGEventType] = [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
 
     /// A click's finger touches the mouse too, and so does a scroll's flick, so neither must count as a tap.
     private func watchClicks() {
@@ -368,8 +370,6 @@ final class MagicMouseZoom {
         static let lensGrowth = "magicMouseZoomLensGrowth"
         static let lensBorder = "magicMouseZoomLensBorder"
         static let lensBorderColor = "magicMouseZoomLensBorderColor"
-        /// The event tap's name for stopping the pointer at a still zoom's edges.
-        static let keepInside = "magicMouseZoomKeepInside"
         /// The event tap's name for hearing macOS's double tap.
         static let smartMagnify = "magicMouseZoomSmartMagnify"
         static let tapDetection = "magicMouseZoomTapDetection"
