@@ -117,6 +117,8 @@ struct SettingsRow<Accessory: View>: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            // Never squeezed by a wide control: below this the title would break mid-word.
+            .frame(minWidth: 160 * scale, alignment: .leading)
             Spacer(minLength: 12 * scale)
             accessory
         }
