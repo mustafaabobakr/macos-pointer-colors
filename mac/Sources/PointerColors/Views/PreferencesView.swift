@@ -21,7 +21,7 @@ struct PreferencesView: View {
 
     var body: some View {
         content
-            .frame(minWidth: 760 * scale, minHeight: 500 * scale)
+            .frame(minWidth: SettingsLayout.minWindowWidth * scale, minHeight: 500 * scale)
             .modifier(GlassWindowBackground())
             .appTextScale(scale)
             .preferredColorScheme(model.colorScheme)
@@ -56,7 +56,7 @@ struct PreferencesView: View {
             // macOS 26 adds its own sidebar button over the sidebar; the toolbar has ours.
             .toolbar(removing: .sidebarToggle)
             .frame(minWidth: 200 * scale)
-            .navigationSplitViewColumnWidth(min: 200 * scale, ideal: 230 * scale, max: 300 * scale)
+            .navigationSplitViewColumnWidth(min: 200 * scale, ideal: SettingsLayout.sidebarWidth * scale, max: 300 * scale)
         } detail: {
             detail
         }
@@ -79,7 +79,8 @@ struct PreferencesView: View {
         ScrollViewReader { proxy in
             page
                 .id(router.tab)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                // Never narrower than the widest row needs, so no title is squeezed.
+                .frame(minWidth: SettingsLayout.minPageWidth * scale, maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .environment(\.settingsFocus, router.focus)
                 .onChange(of: router.requestID) { scrollToFocus(proxy) }
         }

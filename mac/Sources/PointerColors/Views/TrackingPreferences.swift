@@ -99,7 +99,7 @@ private struct NumberSlider<Accessory: View>: View {
                     .accessibilityLabel("Reset to default")
                     .disabled(abs(value - defaultValue) < 0.0005)
             }
-            .frame(minWidth: 220, idealWidth: 360, maxWidth: 360)
+            .frame(width: SettingsLayout.widestControl)
         }
     }
 }

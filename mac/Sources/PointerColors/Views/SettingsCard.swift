@@ -27,7 +27,7 @@ struct SettingsPage<Content: View>: View {
             }
             .frame(maxWidth: 760 * scale)
             .frame(maxWidth: .infinity)
-            .padding(22 * scale)
+            .padding(SettingsLayout.pagePadding * scale)
         }
     }
 }
@@ -60,7 +60,7 @@ struct SettingsCard<Content: View>: View {
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16 * scale)
+        .padding(SettingsLayout.cardPadding * scale)
         .background { CardBackground(shape: shape) }
         // Nothing shows past the card's edge while it grows or shrinks.
         .clipShape(shape)
@@ -107,7 +107,7 @@ struct SettingsRow<Accessory: View>: View {
     }
 
     var body: some View {
-        HStack(spacing: 12 * scale) {
+        HStack(spacing: SettingsLayout.rowSpacing * scale) {
             if let symbol { SettingIcon(symbol: symbol) }
             VStack(alignment: .leading, spacing: 2 * scale) {
                 HStack(spacing: 5 * scale) {
@@ -123,8 +123,8 @@ struct SettingsRow<Accessory: View>: View {
                 }
             }
             // Never squeezed by a wide control: below this the title would break mid-word.
-            .frame(minWidth: 160 * scale, alignment: .leading)
-            Spacer(minLength: 12 * scale)
+            .frame(minWidth: SettingsLayout.titleMinWidth * scale, alignment: .leading)
+            Spacer(minLength: SettingsLayout.rowSpacing * scale)
             // A row inside the control isn't this setting: it gets no reset of its own.
             accessory.environment(\.settingsReset, nil)
         }
@@ -175,7 +175,7 @@ struct SettingIcon: View {
         Image(systemName: symbol)
             .font(.system(size: 12 * scale, weight: .semibold))
             .foregroundStyle(Color.accentColor)
-            .frame(width: 26 * scale, height: 26 * scale)
+            .frame(width: SettingsLayout.iconSide * scale, height: SettingsLayout.iconSide * scale)
             .background(Color.accentColor.opacity(0.12),
                         in: RoundedRectangle(cornerRadius: 7 * scale, style: .continuous))
             .accessibilityHidden(true)
