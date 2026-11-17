@@ -86,7 +86,8 @@ Every feature has its own setting in Preferences, so you turn on only what you n
 - **Follows light and dark**: one pair for light appearance, another for dark, switched for you.
 
 **Highlight clicks for presentations and screen recordings**
-- **Click pulses**: a ring or ripple on every click, with its own size, length and color, outlined in the pair's dark color so it shows on any background.
+- **Click pulses**: a ring, ripple, Frost (a flash, a glowing ring and ice shards) or Bokeh (a glowing square and rounded squares bursting out) on every click, each picked from a card that plays it at real size, with its own size, length and colors.
+- **Reset any setting**: a changed setting shows a button that puts it back to its default, and each pulse style's card resets all of its settings at once.
 - **Laser pointer**: drag to draw a glowing trail that fades, or draw only while holding keys you choose, with or without clicking the app underneath. Pick the Classic look or a GoodNotes-style glow that thins as you move faster, each with an outline as solid as you like.
 - **Ring around the pointer**: keeps the cursor easy to follow on a shared screen, in the size, color, fill and line width you choose.
 - **Press to shrink**: the pointer shrinks while the button is down, so every click shows on the cursor itself.

@@ -98,7 +98,7 @@
      "sources": ["mac/Sources/PointerColors/Views/AutomationPreferences.swift", "mac/Sources/PointerColors/Model/HoverFocus.swift",
                  "mac/Sources/PointerColors/System/WindowFocus.swift"]},
     {"id": "pulse", "screen": "preferences-pulse", "spot": "pulse", "since": "0.4.0",
-     "title": "Ring or ripple pulses", "caption": "Pick the pulse style, size and length, and show long presses.",
+     "title": "Ring, Ripple, Frost or Bokeh", "caption": "Pick a pulse style from cards that play at real size, then its size, length and colors, and show long presses.",
      "use": "Use it when you record or share your screen, so people see every click.",
      "sources": ["mac/Sources/PointerColors/Views/PulsePreferences.swift"]},
     {"id": "laser", "screen": "preferences-laser", "spot": "laser", "since": "0.4.0",

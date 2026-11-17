@@ -3,6 +3,20 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.9.0 — 2026-11-17
+
+- **Two new pulse styles.** **Preferences › Highlight › Pulse** now has four styles, shown as cards side by side, each playing its pulse at real size while the pointer is over it.
+  - **Frost:** a white flash, a glowing ring and ice shards flying out. Choose **Ice** (white and icy blue), the **Pointer pair**'s color or a **Custom** one, turn the **Flash** on or off, and set how many **Shards** fly out. Frost has its own **Length**.
+  - **Bokeh:** a glowing square flashes and shrinks into the pointer while rounded squares burst out, coming into focus as they fly. Its colors are **Golden hour** (orange to pale gold), the **Pointer pair**'s or a **Custom** color, with a **Look** of **Tint**, **Analogous** or **Monochrome**. **Shapes** uses **All** of them as often as in the clip, or only the ones you check: **Pentagon**, **Cross**, **Triangle** and **Pair**. **Blur** sets how soft the squares and their glow are, and **Speed** how fast it plays.
+  - **Size** goes down to 0.1×, and **Pulse on right-clicks too** sits above the style cards.
+- **Reset any setting.** A setting you changed shows a reset button after its name that puts it back to its default, and a pulse style's card shows one that resets all of that style's settings at once.
+- **Light or dark pictures.** Every effect picture has a switch in its corner to draw it on a light or a dark background, shared by every picture and remembered.
+- **Smart zoom on each display (beta).** Each display zooms by itself, so the pointer can go to another display and zoom that one too.
+- **Lens settings.** **Preferences › Mouse › Zoom › Advanced** sets the lens's **Lens position** (**On the pointer**, **Quadrants**, **Edge bands**, **Slide and flip** or **Orbit**), **What the lens shows** (**Centred**, **Toward the lens**, **Under the lens** or **Pointer at a spot**, with a **Pointer spot**) and where the **Lens grows from** (**Nearest edge**, **Lens centre** or **Pointer**), each as cards that play as you hover them.
+- **Preferences fit.** The window no longer gets so narrow that a setting's name breaks letter by letter.
+
+**Export all…** saves every new setting, and **Import…** puts them back.
+
 ## 0.8.0 — 2026-11-14
 
 - **Smart zoom in every app (beta).** Double-tap the Magic Mouse with one finger to zoom in on what's under the pointer, in any app and on any display, the way macOS Smart Zoom does in Safari. Double-tap again, or press Esc, to zoom back out. Turn it on in the new **Preferences › Mouse › Zoom** page.
