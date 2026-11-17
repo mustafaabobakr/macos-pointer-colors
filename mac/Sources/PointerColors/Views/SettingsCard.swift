@@ -25,7 +25,7 @@ struct SettingsPage<Content: View>: View {
                 }
                 content
             }
-            .frame(maxWidth: 760 * scale)
+            .frame(maxWidth: SettingsLayout.pageMaxWidth * scale)
             .frame(maxWidth: .infinity)
             .padding(SettingsLayout.pagePadding * scale)
         }
