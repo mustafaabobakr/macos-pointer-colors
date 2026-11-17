@@ -44,6 +44,10 @@ final class MouseButtons {
     }
 
     static let doubleClickWindowRange = 0.01...0.15
+    /// Seconds after a click in which a second one is ignored, until changed.
+    static let defaultDoubleClickWindow = 0.05
+    /// Both buttons get the double-click fix until changed.
+    static let defaultDoubleClickButtons = DoubleClickButtons.leftAndRight
     nonisolated static let swipeDistanceRange = 40.0...200.0
     nonisolated static let swipeDistanceStep = 10.0
     nonisolated static let defaultSwipeDistance = 80.0
@@ -67,8 +71,8 @@ final class MouseButtons {
         forwardButton = Self.storedButton(Key.forwardButton, in: defaults) ?? Self.defaultForwardButton
         navigationApps = Self.storedNavigationApps(in: defaults)
         fixesDoubleClicks = defaults.bool(forKey: Key.debounce)
-        doubleClickWindow = defaults.object(forKey: Key.debounceWindow) as? Double ?? 0.05
-        doubleClickButtons = defaults.string(forKey: Key.debounceButtons).flatMap(DoubleClickButtons.init) ?? .leftAndRight
+        doubleClickWindow = defaults.object(forKey: Key.debounceWindow) as? Double ?? Self.defaultDoubleClickWindow
+        doubleClickButtons = defaults.string(forKey: Key.debounceButtons).flatMap(DoubleClickButtons.init) ?? Self.defaultDoubleClickButtons
         sideButtons.apps = navigationApps
         sideButtons.back = backButton
         sideButtons.forward = forwardButton

@@ -73,13 +73,18 @@ final class AppModel {
     var menuGlass: MenuGlass = .saved {
         didSet { menuGlass.save() }
     }
-    var menuTintStrength: Double = UserDefaults.standard.object(forKey: "menuTintStrength") as? Double ?? 0.35 {
+    /// How much of the menu's tint shows through, until changed.
+    static let defaultMenuTintStrength = 0.35
+    var menuTintStrength: Double = UserDefaults.standard.object(forKey: "menuTintStrength") as? Double
+        ?? AppModel.defaultMenuTintStrength {
         didSet { UserDefaults.standard.set(menuTintStrength, forKey: "menuTintStrength") }
     }
 
     /// The pair's big picture, hex codes and status at the top of the menu; off by default, since
     /// the previews already show the pair.
-    var menuShowsCurrentPair: Bool = UserDefaults.standard.bool(forKey: "menuShowsCurrentPair") {
+    static let defaultMenuShowsCurrentPair = false
+    var menuShowsCurrentPair: Bool = UserDefaults.standard.object(forKey: "menuShowsCurrentPair") as? Bool
+        ?? AppModel.defaultMenuShowsCurrentPair {
         didSet { UserDefaults.standard.set(menuShowsCurrentPair, forKey: "menuShowsCurrentPair") }
     }
 

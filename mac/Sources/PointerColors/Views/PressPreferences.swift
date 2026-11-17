@@ -18,6 +18,7 @@ struct PressPreferences: View {
                 HighlightPreviewBanner(scene: .press, pair: pair, sample: sample, isOn: highlight.shrinksOnPress)
                 SettingsToggle("Shrink the pointer on click", symbol: "arrow.down.right.and.arrow.up.left",
                                caption: caption, isOn: $highlight.shrinksOnPress.revealing())
+                    .resettable($highlight.shrinksOnPress, to: PointerHighlight.factory.shrinksOnPress)
                     .featureSpot("clip-press-toggle")
                 Reveal(isShown: highlight.shrinksOnPress) { PressRows(highlight: highlight) }
             }
@@ -40,14 +41,19 @@ private struct PressRows: View {
         ValueSlider(title: String(localized: "Pressed size"), symbol: "arrow.down.forward.and.arrow.up.backward",
                     value: $highlight.pressScale, range: PointerHighlight.pressScaleRange, format: "%.2f×",
                     spot: "clip-press-size", ends: .size)
+        .resettable($highlight.pressScale, to: PointerHighlight.factory.pressScale)
         ValueSlider(title: String(localized: "Shrink in"), symbol: "timer", value: $highlight.pressDownDuration,
                     range: PointerHighlight.pressDurationRange, format: "%.2f s", ends: .time)
+        .resettable($highlight.pressDownDuration, to: PointerHighlight.factory.pressDownDuration)
         ValueSlider(title: String(localized: "Grow back in"), symbol: "timer", value: $highlight.pressUpDuration,
                     range: PointerHighlight.pressDurationRange, format: "%.2f s", ends: .time)
+        .resettable($highlight.pressUpDuration, to: PointerHighlight.factory.pressUpDuration)
         SettingsChoice("Animation", symbol: "waveform.path",
                      caption: "Bounce goes a little past the size, then settles, like a spring. 0 s skips the animation.",
                      selection: $highlight.pressCurve, label: \.title)
+        .resettable($highlight.pressCurve, to: PointerHighlight.factory.pressCurve)
         .featureSpot("clip-press-curve")
         SettingsToggle("Shrink on right-clicks too", symbol: "cursorarrow.click", isOn: $highlight.shrinksOnRightClick)
+        .resettable($highlight.shrinksOnRightClick, to: PointerHighlight.factory.shrinksOnRightClick)
     }
 }

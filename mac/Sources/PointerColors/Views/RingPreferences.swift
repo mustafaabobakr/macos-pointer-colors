@@ -13,6 +13,7 @@ struct RingPreferences: View {
                 SettingsToggle("Ring around the pointer", symbol: "circle.dashed",
                                caption: "Makes the pointer easy to follow. Works with any highlight, or on its own.",
                                isOn: $highlight.showsRing.revealing())
+                    .resettable($highlight.showsRing, to: PointerHighlight.factory.showsRing)
                     .featureSpot("clip-ring-toggle")
                 Reveal(isShown: highlight.showsRing) { RingRows(highlight: highlight) }
             }
@@ -33,15 +34,20 @@ private struct RingRows: View {
     @Bindable var highlight: PointerHighlight
 
     var body: some View {
-        ColorSourcePicker(usesPair: $highlight.ringUsesPairColor, color: $highlight.ringColor)
+        ColorSourcePicker(usesPair: $highlight.ringUsesPairColor, color: $highlight.ringColor,
+                          defaultUsesPair: PointerHighlight.factory.ringUsesPairColor, defaultColor: PointerHighlight.factory.ringColor)
         ValueSlider(title: String(localized: "Ring size"), symbol: "arrow.up.left.and.arrow.down.right",
                     value: $highlight.ringSize, range: PointerHighlight.ringSizeRange, format: "%.1f×",
                     spot: "clip-ring-size", ends: .size)
+        .resettable($highlight.ringSize, to: PointerHighlight.factory.ringSize)
         ValueSlider(title: String(localized: "Fill"), symbol: "circle.inset.filled", value: $highlight.ringFill,
                     range: PointerHighlight.fillRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .opacity)
+        .resettable($highlight.ringFill, to: PointerHighlight.factory.ringFill)
         ValueSlider(title: String(localized: "Line width"), symbol: "lineweight", value: $highlight.ringLineWidth,
                     range: PointerHighlight.lineWidthRange, format: "%.1f pt", step: 0.5, ends: .width)
+        .resettable($highlight.ringLineWidth, to: PointerHighlight.factory.ringLineWidth)
         ValueSlider(title: String(localized: "Line opacity"), symbol: "circle.lefthalf.filled", value: $highlight.ringOpacity,
                     range: PointerHighlight.opacityRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .opacity)
+        .resettable($highlight.ringOpacity, to: PointerHighlight.factory.ringOpacity)
     }
 }

@@ -9,6 +9,8 @@ import QuartzCore
 final class PointerLocator {
     /// The keys a double press can use, one at a time.
     static let keys: [HoldKeys] = [.control, .option, .shift, .command]
+    /// The key until changed.
+    static let defaultKey = HoldKeys.control
 
     var isOn: Bool { didSet { defaults.set(isOn, forKey: Key.on); updateMonitors() } }
     var key: HoldKeys { didSet { defaults.set(key.rawValue, forKey: Key.key); taps.reset() } }
@@ -82,11 +84,11 @@ final class PointerLocator {
         self.pointerScale = pointerScale
         isOn = defaults.bool(forKey: Key.on)
         let saved = HoldKeys(rawValue: defaults.integer(forKey: Key.key))
-        key = Self.keys.contains(saved) ? saved : .control
+        key = Self.keys.contains(saved) ? saved : Self.defaultKey
         duration = Self.number(defaults, Key.duration, LocatorLook.defaultDuration, LocatorLook.durationRange)
         startRadius = Self.number(defaults, Key.startRadius, LocatorLook.defaultStartRadius, LocatorLook.startRadiusRange)
-        endSize = Self.number(defaults, Key.endSize, 1, LocatorLook.endSizeRange)
-        lineWidth = Self.number(defaults, Key.lineWidth, 1, LocatorLook.lineWidthRange)
+        endSize = Self.number(defaults, Key.endSize, LocatorLook.defaultEndSize, LocatorLook.endSizeRange)
+        lineWidth = Self.number(defaults, Key.lineWidth, LocatorLook.defaultLineWidth, LocatorLook.lineWidthRange)
         pressGap = Self.number(defaults, Key.pressGap, DoubleTap.defaultGap, DoubleTap.gapRange)
         taps.longestGap = pressGap
         updateMonitors()

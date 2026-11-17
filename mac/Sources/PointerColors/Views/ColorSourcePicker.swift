@@ -5,6 +5,9 @@ import SwiftUI
 struct ColorSourcePicker: View {
     @Binding var usesPair: Bool
     @Binding var color: RGBA
+    /// The settings' defaults, for the rows' reset buttons.
+    let defaultUsesPair: Bool
+    let defaultColor: RGBA
 
     var body: some View {
         SettingsChoice(title: Text("Color"), symbol: "paintpalette",
@@ -12,12 +15,14 @@ struct ColorSourcePicker: View {
                        selection: $usesPair.revealing(), options: [true, false]) { usesPair in
             usesPair ? Text("Pointer pair") : Text("Custom")
         }
+        .resettable($usesPair, to: defaultUsesPair)
         Reveal(isShown: !usesPair) {
             SettingsRow("Custom color", symbol: "eyedropper") {
                 ColorPicker("Custom color", selection: Binding(get: { color.color }, set: { color = RGBA($0) }),
                             supportsOpacity: false)
                     .labelsHidden()
             }
+            .resettable($color, to: defaultColor)
         }
     }
 }

@@ -146,6 +146,8 @@
 "Thin waves, one after another, like a ripple on water." = "موجات رفيعة تتوالى، كتموّج الماء.";
 "A white flash, a glowing ring and ice shards flying out." = "وميض أبيض وحلقة متوهجة وشظايا جليد تتطاير.";
 "Bokeh" = "بوكيه";
+"Reset “%@” to its default" = "إعادة «%@» إلى قيمتها الافتراضية";
+"Reset %@'s settings to their defaults" = "إعادة إعدادات %@ إلى قيمها الافتراضية";
 "Golden hour" = "الساعة الذهبية";
 "Look" = "المظهر";
 "Tint" = "صبغة";

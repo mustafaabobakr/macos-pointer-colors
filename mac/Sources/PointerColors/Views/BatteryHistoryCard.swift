@@ -10,6 +10,7 @@ struct BatteryHistoryCard: View {
             SettingsToggle("Track each charge", symbol: "chart.line.downtrend.xyaxis",
                            caption: "Remembers how long every charge lasts, for each mouse.",
                            isOn: $model.tracksBatteryHistory.revealing())
+                .resettable($model.tracksBatteryHistory, to: AppSettings.factory.tracksBatteryHistory)
                 .featureSpot("clip-battery-health")
             Reveal(isShown: model.tracksBatteryHistory) { reportRows }
             if model.batteryHistory.mice.isEmpty {
@@ -45,10 +46,12 @@ struct BatteryHistoryCard: View {
         SettingsToggle("Drain report", symbol: "lightbulb",
                        caption: "How fast it drains in use and idle, how long a charge lasts, and tips to make it last longer.",
                        isOn: $model.showsDrainReport.revealing())
+            .resettable($model.showsDrainReport, to: AppSettings.factory.showsDrainReport)
         Reveal(isShown: model.showsDrainReport) {
             SettingsChoice(title: Text("Suggest switching it off"), symbol: "power",
                          caption: Text("When idle drain passes this share of a day's drain."),
                          selection: $model.idleTipThreshold, label: \.title)
+                .resettable($model.idleTipThreshold, to: AppSettings.factory.idleTipThreshold)
             HealthRows(battery: model.battery)
         }
     }
@@ -62,9 +65,12 @@ private struct HealthRows: View {
         ValueSlider(title: String(localized: "Wear tip after"), symbol: "exclamationmark.triangle",
                     value: $battery.wearShare, range: BatterySettings.wearRange, format: "%.0f%% shorter",
                     scale: 100, step: 0.05, ends: .size)
+            .resettable($battery.wearShare, to: BatterySettings.factory.wearShare)
         ValueSlider(title: String(localized: "Use counted over"), symbol: "calendar", value: $battery.useDays,
                     range: BatterySettings.useDaysRange, format: "%.0f days", ends: .days)
+            .resettable($battery.useDays, to: BatterySettings.factory.useDays)
         ValueSlider(title: String(localized: "Estimate chart"), symbol: "chart.xyaxis.line", value: $battery.chartDays,
                     range: BatterySettings.chartDaysRange, format: "%.0f days", step: 30, ends: .days)
+            .resettable($battery.chartDays, to: BatterySettings.factory.chartDays)
     }
 }

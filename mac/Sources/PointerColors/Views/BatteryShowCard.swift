@@ -12,22 +12,26 @@ struct BatteryShowCard: View {
             SettingsChoice(title: Text("Next to the menu-bar icon"), symbol: "menubar.rectangle",
                          caption: model.menuBarVisibility == .never ? Text("The menu-bar icon is hidden in General.") : nil,
                          selection: $model.batteryDisplay.revealing(), label: \.title)
+                .resettable($model.batteryDisplay, to: AppSettings.factory.batteryDisplay)
                 .disabled(model.menuBarVisibility == .never)
                 .featureSpot("clip-battery")
             SettingsChoice(title: Text("On the Dock icon"), symbol: "dock.rectangle",
                          caption: model.showsInDock ? nil : Text("Turn on Show in Dock in General to see it."),
                          selection: $model.dockBattery.revealing(), label: \.title)
+                .resettable($model.dockBattery, to: AppSettings.factory.dockBattery)
                 .disabled(!model.showsInDock)
                 .featureSpot("clip-dock-battery")
             SettingsChoice(title: Text("Under the pointer"), symbol: "cursorarrow",
                          caption: Text("A small label that follows the pointer."),
                          selection: $model.pointerBattery.revealing(), label: \.title)
+                .resettable($model.pointerBattery, to: AppSettings.factory.pointerBattery)
                 .featureSpot("clip-pointer-battery")
             Reveal(isShown: model.pointerBattery != .off) { labelRows }
             Reveal(isShown: usesLowLevel) {
                 ValueSlider(title: String(localized: "When low means below"), symbol: "battery.25percent",
                             value: $battery.lowLevel, range: BatterySettings.levelRange, format: "%.0f%%",
                             ends: .level)
+                    .resettable($battery.lowLevel, to: BatterySettings.factory.lowLevel)
             }
         }
     }
@@ -43,6 +47,7 @@ struct BatteryShowCard: View {
         SettingsChoice(title: Text("Label position"), symbol: "arrow.down.right.square",
                      caption: Text("At a display's edge it moves to the other side. It turns red below the alert level."),
                      selection: $battery.labelPosition, label: \.title)
+            .resettable($battery.labelPosition, to: BatterySettings.factory.labelPosition)
     }
 
     private var usesLowLevel: Bool {

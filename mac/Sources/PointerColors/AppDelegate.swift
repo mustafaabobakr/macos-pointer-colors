@@ -8,6 +8,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Tooltips, like the reset buttons' "Reset … to its default", show after a quarter second
+        // rather than macOS's second or so. Registered, not saved: a delay set system-wide wins.
+        UserDefaults.standard.register(defaults: ["NSInitialToolTipDelay": 250])
         SingleInstance.quitOtherCopies()
         NotificationAccess.center?.delegate = self
         model.applyDockVisibility()

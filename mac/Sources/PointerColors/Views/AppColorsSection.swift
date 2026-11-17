@@ -12,6 +12,7 @@ struct AppColorsSection: View {
         SettingsCard("Apps", anchor: "automation.apps") {
             SettingsToggle("Different pair for each app", symbol: "square.grid.2x2",
                            caption: "App pairs win over display pairs.", isOn: $automation.perAppColors.revealing())
+                .resettable($automation.perAppColors, to: AppSettings.factory.perAppColors)
             Reveal(isShown: automation.perAppColors) {
                 SettingsChoice("Applies when", symbol: "cursorarrow.motionlines", selection: $automation.appRuleTrigger,
                                options: [AppRuleTrigger.pointer, .frontmost]) { trigger in
@@ -20,6 +21,7 @@ struct AppColorsSection: View {
                     case .frontmost: Text("The app is in front")
                     }
                 }
+                .resettable($automation.appRuleTrigger, to: AppSettings.factory.appRuleTrigger)
                 .featureSpot("clip-app-trigger")
             }
             ForEach(automation.appRuleIDs, id: \.self) { bundleID in

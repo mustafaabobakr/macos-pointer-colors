@@ -40,6 +40,7 @@ private struct PointerLocationRows: View {
     var body: some View {
         SettingsToggle(title: Text("Show pointer location"), symbol: "scope",
                        caption: Text("Press \(locator.key.title) twice to reveal the pointer."), isOn: $locator.isOn.revealing())
+            .resettable($locator.isOn, to: false)
             .featureSpot("clip-pointer-location")
         Reveal(isShown: locator.isOn) {
             SettingsRow("Key", symbol: "keyboard") {
@@ -49,6 +50,7 @@ private struct PointerLocationRows: View {
                 .featureSpot("clip-pointer-location-key")
                 Button("Show Now") { locator.reveal() }
             }
+            .resettable($locator.key, to: PointerLocator.defaultKey)
             LocatorLookRows(locator: locator)
         }
     }
@@ -64,11 +66,13 @@ private struct HoverFocusSection: View {
             SettingsToggle("Focus the window under the pointer", symbol: "macwindow",
                            caption: "Type into a window just by pointing at it; it stays where it is.",
                            isOn: $hoverFocus.isOn.revealing())
+                .resettable($hoverFocus.isOn, to: false)
                 .disabled(!hoverFocus.isAvailable)
                 .featureSpot("clip-hover-focus")
             Reveal(isShown: hoverFocus.isOn) {
                 ValueSlider(title: String(localized: "Focus after"), symbol: "timer", value: $hoverFocus.delay,
                             range: HoverFocus.delayRange, format: "%.2f s", step: 0.01, ends: .time)
+                    .resettable($hoverFocus.delay, to: HoverFocus.defaultDelay)
                 HoverPauseKeysRow(hoverFocus: hoverFocus)
             }
         }
@@ -94,6 +98,7 @@ private struct HoverPauseKeysRow: View {
                 }
             }
         }
+        .resettable($hoverFocus.pauseKeys, to: HoverFocus.defaultPauseKeys)
     }
 
     private func isOn(_ key: HoverPauseKeys) -> Binding<Bool> {
@@ -110,19 +115,25 @@ private struct AppearanceSection: View {
             SettingsToggle("Switch pairs with light and dark appearance", symbol: "circle.lefthalf.filled",
                            caption: "Applies a pair whenever macOS changes appearance, including on a schedule.",
                            isOn: $automation.followsAppearance.revealing())
+                .resettable($automation.followsAppearance, to: AppSettings.factory.followsAppearance)
                 .featureSpot("clip-follows-appearance")
             Reveal(isShown: automation.followsAppearance) {
-                pairPicker("Light appearance", symbol: "sun.max", selection: $automation.lightPairID)
-                pairPicker("Dark appearance", symbol: "moon", selection: $automation.darkPairID)
+                pairPicker("Light appearance", symbol: "sun.max", selection: $automation.lightPairID,
+                           defaultID: AppSettings.factory.lightPairID)
+                pairPicker("Dark appearance", symbol: "moon", selection: $automation.darkPairID,
+                           defaultID: AppSettings.factory.darkPairID)
             }
         }
     }
 
-    private func pairPicker(_ title: LocalizedStringKey, symbol: String, selection: Binding<String>) -> some View {
+    /// A pair menu for one appearance, with a reset back to `defaultID`.
+    private func pairPicker(_ title: LocalizedStringKey, symbol: String, selection: Binding<String>,
+                            defaultID: String) -> some View {
         SettingsRow(title, symbol: symbol) {
             PairMenuButton(selection: Binding(get: { selection.wrappedValue }, set: { if let id = $0 { selection.wrappedValue = id } }),
                            pairs: pairs, accessibilityTitle: String(localized: "Pair for this appearance"), allowsNone: false)
                 .fixedSize()
         }
+        .resettable(selection, to: defaultID)
     }
 }

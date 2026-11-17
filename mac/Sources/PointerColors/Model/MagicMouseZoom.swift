@@ -100,6 +100,21 @@ final class MagicMouseZoom {
         didSet { defaults.set(flickerSettle, forKey: Key.flickerSettle); doubleTap.limits.settleAfterFlicker = flickerSettle }
     }
 
+    /// Smart zoom starts off, until it is turned on.
+    nonisolated static let defaultIsOn = false
+    nonisolated static let defaultStyle = ZoomStyle.wholeScreen
+    /// Stays where it zoomed in, like macOS Smart Zoom.
+    nonisolated static let defaultMotion = ZoomMotion.stays
+    nonisolated static let defaultUpscaling = ZoomUpscaling.smooth
+    nonisolated static let defaultTapDetection = TapDetection.macOS
+    nonisolated static let defaultLensBorder = LensBorder.white
+    nonisolated static let defaultLensShape = LensShape.rectangle
+    nonisolated static let defaultLensPlacement = LensPlacement.onPointer
+    nonisolated static let defaultLensView = LensView.centred
+    nonisolated static let defaultLensGrowth = LensGrowth.nearestEdge
+    nonisolated static let defaultLeavesNativeZoom = true
+    nonisolated static let defaultShowsInScreenShare = true
+    nonisolated static let defaultHoldsForLaser = true
     nonisolated static let amountRange = 1.5...5.0
     nonisolated static let amountStep = 0.25
     nonisolated static let defaultAmount = 2.0
@@ -148,28 +163,28 @@ final class MagicMouseZoom {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        isOn = defaults.bool(forKey: Key.isOn)
-        let detection = defaults.string(forKey: Key.tapDetection).flatMap(TapDetection.init) ?? .macOS
+        isOn = defaults.object(forKey: Key.isOn) as? Bool ?? Self.defaultIsOn
+        let detection = defaults.string(forKey: Key.tapDetection).flatMap(TapDetection.init) ?? Self.defaultTapDetection
         tapDetection = detection
         votes = TapVotes(detection: detection)
-        upscaling = defaults.string(forKey: Key.upscaling).flatMap(ZoomUpscaling.init) ?? .smooth
-        style = defaults.string(forKey: Key.style).flatMap(ZoomStyle.init) ?? .wholeScreen
-        motion = defaults.string(forKey: Key.motion).flatMap(ZoomMotion.init) ?? .stays
+        upscaling = defaults.string(forKey: Key.upscaling).flatMap(ZoomUpscaling.init) ?? Self.defaultUpscaling
+        style = defaults.string(forKey: Key.style).flatMap(ZoomStyle.init) ?? Self.defaultStyle
+        motion = defaults.string(forKey: Key.motion).flatMap(ZoomMotion.init) ?? Self.defaultMotion
         amount = Self.clamped(defaults.object(forKey: Key.amount) as? Double ?? Self.defaultAmount, to: Self.amountRange)
-        leavesNativeZoom = defaults.object(forKey: Key.leavesNativeZoom) as? Bool ?? true
+        leavesNativeZoom = defaults.object(forKey: Key.leavesNativeZoom) as? Bool ?? Self.defaultLeavesNativeZoom
         nativeZoomApps = defaults.data(forKey: Key.nativeZoomApps)
             .flatMap { try? JSONDecoder().decode([ZoomApp].self, from: $0) } ?? ZoomApp.defaults
-        showsInScreenShare = defaults.object(forKey: Key.showsInScreenShare) as? Bool ?? true
-        holdsForLaser = defaults.object(forKey: Key.holdsForLaser) as? Bool ?? true
-        lensBorder = defaults.string(forKey: Key.lensBorder).flatMap(LensBorder.init) ?? .white
+        showsInScreenShare = defaults.object(forKey: Key.showsInScreenShare) as? Bool ?? Self.defaultShowsInScreenShare
+        holdsForLaser = defaults.object(forKey: Key.holdsForLaser) as? Bool ?? Self.defaultHoldsForLaser
+        lensBorder = defaults.string(forKey: Key.lensBorder).flatMap(LensBorder.init) ?? Self.defaultLensBorder
         lensBorderColor = defaults.data(forKey: Key.lensBorderColor)
             .flatMap { try? JSONDecoder().decode(RGBA.self, from: $0) } ?? Self.defaultLensBorderColor
-        lensShape = defaults.string(forKey: Key.lensShape).flatMap(LensShape.init) ?? .rectangle
-        lensPlacement = defaults.string(forKey: Key.lensPlacement).flatMap(LensPlacement.init) ?? .onPointer
-        lensView = defaults.string(forKey: Key.lensView).flatMap(LensView.init) ?? .centred
+        lensShape = defaults.string(forKey: Key.lensShape).flatMap(LensShape.init) ?? Self.defaultLensShape
+        lensPlacement = defaults.string(forKey: Key.lensPlacement).flatMap(LensPlacement.init) ?? Self.defaultLensPlacement
+        lensView = defaults.string(forKey: Key.lensView).flatMap(LensView.init) ?? Self.defaultLensView
         lensViewSpot = Self.clamped(defaults.object(forKey: Key.lensViewSpot) as? Double ?? Self.defaultLensViewSpot,
                                     to: Self.lensViewSpotRange)
-        lensGrowth = defaults.string(forKey: Key.lensGrowth).flatMap(LensGrowth.init) ?? .nearestEdge
+        lensGrowth = defaults.string(forKey: Key.lensGrowth).flatMap(LensGrowth.init) ?? Self.defaultLensGrowth
         lensSize = Self.clamped(defaults.object(forKey: Key.lensSize) as? Double ?? Self.defaultLensSize, to: Self.lensSizeRange)
         animationLength = Self.clamped(defaults.object(forKey: Key.animationLength) as? Double ?? Self.defaultAnimationLength,
                                        to: Self.animationLengthRange)

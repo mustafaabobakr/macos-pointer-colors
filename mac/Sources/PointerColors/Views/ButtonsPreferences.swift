@@ -13,6 +13,7 @@ struct ButtonsPreferences: View {
                 SettingsToggle("Back and forward in every app", symbol: "arrow.left.arrow.right",
                                caption: "The mouse's side buttons go back and forward in Safari, Finder, Music and other apps that ignore them. Browsers like Chrome already follow them.",
                                isOn: $buttons.sideButtonsNavigate.revealing())
+                    .resettable($buttons.sideButtonsNavigate, to: false)
                     .featureSpot("clip-side-buttons")
                 Reveal(isShown: buttons.sideButtonsNavigate) {
                     NavigationButtonRows(buttons: buttons)
@@ -23,10 +24,12 @@ struct ButtonsPreferences: View {
                 SettingsToggle("Swipe sideways to go back and forward", symbol: "hand.draw",
                                caption: "Swiping between pages presses the back and forward shortcuts of the apps listed below, which ignore the swipe.",
                                isOn: $buttons.swipesNavigate.revealing())
+                    .resettable($buttons.swipesNavigate, to: false)
                 Reveal(isShown: buttons.swipesNavigate) {
                     ValueSlider(title: String(localized: "Swipe distance"), symbol: "arrow.left.and.right",
                                 value: $buttons.swipeDistance, range: MouseButtons.swipeDistanceRange, format: "%.0f pt",
                                 step: MouseButtons.swipeDistanceStep, ends: .spread)
+                        .resettable($buttons.swipeDistance, to: MouseButtons.defaultSwipeDistance)
                 }
             }
             Reveal(isShown: buttons.sideButtonsNavigate || buttons.swipesNavigate) {
@@ -36,17 +39,20 @@ struct ButtonsPreferences: View {
                 SettingsToggle("Fix accidental double-clicks", symbol: "cursorarrow.click.2",
                                caption: "A worn button can click twice when you press once. This ignores a second click that comes too soon after the first.",
                                isOn: $buttons.fixesDoubleClicks.revealing())
+                    .resettable($buttons.fixesDoubleClicks, to: false)
                     .featureSpot("clip-double-clicks")
                 Reveal(isShown: buttons.fixesDoubleClicks) {
                     SettingsChoice("Fix clicks of", symbol: "computermouse",
                                  caption: "Left only keeps every right click, however fast.",
                                  selection: $buttons.doubleClickButtons, label: \.title)
+                        .resettable($buttons.doubleClickButtons, to: MouseButtons.defaultDoubleClickButtons)
                 }
                 Reveal(isShown: buttons.fixesDoubleClicks) {
                     ValueSlider(title: String(localized: "Ignore clicks within"), symbol: "timer",
                                 caption: String(localized: "Raise it if double clicks still get through; lower it if your own fast double-clicks are lost."),
                                 value: $buttons.doubleClickWindow, range: MouseButtons.doubleClickWindowRange,
                                 format: "%.0f ms", spot: "clip-double-click-window", scale: 1000, ends: .time)
+                        .resettable($buttons.doubleClickWindow, to: MouseButtons.defaultDoubleClickWindow)
                 }
             }
             .featureSpot("double-clicks")

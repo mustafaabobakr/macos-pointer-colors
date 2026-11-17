@@ -14,6 +14,7 @@ struct BatteryAlertCard: View {
             SettingsToggle("Notify me", symbol: "battery.25percent",
                            caption: "When the battery drops below the level, and again after it's charged.",
                            isOn: $battery.alertsOn.revealing())
+                .resettable($battery.alertsOn, to: BatterySettings.factory.alertsOn)
                 .featureSpot("clip-battery-alert")
             Reveal(isShown: battery.alertsOn) { alertRows }
             SettingsRow("Test notification", symbol: "bell.and.waves.left.and.right",
@@ -44,14 +45,18 @@ struct BatteryAlertCard: View {
     @ViewBuilder private var alertRows: some View {
         ValueSlider(title: String(localized: "Below"), symbol: "battery.0percent", value: $battery.alertLevel,
                     range: BatterySettings.levelRange, format: "%.0f%%", ends: .level)
+            .resettable($battery.alertLevel, to: BatterySettings.factory.alertLevel)
         SettingsToggle("Sound", symbol: "speaker.wave.2", caption: "Plays the notification sound with it.",
                        isOn: $battery.alertSound)
+            .resettable($battery.alertSound, to: BatterySettings.factory.alertSound)
         SettingsToggle("Remind me again", symbol: "bell.badge",
                        caption: "Notifies again as it keeps dropping, until it's charged.",
                        isOn: $battery.remindsAgain.revealing())
+            .resettable($battery.remindsAgain, to: BatterySettings.factory.remindsAgain)
         Reveal(isShown: battery.remindsAgain) {
             ValueSlider(title: String(localized: "Every"), symbol: "arrow.down.to.line", value: $battery.reminderStep,
                         range: BatterySettings.reminderStepRange, format: "%.0f%% lower", step: 1, ends: .spread)
+                .resettable($battery.reminderStep, to: BatterySettings.factory.reminderStep)
         }
     }
 

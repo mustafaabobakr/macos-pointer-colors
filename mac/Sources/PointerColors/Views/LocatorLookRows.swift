@@ -9,13 +9,18 @@ struct LocatorLookRows: View {
         LocatorPreview(look: locator.look, pair: locator.currentPair, pointerScale: locator.currentPointerScale)
         ValueSlider(title: String(localized: "Animation length"), symbol: "timer", value: $locator.duration,
                     range: LocatorLook.durationRange, format: "%.1f s", step: 0.1, ends: .time)
+            .resettable($locator.duration, to: LocatorLook.defaultDuration)
         ValueSlider(title: String(localized: "Start size"), symbol: "circle.dashed", value: $locator.startRadius,
                     range: LocatorLook.startRadiusRange, format: "%.0f pt", step: 5, ends: .size)
+            .resettable($locator.startRadius, to: LocatorLook.defaultStartRadius)
         ValueSlider(title: String(localized: "End size"), symbol: "scope", value: $locator.endSize,
                     range: LocatorLook.endSizeRange, format: "%.1f×", step: 0.1, ends: .size)
+            .resettable($locator.endSize, to: LocatorLook.defaultEndSize)
         ValueSlider(title: String(localized: "Line width"), symbol: "lineweight", value: $locator.lineWidth,
                     range: LocatorLook.lineWidthRange, format: "%.1f×", step: 0.1, ends: .width)
+            .resettable($locator.lineWidth, to: LocatorLook.defaultLineWidth)
         ValueSlider(title: String(localized: "Time between presses"), symbol: "keyboard.badge.ellipsis",
                     value: $locator.pressGap, range: DoubleTap.gapRange, format: "%.2f s", step: 0.05, ends: .time)
+            .resettable($locator.pressGap, to: DoubleTap.defaultGap)
     }
 }

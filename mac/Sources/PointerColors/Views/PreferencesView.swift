@@ -188,14 +188,18 @@ private struct GeneralPreferences: View {
                                isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
                 SettingsToggle("Re-apply my pair when the app starts", symbol: "arrow.clockwise",
                                caption: "Puts your colors and size back if something reset them.", isOn: $reapply)
+                    .resettable($reapply, to: AppSettings.factory.reapplyAtLaunch)
                     .onChange(of: reapply) { model.settings.reapplyAtLaunch = reapply }
                 SettingsToggle("Draw the menu-bar icon in my colors", symbol: "paintpalette",
                                caption: "Off shows a plain icon that follows the menu bar.", isOn: $model.iconInPairColors)
+                    .resettable($model.iconInPairColors, to: AppSettings.factory.iconInPairColors)
                 SettingsToggle("Play a sound when a pair is applied", symbol: "speaker.wave.2", isOn: $sound.revealing())
+                    .resettable($sound, to: AppSettings.factory.playSoundOnApply)
                     .onChange(of: sound) { model.settings.playSoundOnApply = sound }
                 Reveal(isShown: sound) {
                     SettingsChoice("Sound", symbol: "music.note", caption: "Plays when you pick one.",
                                    selection: $soundName, options: ApplySound.names) { Text(verbatim: $0) }
+                    .resettable($soundName, to: AppSettings.factory.applySound)
                     .onChange(of: soundName) { pickSound(soundName) }
                 }
             }
@@ -237,6 +241,7 @@ private struct AppearancePreferences: View {
                 SettingsChoice("Text size", symbol: "textformat.size",
                                caption: "Size of the menu and this window. Automatic uses Large on big screens.",
                                selection: $model.textSize, label: \.title)
+                    .resettable($model.textSize, to: AppSettings.factory.textSize)
             }
             .featureSpot("menu-appearance")
             SettingsCard("App icon", anchor: "appearance.icon") {
@@ -263,12 +268,16 @@ private struct MenuLookCard: View {
             SettingsToggle("Show current pair at the top", symbol: "rectangle.topthird.inset.filled",
                            caption: "Its colors, buttons to copy their hex codes, and whether it's applied.",
                            isOn: $model.menuShowsCurrentPair)
+                .resettable($model.menuShowsCurrentPair, to: AppModel.defaultMenuShowsCurrentPair)
             SettingsChoice("Menu glass", symbol: "square.on.square", selection: $model.menuGlass, label: \.title)
+                .resettable($model.menuGlass, to: MenuGlass.standard)
             SettingsChoice("Menu tint", symbol: "drop", selection: $model.menuTint.revealing(), label: \.title)
+            .resettable($model.menuTint, to: MenuTint.standard)
             .featureSpot("clip-menu-tint")
             Reveal(isShown: model.menuTint != .none) {
                 ValueSlider(title: String(localized: "Tint strength"), symbol: "slider.horizontal.3",
                             value: $model.menuTintStrength, range: 0.1...0.8, format: "%.0f%%", scale: 100, ends: .opacity)
+                    .resettable($model.menuTintStrength, to: AppModel.defaultMenuTintStrength)
             }
         }
     }
@@ -283,9 +292,11 @@ private struct MenuBarSection: View {
             SettingsChoice(title: Text("Show in menu bar"), symbol: "menubar.rectangle",
                          caption: model.menuBarVisibility == .never ? Text("Open Pointer Colors again to show Preferences.") : nil,
                          selection: $model.menuBarVisibility, label: \.title)
+            .resettable($model.menuBarVisibility, to: AppSettings.factory.menuBarVisibility)
             .featureSpot("clip-menu-bar-visibility")
             SettingsToggle("Show in Dock", symbol: "dock.rectangle",
                            caption: "Also lists Pointer Colors in the app switcher.", isOn: $model.showsInDock)
+                .resettable($model.showsInDock, to: AppSettings.factory.showsInDock)
         }
         .featureSpot("menu-bar-dock")
     }
@@ -393,6 +404,7 @@ private struct ShortcutsPreferences: View {
             SettingsCard("Pointer size", anchor: "shortcuts.size") {
                 ValueSlider(title: String(localized: "Size change per press"), symbol: "plus.forwardslash.minus",
                             value: $sizeStep, range: SizeStep.range, format: "%.2f×", step: 0.05, ends: .size)
+                    .resettable($sizeStep, to: AppSettings.factory.sizeShortcutStep)
                 Text("How much the bigger and smaller pointer shortcuts change the size each time.")
                     .appFont(.caption).foregroundStyle(.secondary)
             }
@@ -598,8 +610,10 @@ private struct UpdateSection: View {
             Link("Download the new version", destination: url)
         }
         SettingsChoice("Check automatically", symbol: "calendar", selection: $schedule, label: \.title)
+        .resettable($schedule, to: UpdateSchedule.standard)
         .onChange(of: schedule) { model.updateSchedule = schedule }
         SettingsToggle("Install updates automatically", symbol: "arrow.triangle.2.circlepath",
                        isOn: $model.installsUpdatesAutomatically)
+        .resettable($model.installsUpdatesAutomatically, to: AppSettings.factory.installsUpdatesAutomatically)
     }
 }

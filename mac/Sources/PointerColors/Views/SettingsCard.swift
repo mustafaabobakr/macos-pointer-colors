@@ -92,6 +92,7 @@ struct SettingsRow<Accessory: View>: View {
     let caption: Text?
     @ViewBuilder var accessory: Accessory
     @Environment(\.appTextScale) private var scale
+    @Environment(\.settingsReset) private var reset
 
     init(_ title: LocalizedStringKey, symbol: String?, caption: LocalizedStringKey? = nil,
          @ViewBuilder accessory: () -> Accessory) {
@@ -109,7 +110,11 @@ struct SettingsRow<Accessory: View>: View {
         HStack(spacing: 12 * scale) {
             if let symbol { SettingIcon(symbol: symbol) }
             VStack(alignment: .leading, spacing: 2 * scale) {
-                title
+                HStack(spacing: 5 * scale) {
+                    title
+                    if let reset, reset.isChanged { SettingsResetButton(reset: reset, title: title) }
+                }
+                .animation(.easeOut(duration: 0.15), value: reset?.isChanged)
                 if let caption {
                     caption
                         .appFont(.caption)
@@ -120,7 +125,8 @@ struct SettingsRow<Accessory: View>: View {
             // Never squeezed by a wide control: below this the title would break mid-word.
             .frame(minWidth: 160 * scale, alignment: .leading)
             Spacer(minLength: 12 * scale)
-            accessory
+            // A row inside the control isn't this setting: it gets no reset of its own.
+            accessory.environment(\.settingsReset, nil)
         }
         .accessibilityElement(children: .contain)
     }

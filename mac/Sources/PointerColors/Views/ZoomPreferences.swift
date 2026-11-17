@@ -32,6 +32,7 @@ private struct SmartZoomSection: View {
             SettingsToggle("Double-tap the Magic Mouse to zoom", symbol: "plus.magnifyingglass",
                            caption: "Zooms in on what's under the pointer, in any app and on any display. Double-tap again, or press Esc, to zoom back out. Tap lightly with one finger, without clicking.",
                            isOn: $zoom.isOn.revealing())
+                .resettable($zoom.isOn, to: MagicMouseZoom.defaultIsOn)
                 .featureSpot("clip-zoom-on")
             Reveal(isShown: zoom.isOn && !canRecord && !ScreenshotRenderer.isRendering) {
                 SettingsRow(symbol: "exclamationmark.triangle.fill", title: Text("Needs Screen Recording").foregroundStyle(.orange),
@@ -48,13 +49,16 @@ private struct SmartZoomSection: View {
             Reveal(isShown: zoom.isOn) {
                 SettingsChoice("Zoom", symbol: "rectangle.dashed", caption: "Lens magnifies an area that follows the pointer; the rest of the screen stays as it is.",
                                selection: $zoom.style, label: \.title)
+                    .resettable($zoom.style, to: MagicMouseZoom.defaultStyle)
                     .featureSpot("clip-zoom-style")
             }
             Reveal(isShown: zoom.isOn && zoom.style == .lens) {
                 SettingsChoice("Lens shape", symbol: "square.on.circle", selection: $zoom.lensShape, label: \.title)
+                    .resettable($zoom.lensShape, to: MagicMouseZoom.defaultLensShape)
             }
             Reveal(isShown: zoom.isOn && zoom.style == .lens) {
                 SettingsChoice("Lens border", symbol: "paintbrush", selection: $zoom.lensBorder.revealing(), label: \.title)
+                    .resettable($zoom.lensBorder, to: MagicMouseZoom.defaultLensBorder)
             }
             Reveal(isShown: zoom.isOn && zoom.style == .lens && zoom.lensBorder == .custom) {
                 SettingsRow("Border color", symbol: "eyedropper") {
@@ -63,35 +67,42 @@ private struct SmartZoomSection: View {
                                 supportsOpacity: false)
                         .labelsHidden()
                 }
+                .resettable($zoom.lensBorderColor, to: MagicMouseZoom.defaultLensBorderColor)
             }
             Reveal(isShown: zoom.isOn && zoom.style == .wholeScreen) {
                 SettingsChoice("When the pointer moves", symbol: "cursorarrow.motionlines",
                                caption: "Stay where you zoomed keeps the zoomed view still, like macOS Smart Zoom. Each display zooms by itself, so the pointer can go to another one and zoom it too.",
                                selection: $zoom.motion, label: \.title)
+                    .resettable($zoom.motion, to: MagicMouseZoom.defaultMotion)
             }
             Reveal(isShown: zoom.isOn && (zoom.style == .lens || zoom.motion == .follows)) {
                 SettingsToggle("Hold still for the laser", symbol: "scope",
                                caption: "Holding the laser's keys, or drawing with it, stops the zoom following the pointer until you let go and the screenshot is taken, so the drawing stays on what it marks.",
                                isOn: $zoom.holdsForLaser)
+                    .resettable($zoom.holdsForLaser, to: MagicMouseZoom.defaultHoldsForLaser)
             }
             Reveal(isShown: zoom.isOn) {
                 ValueSlider(title: String(localized: "Zoom amount"), symbol: "plus.magnifyingglass", value: $zoom.amount,
                             range: MagicMouseZoom.amountRange, format: "%.2g×", step: MagicMouseZoom.amountStep, ends: .size)
+                    .resettable($zoom.amount, to: MagicMouseZoom.defaultAmount)
             }
             Reveal(isShown: zoom.isOn && zoom.style == .lens) {
                 ValueSlider(title: String(localized: "Lens size"), symbol: "circle.dashed", value: $zoom.lensSize,
                             range: MagicMouseZoom.lensSizeRange, format: "%.0f pt", spot: "clip-lens-size",
                             step: MagicMouseZoom.lensSizeStep, ends: .size)
+                    .resettable($zoom.lensSize, to: MagicMouseZoom.defaultLensSize)
             }
             Reveal(isShown: zoom.isOn) {
                 ValueSlider(title: String(localized: "Animation length"), symbol: "wand.and.rays", value: $zoom.animationLength,
                             range: MagicMouseZoom.animationLengthRange, format: "%.0f ms", scale: 1000,
                             step: MagicMouseZoom.animationLengthStep, ends: .time)
+                    .resettable($zoom.animationLength, to: MagicMouseZoom.defaultAnimationLength)
             }
             Reveal(isShown: zoom.isOn) {
                 SettingsToggle("Show zoom when sharing your screen", symbol: "rectangle.inset.filled.and.person.filled",
                                caption: "People in a Slack huddle, Google Meet or other call see the zoom when you share your whole screen. Off, they see your screen as it is. Sharing one window never shows it.",
                                isOn: $zoom.showsInScreenShare)
+                    .resettable($zoom.showsInScreenShare, to: MagicMouseZoom.defaultShowsInScreenShare)
             }
         }
         .featureSpot("zoom")
@@ -114,6 +125,7 @@ private struct NativeZoomAppsSection: View {
             SettingsToggle("Let macOS Smart Zoom work in these apps", symbol: "doc.text.magnifyingglass",
                            caption: "In these apps a double tap zooms the web page, document or image the way macOS does, and Pointer Colors stays out of the way. Turn on Smart zoom in System Settings › Mouse for it to work.",
                            isOn: $zoom.leavesNativeZoom.revealing())
+                .resettable($zoom.leavesNativeZoom, to: MagicMouseZoom.defaultLeavesNativeZoom)
             Reveal(isShown: zoom.leavesNativeZoom) {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(zoom.nativeZoomApps) { app in
@@ -170,6 +182,7 @@ private struct AdvancedTapSection: View {
                 .appFont(.caption).foregroundStyle(.secondary)
             SettingsChoice(title: Text("Detect double taps with"), symbol: "hand.tap", caption: Text(Self.detectionList),
                            selection: $zoom.tapDetection, label: \.title)
+                .resettable($zoom.tapDetection, to: MagicMouseZoom.defaultTapDetection)
             Reveal(isShown: zoom.tapDetection.usesMacOS && !macSmartZoomIsOn) {
                 SettingsRow(symbol: "exclamationmark.triangle.fill", title: Text("Smart zoom is off in System Settings").foregroundStyle(.orange),
                             caption: Text("macOS only sees a double tap with Smart zoom on in System Settings › Mouse.")) {
@@ -180,33 +193,39 @@ private struct AdvancedTapSection: View {
                 ValueSlider(title: String(localized: "Double-tap within"), symbol: "timer", value: $zoom.tapWindow,
                             range: MagicMouseZoom.tapWindowRange, format: "%.0f ms", scale: 1000,
                             step: MagicMouseZoom.tapWindowStep, ends: .time)
+                    .resettable($zoom.tapWindow, to: MagicMouseZoom.defaultTapWindow)
                 TapLimitRows(zoom: zoom)
             }
             SettingsRow("Enlarge the picture", symbol: "textformat.size",
                         caption: "Pointer Colors zooms a picture of the screen, so none of these can add detail the screen didn't have; apps like Safari redraw themselves instead. Each sample is drawn at your zoom amount, the way the zoom draws it.") {
                 EmptyView()
             }
+            .resettable($zoom.upscaling, to: MagicMouseZoom.defaultUpscaling)
             ZoomUpscalingPicker(selection: $zoom.upscaling, amount: zoom.amount)
             Reveal(isShown: zoom.style == .lens) {
                 SettingsRow("Lens position", symbol: "rectangle.and.arrow.up.right.and.arrow.down.left",
                             caption: "Where the lens sits next to the pointer. Move the pointer over a card to try it.") {
                     EmptyView()
                 }
+                .resettable($zoom.lensPlacement, to: MagicMouseZoom.defaultLensPlacement)
                 LensPlacementPicker(selection: $zoom.lensPlacement, zoom: zoom)
                 SettingsRow("What the lens shows", symbol: "viewfinder",
                             caption: "Which part of the screen the lens magnifies. Move the pointer over a card to try it: the dashed outline marks the part the lens shows.") {
                     EmptyView()
                 }
+                .resettable($zoom.lensView, to: MagicMouseZoom.defaultLensView)
                 LensViewPicker(selection: $zoom.lensView, zoom: zoom)
                 Reveal(isShown: zoom.lensView == .pointerSpot) {
                     ValueSlider(title: String(localized: "Pointer spot"), symbol: "scope",
                                 caption: String(localized: "How far in from the picture's top left the pointer's tip sits, as a share of its width and height."),
                                 value: $zoom.lensViewSpot, range: MagicMouseZoom.lensViewSpotRange, format: "%.0f%%", scale: 100,
                                 step: MagicMouseZoom.lensViewSpotStep, ends: .size)
+                        .resettable($zoom.lensViewSpot, to: MagicMouseZoom.defaultLensViewSpot)
                 }
                 SettingsChoice("Lens grows from", symbol: "arrow.up.left.and.arrow.down.right",
                                caption: "Where the lens grows out of as it zooms in, and shrinks back into as it zooms out. Pointer flies it out from the pointer to where it sits.",
                                selection: $zoom.lensGrowth, label: \.title)
+                    .resettable($zoom.lensGrowth, to: MagicMouseZoom.defaultLensGrowth)
             }
         }
         .animation(.reveal, value: zoom.tapDetection)
@@ -236,22 +255,27 @@ private struct TapLimitRows: View {
                     caption: String(localized: "A touch shorter than this is a flicker of contact as a finger shifts on the mouse, not a tap. Real taps last 60 ms or more; flickers that zoomed by themselves lasted 17–32 ms."),
                     value: $zoom.shortestTap, range: MagicMouseZoom.shortestTapRange, format: "%.0f ms", scale: 1000,
                     step: MagicMouseZoom.shortestTapStep, ends: .time)
+            .resettable($zoom.shortestTap, to: TapLimits.defaultShortest)
         ValueSlider(title: String(localized: "Longest tap"), symbol: "hand.raised",
                     caption: String(localized: "A touch longer than this is a finger resting or settling on the mouse, not a tap. Real taps last about 90–150 ms; touches that zoomed by themselves lasted 180–210 ms."),
                     value: $zoom.longestTap, range: MagicMouseZoom.longestTapRange, format: "%.0f ms", scale: 1000,
                     step: MagicMouseZoom.longestTapStep, ends: .time)
+            .resettable($zoom.longestTap, to: TapLimits.defaultLongest)
         ValueSlider(title: String(localized: "Pointer movement during a tap"), symbol: "arrow.up.and.down.and.arrow.left.and.right",
                     caption: String(localized: "A touch that moves the pointer farther than this is a finger brushing the mouse as you move it, not a tap. Real taps move it 0–5 pt; brushes that zoomed by themselves moved it 30 pt or more."),
                     value: $zoom.tapTravel, range: MagicMouseZoom.tapTravelRange, format: "%.0f pt",
                     step: MagicMouseZoom.tapTravelStep, ends: .size)
+            .resettable($zoom.tapTravel, to: Double(TapLimits.defaultFarthestTravel))
         ValueSlider(title: String(localized: "Lightest tap"), symbol: "hand.point.up",
                     caption: String(localized: "A touch smaller than this is a finger grazing the side of the mouse, not a tap. Fingertip taps measure 0.6–1.1; grazes that zoomed by themselves, 0.1–0.25."),
                     value: $zoom.lightestTap, range: MagicMouseZoom.lightestTapRange, format: "%.2f",
                     step: MagicMouseZoom.lightestTapStep, ends: .size)
+            .resettable($zoom.lightestTap, to: Double(TapLimits.defaultLightest))
         ValueSlider(title: String(localized: "Wait after a flicker"), symbol: "hourglass",
                     caption: String(localized: "A touch that starts this soon after a flicker of contact is the finger still settling on the mouse, not a tap. A grip change that zoomed by itself tapped 60 ms after its flicker; real double taps came 460 ms or more after one."),
                     value: $zoom.flickerSettle, range: MagicMouseZoom.flickerSettleRange, format: "%.0f ms", scale: 1000,
                     step: MagicMouseZoom.flickerSettleStep, ends: .time)
+            .resettable($zoom.flickerSettle, to: TapLimits.defaultSettleAfterFlicker)
         Reveal(isShown: !zoom.hasDefaultTapLimits) {
             SettingsRow(symbol: "arrow.counterclockwise", title: Text("Tap limits changed"),
                         caption: Text("Puts the shortest tap, longest tap, pointer movement, lightest tap and wait after a flicker back to 50 ms, 170 ms, 10 pt, 0.5 and 300 ms.")) {

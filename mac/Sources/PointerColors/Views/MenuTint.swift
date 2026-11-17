@@ -28,8 +28,11 @@ enum MenuTint: String, CaseIterable, Identifiable {
         self == .pointer ? pair.fill.color : Self.fixed[self]
     }
 
+    /// Untinted, until another tint is picked.
+    static let standard = MenuTint.none
+
     static var saved: MenuTint {
-        UserDefaults.standard.string(forKey: "menuTint").flatMap(MenuTint.init(rawValue:)) ?? .none
+        UserDefaults.standard.string(forKey: "menuTint").flatMap(MenuTint.init(rawValue:)) ?? standard
     }
 
     func save() { UserDefaults.standard.set(rawValue, forKey: "menuTint") }
@@ -50,8 +53,11 @@ enum MenuGlass: String, CaseIterable, Identifiable {
         }
     }
 
+    /// The system's own glass, until another is picked.
+    static let standard = MenuGlass.system
+
     static var saved: MenuGlass {
-        UserDefaults.standard.string(forKey: "menuGlass").flatMap(MenuGlass.init(rawValue:)) ?? .system
+        UserDefaults.standard.string(forKey: "menuGlass").flatMap(MenuGlass.init(rawValue:)) ?? standard
     }
 
     func save() { UserDefaults.standard.set(rawValue, forKey: "menuGlass") }

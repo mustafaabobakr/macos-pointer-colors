@@ -7,6 +7,10 @@ struct BokehColorPicker: View {
     @Binding var source: BokehColorSource
     @Binding var color: RGBA
     @Binding var look: BokehColorLook
+    /// The settings' defaults, for the rows' reset buttons.
+    let defaultSource: BokehColorSource
+    let defaultColor: RGBA
+    let defaultLook: BokehColorLook
     /// The color the look cards are built from: the pair's or the custom one.
     let lookColor: RGBA
     /// The pulse as drawn on screen, and the pair, for the look cards' pictures.
@@ -18,16 +22,19 @@ struct BokehColorPicker: View {
                        selection: $source.revealing(), options: BokehColorSource.allCases) { source in
             title(of: source)
         }
+        .resettable($source, to: defaultSource)
         Reveal(isShown: source == .custom) {
             SettingsRow("Custom color", symbol: "eyedropper") {
                 ColorPicker("Custom color", selection: Binding(get: { color.color }, set: { color = RGBA($0) }),
                             supportsOpacity: false)
                     .labelsHidden()
             }
+            .resettable($color, to: defaultColor)
         }
         // Last, since the cards are the tallest rows that come and go.
         Reveal(isShown: source != .clip) {
             SettingsRow(symbol: "swatchpalette", title: Text("Look"), caption: Text(look.summary)) { EmptyView() }
+                .resettable($look, to: defaultLook)
             BokehLookPicker(selection: $look, color: lookColor, style: style, pair: pair)
         }
     }

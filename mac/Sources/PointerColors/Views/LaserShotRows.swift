@@ -9,6 +9,7 @@ struct LaserShotRows: View {
         SettingsToggle("Take a screenshot of each drawing", symbol: "camera.viewfinder",
                        caption: "When you let go after drawing a trail, captures the area around it. Needs Screen Recording access, which macOS asks for the first time.",
                        isOn: $highlight.laserShotOn.revealing())
+            .resettable($highlight.laserShotOn, to: PointerHighlight.factory.laserShotOn)
             .onChange(of: highlight.laserShotOn) { _, isOn in
                 if isOn { ScreenRecordingAccess.request() }
             }
@@ -20,26 +21,34 @@ struct LaserShotRows: View {
         SettingsToggle("Only while zoomed", symbol: "plus.magnifyingglass",
                        caption: "Takes a screenshot only while a Magic Mouse zoom is up. Without a zoom, the laser just draws.",
                        isOn: $highlight.laserShotOnlyZoomed)
+        .resettable($highlight.laserShotOnlyZoomed, to: PointerHighlight.factory.laserShotOnlyZoomed)
         ValueSlider(title: String(localized: "Margin around the trail"), symbol: "rectangle.dashed",
                     value: $highlight.laserShotMargin, range: PointerHighlight.shotMarginRange,
                     format: "%.0f pt", spot: "clip-laser-shot-margin", step: 5, ends: .size)
+        .resettable($highlight.laserShotMargin, to: PointerHighlight.factory.laserShotMargin)
         SettingsToggle("Capture the whole zoom while zoomed", symbol: "plus.magnifyingglass",
                        caption: "With a Magic Mouse zoom up, takes everything the zoom shows, the whole screen or the lens, without the margin.",
                        isOn: $highlight.laserShotWholeZoom)
+        .resettable($highlight.laserShotWholeZoom, to: PointerHighlight.factory.laserShotWholeZoom)
         SettingsToggle("Show the laser in the screenshot", symbol: "scribble",
                        caption: "Off captures what's under the trail, without it.",
                        isOn: $highlight.laserShotIncludesTrail)
+        .resettable($highlight.laserShotIncludesTrail, to: PointerHighlight.factory.laserShotIncludesTrail)
         SettingsToggle("Copy to the clipboard", symbol: "doc.on.clipboard", isOn: $highlight.laserShotCopies)
+        .resettable($highlight.laserShotCopies, to: PointerHighlight.factory.laserShotCopies)
         SettingsToggle("Save to a folder", symbol: "folder", isOn: $highlight.laserShotSaves.revealing())
+        .resettable($highlight.laserShotSaves, to: PointerHighlight.factory.laserShotSaves)
         Reveal(isShown: highlight.laserShotSaves) { folderRow }
         // A menu even with four or fewer apps: segments don't show the app icons well.
         SettingsChoice("Open in", symbol: "arrow.up.forward.app",
                        caption: "Opens each screenshot to mark up. Without Save to a folder, it's kept in the app's Screenshots folder below.",
                        selection: $highlight.laserShotOpener, options: LaserShotOpener.allCases.filter(\.isAvailable),
                        style: .menu) { OpenerLabel(opener: $0) }
+            .resettable($highlight.laserShotOpener, to: PointerHighlight.factory.laserShotOpener)
         SettingsChoice("Zoom out after the screenshot", symbol: "minus.magnifyingglass",
                        caption: "Ends the Magic Mouse zoom once the screenshot is taken: a whole-screen zoom, a lens, or both.",
                        selection: $highlight.laserShotZoomOut, label: \.title)
+            .resettable($highlight.laserShotZoomOut, to: PointerHighlight.factory.laserShotZoomOut)
             .featureSpot("clip-laser-shot-zoom-out")
         UnsavedShotsRow()
     }
@@ -55,6 +64,7 @@ struct LaserShotRows: View {
                     caption: Text(verbatim: highlight.laserShotFolder)) {
             Button("Choose…", action: chooseFolder)
         }
+        .resettable($highlight.laserShotFolder, to: PointerHighlight.factory.laserShotFolder)
     }
 
     private func chooseFolder() {

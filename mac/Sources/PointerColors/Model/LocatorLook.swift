@@ -11,12 +11,14 @@ struct LocatorLook: Equatable {
     /// The ring's radius when it appears, in points.
     var startRadius = Self.defaultStartRadius
     /// How large the ring ends, as a share of its usual end size for the pointer's size.
-    var endSize = 1.0
+    var endSize = Self.defaultEndSize
     /// How thick both rings are, as a share of their usual 7 pt outline and 3 pt fill.
-    var lineWidth = 1.0
+    var lineWidth = Self.defaultLineWidth
 
     static let defaultDuration = 0.8
     static let defaultStartRadius = 90.0
+    static let defaultEndSize = 1.0
+    static let defaultLineWidth = 1.0
     static let durationRange = 0.4...2.0
     static let startRadiusRange = 50.0...150.0
     static let endSizeRange = 0.5...2.0

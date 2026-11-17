@@ -18,6 +18,8 @@ final class HoverFocus {
 
     static let defaultDelay: TimeInterval = 0.12
     static let delayRange: ClosedRange<TimeInterval> = 0.05...1
+    /// Every modifier key pauses focusing until changed.
+    static let defaultPauseKeys = HoverPauseKeys.all
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let tap: MouseEventTap
@@ -30,7 +32,7 @@ final class HoverFocus {
         self.tap = tap
         isOn = defaults.bool(forKey: Key.on)
         delay = Self.snapped((defaults.object(forKey: Key.delay) as? Double) ?? Self.defaultDelay)
-        pauseKeys = (defaults.object(forKey: Key.pauseKeys) as? Int).map(HoverPauseKeys.init(saved:)) ?? .all
+        pauseKeys = (defaults.object(forKey: Key.pauseKeys) as? Int).map(HoverPauseKeys.init(saved:)) ?? Self.defaultPauseKeys
         configureWorker()
         update()
     }

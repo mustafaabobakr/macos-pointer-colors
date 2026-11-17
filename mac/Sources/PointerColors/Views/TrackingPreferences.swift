@@ -11,6 +11,7 @@ struct TrackingPreferences: View {
                 SettingsToggle("Disable pointer acceleration", symbol: "equal.circle",
                                caption: "The pointer moves the same distance however fast you move the mouse.",
                                isOn: $tracking.accelerationOff.revealing())
+                    .resettable($tracking.accelerationOff, to: false)
                     .featureSpot("clip-acceleration-off")
                 NumberSlider(title: tracking.accelerationOff ? "Tracking speed" : "Pointer acceleration",
                              symbol: "gauge.with.dots.needle.67percent",

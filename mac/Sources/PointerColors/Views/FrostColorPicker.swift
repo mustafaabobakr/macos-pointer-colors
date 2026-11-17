@@ -5,18 +5,23 @@ import SwiftUI
 struct FrostColorPicker: View {
     @Binding var source: FrostColorSource
     @Binding var color: RGBA
+    /// The settings' defaults, for the rows' reset buttons.
+    let defaultSource: FrostColorSource
+    let defaultColor: RGBA
 
     var body: some View {
         SettingsChoice(title: Text("Color"), symbol: "paintpalette", caption: caption,
                        selection: $source.revealing(), options: FrostColorSource.allCases) { source in
             title(of: source)
         }
+        .resettable($source, to: defaultSource)
         Reveal(isShown: source == .custom) {
             SettingsRow("Custom color", symbol: "eyedropper") {
                 ColorPicker("Custom color", selection: Binding(get: { color.color }, set: { color = RGBA($0) }),
                             supportsOpacity: false)
                     .labelsHidden()
             }
+            .resettable($color, to: defaultColor)
         }
     }
 

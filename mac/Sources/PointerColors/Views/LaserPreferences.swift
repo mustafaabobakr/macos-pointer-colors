@@ -13,6 +13,7 @@ struct LaserPreferences: View {
                 SettingsToggle("Show the laser", symbol: "scribble",
                                caption: "A glowing dot that follows the pointer, and a fading trail while you drag.",
                                isOn: $highlight.laserOn.revealing())
+                    .resettable($highlight.laserOn, to: PointerHighlight.factory.laserOn)
                 Reveal(isShown: highlight.laserOn) { LaserRows(highlight: highlight) }
             }
             .featureSpot("laser")
@@ -45,34 +46,43 @@ private struct LaserRows: View {
     var body: some View {
         ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.laserSize,
                     range: PointerHighlight.sizeRange, format: "%.1f×", spot: "clip-laser-size", ends: .size)
+        .resettable($highlight.laserSize, to: PointerHighlight.factory.laserSize)
         SettingsChoice("Look", symbol: "wand.and.rays",
                      caption: "Classic draws a white center with an outline. GoodNotes draws a glowing line around a white core that's thick when you move slowly and thin when you move fast, and a solid dot, and keeps the trail whole before fading it out.",
                      selection: $highlight.laserLook.revealing(), label: \.title)
+        .resettable($highlight.laserLook, to: PointerHighlight.factory.laserLook)
         .featureSpot("clip-laser-look")
-        ColorSourcePicker(usesPair: $highlight.laserUsesPairColor, color: $highlight.laserColor)
+        ColorSourcePicker(usesPair: $highlight.laserUsesPairColor, color: $highlight.laserColor,
+                          defaultUsesPair: PointerHighlight.factory.laserUsesPairColor, defaultColor: PointerHighlight.factory.laserColor)
         SettingsChoice("Outline", symbol: "circle.dashed",
                      caption: "The thin edge around the dot and along the trail. The pair's dark color keeps the laser clear on light backgrounds.",
                      selection: $highlight.laserOutline.revealing(), label: \.title)
+        .resettable($highlight.laserOutline, to: PointerHighlight.factory.laserOutline)
         .featureSpot("clip-laser-outline")
         Reveal(isShown: highlight.laserOutline != .none) {
             ValueSlider(title: String(localized: "Outline opacity"), symbol: "circle.lefthalf.filled",
                         value: $highlight.laserOutlineOpacity,
                         range: PointerHighlight.outlineOpacityRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .opacity)
+            .resettable($highlight.laserOutlineOpacity, to: PointerHighlight.factory.laserOutlineOpacity)
         }
         SettingsToggle("Draw a trail while dragging", symbol: "scribble",
                        caption: "Hold the mouse button and move to draw; the trail fades after you let go.",
                        isOn: $highlight.laserTrail.revealing())
+        .resettable($highlight.laserTrail, to: PointerHighlight.factory.laserTrail)
         Reveal(isShown: highlight.laserTrail) {
             ValueSlider(title: String(localized: "Trail fades after"), symbol: "timer", value: $highlight.laserTrailFade,
                         range: PointerHighlight.trailFadeRange, format: "%.1f s", ends: .time)
+            .resettable($highlight.laserTrailFade, to: PointerHighlight.factory.laserTrailFade)
             HoldKeysRows(highlight: highlight)
         }
         SettingsChoice("Dot", symbol: "smallcircle.filled.circle",
                      caption: "When the glowing dot follows the pointer. While drawing, it shows only at the tip of a trail.",
                      selection: $highlight.laserDot.revealing(), label: \.title)
+        .resettable($highlight.laserDot, to: PointerHighlight.factory.laserDot)
         Reveal(isShown: highlight.laserDot != .hidden) {
             ValueSlider(title: String(localized: "Dot fades after"), symbol: "timer", value: $highlight.laserDotFade,
                         range: PointerHighlight.dotFadeRange, format: "%.2f s", step: 0.2, ends: .time)
+            .resettable($highlight.laserDotFade, to: PointerHighlight.factory.laserDotFade)
         }
         Reveal(isShown: highlight.laserLook == .classic) { ClassicLookRows(highlight: highlight) }
         Reveal(isShown: highlight.laserLook == .goodNotes) { GoodNotesLookRows(highlight: highlight) }
@@ -86,10 +96,13 @@ private struct ClassicLookRows: View {
     var body: some View {
         ValueSlider(title: String(localized: "Trail opacity"), symbol: "circle.lefthalf.filled", value: $highlight.laserTrailOpacity,
                     range: PointerHighlight.trailOpacityRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .opacity)
+        .resettable($highlight.laserTrailOpacity, to: PointerHighlight.factory.laserTrailOpacity)
         ValueSlider(title: String(localized: "Glow"), symbol: "sun.max", value: $highlight.laserGlow,
                     range: PointerHighlight.glowRange, format: "%.0f%%", scale: 100, step: 0.05, ends: .brightness)
+        .resettable($highlight.laserGlow, to: PointerHighlight.factory.laserGlow)
         ValueSlider(title: String(localized: "Middle lightness"), symbol: "circle.circle", value: $highlight.laserCoreLightness,
                     range: PointerHighlight.coreLightnessRange, format: "%.0f%%", scale: 100, step: 0.1, ends: .brightness)
+        .resettable($highlight.laserCoreLightness, to: PointerHighlight.factory.laserCoreLightness)
     }
 }
 
@@ -100,9 +113,11 @@ private struct GoodNotesLookRows: View {
     var body: some View {
         ValueSlider(title: String(localized: "Fade-out"), symbol: "timer", value: $highlight.laserFadeOut,
                     range: PointerHighlight.fadeOutRange, format: "%.2f s", step: 0.1, ends: .time)
+        .resettable($highlight.laserFadeOut, to: PointerHighlight.factory.laserFadeOut)
         Reveal(isShown: highlight.laserOutline != .none) {
             ValueSlider(title: String(localized: "Edge width"), symbol: "lineweight", value: $highlight.laserRim,
                         range: PointerHighlight.rimRange, format: "%.1f pt", step: 0.5, ends: .width)
+            .resettable($highlight.laserRim, to: PointerHighlight.factory.laserRim)
         }
     }
 }
@@ -117,6 +132,7 @@ private struct HoldKeysRows: View {
         SettingsToggle(title: Text("Draw only while holding \(highlight.laserKeys.title)"), symbol: "command",
                        caption: Text("A \(highlight.laserKeys.symbols)-drag draws the laser. Without \(highlight.laserKeys.symbols), clicks and drags work as usual."),
                        isOn: $highlight.laserNeedsKeys.revealing())
+        .resettable($highlight.laserNeedsKeys, to: PointerHighlight.factory.laserNeedsKeys)
         Reveal(isShown: highlight.laserNeedsKeys) { keys }
     }
 
@@ -124,6 +140,7 @@ private struct HoldKeysRows: View {
         SettingsToggle(title: Text("Block clicks while drawing"), symbol: "hand.raised",
                        caption: Text("A \(highlight.laserKeys.symbols)-drag doesn't click the app underneath, so no text gets selected. Off, the drag draws and also reaches the app. Works with Draw only while holding \(highlight.laserKeys.title)."),
                        isOn: $highlight.laserBlocksClicks)
+        .resettable($highlight.laserBlocksClicks, to: PointerHighlight.factory.laserBlocksClicks)
     }
 
     private var keys: some View {
@@ -131,5 +148,6 @@ private struct HoldKeysRows: View {
                     caption: "Click, then press ⌘, ⌥, ⌃ or ⇧, alone or together, and let go.") {
             HoldKeyRecorder(keys: highlight.laserKeys) { highlight.laserKeys = $0 }
         }
+        .resettable($highlight.laserKeys, to: PointerHighlight.factory.laserKeys)
     }
 }

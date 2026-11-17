@@ -38,8 +38,10 @@ enum UpdateSchedule: String, CaseIterable, Identifiable {
     private static let legacyKey = "checkForUpdatesAutomatically"
 
     /// Daily unless chosen otherwise, since the menu used to check every time it opened.
+    static let standard = UpdateSchedule.daily
+
     static func saved(in defaults: UserDefaults = .standard) -> UpdateSchedule {
-        defaults.string(forKey: key).flatMap(UpdateSchedule.init(rawValue:)) ?? .daily
+        defaults.string(forKey: key).flatMap(UpdateSchedule.init(rawValue:)) ?? standard
     }
 
     func save(in defaults: UserDefaults = .standard) {

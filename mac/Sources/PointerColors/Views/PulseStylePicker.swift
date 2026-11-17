@@ -1,9 +1,12 @@
 import SwiftUI
 
 /// Ring, Ripple, Frost and Bokeh as cards side by side, each playing its pulse at real size while the
-/// pointer is over it. The chosen one is outlined.
+/// pointer is over it. The chosen one is outlined. A card whose style has settings changed from
+/// their defaults shows a reset button in its picture's corner.
 struct PulseStylePicker: View {
     @Binding var selection: PulseStyle
+    /// The settings each card's reset button puts back.
+    let highlight: PointerHighlight
     /// The pulse settings as drawn on screen; each card swaps in its own style.
     let style: HighlightStyle
     let pair: PointerPair
@@ -14,7 +17,8 @@ struct PulseStylePicker: View {
         HStack(alignment: .top, spacing: 10 * scale) {
             ForEach(PulseStyle.allCases) { option in
                 PulseStyleCard(option: option, style: style(for: option), pair: pair, pictureHeight: pictureHeight,
-                               isSelected: selection == option) { selection = option }
+                               isSelected: selection == option, isChanged: highlight.isChanged(option),
+                               reset: { highlight.reset(option) }) { selection = option }
             }
         }
         .environment(\.previewBackdrop, backdrop)
@@ -40,6 +44,9 @@ private struct PulseStyleCard: View {
     let pair: PointerPair
     let pictureHeight: CGFloat
     let isSelected: Bool
+    /// Whether this style's own settings differ from their defaults, and how to put them back.
+    let isChanged: Bool
+    let reset: () -> Void
     let select: () -> Void
     @Environment(\.appTextScale) private var scale
 
@@ -66,6 +73,10 @@ private struct PulseStyleCard: View {
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         // Over the picture's corner but outside the card's button, so it takes its own clicks.
         .overlay(alignment: .topLeading) { PreviewBackdropPicker().padding(8 * scale) }
+        .overlay(alignment: .topTrailing) {
+            if isChanged { StyleResetButton(title: option.title, reset: reset).padding(14 * scale) }
+        }
+        .animation(.easeOut(duration: 0.15), value: isChanged)
     }
 
     private var title: some View {
@@ -77,5 +88,25 @@ private struct PulseStyleCard: View {
                 Text("Default").appFont(.caption).foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+/// The reset button in a style card's corner: puts that style's own settings back to their defaults.
+private struct StyleResetButton: View {
+    let title: String
+    let reset: () -> Void
+    @Environment(\.appTextScale) private var scale
+
+    var body: some View {
+        Button(action: reset) {
+            Image(systemName: "arrow.counterclockwise.circle.fill")
+                .font(.system(size: 16 * scale))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, Color.black.opacity(0.45))
+        }
+        .buttonStyle(.plain)
+        .help(Text("Reset \(title)'s settings to their defaults"))
+        .accessibilityLabel(Text("Reset \(title)'s settings to their defaults"))
+        .transition(.opacity.combined(with: .scale(scale: 0.6)))
     }
 }
