@@ -46,7 +46,7 @@ private struct PulseRows: View {
         PulseStylePicker(selection: $highlight.pulseStyle.revealing(), style: style, pair: pair)
             .featureSpot("clip-pulse-style")
         SharedPulseRows(highlight: highlight)
-        // Frost and Bokeh have color rows of their own and glow instead of having an outline.
+        // Frost has a color row of its own, Bokeh keeps its clip's colors, and both glow instead of having an outline.
         Reveal(isShown: !highlight.pulseStyle.hasOwnColors) {
             ColorSourcePicker(usesPair: $highlight.pulseUsesPairColor, color: $highlight.pulseColor)
             OutlineRows(highlight: highlight)
@@ -54,19 +54,62 @@ private struct PulseRows: View {
         Reveal(isShown: highlight.pulseStyle == .ring) { RingStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .ripple) { RippleStyleRows(highlight: highlight) }
         Reveal(isShown: highlight.pulseStyle == .frost) { FrostStyleRows(highlight: highlight) }
-        Reveal(isShown: highlight.pulseStyle == .bokeh) { BokehStyleRows(highlight: highlight) }
+        Reveal(isShown: highlight.pulseStyle == .bokeh) {
+            ValueSlider(title: String(localized: "Speed"), symbol: "speedometer",
+                        caption: String(localized: "1× plays it at the speed of the clip it was made from."),
+                        value: $highlight.bokehSpeed, range: PointerHighlight.bokehSpeedRange, format: "%.2f×", ends: .speed)
+            ValueSlider(title: String(localized: "Blur"), symbol: "aqi.medium",
+                        caption: String(localized: "How soft the squares and their glow are. 0% draws sharp shapes with no glow; 100% is the clip's blur."),
+                        value: $highlight.bokehBlur, range: PointerHighlight.bokehBlurRange, format: "%.0f%%", scale: 100,
+                        step: 0.05, ends: .blur)
+            BokehColorPicker(source: $highlight.bokehColorSource, color: $highlight.bokehColor, look: $highlight.bokehColorLook,
+                             lookColor: highlight.bokehColorSource == .custom ? highlight.bokehColor : pair.highlightColor,
+                             style: style, pair: pair)
+            BokehShapeRows(highlight: highlight, style: style, pair: pair)
+        }
     }
 }
 
-/// Size and length, the same for every style.
+/// Size for every style, and Length for all but Bokeh, which has a Speed of its own at the bottom.
+/// Frost's Length is its own; Ring and Ripple share theirs.
 private struct SharedPulseRows: View {
     @Bindable var highlight: PointerHighlight
+
+    /// Frost's own Length, or the one Ring and Ripple share.
+    private var length: ReferenceWritableKeyPath<PointerHighlight, Double> {
+        highlight.pulseStyle == .frost ? \.frostDuration : \.pulseDuration
+    }
 
     var body: some View {
         ValueSlider(title: String(localized: "Size"), symbol: "arrow.up.left.and.arrow.down.right", value: $highlight.pulseSize,
                     range: PointerHighlight.pulseSizeRange, format: "%.1f×", spot: "clip-pulse-size", ends: .size)
-        ValueSlider(title: String(localized: "Length"), symbol: "timer", value: $highlight.pulseDuration,
-                    range: PointerHighlight.pulseDurationRange, format: "%.2f s", ends: .time)
+        Reveal(isShown: highlight.pulseStyle != .bokeh) {
+            ValueSlider(title: String(localized: "Length"), symbol: "timer", value: $highlight[dynamicMember: length],
+                        range: PointerHighlight.pulseDurationRange, format: "%.2f s", ends: .time)
+        }
+    }
+}
+
+/// Which shapes Bokeh's clicks use: all of them as in the clip, or the ones checked on their cards,
+/// which come and go at the bottom.
+private struct BokehShapeRows: View {
+    @Bindable var highlight: PointerHighlight
+    let style: HighlightStyle
+    let pair: PointerPair
+
+    var body: some View {
+        SettingsChoice(title: Text("Shapes"), symbol: "pentagon", caption: caption,
+                       selection: $highlight.bokehShapeChoice.revealing(), label: \.title)
+        Reveal(isShown: highlight.bokehShapeChoice == .custom) {
+            BokehShapePicker(highlight: highlight, style: style, pair: pair)
+        }
+    }
+
+    private var caption: Text {
+        switch highlight.bokehShapeChoice {
+        case .all: Text("Every shape, as often as in the clip.")
+        case .custom: Text("Only the checked shapes, each as likely. Move the pointer over a card to play it.")
+        }
     }
 }
 
@@ -134,29 +177,6 @@ private struct FrostStyleRows: View {
                     range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
         // Last, since its custom color row comes and goes.
         FrostColorPicker(source: $highlight.frostColorSource, color: $highlight.frostColor)
-    }
-}
-
-/// The Bokeh style: a glow frame and rounded squares that come into focus as they fly out.
-private struct BokehStyleRows: View {
-    @Bindable var highlight: PointerHighlight
-
-    private var tiles: Binding<Double> {
-        Binding(get: { Double(highlight.bokehTiles) }, set: { highlight.bokehTiles = Int($0.rounded()) })
-    }
-
-    var body: some View {
-        let range = PointerHighlight.bokehTilesRange
-        SettingsToggle("Glow frame", symbol: "square.dashed",
-                       caption: "A large glowing square flashes around the pointer as the click lands, and shrinks away.",
-                       isOn: $highlight.bokehFrame)
-        ValueSlider(title: String(localized: "Squares"), symbol: "square.on.square", value: tiles,
-                    range: Double(range.lowerBound)...Double(range.upperBound), format: "%.0f", step: 1, ends: .count)
-        SettingsToggle("Focus blur", symbol: "camera.aperture",
-                       caption: "The squares start blurred and come into focus as they fly out. Off, they stay sharp.",
-                       isOn: $highlight.bokehFocus)
-        // Last, since its custom color row comes and goes.
-        BokehColorPicker(source: $highlight.bokehColorSource, color: $highlight.bokehColor)
     }
 }
 

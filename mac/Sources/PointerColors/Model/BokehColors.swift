@@ -1,24 +1,30 @@
-/// The Bokeh pulse's colors: gold and amber from the reference clip, or shades of the pulse color.
-struct BokehColors: Equatable {
-    /// The glow frame, the middle square and most of the flying ones.
-    var light: RGBA
-    /// The warm squares.
-    var warm: RGBA
+import Foundation
 
-    /// How solid the lines and the filled squares are at their brightest. The clip's pieces are
-    /// see-through; these, with the colors below, match what it shows on a dark background.
-    static let lineOpacity = 0.5
-    static let fillOpacity = 0.45
-    /// The glow frame is brighter, since its blur spreads it thin.
-    static let frameOpacity = 0.9
+/// The Bokeh pulse's colors, at their brightest and solid, never see-through.
+///
+/// Measured on every square of the reference clip's 44 clean clicks: each square's color sits on
+/// one line from orange (hue 18°, saturation 0.83) to pale gold (hue 38°, saturation 0.45), the
+/// more yellow the paler. Brightness is set to the top, as the clip shows on an HDR screen.
+enum BokehColors {
+    /// The middle square: #FFD07F, its line's brightest point on screen.
+    static let middle = RGBA(hex: "FFD07F")!
 
-    /// Pale gold and amber. At the opacities above over the clip's background (#1A1C24) the pale
-    /// gold comes out #817A62, against #838068 measured on the clip's sharpest square; the amber
-    /// comes out a little brighter than the #6D5337 measured on a warm square's line.
-    static let gold = BokehColors(light: RGBA(hex: "E8D8A0")!, warm: RGBA(hex: "E8A05A")!)
+    /// The hues a flying square can take, in degrees.
+    static let hues = 18.0...38.0
 
-    /// The same parts in `tint`: a pale shade of it, and the tint itself for the warm squares.
-    static func tinted(_ tint: RGBA) -> BokehColors {
-        BokehColors(light: tint.mixed(with: RGBA(red: 1, green: 1, blue: 1), by: 0.55), warm: tint)
+    /// The color of a flying square with `hue`: its saturation follows the clip's line from orange
+    /// to pale gold, at the top brightness.
+    static func square(hue: Double) -> RGBA {
+        let share = (hue - hues.lowerBound) / (hues.upperBound - hues.lowerBound)
+        return hsv(hue: hue, saturation: 0.83 - 0.38 * share, value: 1)
+    }
+
+    private static func hsv(hue: Double, saturation: Double, value: Double) -> RGBA {
+        let chroma = value * saturation
+        let side = hue / 60
+        let second = chroma * (1 - abs(side.truncatingRemainder(dividingBy: 2) - 1))
+        let low = value - chroma
+        // Hues 0° to 60°, where every Bokeh color lies: red is the strongest, then green.
+        return RGBA(red: chroma + low, green: second + low, blue: low)
     }
 }

@@ -38,6 +38,25 @@ final class FrostBurstTests: XCTestCase {
         }
     }
 
+    func testFrostHasItsOwnLength() throws {
+        let suite = "FrostLength-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        let highlight = PointerHighlight(defaults: defaults)
+        XCTAssertEqual(highlight.frostDuration, 0.95)
+        highlight.pulseDuration = 0.6
+        highlight.pulseStyle = .frost
+        var style = HighlightStyle(settings: highlight, pair: .featured, pointerScale: 1)
+        XCTAssertEqual(style.pulseDuration, 0.95, "Frost plays for its own Length")
+        style.pulseStyle = .ripple
+        XCTAssertEqual(style.pulseDuration, 0.6, "Ring and Ripple keep the shared one")
+        highlight.frostDuration = 1.2
+        let backup = SettingsBackup(defaults: defaults, domain: suite)
+        let data = try backup.export(launchAtLogin: false)
+        highlight.frostDuration = 0.3
+        try backup.restore(from: data)
+        XCTAssertEqual(PointerHighlight(defaults: defaults).frostDuration, 1.2)
+    }
+
     func testSettingsStartAsTheClipAndAreRemembered() {
         let defaults = UserDefaults(suiteName: "FrostBurstTests-\(UUID().uuidString)")!
         let highlight = PointerHighlight(defaults: defaults)

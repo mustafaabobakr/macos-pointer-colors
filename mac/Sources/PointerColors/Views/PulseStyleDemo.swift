@@ -45,15 +45,19 @@ struct PulseStyleDemo: View {
         case .ring: 0.35
         case .ripple: 0.45
         case .frost: 0.22
-        case .bokeh: 0.3
+        case .bokeh: 6 / BokehBurst.frames
         }
     }
+
+    /// Bokeh's squares differ every click; seed 8 is a full pentagon of filled and outlined
+    /// squares from orange to pale gold, so the still shows them all.
+    private var seed: UInt64 { style.pulseStyle == .bokeh ? 8 : 7 }
 
     private func scene(at center: CGPoint, age: Double) -> HighlightScene {
         let scene = HighlightScene()
         scene.style = style
         scene.pointer = center
-        scene.pulses = [Pulse(point: center, start: Self.now - age, seed: 7)]
+        scene.pulses = [Pulse(point: center, start: Self.now - age, seed: seed)]
         return scene
     }
 }

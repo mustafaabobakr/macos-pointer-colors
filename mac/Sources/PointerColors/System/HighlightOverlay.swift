@@ -400,7 +400,33 @@ struct HighlightStyle: Equatable {
                             middle: RGBA(red: 1, green: 0, blue: 0), center: RGBA(red: 1, green: 1, blue: 1))
     var pointerScale = 1.0
     var pulseSize = 1.0
-    var pulseDuration = 0.45
+    /// The Length of Ring and Ripple, and Frost's own.
+    var sharedPulseDuration = 0.45
+    var frostDuration = PointerHighlight.defaultFrostDuration
+    /// How fast Bokeh plays against its clip.
+    var bokehSpeed = PointerHighlight.defaultBokehSpeed
+    /// How soft Bokeh's shapes are against its clip.
+    var bokehBlur = 1.0
+    /// The shapes Bokeh's clicks use: nil for every shape at the clip's rates.
+    var bokehShapes: [BokehShape]?
+    /// Every color Bokeh draws.
+    var bokehPalette = BokehPalette.clip
+    /// Seconds the chosen style's pulse plays: Bokeh plays its clip at its own speed.
+    var pulseDuration: Double {
+        get { Self.duration(of: pulseStyle, shared: sharedPulseDuration, frost: frostDuration, bokehSpeed: bokehSpeed) }
+        set {
+            if pulseStyle == .frost { frostDuration = newValue } else { sharedPulseDuration = newValue }
+        }
+    }
+
+    /// Seconds a pulse of `style` plays: Bokeh's clip at its speed, Frost's own Length, or the shared one.
+    private static func duration(of style: PulseStyle, shared: Double, frost: Double, bokehSpeed: Double) -> Double {
+        switch style {
+        case .bokeh: BokehBurst.clipLength / bokehSpeed
+        case .frost: frost
+        case .ring, .ripple: shared
+        }
+    }
     var showsHold = true
     var pulseStyle = PulseStyle.ring
     var laserSize = 1.0
@@ -426,10 +452,6 @@ struct HighlightStyle: Equatable {
     var frostShards = 6
     var frostFlash = true
     var frostColors = FrostColors.ice
-    var bokehTiles = 6
-    var bokehFrame = true
-    var bokehFocus = true
-    var bokehColors = BokehColors.gold
     var holdDelay = 0.35
     var holdSize = 0.55
     var holdFill = 0.35
@@ -449,13 +471,17 @@ struct HighlightStyle: Equatable {
         ringColor = settings.ringColor(for: pair)
         pulseColor = settings.pulseColor(for: pair)
         frostColors = settings.frostColors(for: pair)
-        bokehColors = settings.bokehColors(for: pair)
         pulseOutline = settings.pulseOutlined ? pair.darkColor : nil
         pulseOutlineExtra = settings.pulseOutlineWidth * 2
         laser = settings.laserColors(for: pair)
         self.pointerScale = pointerScale
         pulseSize = settings.pulseSize
-        pulseDuration = settings.pulseDuration
+        sharedPulseDuration = settings.pulseDuration
+        frostDuration = settings.frostDuration
+        bokehSpeed = settings.bokehSpeed
+        bokehBlur = settings.bokehBlur
+        bokehShapes = settings.bokehShapes
+        bokehPalette = settings.bokehPalette(for: pair)
         showsHold = settings.pulseShowsHold
         pulseStyle = settings.pulseStyle
         laserSize = settings.laserSize
@@ -475,7 +501,6 @@ struct HighlightStyle: Equatable {
         (rippleWaves, rippleGrowth, rippleSpacing) = (settings.rippleWaves, settings.rippleGrowth, settings.rippleSpacing)
         (rippleLineWidth, rippleOpacity) = (settings.rippleLineWidth, settings.rippleOpacity)
         (frostGrowth, frostShards, frostFlash) = (settings.frostGrowth, settings.frostShards, settings.frostFlash)
-        (bokehTiles, bokehFrame, bokehFocus) = (settings.bokehTiles, settings.bokehFrame, settings.bokehFocus)
         (holdDelay, holdSize, holdFill) = (settings.holdDelay, settings.holdSize, settings.holdFill)
         (holdLineWidth, holdBreathes) = (settings.holdLineWidth, settings.holdBreathes)
     }
@@ -500,8 +525,8 @@ extension HighlightStyle {
     /// The Frost pulse's timeline at this size: its ring grows to `frostGrowth` times the base.
     var frost: FrostBurst { FrostBurst(radius: 44 * pointerScale * pulseSize * frostGrowth / 2) }
 
-    /// The Bokeh pulse's timeline at this size: its glow frame and squares are sized against the base.
-    var bokeh: BokehBurst { BokehBurst(base: 44 * pointerScale * pulseSize, focus: bokehFocus) }
+    /// The Bokeh pulse's timeline at this size: the clip's, scaled by Size.
+    var bokeh: BokehBurst { BokehBurst(base: 44 * pointerScale * pulseSize, softness: bokehBlur) }
 
     /// A ripple wave thins to a third of its starting width as it spreads.
     var rippleEndLineWidth: Double { rippleLineWidth / 3 }

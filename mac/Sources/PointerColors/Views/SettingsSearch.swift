@@ -78,7 +78,7 @@ enum SettingsSearch {
         item(.pulse, "highlight.pulse", String(localized: "Pulse line width and opacity"), "lineweight"),
         item(.pulse, "highlight.pulse", String(localized: "Ripple waves and gap"), "dot.radiowaves.right"),
         item(.pulse, "highlight.pulse", String(localized: "Frost color, flash and shards"), "snowflake"),
-        item(.pulse, "highlight.pulse", String(localized: "Bokeh color, glow frame, squares and focus blur"), "camera.aperture"),
+        item(.pulse, "highlight.pulse", String(localized: "Bokeh shapes: pentagon, cross, triangle, pair"), "pentagon"),
         item(.pulse, "highlight.hold", String(localized: "Long presses"), "hand.tap"),
         item(.laser, "highlight.laser", String(localized: "Laser glow, trail opacity and dot fade"), "sun.max"),
         item(.laser, "highlight.laser", String(localized: "Laser look: Classic or GoodNotes glow"), "wand.and.rays"),

@@ -5,6 +5,10 @@ enum SliderEnds {
     /// A length of time, in seconds. Laid out as macOS lays out speed: the tortoise, the longest
     /// time, on the left and the hare, the shortest, on the right, so the slider runs backwards.
     case time
+    /// A speed: the tortoise, slowest, on the left and the hare, fastest, on the right.
+    case speed
+    /// Sharp to soft.
+    case blur
     /// Small to large.
     case size
     /// A thin line to a thick one.
@@ -27,7 +31,8 @@ enum SliderEnds {
 
     var low: SliderEnd {
         switch self {
-        case .time: SliderEnd("tortoise.fill")
+        case .time, .speed: SliderEnd("tortoise.fill")
+        case .blur: SliderEnd("square")
         case .size: SliderEnd("circle", scale: .small)
         case .width: SliderEnd("line.diagonal", weight: .ultraLight)
         case .opacity: SliderEnd("circle.dotted")
@@ -41,7 +46,8 @@ enum SliderEnds {
 
     var high: SliderEnd {
         switch self {
-        case .time: SliderEnd("hare.fill")
+        case .time, .speed: SliderEnd("hare.fill")
+        case .blur: SliderEnd("square.dashed")
         case .size: SliderEnd("circle", scale: .large)
         case .width: SliderEnd("line.diagonal", weight: .black)
         case .opacity: SliderEnd("circle.fill")

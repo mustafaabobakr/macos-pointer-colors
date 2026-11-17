@@ -1,36 +1,40 @@
 import Foundation
 
-/// One flying square of the Bokeh pulse: a rounded square, outlined or filled, pale or warm,
-/// that bursts straight out from the click, slows to a stop and fades.
+/// One flying square of the Bokeh pulse: a rounded square, outlined or filled, that flies straight
+/// out from the click along its place in the click's layout and fades while still moving. Its
+/// ranges are the ones measured on every square of the clip's 44 clean clicks, in points at the
+/// 44 pt base size.
 struct BokehTile: Equatable {
-    /// How far out the farthest square stops, and the largest square's side, against the base.
-    static let farthest = 2.0
-    static let largest = 0.95
+    /// The fastest steady speed, in points a frame, and the largest side.
+    static let fastest = 12.0
+    static let largest = 60.0
 
-    /// The direction it flies, in radians.
+    /// The direction it flies, in radians: exactly its place in the layout, as in the clip.
     let angle: Double
-    /// Where it starts and stops, against the base.
-    let from: Double
-    let to: Double
-    /// When it appears and when it starts to fade, as shares of the pulse length.
-    let leaves: Double
+    /// How far from the click it starts, and its steady speed in points a frame (6 to 12, median 9).
+    let start: Double
+    let speed: Double
+    /// The frame it starts to fade on; it's gone 2.5 frames later.
     let fades: Double
-    /// Its side against the base.
-    let size: Double
-    /// Filled squares glow solid; the others are outlines, about two in three as in the clip.
+    /// Its side once it has settled, in points (23 to 68 measured, median 39).
+    let side: Double
+    /// Filled squares glow solid; the others are outlines, about half and half.
     let isFilled: Bool
-    /// Warm squares take the deeper color, about one in three.
-    let isWarm: Bool
+    /// Its shade, anywhere from the palette's deepest (0, the clip's orange) to its palest (1, the
+    /// clip's pale gold), as measured.
+    let shade: Double
+    /// The blur it settles to: next to none for outlines, a soft edge for filled squares.
+    let rest: Double
 
-    init(index: Int, of count: Int, start: Double, using random: inout SplitMix) {
-        let slot = 2 * .pi / Double(max(count, 1))
-        angle = start + slot * Double(index) + Double.random(in: -0.3...0.3, using: &random) * slot
-        from = Double.random(in: 0.1...0.35, using: &random)
-        to = Double.random(in: 1.35...Self.farthest, using: &random)
-        leaves = Double.random(in: 0.5...1.5, using: &random) * BokehBurst.tick
-        fades = Double.random(in: 5...8, using: &random) * BokehBurst.tick
-        size = Double.random(in: 0.45...Self.largest, using: &random)
-        isFilled = index % 3 == 1
-        isWarm = index % 3 == 2 || Double.random(in: 0..<1, using: &random) < 0.15
+    /// A square flying along `direction` in radians.
+    init(direction: Double, using random: inout SplitMix) {
+        angle = direction
+        start = 7
+        speed = Double.random(in: 6...Self.fastest, using: &random)
+        fades = Double.random(in: 7.5...8.5, using: &random)
+        isFilled = Bool.random(using: &random)
+        shade = Double.random(in: 0...1, using: &random)
+        side = Double.random(in: 25...55, using: &random)
+        rest = isFilled ? side / 12 : 1.2
     }
 }
