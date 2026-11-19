@@ -51,7 +51,7 @@ final class ScreenZoom {
     private var sharingType: NSWindow.SharingType { showsInScreenShare ? .readOnly : .none }
     /// How the screen's picture is enlarged: the display's smoothing, or a sharp picture of our own.
     var upscaling = ZoomUpscaling.smooth {
-        didSet { sharpener.reset(); if upscaling == .smooth { imageLayer.contents = latestFrame?.surface } }
+        didSet { sharpener?.reset(); imageLayer.contents = latestFrame?.surface }
     }
     /// Seconds zooming in or out takes; 0 jumps.
     var animationLength: TimeInterval {
@@ -63,7 +63,12 @@ final class ScreenZoom {
     private let imageLayer = CALayer()
     private var stream: SCStream?
     private lazy var output = ZoomStreamOutput { [weak self] frame, source in self?.received(frame, from: source) }
-    private let sharpener = ZoomSharpener()
+    /// Draws Sharp and Sharper over the capture; nil without a graphics chip that can, where they show smoothed.
+    private lazy var sharpener: ZoomSharpener? = {
+        guard let sharpener = ZoomSharpener() else { return nil }
+        imageLayer.addSublayer(sharpener.layer)
+        return sharpener
+    }()
     /// The capture's newest frame, and how many have come, so a sharp picture is drawn again.
     private var latestFrame: HeldFrame?
     private var frameCount = 0
@@ -127,7 +132,7 @@ final class ScreenZoom {
         imageLayer.contents = nil
         CATransaction.commit()
         latestFrame = nil
-        sharpener.reset()
+        sharpener?.reset()
         keyMonitors.forEach(NSEvent.removeMonitor)
         keyMonitors = []
         if let stream { Task { try? await stream.stopCapture() } }
@@ -167,7 +172,11 @@ final class ScreenZoom {
         let configuration = SCStreamConfiguration()
         configuration.width = Int(screen.frame.width * screen.backingScaleFactor)
         configuration.height = Int(screen.frame.height * screen.backingScaleFactor)
-        configuration.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+        // Every frame the display shows, up to its own top rate, like 120 on ProMotion.
+        configuration.minimumFrameInterval = CMTime(value: 1, timescale: CMTimeScale(max(screen.maximumFramesPerSecond, 60)))
+        // Full RGB, the display's own pixels. The default, 4:2:0 YCbCr, keeps color at a quarter
+        // of the resolution: colored text and edges blur, and some colors shift.
+        configuration.pixelFormat = kCVPixelFormatType_32BGRA
         configuration.showsCursor = false
         configuration.queueDepth = 4
         return SCStream(filter: filter, configuration: configuration, delegate: nil)
@@ -223,7 +232,7 @@ final class ScreenZoom {
 
     @objc private func tick(_ link: CADisplayLink) {
         // The animation waits for the first frame of the capture.
-        if imageLayer.contents != nil {
+        if latestFrame != nil {
             animation.advance(by: lastTick.map { link.timestamp - $0 } ?? 0)
             lastTick = link.timestamp
         }
@@ -260,8 +269,8 @@ final class ScreenZoom {
         // On the display, from its top left, as the placement measures it.
         let local = CGPoint(x: mouse.x - screenFrame.minX, y: screenFrame.maxY - mouse.y)
         let lens = glidedLensFrame(pointer: local, lens: lensShape.size(width: lensSize))
-        var shown = lensGrowth.frame(grown, lens: lens, pointer: local)
-        shown.size = CGSize(width: max(shown.width, 1), height: max(shown.height, 1))
+        // On whole pixels, so the picture lands on the screen's pixels one to one, never blurred by a resample.
+        let shown = ZoomGeometry.pixelAligned(lensGrowth.frame(grown, lens: lens, pointer: local), scale: panel.backingScaleFactor)
         panel.setFrame(CGRect(x: screenFrame.minX + shown.minX, y: screenFrame.maxY - shown.maxY,
                               width: shown.width, height: shown.height), display: false)
         imageLayer.frame = CGRect(origin: .zero, size: shown.size)
@@ -284,31 +293,27 @@ final class ScreenZoom {
         return lensPlacement.staysOnScreen ? LensPlacement.kept(frame, in: screenFrame.size) : frame
     }
 
-    /// A new frame of the current capture. Smooth shows it straight away; a sharp picture is drawn from it
-    /// on the next display frame.
+    /// A new frame of the current capture. It shows straight away, unless a sharp picture covers it,
+    /// which is drawn from it on the next display frame.
     private func received(_ frame: HeldFrame, from source: ObjectIdentifier) {
         // A capture still stopping sends a last few frames, maybe of another display.
         guard let stream, ObjectIdentifier(stream) == source else { return }
         latestFrame = frame
         frameCount += 1
-        if upscaling == .smooth { imageLayer.contents = frame.surface }
+        if sharpener?.isShowing != true { imageLayer.contents = frame.surface }
     }
 
-    /// Shows `part` of the display (units from its top left) across the image layer.
+    /// Shows `part` of the display (units from its top left) across the image layer. A sharp choice
+    /// draws it over the capture in this same frame; until it first does, the capture shows smoothed.
     private func showPart(_ part: CGRect) {
-        guard let sharpening = upscaling.sharpening, let surface = latestFrame?.surface else {
-            imageLayer.contentsRect = ZoomGeometry.layerRect(part)
-            return
-        }
+        imageLayer.contentsRect = ZoomGeometry.layerRect(part)
+        guard let sharpening = upscaling.sharpening, let frame = latestFrame, let sharpener else { return }
         let scale = panel?.backingScaleFactor ?? 1
+        sharpener.layer.frame = imageLayer.bounds
         let size = CGSize(width: imageLayer.bounds.width * scale, height: imageLayer.bounds.height * scale)
-        guard let picture = sharpener.picture(of: surface, frame: frameCount, part: part, size: size, sharpening: sharpening) else {
-            imageLayer.contents = surface
-            imageLayer.contentsRect = ZoomGeometry.layerRect(part)
-            return
-        }
-        imageLayer.contents = picture
-        imageLayer.contentsRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        sharpener.show(frame, number: frameCount, part: part, size: size, sharpening: sharpening)
+        // Covered by the sharp picture, so the window server needn't draw the capture too.
+        if sharpener.isShowing { imageLayer.contents = nil }
     }
 
     /// Esc zooms out, in any app, when the pointer is on this zoom's display; other displays keep

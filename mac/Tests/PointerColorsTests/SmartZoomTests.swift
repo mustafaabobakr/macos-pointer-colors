@@ -1,5 +1,6 @@
 import IOSurface
 import CoreVideo
+import Metal
 import XCTest
 @testable import PointerColors
 
@@ -204,6 +205,14 @@ final class ZoomGeometryTests: XCTestCase {
     func testLayerRectStartsAtTheBottom() {
         let rect = ZoomGeometry.layerRect(CGRect(x: 0.1, y: 0.1, width: 0.5, height: 0.2))
         XCTAssertEqual(rect.minY, 0.7, accuracy: 1e-9)
+    }
+
+    /// A lens's edges land on whole pixels, so its picture is never resampled on screen.
+    func testPixelAlignedLandsOnWholePixels() {
+        let rect = ZoomGeometry.pixelAligned(CGRect(x: 10.3, y: 20.6, width: 300.4, height: 0.2), scale: 2)
+        XCTAssertEqual(rect, CGRect(x: 10.5, y: 20.5, width: 300.0, height: 0.5))
+        let flat = ZoomGeometry.pixelAligned(CGRect(x: 10.3, y: 20.6, width: 300.4, height: 0.2), scale: 1)
+        XCTAssertEqual(flat, CGRect(x: 10, y: 21, width: 301, height: 1))
     }
 }
 
@@ -597,53 +606,89 @@ final class TapVotesTests: XCTestCase {
 
 @MainActor
 final class ZoomSharpenerTests: XCTestCase {
-    /// A capture whose top half is white and bottom half black.
-    private func capture(width: Int = 64, height: Int = 64) -> IOSurfaceRef {
+    /// A capture whose top half is `top` and bottom half `bottom` (BGRA bytes).
+    private func capture(width: Int = 64, height: Int = 64, top: [UInt8] = [255, 255, 255, 255],
+                         bottom: [UInt8] = [0, 0, 0, 255]) -> IOSurfaceRef {
         let surface = IOSurfaceCreate([kIOSurfaceWidth: width, kIOSurfaceHeight: height, kIOSurfaceBytesPerElement: 4,
                                        kIOSurfacePixelFormat: kCVPixelFormatType_32BGRA] as CFDictionary)!
         IOSurfaceLock(surface, [], nil)
         let base = IOSurfaceGetBaseAddress(surface).assumingMemoryBound(to: UInt8.self)
         let row = IOSurfaceGetBytesPerRow(surface)
-        for y in 0..<height { memset(base + y * row, y < height / 2 ? 255 : 0, width * 4) }
+        for y in 0..<height {
+            for x in 0..<width { (0..<4).forEach { base[y * row + x * 4 + $0] = (y < height / 2 ? top : bottom)[$0] } }
+        }
         IOSurfaceUnlock(surface, [], nil)
         return surface
     }
 
-    private func pixel(_ surface: IOSurfaceRef, x: Int, y: Int) -> UInt8 {
+    private func texture(_ surface: IOSurfaceRef, _ device: MTLDevice) throws -> MTLTexture {
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: IOSurfaceGetWidth(surface),
+                                                                  height: IOSurfaceGetHeight(surface), mipmapped: false)
+        descriptor.usage = [.shaderRead, .shaderWrite]
+        return try XCTUnwrap(device.makeTexture(descriptor: descriptor, iosurface: surface, plane: 0))
+    }
+
+    /// `part` of `source` enlarged by the zoom's sharpening into a new `width` × `height` surface.
+    private func enlarged(_ source: IOSurfaceRef, part: CGRect, width: Int, height: Int) throws -> IOSurfaceRef {
+        let enlarger = try XCTUnwrap(SharpEnlarger.shared)
+        let target = capture(width: width, height: height)
+        let buffer = try XCTUnwrap(enlarger.queue.makeCommandBuffer())
+        enlarger.encode(try texture(source, enlarger.device), part: part, sharpening: 1,
+                        into: try texture(target, enlarger.device), on: buffer)
+        buffer.commit()
+        buffer.waitUntilCompleted()
+        return target
+    }
+
+    private func pixel(_ surface: IOSurfaceRef, x: Int, y: Int) -> [UInt8] {
         IOSurfaceLock(surface, .readOnly, nil)
         defer { IOSurfaceUnlock(surface, .readOnly, nil) }
         let base = IOSurfaceGetBaseAddress(surface).assumingMemoryBound(to: UInt8.self)
-        return base[y * IOSurfaceGetBytesPerRow(surface) + x * 4]
-    }
-
-    func testDrawsThePartAtTheAskedSize() throws {
-        let sharpener = ZoomSharpener()
-        let out = try XCTUnwrap(sharpener.picture(of: capture(), frame: 1, part: CGRect(x: 0, y: 0, width: 0.5, height: 0.5),
-                                                  size: CGSize(width: 200, height: 100), sharpening: 0.5))
-        XCTAssertEqual(IOSurfaceGetWidth(out), 200)
-        XCTAssertEqual(IOSurfaceGetHeight(out), 100)
+        let offset = y * IOSurfaceGetBytesPerRow(surface) + x * 4
+        return Array(UnsafeBufferPointer(start: base + offset, count: 4))
     }
 
     /// The part is counted from the top left, as the zoom counts it: the top quarter is white.
     func testKeepsTheTopAtTheTop() throws {
-        let sharpener = ZoomSharpener()
-        let top = try XCTUnwrap(sharpener.picture(of: capture(), frame: 1, part: CGRect(x: 0.25, y: 0, width: 0.5, height: 0.25),
-                                                  size: CGSize(width: 64, height: 32), sharpening: 0.5))
-        XCTAssertGreaterThan(pixel(top, x: 32, y: 16), 200)
-        let bottom = try XCTUnwrap(sharpener.picture(of: capture(), frame: 2, part: CGRect(x: 0.25, y: 0.75, width: 0.5, height: 0.25),
-                                                     size: CGSize(width: 64, height: 32), sharpening: 0.5))
-        XCTAssertLessThan(pixel(bottom, x: 32, y: 16), 50)
+        let top = try enlarged(capture(), part: CGRect(x: 0.25, y: 0, width: 0.5, height: 0.25), width: 64, height: 32)
+        XCTAssertGreaterThan(pixel(top, x: 32, y: 16)[0], 200)
+        let bottom = try enlarged(capture(), part: CGRect(x: 0.25, y: 0.75, width: 0.5, height: 0.25), width: 64, height: 32)
+        XCTAssertLessThan(pixel(bottom, x: 32, y: 16)[0], 50)
     }
 
+    /// A flat color comes out exactly as it went in, edges included: no color management, and the
+    /// capture's edge repeats past it rather than black seeping in.
+    func testColorsPassThroughExactly() throws {
+        let color: [UInt8] = [220, 160, 30, 255]
+        let out = try enlarged(capture(top: color, bottom: color), part: CGRect(x: 0, y: 0, width: 0.4, height: 0.4), width: 160, height: 160)
+        for (x, y) in [(0, 0), (80, 80), (159, 0), (0, 159)] { XCTAssertEqual(pixel(out, x: x, y: y), color, "at \(x), \(y)") }
+    }
+
+    /// The layer has no color profile, so the window server shows its pixels as they are, in the
+    /// display's own colors; it stays hidden until it shows a picture.
+    func testTheLayerShowsDisplayColorsOnceDrawn() throws {
+        let sharpener = try XCTUnwrap(ZoomSharpener())
+        XCTAssertNil(sharpener.layer.colorspace)
+        XCTAssertTrue(sharpener.layer.isHidden)
+        sharpener.show(HeldFrame(capture()), number: 1, part: CGRect(x: 0, y: 0, width: 1, height: 1),
+                       size: CGSize(width: 200, height: 100), sharpening: 1)
+        XCTAssertTrue(sharpener.isShowing)
+        XCTAssertFalse(sharpener.layer.isHidden)
+        XCTAssertEqual(sharpener.layer.drawableSize, CGSize(width: 200, height: 100))
+        sharpener.reset()
+        XCTAssertFalse(sharpener.isShowing)
+        XCTAssertTrue(sharpener.layer.isHidden)
+    }
+
+    /// The same picture twice is drawn once; a new frame draws another.
     func testTheSameJobIsntDrawnAgain() throws {
-        let sharpener = ZoomSharpener()
-        let surface = capture()
+        let sharpener = try XCTUnwrap(ZoomSharpener())
+        let frame = HeldFrame(capture())
         let part = CGRect(x: 0, y: 0, width: 1, height: 1), size = CGSize(width: 64, height: 64)
-        let first = sharpener.picture(of: surface, frame: 1, part: part, size: size, sharpening: 0.5)
-        let again = sharpener.picture(of: surface, frame: 1, part: part, size: size, sharpening: 0.5)
-        XCTAssertTrue(first === again)
-        let next = sharpener.picture(of: surface, frame: 2, part: part, size: size, sharpening: 0.5)
-        XCTAssertFalse(first === next)
+        sharpener.show(frame, number: 1, part: part, size: size, sharpening: 0.5)
+        sharpener.show(frame, number: 1, part: part, size: size, sharpening: 0.5)
+        sharpener.show(frame, number: 2, part: part, size: size, sharpening: 0.5)
+        XCTAssertEqual(sharpener.picturesDrawn, 2)
     }
 }
 

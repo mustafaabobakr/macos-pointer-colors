@@ -1,21 +1,30 @@
-import CoreImage
-import CoreVideo
+// IOSurface references are safe from any thread; the module just isn't annotated.
+@preconcurrency import IOSurface
 import Metal
+import QuartzCore
 
-/// Draws the part of a screen capture a zoom shows at the zoom's own pixel size, with Lanczos
-/// scaling and an unsharp mask, so edges stay crisper than the display's plain smoothing.
-/// Colors pass through untouched: no color management, as the capture is already in the
-/// display's colors.
+/// Shows the part of a screen capture a zoom shows at the zoom's own pixel size, sharpened by
+/// `SharpEnlarger`, in a Metal layer of its own.
+///
+/// Each picture shows in the same display frame as the lens moves or grows, so it always matches
+/// where the lens is: the layer presents with the frame's other changes. The main thread only queues
+/// the drawing on the graphics chip, well under a millisecond, and never waits for it to finish.
+///
+/// Colors pass through untouched: the layer has no color profile, so the window server takes its
+/// pixels to be in the display's own colors, like the capture's.
 @MainActor
 final class ZoomSharpener {
-    private let context: CIContext
-    private var pool: CVPixelBufferPool?
-    private var poolSize = CGSize.zero
-    /// What the last picture was drawn from, to skip drawing the same one again.
+    /// Sits over the capture, filling the zoom; hidden until it shows a picture.
+    let layer = CAMetalLayer()
+    /// Whether the layer shows a picture of the capture.
+    private(set) var isShowing = false
+    /// How many pictures it has drawn.
+    private(set) var picturesDrawn = 0
+    private let enlarger: SharpEnlarger
+    /// The newest frame's surface, ready for the graphics chip, and which frame it is.
+    private var source: (number: Int, texture: MTLTexture)?
+    /// What the last picture was, to skip drawing the same one again.
     private var lastJob: Job?
-    private var lastPicture: IOSurfaceRef?
-    /// The last few pictures stay held, so the pool never hands back one still on screen.
-    private var recent: [CVPixelBuffer] = []
 
     private struct Job: Equatable {
         let frame: Int
@@ -24,71 +33,59 @@ final class ZoomSharpener {
         let sharpening: Double
     }
 
-    init() {
-        let options: [CIContextOption: Any] = [.workingColorSpace: NSNull(), .outputColorSpace: NSNull(), .cacheIntermediates: false]
-        context = MTLCreateSystemDefaultDevice().map { CIContext(mtlDevice: $0, options: options) } ?? CIContext(options: options)
+    init?() {
+        guard let enlarger = SharpEnlarger.shared else { return nil }
+        self.enlarger = enlarger
+        layer.device = enlarger.device
+        layer.pixelFormat = .bgra8Unorm
+        layer.colorspace = nil
+        // The sharpening writes straight into the layer's pictures.
+        layer.framebufferOnly = false
+        layer.isOpaque = true
+        layer.presentsWithTransaction = true
+        layer.isHidden = true
     }
 
-    /// The picture of `part` (units of the capture, from its top left) of `surface` drawn at `size`
-    /// pixels. `frame` counts the capture's frames, so a new one is drawn again.
-    func picture(of surface: IOSurfaceRef, frame: Int, part: CGRect, size: CGSize, sharpening: Double) -> IOSurfaceRef? {
+    /// Shows `part` (units of the capture, from its top left) of `frame` drawn at `size` pixels, with
+    /// the current Core Animation transaction. `number` counts the capture's frames, so a new one is drawn.
+    func show(_ frame: HeldFrame, number: Int, part: CGRect, size: CGSize, sharpening: Double) {
         let size = CGSize(width: max(size.width.rounded(), 1), height: max(size.height.rounded(), 1))
-        let job = Job(frame: frame, part: part, size: size, sharpening: sharpening)
-        if job == lastJob, let lastPicture { return lastPicture }
-        guard let buffer = makeBuffer(size), let output = CVPixelBufferGetIOSurface(buffer)?.takeUnretainedValue() else { return nil }
-        context.render(Self.enlarged(CIImage(ioSurface: surface), part: part, size: size, sharpening: sharpening), to: buffer,
-                       bounds: CGRect(origin: .zero, size: size), colorSpace: nil)
+        let job = Job(frame: number, part: part, size: size, sharpening: sharpening)
+        guard job != lastJob else { return }
+        if layer.drawableSize != size { layer.drawableSize = size }
+        guard let texture = texture(of: frame, number: number), let drawable = layer.nextDrawable(),
+              let buffer = enlarger.queue.makeCommandBuffer() else { return }
         lastJob = job
-        lastPicture = output
-        recent = Array((recent + [buffer]).suffix(3))
-        return output
+        enlarger.encode(texture, part: part, sharpening: sharpening, into: drawable.texture, on: buffer)
+        // The frame stays held while it's read, so the capture can't paint over it meanwhile.
+        buffer.addCompletedHandler { _ in withExtendedLifetime(frame) {} }
+        buffer.commit()
+        buffer.waitUntilScheduled()
+        drawable.present()
+        layer.isHidden = false
+        isShowing = true
+        picturesDrawn += 1
     }
 
+    /// Hides the layer until the next picture, and forgets the frames it drew from.
     func reset() {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        layer.isHidden = true
+        CATransaction.commit()
+        isShowing = false
         lastJob = nil
-        lastPicture = nil
-        recent = []
+        source = nil
     }
 
-    /// `part` of `source` (units of it, from its top left) enlarged to `size` pixels: Lanczos and an
-    /// unsharp mask of `sharpening`, or with nil, the plain blending between pixels the display does
-    /// for Smooth.
-    nonisolated static func enlarged(_ source: CIImage, part: CGRect, size: CGSize, sharpening: Double?) -> CIImage {
-        let width = source.extent.width, height = source.extent.height
-        // Core Image counts from the bottom left.
-        let crop = CGRect(x: part.minX * width, y: (1 - part.maxY) * height,
-                          width: max(part.width * width, 1), height: max(part.height * height, 1))
-        let scale = size.height / crop.height
-        let aspect = (size.width / crop.width) / scale
-        let moved = source.clampedToExtent().transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
-        guard let sharpening else {
-            return moved.transformed(by: CGAffineTransform(scaleX: scale * aspect, y: scale))
-                .cropped(to: CGRect(origin: .zero, size: size))
-        }
-        let scaled = moved.applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: scale, kCIInputAspectRatioKey: aspect])
-        let sharpened = scaled.applyingFilter("CIUnsharpMask", parameters: [
-            kCIInputRadiusKey: max(scale * 0.8, 1), kCIInputIntensityKey: sharpening,
-        ])
-        return sharpened.cropped(to: CGRect(origin: .zero, size: size))
-    }
-
-    private func makeBuffer(_ size: CGSize) -> CVPixelBuffer? {
-        if size != poolSize { pool = Self.makePool(size); poolSize = size }
-        guard let pool else { return nil }
-        var buffer: CVPixelBuffer?
-        CVPixelBufferPoolCreatePixelBuffer(nil, pool, &buffer)
-        return buffer
-    }
-
-    private static func makePool(_ size: CGSize) -> CVPixelBufferPool? {
-        let attributes: [CFString: Any] = [
-            kCVPixelBufferPixelFormatTypeKey: kCVPixelFormatType_32BGRA,
-            kCVPixelBufferWidthKey: Int(size.width), kCVPixelBufferHeightKey: Int(size.height),
-            kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary,
-            kCVPixelBufferMetalCompatibilityKey: true,
-        ]
-        var pool: CVPixelBufferPool?
-        CVPixelBufferPoolCreate(nil, [kCVPixelBufferPoolMinimumBufferCountKey: 4] as CFDictionary, attributes as CFDictionary, &pool)
-        return pool
+    private func texture(of frame: HeldFrame, number: Int) -> MTLTexture? {
+        if let source, source.number == number { return source.texture }
+        let surface = frame.surface
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: IOSurfaceGetWidth(surface),
+                                                                  height: IOSurfaceGetHeight(surface), mipmapped: false)
+        descriptor.usage = .shaderRead
+        guard let texture = enlarger.device.makeTexture(descriptor: descriptor, iosurface: surface, plane: 0) else { return nil }
+        source = (number, texture)
+        return texture
     }
 }

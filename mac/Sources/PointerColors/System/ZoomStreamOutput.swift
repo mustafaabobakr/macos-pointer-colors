@@ -16,6 +16,10 @@ final class ZoomStreamOutput: NSObject, SCStreamOutput {
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
         guard type == .screen, Self.isComplete(sampleBuffer), let pixels = sampleBuffer.imageBuffer,
               let surface = CVPixelBufferGetIOSurface(pixels)?.takeUnretainedValue() else { return }
+        // Untagged, the window server takes the frame to be in its display's own colors, which it
+        // is, and shows its pixels as they are. Tagged with that same profile, it converts them
+        // anyway and some colors come out a level off.
+        IOSurfaceRemoveValue(surface, kIOSurfaceColorSpace)
         let show = show, frame = HeldFrame(surface), source = ObjectIdentifier(stream)
         DispatchQueue.main.async { MainActor.assumeIsolated { show(frame, source) } }
     }
