@@ -3,6 +3,12 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.9.1 — 2026-11-19
+
+- **Smart zoom keeps your display's colors.** The zoom now captures the screen in full color. Before, colored text and edges kept only a quarter of their color detail, so they blurred and some colors shifted. Each pixel now shows exactly as your display shows it, whatever its color profile.
+- **Sharp and Sharper, crisper and smooth.** The graphics chip now draws them in the same frame as the zoom moves, so the zoomed picture always matches where the lens is, with no stutter and no flash of another part of the screen. Edges come out a little crisper than before, and on a 4K display each frame takes the app about 0.3 ms of work instead of 8.6 ms. The samples in **Preferences › Mouse › Zoom › Advanced** use the same drawing.
+- **Smoother on fast displays.** The zoom follows the screen at your display's top refresh rate, like 120 Hz on ProMotion, and the lens sits on whole pixels so its picture is never blurred by a fraction of a pixel.
+
 ## 0.9.0 — 2026-11-17
 
 - **Two new pulse styles.** **Preferences › Highlight › Pulse** now has four styles, shown as cards side by side, each playing its pulse at real size while the pointer is over it.
