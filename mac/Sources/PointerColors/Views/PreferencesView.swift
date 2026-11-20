@@ -55,8 +55,8 @@ struct PreferencesView: View {
                 }
             // macOS 26 adds its own sidebar button over the sidebar; the toolbar has ours.
             .toolbar(removing: .sidebarToggle)
-            .frame(minWidth: 200 * scale)
-            .navigationSplitViewColumnWidth(min: 200 * scale, ideal: SettingsLayout.sidebarWidth * scale, max: 300 * scale)
+            // One fixed width that fits the widest row, so the divider can't be dragged.
+            .navigationSplitViewColumnWidth(SettingsLayout.sidebarWidth * scale)
         } detail: {
             detail
         }
