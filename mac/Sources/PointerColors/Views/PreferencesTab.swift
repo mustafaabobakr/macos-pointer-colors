@@ -11,65 +11,60 @@ enum PreferencesTab: String, CaseIterable, Identifiable {
     /// Names the page's screen in docs/features/features.json.
     var slug: String { rawValue }
 
-    var title: LocalizedStringKey {
-        switch self {
-        case .general: "General"
-        case .appearance: "Appearance"
-        case .pairs: "Pairs"
-        case .automation: "Automation"
-        case .ring: "Ring"
-        case .pulse: "Pulse"
-        case .laser: "Laser"
-        case .press: "Press"
-        case .speed: "Speed"
-        case .zoom: "Zoom"
-        case .buttons: "Buttons"
-        case .battery: "Battery"
-        case .shortcuts: "Shortcuts"
-        case .about: "About"
-        case .whatsNew: "What's New"
-        }
-    }
+    var title: LocalizedStringKey { details.title }
 
     /// The title as a string, for search.
-    var name: String {
-        switch self {
-        case .general: String(localized: "General")
-        case .appearance: String(localized: "Appearance")
-        case .pairs: String(localized: "Pairs")
-        case .automation: String(localized: "Automation")
-        case .ring: String(localized: "Ring")
-        case .pulse: String(localized: "Pulse")
-        case .laser: String(localized: "Laser")
-        case .press: String(localized: "Press")
-        case .speed: String(localized: "Speed")
-        case .zoom: String(localized: "Zoom")
-        case .buttons: String(localized: "Buttons")
-        case .battery: String(localized: "Battery")
-        case .shortcuts: String(localized: "Shortcuts")
-        case .about: String(localized: "About")
-        case .whatsNew: String(localized: "What's New")
+    var name: String { details.name }
+
+    var symbol: String { details.symbol }
+
+    private typealias Details = (title: LocalizedStringKey, name: String, symbol: String)
+
+    /// The page's title, searchable name and symbol, looked up within its sidebar group so each
+    /// switch stays short.
+    private var details: Details {
+        switch PreferencesGroup.containing(self) {
+        case .pointer: pointerDetails
+        case .highlight: highlightDetails
+        case .mouse: mouseDetails
+        case .app: appDetails
         }
     }
 
-    var symbol: String {
+    private var pointerDetails: Details {
         switch self {
-        case .general: "gearshape"
-        // The same symbol as Appearance in System Settings.
-        case .appearance: "circle.lefthalf.filled"
-        case .pairs: "cursorarrow"
-        case .automation: "wand.and.stars"
-        case .ring: "circle.dashed"
-        case .pulse: "circle.circle"
-        case .laser: "scribble"
-        case .press: "arrow.down.right.and.arrow.up.left"
-        case .speed: "hare"
-        case .zoom: "plus.magnifyingglass"
-        case .buttons: "computermouse"
-        case .battery: "battery.75percent"
-        case .shortcuts: "command"
-        case .about: "info.circle"
-        case .whatsNew: "sparkles"
+        case .appearance:
+            // The same symbol as Appearance in System Settings.
+            ("Appearance", String(localized: "Appearance"), "circle.lefthalf.filled")
+        case .pairs: ("Pairs", String(localized: "Pairs"), "cursorarrow")
+        case .automation: ("Automation", String(localized: "Automation"), "wand.and.stars")
+        default: ("General", String(localized: "General"), "gearshape")
+        }
+    }
+
+    private var highlightDetails: Details {
+        switch self {
+        case .ring: ("Ring", String(localized: "Ring"), "circle.dashed")
+        case .pulse: ("Pulse", String(localized: "Pulse"), "circle.circle")
+        case .laser: ("Laser", String(localized: "Laser"), "scribble")
+        default: ("Press", String(localized: "Press"), "arrow.down.right.and.arrow.up.left")
+        }
+    }
+
+    private var mouseDetails: Details {
+        switch self {
+        case .zoom: ("Zoom", String(localized: "Zoom"), "plus.magnifyingglass")
+        case .buttons: ("Buttons", String(localized: "Buttons"), "computermouse")
+        case .battery: ("Battery", String(localized: "Battery"), "battery.75percent")
+        default: ("Speed", String(localized: "Speed"), "hare")
+        }
+    }
+
+    private var appDetails: Details {
+        switch self {
+        case .about: ("About", String(localized: "About"), "info.circle")
+        case .whatsNew: ("What's New", String(localized: "What's New"), "sparkles")
+        default: ("Shortcuts", String(localized: "Shortcuts"), "command")
         }
     }
 }

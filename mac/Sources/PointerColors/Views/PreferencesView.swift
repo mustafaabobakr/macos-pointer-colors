@@ -86,23 +86,48 @@ struct PreferencesView: View {
         }
     }
 
+    /// The chosen page, found within its sidebar group so each switch stays short.
     @ViewBuilder private var page: some View {
+        switch PreferencesGroup.containing(router.tab) {
+        case .pointer: pointerPage
+        case .highlight: highlightPage
+        case .mouse: mousePage
+        case .app: appPage
+        }
+    }
+
+    @ViewBuilder private var pointerPage: some View {
         switch router.tab {
-        case .general: GeneralPreferences(model: model)
         case .appearance: AppearancePreferences(model: model)
         case .pairs: PairsPreferences(model: model)
         case .automation: AutomationPreferences(model: model)
+        default: GeneralPreferences(model: model)
+        }
+    }
+
+    @ViewBuilder private var highlightPage: some View {
+        switch router.tab {
         case .ring: RingPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
         case .pulse: PulsePreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
         case .laser: LaserPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
-        case .press: PressPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
-        case .speed: TrackingPreferences(tracking: model.tracking)
+        default: PressPreferences(highlight: model.highlight, pair: model.menuBarPair, pointerScale: model.scale)
+        }
+    }
+
+    @ViewBuilder private var mousePage: some View {
+        switch router.tab {
         case .zoom: ZoomPreferences(zoom: model.magicMouseZoom)
         case .buttons: ButtonsPreferences(buttons: model.buttons)
         case .battery: BatteryPreferences(model: model)
-        case .shortcuts: ShortcutsPreferences(model: model)
+        default: TrackingPreferences(tracking: model.tracking)
+        }
+    }
+
+    @ViewBuilder private var appPage: some View {
+        switch router.tab {
         case .about: AboutPreferences(model: model)
         case .whatsNew: WhatsNewPreferences()
+        default: ShortcutsPreferences(model: model)
         }
     }
 
