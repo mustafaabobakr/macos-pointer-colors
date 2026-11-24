@@ -32,6 +32,10 @@ final class AppModel {
     var iconInPairColors: Bool {
         didSet { settings.iconInPairColors = iconInPairColors }
     }
+    var reconnectsMouseOnMenuOpen: Bool {
+        didSet { settings.reconnectsMouseOnMenuOpen = reconnectsMouseOnMenuOpen }
+    }
+    let mouseReconnect = BluetoothReconnector()
     var textSize: TextSize {
         didSet { settings.textSize = textSize }
     }
@@ -157,6 +161,7 @@ final class AppModel {
         selectedID = PointerPair.featured.id
         scale = SystemPointer.minimumScale
         iconInPairColors = settings.iconInPairColors
+        reconnectsMouseOnMenuOpen = settings.reconnectsMouseOnMenuOpen
         textSize = settings.textSize
         showsInDock = settings.showsInDock
         menuBarVisibility = settings.menuBarVisibility

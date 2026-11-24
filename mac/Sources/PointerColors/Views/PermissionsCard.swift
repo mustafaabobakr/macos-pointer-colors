@@ -8,6 +8,7 @@ struct PermissionsCard: View {
     /// Read again whenever the app comes forward, as the user may have just changed them.
     @State private var accessibility = AXIsProcessTrusted()
     @State private var screenRecording = ScreenRecordingAccess.isAllowed
+    @State private var bluetooth = BluetoothReconnector.isAllowed
 
     var body: some View {
         SettingsCard("Permissions", anchor: "general.permission") {
@@ -39,6 +40,12 @@ struct PermissionsCard: View {
                     PermissionStatus(isAllowed: screenRecording, action: ScreenRecordingAccess.request)
                 }
             }
+            PermissionGroup("Mouse reconnect") {
+                SettingsRow("Bluetooth", symbol: "dot.radiowaves.left.and.right",
+                            caption: "Finds your paired Apple mouse or trackpad and reconnects it when it has dropped. Nothing else is read.") {
+                    PermissionStatus(isAllowed: bluetooth, action: bluetoothAction)
+                }
+            }
             PermissionGroup("Battery alerts") {
                 NotificationPermissionRow()
             }
@@ -51,6 +58,13 @@ struct PermissionsCard: View {
     private func refresh() {
         accessibility = AXIsProcessTrusted()
         screenRecording = ScreenRecordingAccess.isAllowed
+        bluetooth = BluetoothReconnector.isAllowed
+    }
+
+    /// Not asked yet: a reconnect shows macOS's prompt. Denied: only System Settings can change it.
+    private func bluetoothAction() {
+        guard model.mouseReconnect.state == .noAccess else { return model.reconnectMouse() }
+        BluetoothReconnector.openSettings()
     }
 }
 

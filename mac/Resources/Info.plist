@@ -46,6 +46,8 @@
 	<string>14.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Pointer Colors reconnects your paired Apple mouse or trackpad when its Bluetooth connection drops.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Mostafa Abobakr</string>
 </dict>

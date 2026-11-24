@@ -43,6 +43,8 @@ enum SettingsSearch {
     }
 
     static let items: [SettingsSearchResult] = [
+        item(.general, "general.mouse", String(localized: "Reconnect my Apple mouse when I open the menu"), "cursorarrow.motionlines"),
+        item(.general, "general.mouse", String(localized: "Reconnect Bluetooth mouse now"), "dot.radiowaves.left.and.right"),
         item(.general, "general.startup", String(localized: "Launch at login"), "power"),
         item(.general, "general.startup", String(localized: "Re-apply my pair when the app starts"), "arrow.clockwise"),
         item(.general, "general.startup", String(localized: "Draw the menu-bar icon in my colors"), "paintpalette"),
@@ -60,6 +62,7 @@ enum SettingsSearch {
         item(.general, "general.permission", String(localized: "Notifications"), "bell"),
         item(.general, "general.permission", String(localized: "Accessibility"), "accessibility"),
         item(.general, "general.permission", String(localized: "Screen Recording"), "rectangle.dashed.badge.record"),
+        item(.general, "general.permission", String(localized: "Bluetooth"), "dot.radiowaves.left.and.right"),
         item(.general, "general.feedback", String(localized: "Send feedback"), "bubble.left.and.text.bubble.right"),
         item(.pairs, "pairs.list", String(localized: "Add custom pair"), "plus"),
         item(.pairs, "pairs.list", String(localized: "Hide pairs from the menu"), "eye.slash"),

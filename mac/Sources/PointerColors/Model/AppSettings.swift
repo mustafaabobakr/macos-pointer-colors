@@ -7,7 +7,7 @@ struct AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        defaults.register(defaults: [Key.reapplyAtLaunch: true, Key.iconInPairColors: true, "tracksBatteryHistory": true, "showsDrainReport": true])
+        defaults.register(defaults: [Key.reapplyAtLaunch: true, Key.iconInPairColors: true, Key.reconnectsMouseOnMenuOpen: true, "tracksBatteryHistory": true, "showsDrainReport": true])
     }
 
     /// Puts the last applied pair and size back when the app starts.
@@ -20,6 +20,12 @@ struct AppSettings {
     var iconInPairColors: Bool {
         get { defaults.bool(forKey: Key.iconInPairColors) }
         nonmutating set { defaults.set(newValue, forKey: Key.iconInPairColors) }
+    }
+
+    /// Opening the menu reconnects a paired Apple mouse or trackpad that isn't connected.
+    var reconnectsMouseOnMenuOpen: Bool {
+        get { defaults.bool(forKey: Key.reconnectsMouseOnMenuOpen) }
+        nonmutating set { defaults.set(newValue, forKey: Key.reconnectsMouseOnMenuOpen) }
     }
 
     var playSoundOnApply: Bool {
@@ -207,6 +213,7 @@ struct AppSettings {
     private enum Key {
         static let reapplyAtLaunch = "reapplyAtLaunch"
         static let iconInPairColors = "iconInPairColors"
+        static let reconnectsMouseOnMenuOpen = "reconnectsMouseOnMenuOpen"
         static let playSoundOnApply = "playSoundOnApply"
         static let textSize = "textSize"
         static let shortcuts = "shortcuts"

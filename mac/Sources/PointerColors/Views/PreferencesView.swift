@@ -209,6 +209,7 @@ private struct GeneralPreferences: View {
 
     var body: some View {
         SettingsPage("General") {
+            MouseReconnectCard(model: model)
             SettingsCard("Startup", anchor: "general.startup") {
                 SettingsToggle("Launch at login", symbol: "power", caption: "Start Pointer Colors when you log in.",
                                isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))

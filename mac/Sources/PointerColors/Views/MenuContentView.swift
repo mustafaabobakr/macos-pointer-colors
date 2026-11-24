@@ -73,6 +73,7 @@ struct MenuContentView: View {
         .onAppear {
             model.refreshFromSystem()
             model.menuOpened()
+            model.reconnectMouseOnMenuOpen()
         }
         .onDisappear { model.menuClosed() }
     }
@@ -221,6 +222,10 @@ struct MenuContentView: View {
                 ReleaseNotesView(version: update.version, notes: update.notes, height: 110 * scale)
                     .padding(.horizontal, 6).padding(.bottom, 4)
             }
+            MenuRow(title: String(localized: "Reconnect mouse"), subtitle: model.mouseReconnect.state.message, shortcut: nil) {
+                model.reconnectMouse()
+            }
+            .disabled(model.mouseReconnect.state.isBusy)
             MenuRow(title: String(localized: "Browse pairs on the website"), shortcut: nil) {
                 NSWorkspace.shared.open(URL(string: "https://macos-pointer-colors.pages.dev")!)
             }

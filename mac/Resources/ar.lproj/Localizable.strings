@@ -649,3 +649,21 @@
 "More of what's right of and below the arrow tip, where text reads" = "مزيد مما على يمين طرف السهم وأسفله، حيث يُقرأ النص";
 "The same spot every time" = "الموضع نفسه في كل مرة";
 "Ignores which side the lens is on" = "لا يراعي جهة العدسة";
+
+/* Mouse reconnect */
+"Reconnect my Apple mouse when I open the menu" = "إعادة توصيل ماوس Apple عند فتح القائمة";
+"Also reconnects a Magic Trackpad. Devices that are already connected are left alone." = "يعيد توصيل Magic Trackpad أيضًا. الأجهزة المتصلة بالفعل لا تتأثر.";
+"Bluetooth mouse" = "ماوس البلوتوث";
+"Reconnect now" = "إعادة التوصيل الآن";
+"Reconnect mouse" = "إعادة توصيل الماوس";
+"Reconnect Bluetooth mouse now" = "إعادة توصيل ماوس البلوتوث الآن";
+"Not checked yet" = "لم يُفحص بعد";
+"Needs Bluetooth access" = "يحتاج إلى إذن البلوتوث";
+"No Apple mouse or trackpad is paired" = "لا يوجد ماوس أو لوحة تتبّع من Apple مقترنة";
+"Connected: %@" = "متصل: %@";
+"Reconnecting %@…" = "جارٍ إعادة توصيل %@…";
+"Couldn't reach %@. Is it on?" = "تعذّر الوصول إلى %@. هل هو مُشغَّل؟";
+"Mouse reconnect" = "إعادة توصيل الماوس";
+"Bluetooth" = "البلوتوث";
+"Finds your paired Apple mouse or trackpad and reconnects it when it has dropped. Nothing else is read." = "يعثر على ماوس أو لوحة تتبّع Apple المقترنة ويعيد توصيلها عند انقطاعها. لا يُقرأ أي شيء آخر.";
+"Open System Settings…" = "فتح إعدادات النظام…";
