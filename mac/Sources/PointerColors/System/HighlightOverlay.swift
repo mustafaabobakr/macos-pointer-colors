@@ -164,7 +164,7 @@ final class HighlightOverlay {
 
     /// Takes the windows off screen once nothing is drawn and the last drawing has faded.
     private func hideWindowsWhenIdle() {
-        guard windowsShown, !settings.showsRing, !isDrawing, !keysArmLaser, !isHoldingTrail, !isCapturing,
+        guard windowsShown, !settings.showsRing, !isDrawing, !isHoldingTrail, !isCapturing,
               !tapOwnsDrag, NSEvent.pressedMouseButtons == 0 else { return }
         guard ProcessInfo.processInfo.systemUptime - lastDrawn > fadeTime else { return }
         windowsShown = false
@@ -176,9 +176,11 @@ final class HighlightOverlay {
         max(style.pulseDuration, style.trailFade, style.dotFade, Hold.release) + 0.5
     }
 
-    /// The event may draw something: a pulse or laser trail on a click, the dot on a move.
+    /// The event may draw something: a pulse or laser trail on a click, the dot on a move. The
+    /// laser's keys alone draw nothing, so holding them (as part of a screenshot shortcut, say)
+    /// doesn't bring the windows up, unless the windows have to catch the drag.
     private func mayDraw(_ type: NSEvent.EventType) -> Bool {
-        if settings.showsRing || keysArmLaser || isDrawing { return true }
+        if settings.showsRing || isCapturing || isDrawing { return true }
         if Self.buttonTypes.contains(type) { return true }
         return settings.laserDotShows(drawing: false)
     }

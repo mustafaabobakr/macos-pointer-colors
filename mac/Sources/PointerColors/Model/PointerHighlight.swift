@@ -479,9 +479,10 @@ final class PointerHighlight {
         shrinksOnPress && (isLeft || shrinksOnRightClick)
     }
 
-    /// The laser's keys are all down in `flags`.
+    /// Exactly the laser's keys are down in `flags`. A shortcut that adds another key, like ⌘⌥1 for
+    /// a screenshot app with Option as the laser's key, doesn't arm the laser.
     func laserKeysHeld(in flags: NSEvent.ModifierFlags) -> Bool {
-        laserKeys.areHeld(in: flags)
+        laserKeys.areHeldAlone(in: flags)
     }
 
     /// The laser dot shows for this move: always, or only while a trail is `drawing`.

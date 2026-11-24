@@ -23,6 +23,11 @@ struct HoldKeys: OptionSet, Hashable {
         self = Self.keys.filter { flags.contains($0.flag) }.reduce(into: []) { $0.insert($1.key) }
     }
 
+    /// Exactly these keys are down in `flags`, with no other of Control, Option, Shift and Command.
+    func areHeldAlone(in flags: NSEvent.ModifierFlags) -> Bool {
+        HoldKeys(flags: flags) == self
+    }
+
     /// Every one of these keys is down in `flags`; other keys held too don't matter.
     func areHeld(in flags: NSEvent.ModifierFlags) -> Bool {
         HoldKeys(flags: flags).isSuperset(of: self)

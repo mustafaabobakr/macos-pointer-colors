@@ -419,7 +419,9 @@ final class PointerHighlightTests: XCTestCase {
         highlight.laserKeys = [.control, .option]
         XCTAssertEqual(highlight.laserKeys.title, "⌃⌥")
         XCTAssertFalse(highlight.laserKeysHeld(in: .option))
-        XCTAssertTrue(highlight.laserKeysHeld(in: [.control, .option, .shift]))
+        XCTAssertTrue(highlight.laserKeysHeld(in: [.control, .option]))
+        XCTAssertFalse(highlight.laserKeysHeld(in: [.control, .option, .shift]))
+        XCTAssertTrue(highlight.laserKeysHeld(in: [.control, .option, .capsLock]))
         XCTAssertEqual(PointerHighlight(defaults: defaults).laserKeys, [.control, .option])
     }
 
