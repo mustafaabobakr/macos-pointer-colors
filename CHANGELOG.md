@@ -3,6 +3,14 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.9.2 — 2026-11-25
+
+- **Window screenshots work again.** With a Highlight effect on, screenshot apps that capture the window under the pointer, like Shottr and CleanShot X, offered the whole display instead. Highlight now takes its drawing layer off the screen whenever nothing is drawn, so they find the window you point at.
+- **The laser needs exactly its keys.** A shortcut that adds another key, like ⌘⌥1 with ⌥ Option as the laser's key, no longer arms the laser, and holding the laser's keys puts nothing on screen until you drag. A drag with an extra key held no longer draws.
+- **Reconnect your Apple mouse.** Opening the menu reconnects a paired Magic Mouse or Magic Trackpad that has dropped its Bluetooth connection, and the menu has a **Reconnect mouse** item. Devices that are already connected are left alone. Turn it off in **Preferences › General › Mouse**. The first time, macOS asks for Bluetooth access.
+- **Switch apps in macOS Smart Zoom on and off.** Each app listed in **Preferences › Mouse › Zoom › macOS Smart Zoom** has a switch, so Pointer Colors can zoom over it again without removing it from the list.
+- **A steadier Preferences sidebar.** It keeps one fixed width and can't be dragged wider.
+
 ## 0.9.1 — 2026-11-19
 
 - **Smart zoom keeps your display's colors.** The zoom now captures the screen in full color. Before, colored text and edges kept only a quarter of their color detail, so they blurred and some colors shifted. Each pixel now shows exactly as your display shows it, whatever its color profile.
