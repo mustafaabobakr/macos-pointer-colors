@@ -256,6 +256,12 @@ final class MagicMouseZoom {
         nativeZoomApps.append(app)
     }
 
+    /// Turns the listed app with `id` on or off, if it's still there.
+    func setNativeZoomApp(_ id: ZoomApp.ID, isOn: Bool) {
+        guard let index = nativeZoomApps.firstIndex(where: { $0.id == id }) else { return }
+        nativeZoomApps[index].isOn = isOn
+    }
+
     func removeNativeZoomApp(_ id: ZoomApp.ID) {
         nativeZoomApps.removeAll { $0.id == id }
     }
@@ -264,7 +270,7 @@ final class MagicMouseZoom {
     /// zoomed in, its double tap always zooms back out.
     func leavesToMacOS(_ bundleID: String?, isZoomed: Bool) -> Bool {
         guard leavesNativeZoom, !isZoomed, let bundleID else { return false }
-        return nativeZoomApps.contains { $0.bundleID == bundleID }
+        return nativeZoomApps.contains { $0.isOn && $0.bundleID == bundleID }
     }
 
     private func frame(fingers: Int, at time: TimeInterval, size: Float) {

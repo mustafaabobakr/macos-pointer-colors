@@ -129,7 +129,11 @@ private struct NativeZoomAppsSection: View {
             Reveal(isShown: zoom.leavesNativeZoom) {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(zoom.nativeZoomApps) { app in
-                        NativeZoomAppRow(app: app) { zoom.removeNativeZoomApp(app.id) }
+                        NativeZoomAppRow(app: app) { isOn in
+                            zoom.setNativeZoomApp(app.id, isOn: isOn)
+                        } remove: {
+                            zoom.removeNativeZoomApp(app.id)
+                        }
                     }
                     Button("Add App…", action: chooseApp)
                 }
@@ -146,9 +150,10 @@ private struct NativeZoomAppsSection: View {
     }
 }
 
-/// One listed app: its icon and name, and Remove.
+/// One listed app: its icon and name, Remove, and a switch that leaves it to macOS or not.
 private struct NativeZoomAppRow: View {
     let app: ZoomApp
+    let setOn: (Bool) -> Void
     let remove: () -> Void
     @Environment(\.appTextScale) private var scale
 
@@ -158,6 +163,9 @@ private struct NativeZoomAppRow: View {
             Text(app.name)
             Spacer()
             Button("Remove", role: .destructive, action: remove)
+            Toggle(app.name, isOn: Binding(get: { app.isOn }, set: setOn))
+                .labelsHidden()
+                .toggleStyle(.switch)
         }
     }
 

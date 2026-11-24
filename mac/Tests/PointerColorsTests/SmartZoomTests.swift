@@ -340,6 +340,22 @@ final class NativeZoomAppsTests: XCTestCase {
         zoom.removeNativeZoomApp("com.apple.Photos")
         XCTAssertFalse(MagicMouseZoom(defaults: defaults).nativeZoomApps.contains { $0.bundleID == "com.apple.Photos" })
     }
+
+    func testSwitchedOffAppIsZoomedButStaysListed() {
+        let (zoom, defaults) = makeZoom()
+        zoom.setNativeZoomApp("com.apple.Safari", isOn: false)
+        XCTAssertFalse(zoom.leavesToMacOS("com.apple.Safari", isZoomed: false))
+        XCTAssertTrue(zoom.leavesToMacOS("com.google.Chrome", isZoomed: false))
+        let reloaded = MagicMouseZoom(defaults: defaults)
+        XCTAssertEqual(reloaded.nativeZoomApps.first { $0.bundleID == "com.apple.Safari" }?.isOn, false)
+    }
+
+    /// Lists saved before apps had their own switch load with every app on.
+    func testOldSavedListLoadsAllOn() throws {
+        let old = #"[{"bundleID":"com.apple.Safari","name":"Safari"}]"#
+        let apps = try JSONDecoder().decode([ZoomApp].self, from: Data(old.utf8))
+        XCTAssertEqual(apps.map(\.isOn), [true])
+    }
 }
 
 final class StillZoomEdgeTests: XCTestCase {

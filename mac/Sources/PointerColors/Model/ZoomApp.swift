@@ -4,6 +4,8 @@ import Foundation
 struct ZoomApp: Codable, Identifiable, Equatable {
     var bundleID: String
     var name: String
+    /// Off keeps the app in the list while Pointer Colors zooms over it as over any other app.
+    var isOn = true
 
     var id: String { bundleID }
 
@@ -26,5 +28,13 @@ struct ZoomApp: Codable, Identifiable, Equatable {
         let name = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
             ?? FileManager.default.displayName(atPath: url.path).replacingOccurrences(of: ".app", with: "")
         self.init(bundleID: bundleID, name: name)
+    }
+
+    /// Reads lists saved before apps had their own switch as all on.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        bundleID = try container.decode(String.self, forKey: .bundleID)
+        name = try container.decode(String.self, forKey: .name)
+        isOn = try container.decodeIfPresent(Bool.self, forKey: .isOn) ?? true
     }
 }
