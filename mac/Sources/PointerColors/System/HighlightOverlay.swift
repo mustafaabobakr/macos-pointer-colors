@@ -5,7 +5,9 @@ import Observation
 ///
 /// The windows cover whole displays so a laser trail can go anywhere, ignore the mouse so clicks
 /// pass straight through, and show on every Space and over full-screen apps. They exist only while
-/// something is switched on, and the mouse is only watched then. Everything in them is a Core
+/// something is switched on, and the mouse is only watched then. They're on screen only while
+/// something is drawn or fading: a screenshot app that captures the window under the pointer
+/// would otherwise find one of them on top of every window and offer the whole display. Everything in them is a Core
 /// Animation layer that the app moves or hands an animation to, so nothing is redrawn per frame.
 ///
 /// With Block clicks on, a laser drag with its keys held goes through the session event tap when Accessibility allows it:
@@ -19,6 +21,10 @@ final class HighlightOverlay {
     private let tap: MouseEventTap
     private var style = HighlightStyle()
     private var windows: [NSPanel] = []
+    /// The windows are on screen; they're ordered out while nothing is drawn.
+    private var windowsShown = false
+    /// When something was last drawn, so the windows stay until it has faded.
+    private var lastDrawn: TimeInterval = 0
     /// Each display's layers, with the display's frame in global coordinates.
     private var displays: [DisplayLayers] = []
     private var monitors: [Any] = []
@@ -111,6 +117,7 @@ final class HighlightOverlay {
 
     private func start() {
         if windows.isEmpty { rebuildWindows() }
+        if settings.showsRing { showWindows() }
         guard monitors.isEmpty else { return }
         let global = NSEvent.addGlobalMonitorForEvents(matching: Self.events) { [weak self] event in
             MainActor.assumeIsolated { self?.handle(event.type) }
@@ -121,7 +128,10 @@ final class HighlightOverlay {
         }
         monitors = [global, local].compactMap { $0 }
         lostReleaseTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.endLostPress() }
+            MainActor.assumeIsolated {
+                self?.endLostPress()
+                self?.hideWindowsWhenIdle()
+            }
         }
     }
 
@@ -132,15 +142,49 @@ final class HighlightOverlay {
         lostReleaseTimer = nil
         windows.forEach { $0.orderOut(nil) }
         windows = []
+        windowsShown = false
         displays = []
     }
 
     private func rebuildWindows() {
         windows.forEach { $0.orderOut(nil) }
+        windowsShown = false
         displays = []
         windows = settings.isActive ? NSScreen.screens.map(makeWindow) : []
         placeRing(at: NSEvent.mouseLocation)
     }
+
+    /// Puts the windows on screen before something is drawn in them, and notes when.
+    private func showWindows() {
+        lastDrawn = ProcessInfo.processInfo.systemUptime
+        guard !windowsShown else { return }
+        windowsShown = true
+        windows.forEach { $0.orderFrontRegardless() }
+    }
+
+    /// Takes the windows off screen once nothing is drawn and the last drawing has faded.
+    private func hideWindowsWhenIdle() {
+        guard windowsShown, !settings.showsRing, !isDrawing, !keysArmLaser, !isHoldingTrail, !isCapturing,
+              !tapOwnsDrag, NSEvent.pressedMouseButtons == 0 else { return }
+        guard ProcessInfo.processInfo.systemUptime - lastDrawn > fadeTime else { return }
+        windowsShown = false
+        windows.forEach { $0.orderOut(nil) }
+    }
+
+    /// Seconds the longest effect takes to fade after it was last drawn, with a little to spare.
+    private var fadeTime: Double {
+        max(style.pulseDuration, style.trailFade, style.dotFade, Hold.release) + 0.5
+    }
+
+    /// The event may draw something: a pulse or laser trail on a click, the dot on a move.
+    private func mayDraw(_ type: NSEvent.EventType) -> Bool {
+        if settings.showsRing || keysArmLaser || isDrawing { return true }
+        if Self.buttonTypes.contains(type) { return true }
+        return settings.laserDotShows(drawing: false)
+    }
+
+    private static let buttonTypes: Set<NSEvent.EventType> = [.leftMouseDown, .rightMouseDown, .otherMouseDown,
+                                                               .leftMouseUp, .rightMouseUp, .otherMouseUp]
 
     private func makeWindow(for screen: NSScreen) -> NSPanel {
         let panel = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel],
@@ -163,7 +207,6 @@ final class HighlightOverlay {
         displays.append(layers)
         panel.contentView = container
         panel.setFrame(screen.frame, display: false)
-        panel.orderFrontRegardless()
         return panel
     }
 
@@ -175,6 +218,7 @@ final class HighlightOverlay {
         let keysHeld = settings.laserKeysHeld(in: NSEvent.modifierFlags)
         updateCapture(keysHeld: keysHeld)
         keysArmLaser = keysHeld && settings.laserNeedsKeys && settings.laserDraws(keysHeld: true)
+        if mayDraw(type) { showWindows() }
         switch type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             press(at: point, isLeft: type == .leftMouseDown, keysHeld: keysHeld)
@@ -371,6 +415,7 @@ final class HighlightOverlay {
         let flags = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
         tapOwnsDrag = settings.laserKeysHeld(in: flags) && settings.laserDraws(keysHeld: true)
         guard tapOwnsDrag else { return .pass }
+        showWindows()
         press(at: point, isLeft: true, keysHeld: true)
         return .drop
     }
