@@ -30,6 +30,12 @@ struct PermissionsCard: View {
                     PermissionStatus(isAllowed: accessibility) { MouseEventTap.shared.requestAccess() }
                 }
             }
+            PermissionGroup("Battery level under the pointer") {
+                SettingsRow("Accessibility", symbol: "accessibility",
+                            caption: "Moves the battery label as soon as the pointer moves, so it keeps up when you move fast. Without it the label still follows, a little behind.") {
+                    PermissionStatus(isAllowed: accessibility) { MouseEventTap.shared.requestAccess() }
+                }
+            }
             PermissionGroup("Laser screenshots") {
                 SettingsRow("Screen Recording", symbol: "rectangle.dashed.badge.record",
                             caption: "Captures the area around each laser drawing, only while Take a screenshot of each drawing is on. Nothing is recorded otherwise.") {

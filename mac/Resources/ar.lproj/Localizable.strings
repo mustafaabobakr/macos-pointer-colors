@@ -669,3 +669,5 @@
 "Open System Settings…" = "فتح إعدادات النظام…";
 "Ring, pulse and laser dot" = "الحلقة والنبضة ونقطة الليزر";
 "Moves the ring with the pointer before other apps see each move, so a screenshot app that captures the window under the pointer finds that window instead of the whole display." = "يحرّك الحلقة مع المؤشر قبل أن ترى التطبيقات الأخرى كل حركة، فيجد تطبيق لقطات الشاشة الذي يلتقط النافذة تحت المؤشر تلك النافذة بدلًا من الشاشة كلها.";
+"Battery level under the pointer" = "مستوى البطارية تحت المؤشر";
+"Moves the battery label as soon as the pointer moves, so it keeps up when you move fast. Without it the label still follows, a little behind." = "يحرّك ملصق البطارية فور تحرّك المؤشر، فيواكبه حتى مع الحركة السريعة. ومن دونه يظل الملصق يتبع المؤشر، متأخرًا قليلًا.";
