@@ -158,11 +158,11 @@ final class ScreenZoom {
     }
 
     private func makeStream(for screen: NSScreen) async throws -> SCStream {
-        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        let pid = ProcessInfo.processInfo.processIdentifier
+        let content = try await Self.contentListingApp(pid)
         guard let display = content.displays.first(where: { $0.displayID == screen.displayID }) else {
             throw CocoaError(.featureUnsupported)
         }
-        let pid = ProcessInfo.processInfo.processIdentifier
         // Leaving out the whole app also leaves out windows it shows later, like the zoom itself,
         // which macOS may not have listed yet. Its ordinary windows, like Preferences, sit on
         // layer 0 and are filmed like any other app's.
@@ -181,6 +181,25 @@ final class ScreenZoom {
         configuration.queueDepth = 4
         return SCStream(filter: filter, configuration: configuration, delegate: nil)
     }
+
+    /// The shareable content once it lists this app. Only a listed app can be left out of a capture,
+    /// and macOS lists an app only while it has a window on screen: the zoom window was just ordered
+    /// front and may not be listed yet, and with no other window of ours showing, the app wasn't left
+    /// out and the zoom filmed itself, magnifying its own picture over and over.
+    private static func contentListingApp(_ pid: pid_t) async throws -> SCShareableContent {
+        for _ in 1...listingAttempts {
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            if content.applications.contains(where: { $0.processID == pid }) { return content }
+            try await Task.sleep(for: listingRetryDelay)
+        }
+        // Better no zoom than one that films itself.
+        throw CocoaError(.featureUnsupported)
+    }
+
+    /// Up to about a second for macOS to list the zoom window. Measured, it was always listed a
+    /// second after the capture started.
+    private static let listingAttempts = 50
+    private static let listingRetryDelay = Duration.milliseconds(20)
 
     // MARK: Window
 
