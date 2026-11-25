@@ -10,3 +10,5 @@ __pycache__/
 # Build settings per environment; mac/.env.example lists the keys.
 mac/.env.local
 mac/.env.prod
+/.docs
+/mac/dev-references
