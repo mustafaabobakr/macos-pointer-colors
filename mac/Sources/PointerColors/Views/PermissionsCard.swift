@@ -24,6 +24,12 @@ struct PermissionsCard: View {
                     PermissionStatus(isAllowed: accessibility) { MouseEventTap.shared.requestAccess() }
                 }
             }
+            PermissionGroup("Ring, pulse and laser dot") {
+                SettingsRow("Accessibility", symbol: "accessibility",
+                            caption: "Moves the ring with the pointer before other apps see each move, so a screenshot app that captures the window under the pointer finds that window instead of the whole display.") {
+                    PermissionStatus(isAllowed: accessibility) { MouseEventTap.shared.requestAccess() }
+                }
+            }
             PermissionGroup("Laser screenshots") {
                 SettingsRow("Screen Recording", symbol: "rectangle.dashed.badge.record",
                             caption: "Captures the area around each laser drawing, only while Take a screenshot of each drawing is on. Nothing is recorded otherwise.") {

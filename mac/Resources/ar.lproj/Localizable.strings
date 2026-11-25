@@ -667,3 +667,5 @@
 "Bluetooth" = "البلوتوث";
 "Finds your paired Apple mouse or trackpad and reconnects it when it has dropped. Nothing else is read." = "يعثر على ماوس أو لوحة تتبّع Apple المقترنة ويعيد توصيلها عند انقطاعها. لا يُقرأ أي شيء آخر.";
 "Open System Settings…" = "فتح إعدادات النظام…";
+"Ring, pulse and laser dot" = "الحلقة والنبضة ونقطة الليزر";
+"Moves the ring with the pointer before other apps see each move, so a screenshot app that captures the window under the pointer finds that window instead of the whole display." = "يحرّك الحلقة مع المؤشر قبل أن ترى التطبيقات الأخرى كل حركة، فيجد تطبيق لقطات الشاشة الذي يلتقط النافذة تحت المؤشر تلك النافذة بدلًا من الشاشة كلها.";

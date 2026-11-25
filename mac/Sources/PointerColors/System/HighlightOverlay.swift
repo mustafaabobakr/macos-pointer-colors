@@ -34,12 +34,15 @@ final class HighlightOverlay {
     /// The tap took the press that started this laser drag, so it also takes the drag and the release.
     private var tapOwnsDrag = false
     private var isWatchingTap = false
+    /// The tap moves what follows the pointer as soon as it sees a move.
+    private var isFollowingTap = false
     /// The points the current trail has passed through, for a screenshot of it; nil between trails.
     private var trailBounds: CGRect?
     /// Counts trails, so a screenshot that kept its trail on screen only fades that one.
     private var trailNumber = 0
-    /// A screenshot with the trail in it is being taken, so the trail stays until it's done.
-    private var isHoldingTrail = false
+    /// A screenshot with the trail in it is being taken, so the trail stays until it's done. The
+    /// hole under the pointer closes meanwhile, so the picture shows the trail whole.
+    private var isHoldingTrail = false { didSet { placeHole(at: NSEvent.mouseLocation) } }
     /// Whether something that zooms should hold still for the laser: its keys are held, or a
     /// drawing is under way or waiting for its screenshot. Called with repeats; it must not mind.
     var onHold: (Bool) -> Void = { _ in }
@@ -73,6 +76,7 @@ final class HighlightOverlay {
     func refresh() {
         style = HighlightStyle(settings: settings, pair: pair(), pointerScale: pointerScale())
         placeRing(at: NSEvent.mouseLocation)
+        placeHole(at: NSEvent.mouseLocation)
         displays.forEach { $0.laser.restyleStroke(style) }
     }
 
@@ -96,6 +100,36 @@ final class HighlightOverlay {
         refresh()
         if settings.isActive { start() } else { stop() }
         watchTap()
+        watchFollow()
+    }
+
+    /// While anything is on, the tap moves the ring, the long-press ring and the hole under the
+    /// pointer before any app gets the move. A screenshot app that picks the window under the pointer
+    /// as each move arrives would otherwise still find the ring where the pointer was a moment
+    /// before, around where it is now. Without Accessibility only the event monitor moves them.
+    private func watchFollow() {
+        guard settings.isActive != isFollowingTap else { return }
+        isFollowingTap = settings.isActive
+        tap.set(Self.followID, types: [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged],
+                handler: isFollowingTap ? { [weak self] type, event in
+                    self?.followEarly(type, event)
+                    return .pass
+                } : nil)
+    }
+
+    private static let followID = "highlightFollow"
+
+    /// Moves what follows the pointer and sends it to the screen at once, before the tap lets the move go on.
+    private func followEarly(_ type: CGEventType, _ event: CGEvent) {
+        guard !displays.isEmpty else { return }
+        let point = NSEvent(cgEvent: event)?.locationInWindow ?? NSEvent.mouseLocation
+        placeRing(at: point)
+        placeHole(at: point)
+        for display in displays {
+            display.pulses.moveHold(to: local(point, in: display.frame))
+        }
+        if type == .mouseMoved { moveDot(to: point, drawing: false) }
+        CATransaction.flush()
     }
 
     /// Hooks into the tap while a laser drag keeps its clicks. Setting a handler rebuilds the tap, so only on a change.
@@ -152,6 +186,7 @@ final class HighlightOverlay {
         displays = []
         windows = settings.isActive ? NSScreen.screens.map(makeWindow) : []
         placeRing(at: NSEvent.mouseLocation)
+        placeHole(at: NSEvent.mouseLocation)
     }
 
     /// Puts the windows on screen before something is drawn in them, and notes when.
@@ -199,12 +234,17 @@ final class HighlightOverlay {
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
         let bounds = CGRect(origin: .zero, size: screen.frame.size)
         let container = NSView(frame: bounds)
-        let layers = DisplayLayers(frame: screen.frame, ring: RingLayerView(frame: bounds),
-                                   laser: LaserLayerView(frame: bounds), pulses: PulseLayerView(frame: bounds))
-        for view in [layers.ring, layers.laser, layers.pulses] as [NSView] {
+        let layers = DisplayLayers(frame: screen.frame, effects: NSView(frame: bounds), hole: PointerHoleMask(),
+                                   ring: RingLayerView(frame: bounds), laser: LaserLayerView(frame: bounds),
+                                   pulses: PulseLayerView(frame: bounds))
+        // The ring, laser and pulses sit in one view masked by the hole under the pointer.
+        layers.effects.wantsLayer = true
+        layers.effects.layer?.mask = layers.hole
+        for (view, parent) in [(layers.effects, container), (layers.ring, layers.effects),
+                               (layers.laser, layers.effects), (layers.pulses, layers.effects)] as [(NSView, NSView)] {
             view.frame = bounds
             view.autoresizingMask = [.width, .height]
-            container.addSubview(view)
+            parent.addSubview(view)
         }
         displays.append(layers)
         panel.contentView = container
@@ -263,6 +303,7 @@ final class HighlightOverlay {
     /// The ring, the long-press ring and the laser dot follow the pointer.
     private func follow(_ point: CGPoint, drawing: Bool) {
         placeRing(at: point)
+        placeHole(at: point)
         for display in displays {
             display.pulses.moveHold(to: local(point, in: display.frame))
         }
@@ -287,6 +328,18 @@ final class HighlightOverlay {
         for display in displays {
             let spot = isNear(point, display.frame, reach: reach) ? local(point, in: display.frame) : nil
             display.ring.place(at: spot, style: style)
+        }
+    }
+
+    // MARK: Hole
+
+    /// Keeps the pixel under the pointer clear on every display, so a screenshot app that picks the
+    /// window under the pointer finds the window below instead of the overlay. Closed while a laser
+    /// screenshot with its trail in it is taken.
+    private func placeHole(at point: CGPoint) {
+        for display in displays {
+            let spot = isHoldingTrail ? nil : local(point, in: display.frame)
+            display.hole.place(hole: spot, in: display.effects.bounds)
         }
     }
 
@@ -426,6 +479,9 @@ final class HighlightOverlay {
 /// One display's layers, and its frame in global coordinates.
 private struct DisplayLayers {
     let frame: CGRect
+    /// Holds the ring, laser and pulses, masked by `hole`.
+    let effects: NSView
+    let hole: PointerHoleMask
     let ring: RingLayerView
     let laser: LaserLayerView
     let pulses: PulseLayerView
