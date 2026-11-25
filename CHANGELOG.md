@@ -3,6 +3,12 @@
 What changed in each release of the Pointer Colors Mac app. Downloads are on the
 [releases page](https://github.com/mustafaabobakr/macos-pointer-colors/releases).
 
+## 0.9.3 — 2026-11-25
+
+- **Smart zoom no longer zooms into itself.** Sometimes, often over a dark window, zooming in filled the screen with the zoom's own picture magnified again and again. The zoom now waits until macOS knows to leave it out of what it films before it starts.
+- **The battery label keeps up.** The battery level under the pointer now moves the moment the pointer does, so it stays with it when you move fast. This uses Accessibility, listed in **Preferences › General › Permissions**; without it the label still follows, a little behind.
+- **No slide-in in Preferences.** The **Mouse** card in **Preferences › General** no longer slides in from under the sidebar when Preferences opens.
+
 ## 0.9.2 — 2026-11-25
 
 - **Window screenshots work again.** With a Highlight effect on, screenshot apps that capture the window under the pointer, like Shottr and CleanShot X, offered the whole display instead. Highlight now takes its drawing layer off the screen whenever nothing is drawn, so they find the window you point at.
