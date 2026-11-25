@@ -16,13 +16,21 @@ struct MouseReconnectCard: View {
             }
         }
         .animation(.reveal, value: reconnect.state)
-        .onAppear(perform: reconnect.refresh)
+        .onAppear(perform: refreshQuietly)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            reconnect.refresh()
+            refreshQuietly()
         }
     }
 
     private var reconnect: BluetoothReconnector { model.mouseReconnect }
+
+    /// Reads the status without animating it. Both calls land while the window is opening, and an
+    /// animated change then also animated the card's first layout: it slid in from under the sidebar.
+    private func refreshQuietly() {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction, reconnect.refresh)
+    }
 
     @ViewBuilder private var action: some View {
         if reconnect.state == .noAccess {
